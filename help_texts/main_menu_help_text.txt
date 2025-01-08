@@ -1,6 +1,6 @@
 Click the ? again to hide this text
 
-This is a placeholder for the help text
+This is a placeholder for the main menu help text
 
 bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla blab
 

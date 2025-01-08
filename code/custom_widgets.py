@@ -1,5 +1,6 @@
 import tkinter as tk
 from PIL import Image, ImageTk
+import warnings
 
 class Window:
     def __init__(
@@ -91,7 +92,7 @@ class Frame:
         return
 
     def switch_to_frame(self, new_frame):
-        self.frame.place_forget()
+        self.frame.destroy()
         new_frame.place_frame()
         new_frame.visibility = True
 
@@ -105,11 +106,13 @@ class Button:
             x: int,
             y: int,
             command: callable,
-            text: str,
-            font: [[str, int],[str, int, str,...]],
             foreground_color: str,
             background_color: str,
             border_width: int,
+            text: str | None = None,
+            font: [[str, int], [str, int, str, ...], None]  = None,
+            image: str | None = None,
+            rotation: int| None = 0,
     ):
         self.root = root
         self.width = width
@@ -117,29 +120,52 @@ class Button:
         self.x = x
         self.y = y
         self.command = command
-        self.text = text
         self.font = font
         self.foreground_color = foreground_color
         self.background_color = background_color
         self.border_width = border_width
+        self.text = text
+        self.image = image
+        self.rotation = rotation
+
+        if self.image:
+             self.image = self.get_image(self.image)
 
         self.button = self.create_button()
 
         self.place_button()
 
     def create_button(self):
-        button = tk.Button(
-            self.root, command=self.command,
-            width=self.width, height=self.height,
-            text=self.text, font=self.font,
-            fg=self.foreground_color, bg=self.background_color,
-            bd=self.border_width
-        )
-
-        return button
+        if self.text:
+            button = tk.Button(
+                self.root, command=self.command,
+                width=self.width, height=self.height,
+                text=self.text, font=self.font,
+                fg=self.foreground_color, bg=self.background_color,
+                bd=self.border_width
+            )
+            return button
+        elif self.image:
+            button = tk.Button(
+                self.root, command=self.command,
+                width=self.width, height=self.height,
+                image=self.image,
+                fg=self.foreground_color, bg=self.background_color,
+                bd=self.border_width
+            )
+            return button
+        else:
+            warnings.warn('No text or image given to Button', UserWarning)
 
     def place_button(self):
         self.button.place(x=self.x, y=self.y)
+
+    def get_image(self, image_path):
+        image = Image.open(image_path)
+        image = image.resize(size=(self.width, self.height))
+        image = image.rotate(angle=self.rotation)
+        image = ImageTk.PhotoImage(image)
+        return image
 
 
 class Label:

@@ -64,7 +64,7 @@ class Canvas:
     def add_image_to_canvas(self):
         # Load the image
         # TODO: change so created image is displayed
-        image = Image.open("./env_001--4_2.png")
+        image = Image.open("../code/env_001--4_2.png")
 
         # Crop the image
         crop_box = (0, 0, image.width - 4, image.height - 4)
