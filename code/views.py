@@ -1,7 +1,7 @@
+import numpy as np
+
 from custom_widgets import *
 from custom_canvas import *
-
-import os
 
 
 WINDOWS, FRAMES, BUTTONS, LABELS, CANVASES, ENTRY_FIELDS, PICTURES, TEXTS = (
@@ -860,7 +860,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.02,
         y=FRAMES['build_menu_frame'].width * 0.05,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(32800),
         image='../png/Gleis_horizontal.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -873,7 +873,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.14,
         y=FRAMES['build_menu_frame'].width * 0.05,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(1025),
         image='../png/Gleis_vertikal.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -886,7 +886,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.52,
         y=FRAMES['build_menu_frame'].width * 0.05,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(2064),
         image='../png/Gleis_kurve_oben_links.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -899,7 +899,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.64,
         y=FRAMES['build_menu_frame'].width * 0.05,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(72),
         image='../png/Gleis_kurve_oben_rechts.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -912,7 +912,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.76,
         y=FRAMES['build_menu_frame'].width * 0.05,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(16386),
         image='../png/Gleis_kurve_unten_rechts.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -925,7 +925,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.88,
         y=FRAMES['build_menu_frame'].width * 0.05,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(4608),
         image='../png/Gleis_kurve_unten_links.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -938,7 +938,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.02,
         y=FRAMES['build_menu_frame'].width * 0.2,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(3089),
         image='../png/Weiche_horizontal_oben_links.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -951,7 +951,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.14,
         y=FRAMES['build_menu_frame'].width * 0.2,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(32872),
         image='../png/Weiche_horizontal_oben_rechts.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -964,7 +964,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.26,
         y=FRAMES['build_menu_frame'].width * 0.2,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(17411),
         image='../png/Weiche_horizontal_unten_rechts.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -977,7 +977,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.38,
         y=FRAMES['build_menu_frame'].width * 0.2,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(38408),
         image='../png/Weiche_horizontal_unten_links.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -990,7 +990,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.52,
         y=FRAMES['build_menu_frame'].width * 0.2,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(34864),
         image='../png/Weiche_vertikal_oben_links.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1003,7 +1003,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.64,
         y=FRAMES['build_menu_frame'].width * 0.2,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(1097),
         image='../png/Weiche_vertikal_oben_rechts.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1016,7 +1016,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.76,
         y=FRAMES['build_menu_frame'].width * 0.2,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(49186),
         image='../png/Weiche_vertikal_unten_rechts.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1029,7 +1029,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.88,
         y=FRAMES['build_menu_frame'].width * 0.2,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(5633),
         image='../png/Weiche_vertikal_unten_links.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1042,7 +1042,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.02,
         y=FRAMES['build_menu_frame'].width * 0.35,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(33825),
         image='../png/Gleis_Diamond_Crossing.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1055,7 +1055,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.52,
         y=FRAMES['build_menu_frame'].width * 0.35,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(35889),
         image='../png/Weiche_Single_Slip.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1069,7 +1069,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.64,
         y=FRAMES['build_menu_frame'].width * 0.35,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(33897),
         image='../png/Weiche_Single_Slip.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1083,7 +1083,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.76,
         y=FRAMES['build_menu_frame'].width * 0.35,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(50211),
         image='../png/Weiche_Single_Slip.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1097,7 +1097,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.88,
         y=FRAMES['build_menu_frame'].width * 0.35,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(38433),
         image='../png/Weiche_Single_Slip.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1105,13 +1105,13 @@ def build_build_menu_frame():
         rotation=0,
     )
 
-    BUTTONS['single_slip_top_left_bottom_right_button'] = Button(
+    BUTTONS['double_slip_top_left_bottom_right_button'] = Button(
         root=FRAMES['build_menu_frame'].frame,
         width=100,
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.02,
         y=FRAMES['build_menu_frame'].width * 0.5,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(52275),
         image='../png/Weiche_Double_Slip.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1119,13 +1119,13 @@ def build_build_menu_frame():
         rotation=90,
     )
 
-    BUTTONS['single_slip_bottom_left_top_right_button'] = Button(
+    BUTTONS['double_slip_bottom_left_top_right_button'] = Button(
         root=FRAMES['build_menu_frame'].frame,
         width=100,
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.14,
         y=FRAMES['build_menu_frame'].width * 0.5,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(38505),
         image='../png/Weiche_Double_Slip.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1133,13 +1133,13 @@ def build_build_menu_frame():
         rotation=0,
     )
 
-    BUTTONS['single_slip_top_left_top_right_button'] = Button(
+    BUTTONS['symmetrical_top_left_top_right_button'] = Button(
         root=FRAMES['build_menu_frame'].frame,
         width=100,
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.52,
         y=FRAMES['build_menu_frame'].width * 0.5,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(2136),
         image='../png/Weiche_Symetrical.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1147,13 +1147,13 @@ def build_build_menu_frame():
         rotation=180,
     )
 
-    BUTTONS['single_slip_top_right_bottom_right_button'] = Button(
+    BUTTONS['symmetrical_top_right_bottom_right_button'] = Button(
         root=FRAMES['build_menu_frame'].frame,
         width=100,
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.64,
         y=FRAMES['build_menu_frame'].width * 0.5,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(16458),
         image='../png/Weiche_Symetrical.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1161,13 +1161,13 @@ def build_build_menu_frame():
         rotation=90,
     )
 
-    BUTTONS['single_slip_bottom_left_bottom_right_button'] = Button(
+    BUTTONS['symmetrical_bottom_left_bottom_right_button'] = Button(
         root=FRAMES['build_menu_frame'].frame,
         width=100,
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.76,
         y=FRAMES['build_menu_frame'].width * 0.5,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(20994),
         image='../png/Weiche_Symetrical.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1175,13 +1175,13 @@ def build_build_menu_frame():
         rotation=0,
     )
 
-    BUTTONS['single_slip_top_left_top_left_button'] = Button(
+    BUTTONS['symmetrical_top_left_bottom_left_button'] = Button(
         root=FRAMES['build_menu_frame'].frame,
         width=100,
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.88,
         y=FRAMES['build_menu_frame'].width * 0.5,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(6672),
         image='../png/Weiche_Symetrical.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1195,7 +1195,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.02,
         y=FRAMES['build_menu_frame'].width * 0.65,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(1),
         image='../png/Zug_Gleis_#0091ea.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1209,7 +1209,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.14,
         y=FRAMES['build_menu_frame'].width * 0.65,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(2),
         image='../png/Zug_Gleis_#0091ea.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1223,7 +1223,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.26,
         y=FRAMES['build_menu_frame'].width * 0.65,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(3),
         image='../png/Zug_Gleis_#0091ea.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1237,7 +1237,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.38,
         y=FRAMES['build_menu_frame'].width * 0.65,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(4),
         image='../png/Zug_Gleis_#0091ea.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1251,7 +1251,7 @@ def build_build_menu_frame():
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.52,
         y=FRAMES['build_menu_frame'].width * 0.65,
-        command=stub,
+        command=lambda: CANVASES['build_grid_canvas'].select(5),
         image='../png/Bahnhof_#d50000.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -1259,18 +1259,18 @@ def build_build_menu_frame():
         rotation=0,
     )
 
-    BUTTONS['blank_button'] = Button(
+    BUTTONS['delete_button'] = Button(
         root=FRAMES['build_menu_frame'].frame,
         width=100,
         height=100,
         x=FRAMES['build_menu_frame'].width * 0.76,
         y=FRAMES['build_menu_frame'].width * 0.65,
-        command=stub,
-        image='../png/Background_white_filter.png',
+        command=lambda: CANVASES['build_grid_canvas'].select(0),
+        image='../png/eraser.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
-        rotation=270,
+        rotation=0,
     )
 
     BUTTONS['finish_building_button'] = Button(
@@ -1309,6 +1309,7 @@ def build_build_grid_frame():
         y=FRAMES['build_grid_frame'].height * 0,
         background_color='#333333',
         border_width=0,
+        array=np.zeros((3, 40, 40)),
     )
 
 def build_finished_build_viewer():

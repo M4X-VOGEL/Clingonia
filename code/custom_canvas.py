@@ -1,4 +1,6 @@
 import tkinter as tk
+
+import numpy as np
 from PIL import Image, ImageTk
 
 class EnvCanvas:
@@ -99,10 +101,8 @@ class EnvCanvas:
         self.draw_image()
 
     def draw_mouse_symbols(self, event):
-        mouse_x = event.x
-        mouse_y = event.y
-        adjusted_x = (mouse_x - self.x_offset) / self.scale
-        adjusted_y = (mouse_y - self.y_offset) / self.scale
+        adjusted_x = (event.x - self.x_offset) / self.scale
+        adjusted_y = (event.y - self.y_offset) / self.scale
         grid_width = self.cols * self.cell_size
         grid_height = self.rows * self.cell_size
 
@@ -113,7 +113,7 @@ class EnvCanvas:
 
             if self.text_label is None:
                 self.text_label = self.canvas.create_text(
-                    mouse_x + 10, mouse_y + 10,  # Position next to the cursor
+                    event.x + 10, event.y + 10,  # Position next to the cursor
                     text=coords_text,
                     font=("Arial", 20),
                     fill="#000000",  # Text color
@@ -121,7 +121,7 @@ class EnvCanvas:
                 )
             else:
                 self.canvas.itemconfig(self.text_label, text=coords_text)
-                self.canvas.coords(self.text_label, mouse_x + 10, mouse_y + 10)
+                self.canvas.coords(self.text_label, event.x + 10, event.y + 10)
         else:
             self.canvas.delete(self.text_label)
             self.text_label = None
@@ -220,6 +220,7 @@ class BuildCanvas:
             y: int,
             background_color: str,
             border_width: int,
+            array: np.ndarray,
     ):
         self.root = root
         self.width = width
@@ -232,23 +233,33 @@ class BuildCanvas:
         self.canvas = self.create_canvas()
         self.place_canvas()
 
+        self.dict = self.set_dict()
+
         # populate canvas
-        self.rows = 100
-        self.cols = 100
         self.pan_start = (0, 0)
         self.x_offset = 0
         self.y_offset = 0
         self.cell_size = 50
         self.scale = 1.0
         self.text_label = None
+        self.current_selection_image = None
+        self.mouse_image = None
 
         self.canvas.bind("<MouseWheel>", self.zoom)
+        self.canvas.bind("<ButtonPress-1>", self.modify_array)
         self.canvas.bind("<ButtonPress-3>", self.start_pan)
         self.canvas.bind("<B3-Motion>", self.pan)
         self.canvas.bind("<Leave>", self.remove_mouse_symbols)
         self.canvas.bind("<Motion>", self.draw_mouse_symbols)
 
-        self.draw_grid()
+        self.current_selection = 0
+        self.image_refs = []
+        self.array = array
+        self.rows, self.cols = array[0].shape
+
+        self.draw_images()
+
+
 
     def create_canvas(self):
         canvas = tk.Canvas(
@@ -261,6 +272,43 @@ class BuildCanvas:
 
     def place_canvas(self):#
         self.canvas.place(x=self.x, y=self.y)
+
+    @staticmethod
+    def set_dict():
+        dictionary = {
+            0: ('eraser', 0),
+            1: ('Zug_Gleis_#0091ea', 0),
+            2: ('Zug_Gleis_#0091ea', 270),
+            3: ('Zug_Gleis_#0091ea', 180),
+            4: ('Zug_Gleis_#0091ea', 90),
+            5: ('Bahnhof_#d50000', 0),
+            32800: ('Gleis_horizontal', 0),
+            1025: ('Gleis_vertikal', 0),
+            2064: ('Gleis_kurve_oben_links', 0),
+            72: ('Gleis_kurve_oben_rechts', 0),
+            16386: ('Gleis_kurve_unten_rechts', 0),
+            4608: ('Gleis_kurve_unten_links', 0),
+            3089: ('Weiche_horizontal_oben_links', 0),
+            32872: ('Weiche_horizontal_oben_rechts', 0),
+            17411: ('Weiche_horizontal_unten_rechts', 0),
+            38408: ('Weiche_horizontal_unten_links', 0),
+            34864: ('Weiche_vertikal_oben_links', 0),
+            1097: ('Weiche_vertikal_oben_rechts', 0),
+            49186: ('Weiche_vertikal_unten_rechts', 0),
+            5633: ('Weiche_vertikal_unten_links', 0),
+            33825: ('Gleis_Diamond_Crossing', 0),
+            35889: ('Weiche_Single_Slip', 270),
+            33897: ('Weiche_Single_Slip', 180),
+            50211: ('Weiche_Single_Slip', 90),
+            38433: ('Weiche_Single_Slip', 0),
+            52275: ('Weiche_Double_Slip', 90),
+            38505: ('Weiche_Double_Slip', 0),
+            2136: ('Weiche_Symetrical', 180),
+            16458: ('Weiche_Symetrical', 90),
+            20994: ('Weiche_Symetrical', 0),
+            6672: ('Weiche_Symetrical', 270),
+        }
+        return dictionary
 
     def zoom(self, event):
         scale_factor = 1.1 if event.delta > 0 else 0.9
@@ -280,7 +328,7 @@ class BuildCanvas:
         # Apply the new scale
         self.scale = new_scale
 
-        self.draw_grid()
+        self.draw_images()
 
     def start_pan(self, event):
         self.pan_start = (event.x, event.y)
@@ -293,13 +341,11 @@ class BuildCanvas:
         self.y_offset += dy
         self.pan_start = (event.x, event.y)
 
-        self.draw_grid()
+        self.draw_images()
 
     def draw_mouse_symbols(self, event):
-        mouse_x = event.x
-        mouse_y = event.y
-        adjusted_x = (mouse_x - self.x_offset) / self.scale
-        adjusted_y = (mouse_y - self.y_offset) / self.scale
+        adjusted_x = (event.x - self.x_offset) / self.scale
+        adjusted_y = (event.y - self.y_offset) / self.scale
         grid_width = self.cols * self.cell_size
         grid_height = self.rows * self.cell_size
 
@@ -308,20 +354,42 @@ class BuildCanvas:
             col = int(adjusted_x / self.cell_size )
             coords_text = f"[{row}, {col}]"
 
+            image, rotation = self.dict[self.current_selection]
+            image = f'../png/{image}.png'
+            image = Image.open(image).resize((30,30)).rotate(rotation)
+            self.current_selection_image = ImageTk.PhotoImage(image)
+
             if self.text_label is None:
                 self.text_label = self.canvas.create_text(
-                    mouse_x + 10, mouse_y + 10,  # Position next to the cursor
+                    event.x + 10,
+                    event.y + 10,
                     text=coords_text,
                     font=("Arial", 20),
-                    fill="#FFFFFF",  # Text color
+                    fill="#FFFFFF",
                     anchor="nw"
                 )
             else:
                 self.canvas.itemconfig(self.text_label, text=coords_text)
-                self.canvas.coords(self.text_label, mouse_x + 10, mouse_y + 10)
+                self.canvas.coords(self.text_label, event.x + 10, event.y + 10)
+
+            if self.mouse_image is None:
+                self.mouse_image = self.canvas.create_image(
+                    event.x + 10,
+                    event.y - 20,
+                    image=self.current_selection_image,
+                    anchor="nw"
+                )
+            else:
+                self.canvas.itemconfig(
+                    self.mouse_image,
+                    image=self.current_selection_image
+                )
+                self.canvas.coords(self.mouse_image, event.x + 10, event.y - 20)
         else:
             self.canvas.delete(self.text_label)
+            self.canvas.delete(self.mouse_image)
             self.text_label = None
+            self.mouse_image = None
 
     def remove_mouse_symbols(self, event):
         """Clear the coordinates label when the mouse leaves the canvas."""
@@ -382,6 +450,61 @@ class BuildCanvas:
                 fill='#FFFFFF',
                 tags="grid_label"
             )
+
+    def select(self, selection):
+        self.current_selection = selection
+
+    def modify_array(self, event):
+        adjusted_x = (event.x - self.x_offset) / self.scale
+        adjusted_y = (event.y - self.y_offset) / self.scale
+        row = int(adjusted_y / self.cell_size)
+        col = int(adjusted_x / self.cell_size)
+        if self.current_selection:
+            if self.current_selection in [1,2,3,4,5]:
+                if self.current_selection == 5:
+                    self.array[2][row, col] = self.current_selection
+                else:
+                    self.array[1][row, col] = self.current_selection
+            else:
+                self.array[0][row, col] = self.current_selection
+        else:
+            for i in [2,1,0]:
+                if self.array[i][row, col]:
+                    self.array[i][row, col] = 0
+                    break
+                else:
+                    continue
+        self.draw_images()
+
+    def draw_images(self):
+        self.draw_grid()
+        self.canvas.delete("grid_image")
+
+        for i in range(3):
+            for row in range(self.rows):
+                for col in range(self.cols):
+                    value = self.array[i][row, col]
+                    if value:
+                        image, rotation = self.dict[value]
+
+                        image = f'../png/{image}.png'
+                        image = Image.open(image).resize(
+                            (int(self.cell_size * self.scale),
+                             int(self.cell_size * self.scale))
+                        ).rotate(rotation)
+                        image = ImageTk.PhotoImage(image)
+
+                        self.image_refs.append(image)
+
+                        x1 = self.x_offset + col * self.cell_size * self.scale
+                        y1 = self.y_offset + row * self.cell_size * self.scale
+                        self.canvas.create_image(
+                            x1, y1, anchor="nw", image=image,
+                            tags="grid_image"
+                        )
+
+
+
 
 
 class ResultCanvas:
@@ -482,10 +605,8 @@ class ResultCanvas:
         self.draw_image()
 
     def draw_mouse_symbols(self, event):
-        mouse_x = event.x
-        mouse_y = event.y
-        adjusted_x = (mouse_x - self.x_offset) / self.scale
-        adjusted_y = (mouse_y - self.y_offset) / self.scale
+        adjusted_x = (event.x - self.x_offset) / self.scale
+        adjusted_y = (event.y - self.y_offset) / self.scale
         grid_width = self.cols * self.cell_size
         grid_height = self.rows * self.cell_size
 
@@ -496,7 +617,7 @@ class ResultCanvas:
 
             if self.text_label is None:
                 self.text_label = self.canvas.create_text(
-                    mouse_x + 10, mouse_y + 10,  # Position next to the cursor
+                    event.x + 10, event.y + 10,  # Position next to the cursor
                     text=coords_text,
                     font=("Arial", 20),
                     fill="#000000",  # Text color
@@ -504,7 +625,7 @@ class ResultCanvas:
                 )
             else:
                 self.canvas.itemconfig(self.text_label, text=coords_text)
-                self.canvas.coords(self.text_label, mouse_x + 10, mouse_y + 10)
+                self.canvas.coords(self.text_label, event.x + 10, event.y + 10)
         else:
             self.canvas.delete(self.text_label)
             self.text_label = None
