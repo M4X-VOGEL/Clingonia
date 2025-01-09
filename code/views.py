@@ -1,5 +1,5 @@
 from custom_widgets import *
-from custom_canvas import Canvas
+from custom_canvas import *
 
 import os
 
@@ -201,7 +201,6 @@ def build_main_menu_view():
         FRAMES['result_viewer_frame'].switch_to_frame(
             FRAMES['env_viewer_frame']
         )
-    show_base_para_options('random_gen_para_frame')
 
 def build_main_menu():
     global WINDOWS, FRAMES, BUTTONS, SCREENWIDTH, SCREENHEIGHT
@@ -378,14 +377,15 @@ def build_env_viewer_frame():
         visibility=False
     )
 
-    CANVASES['env_viewer_canvas'] = Canvas(
+    CANVASES['env_viewer_canvas'] = EnvCanvas(
         root=FRAMES['env_viewer_frame'].frame,
         width=FRAMES['env_viewer_frame'].width,
         height=FRAMES['env_viewer_frame'].height,
         x=FRAMES['env_viewer_frame'].width * 0,
         y=FRAMES['env_viewer_frame'].height * 0,
-        background_color='#000000',
+        background_color='#333333',
         border_width=0,
+        image='env_001--4_2.png'
     )
 
 # parameter entries
@@ -1301,13 +1301,13 @@ def build_build_grid_frame():
         visibility=False
     )
 
-    CANVASES['build_grid_canvas'] = Canvas(
+    CANVASES['build_grid_canvas'] = BuildCanvas(
         root=FRAMES['build_grid_frame'].frame,
         width=FRAMES['build_grid_frame'].width,
         height=FRAMES['build_grid_frame'].height,
         x=FRAMES['build_grid_frame'].width * 0,
         y=FRAMES['build_grid_frame'].height * 0,
-        background_color='#000000',
+        background_color='#333333',
         border_width=0,
     )
 
@@ -1393,7 +1393,6 @@ def build_result_menu():
         border_width=0,
     )
 
-
 def build_result_env_viewer():
     global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT
 
@@ -1408,14 +1407,15 @@ def build_result_env_viewer():
         visibility=False
     )
 
-    CANVASES['result_viewer_canvas'] = Canvas(
+    CANVASES['result_viewer_canvas'] = ResultCanvas(
         root=FRAMES['result_viewer_frame'].frame,
         width=FRAMES['result_viewer_frame'].width,
         height=FRAMES['result_viewer_frame'].height,
         x=FRAMES['result_viewer_frame'].width * 0,
         y=FRAMES['result_viewer_frame'].height * 0,
-        background_color='#000000',
+        background_color='#333333',
         border_width=0,
+        image='env_001--4_2.png',
     )
 
 def stub():
