@@ -504,9 +504,6 @@ class BuildCanvas:
                         )
 
 
-
-
-
 class ResultCanvas:
     def __init__(
             self,

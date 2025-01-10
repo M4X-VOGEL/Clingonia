@@ -1,5 +1,3 @@
-import numpy as np
-
 from custom_widgets import *
 from custom_canvas import *
 
@@ -10,7 +8,13 @@ WINDOWS, FRAMES, BUTTONS, LABELS, CANVASES, ENTRY_FIELDS, PICTURES, TEXTS = (
 
 SCREENWIDTH, SCREENHEIGHT = 0, 0
 
-# start condition
+
+# start menu
+
+def create_start_menu():
+    build_flatland_window()
+    build_title_frame()
+    build_start_menu_frame()
 
 def build_flatland_window():
     global WINDOWS, SCREENWIDTH, SCREENHEIGHT
@@ -19,7 +23,7 @@ def build_flatland_window():
         width=None,
         height=None,
         fullscreen=True,
-        background_color='#000000',
+        background_color='#00FF00',
         title='Flatland'
     )
     
@@ -48,7 +52,8 @@ def build_title_frame():
         y=FRAMES['title_frame'].height * 0.3,
         image='./env_001--4_2.png',
         foreground_color='#FFFFFF',
-        background_color='#000000'
+        background_color='#000000',
+        visibility=True,
     )
 
     LABELS['title_label'] = Label(
@@ -58,10 +63,11 @@ def build_title_frame():
         text='FLATLAND',
         font=('Arial', 80, 'bold'),
         foreground_color='#FFFFFF',
-        background_color='#000000'
+        background_color='#000000',
+        visibility=True,
     )
 
-def build_start_menu():
+def build_start_menu_frame():
     global WINDOWS, FRAMES, BUTTONS, SCREENWIDTH, SCREENHEIGHT
 
     FRAMES['start_menu_frame'] = Frame(
@@ -81,12 +87,13 @@ def build_start_menu():
         height=1,
         x=FRAMES['start_menu_frame'].width * 0.95,
         y=FRAMES['start_menu_frame'].width * 0,
-        command=WINDOWS['flatland_window'].close_window,
+        command=exit_stub,
         text='X',
         font=('Arial', 25, 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['start_help_button'] = Button(
@@ -95,12 +102,13 @@ def build_start_menu():
         height=1,
         x=FRAMES['start_menu_frame'].width * 0,
         y=FRAMES['start_menu_frame'].height * 0,
-        command=build_start_menu_help_frame,
+        command=toggle_start_menu_help,
         text='?',
         font=('Arial', 25, 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['random_gen_button'] = Button(
@@ -109,12 +117,13 @@ def build_start_menu():
         height=2,
         x=FRAMES['start_menu_frame'].width * 0.25,
         y=FRAMES['start_menu_frame'].height * 0.25,
-        command=build_random_gen_para_frame,
+        command=switch_start_to_random_gen,
         text='Generate Random Environment',
         font=('Arial', 20, 'bold'),
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['build_env_button'] = Button(
@@ -123,12 +132,13 @@ def build_start_menu():
         height=2,
         x=FRAMES['start_menu_frame'].width * 0.25,
         y=FRAMES['start_menu_frame'].height * 0.35,
-        command=build_builder_para_frame,
+        command=switch_start_to_builder,
         text='Build Custom Environment',
         font=('Arial', 20, 'bold'),
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['load_env_button'] = Button(
@@ -143,64 +153,121 @@ def build_start_menu():
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
+        visibility=True,
     )
 
 def build_start_menu_help_frame():
     global WINDOWS, FRAMES, TEXTS, SCREENWIDTH, SCREENHEIGHT
+
+    FRAMES['start_menu_help_frame'] = Frame(
+        root=WINDOWS['flatland_window'].window,
+        width=SCREENWIDTH * 0.5,
+        height=SCREENHEIGHT,
+        x=SCREENWIDTH * 0,
+        y=SCREENWIDTH * 0,
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    with open("../help_texts/start_menu_help_text.txt", "r") as file:
+        # TODO: change help text
+        help_displaytext = file.read()
+
+    TEXTS['start_menu_help_frame'] = Text(
+        root=FRAMES['start_menu_help_frame'].frame,
+        width=FRAMES['start_menu_help_frame'].width,
+        height=FRAMES['start_menu_help_frame'].height,
+        x=FRAMES['start_menu_help_frame'].width * 0,
+        y=FRAMES['start_menu_help_frame'].height * 0,
+        text=help_displaytext,
+        font=("Arial", 14),
+        wrap='word',
+        foreground_color='#CCCCCC',
+        background_color='#000000',
+        border_width=0,
+        state='disabled',
+        visibility=True,
+    )
+
+def build_start_menu_env_viewer():
+    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT
+
+    FRAMES['start_menu_env_viewer_frame'] = Frame(
+        root=WINDOWS['flatland_window'].window,
+        width=SCREENWIDTH * 0.5,
+        height=SCREENHEIGHT,
+        x=SCREENWIDTH * 0,
+        y=SCREENWIDTH * 0,
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    CANVASES['start_menu_env_viewer_canvas'] = EnvCanvas(
+        root=FRAMES['start_menu_env_viewer_frame'].frame,
+        width=FRAMES['start_menu_env_viewer_frame'].width,
+        height=FRAMES['start_menu_env_viewer_frame'].height,
+        x=FRAMES['start_menu_env_viewer_frame'].width * 0,
+        y=FRAMES['start_menu_env_viewer_frame'].height * 0,
+        background_color='#333333',
+        border_width=0,
+        image='env_001--4_2.png'
+    )
+
+def toggle_start_menu_help():
     if 'start_menu_help_frame' in FRAMES:
         FRAMES['start_menu_help_frame'].toggle_visibility()
     else:
-        FRAMES['start_menu_help_frame'] = Frame(
-            root=WINDOWS['flatland_window'].window,
-            width=SCREENWIDTH * 0.5,
-            height=SCREENHEIGHT,
-            x=SCREENWIDTH * 0,
-            y=SCREENWIDTH * 0,
-            background_color='#000000',
-            border_width=0,
-            visibility=True
-        )
+        build_start_menu_help_frame()
 
-        with open("../help_texts/start_menu_help_text.txt", "r") as file:
-            # TODO: change help text
-            help_displaytext = file.read()
+def switch_title_to_start_viewer():
+    if 'title_frame' in FRAMES:
+        FRAMES['title_frame'].destroy_frame()
+        del FRAMES['title_frame']
 
-        TEXTS['start_menu_help_frame'] = Text(
-            root=FRAMES['start_menu_help_frame'].frame,
-            width=FRAMES['start_menu_help_frame'].width,
-            height=FRAMES['start_menu_help_frame'].height,
-            x=FRAMES['start_menu_help_frame'].width * 0,
-            y=FRAMES['start_menu_help_frame'].height * 0,
-            text=help_displaytext,
-            font=("Arial", 14),
-            wrap='word',
-            foreground_color='#CCCCCC',
-            background_color='#000000',
-            border_width=0,
-            state='disabled',
-        )
+    build_start_menu_env_viewer()
+
+def switch_start_to_random_gen():
+    if 'title_frame' in FRAMES:
+        FRAMES['title_frame'].destroy_frame()
+        del FRAMES['title_frame']
+    if 'start_menu_frame' in FRAMES:
+        FRAMES['start_menu_frame'].destroy_frame()
+        del FRAMES['start_menu_frame']
+    if 'start_menu_help_frame' in FRAMES:
+        FRAMES['start_menu_help_frame'].destroy_frame()
+        del FRAMES['start_menu_help_frame']
+    if 'start_menu_env_viewer_frame' in FRAMES:
+        FRAMES['start_menu_env_viewer_frame'].destroy_frame()
+        del FRAMES['start_menu_env_viewer_frame']
+
+    build_random_gen_para_frame()
+
+def switch_start_to_builder():
+    if 'title_frame' in FRAMES:
+        FRAMES['title_frame'].destroy_frame()
+        del FRAMES['title_frame']
+    if 'start_menu_frame' in FRAMES:
+        FRAMES['start_menu_frame'].destroy_frame()
+        del FRAMES['start_menu_frame']
+    if 'start_menu_help_frame' in FRAMES:
+        FRAMES['start_menu_help_frame'].destroy_frame()
+        del FRAMES['start_menu_help_frame']
+    if 'start_menu_env_viewer_frame' in FRAMES:
+        FRAMES['start_menu_env_viewer_frame'].destroy_frame()
+        del FRAMES['start_menu_env_viewer_frame']
+
+    build_builder_para_frame()
+
+
+
 
 # main menu
 
-def build_main_menu_view():
+def create_main_menu():
     build_main_menu()
-    build_env_viewer_frame()
-    build_main_menu_help_frame()
-    if 'random_gen_para_frame' in FRAMES:
-        FRAMES['random_gen_para_frame'].switch_to_frame(
-            FRAMES['main_menu_frame']
-        )
-    elif 'build_menu_frame' in FRAMES:
-        FRAMES['build_menu_frame'].switch_to_frame(
-            FRAMES['main_menu_frame']
-        )
-    else:
-        FRAMES['result_menu_frame'].switch_to_frame(
-            FRAMES['main_menu_frame']
-        )
-        FRAMES['result_viewer_frame'].switch_to_frame(
-            FRAMES['env_viewer_frame']
-        )
+    build_main_menu_env_viewer()
 
 def build_main_menu():
     global WINDOWS, FRAMES, BUTTONS, SCREENWIDTH, SCREENHEIGHT
@@ -213,7 +280,7 @@ def build_main_menu():
         y=SCREENWIDTH * 0,
         background_color='#000000',
         border_width=0,
-        visibility=False
+        visibility=True
     )
 
     BUTTONS['exit_button'] = Button(
@@ -222,12 +289,13 @@ def build_main_menu():
         height=1,
         x=FRAMES['main_menu_frame'].width * 0.95,
         y=FRAMES['main_menu_frame'].width * 0,
-        command=WINDOWS['flatland_window'].close_window,
+        command=exit_stub,
         text='X',
         font=('Arial', 25, 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['help_button'] = Button(
@@ -236,12 +304,13 @@ def build_main_menu():
         height=1,
         x=FRAMES['main_menu_frame'].width * 0,
         y=FRAMES['main_menu_frame'].height * 0,
-        command=build_main_menu_help_frame,
+        command=toggle_main_menu_help,
         text='?',
         font=('Arial', 25, 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['random_gen_button'] = Button(
@@ -250,12 +319,13 @@ def build_main_menu():
         height=2,
         x=FRAMES['main_menu_frame'].width * 0.25,
         y=FRAMES['main_menu_frame'].height * 0.25,
-        command=build_random_gen_para_frame,
+        command=switch_main_to_random_gen,
         text='Generate Random Environment',
         font=('Arial', 20, 'bold'),
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['build_env_button'] = Button(
@@ -264,12 +334,13 @@ def build_main_menu():
         height=2,
         x=FRAMES['main_menu_frame'].width * 0.25,
         y=FRAMES['main_menu_frame'].height * 0.35,
-        command=build_builder_para_frame,
+        command=switch_main_to_builder,
         text='Build Custom Environment',
         font=('Arial', 20, 'bold'),
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['modify_env_button'] = Button(
@@ -278,12 +349,13 @@ def build_main_menu():
         height=2,
         x=FRAMES['main_menu_frame'].width * 0.25,
         y=FRAMES['main_menu_frame'].height * 0.45,
-        command=build_builder_para_frame,
+        command=switch_main_to_builder,
         text='Modify Existing Environment',
         font=('Arial', 20, 'bold'),
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['load_env_button'] = Button(
@@ -298,6 +370,7 @@ def build_main_menu():
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['save_env_button'] = Button(
@@ -312,6 +385,7 @@ def build_main_menu():
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['run_sim_button'] = Button(
@@ -320,53 +394,19 @@ def build_main_menu():
         height=2,
         x=FRAMES['main_menu_frame'].width * 0.25,
         y=FRAMES['main_menu_frame'].height * 0.75,
-        command=build_result_view,
+        command=create_result_menu,
         text='Run Simulation',
         font=('Arial', 20, 'bold'),
         foreground_color='#000000',
         background_color='#FF0000',
         border_width=0,
+        visibility=True,
     )
 
 def build_main_menu_help_frame():
     global WINDOWS, FRAMES, TEXTS, SCREENWIDTH, SCREENHEIGHT
-    if 'main_menu_help_frame' in FRAMES:
-        FRAMES['main_menu_help_frame'].toggle_visibility()
-    else:
-        FRAMES['main_menu_help_frame'] = Frame(
-            root=WINDOWS['flatland_window'].window,
-            width=SCREENWIDTH * 0.5,
-            height=SCREENHEIGHT,
-            x=SCREENWIDTH * 0,
-            y=SCREENWIDTH * 0,
-            background_color='#000000',
-            border_width=0,
-            visibility=False
-        )
 
-        with open("../help_texts/main_menu_help_text.txt", "r") as file:
-            # TODO: change help text
-            help_displaytext = file.read()
-
-        TEXTS['main_menu_help_frame'] = Text(
-            root=FRAMES['main_menu_help_frame'].frame,
-            width=FRAMES['main_menu_help_frame'].width,
-            height=FRAMES['main_menu_help_frame'].height,
-            x=FRAMES['main_menu_help_frame'].width * 0,
-            y=FRAMES['main_menu_help_frame'].height * 0,
-            text=help_displaytext,
-            font=("Arial", 14),
-            wrap='word',
-            foreground_color='#CCCCCC',
-            background_color='#000000',
-            border_width=0,
-            state='disabled',
-        )
-
-def build_env_viewer_frame():
-    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT
-
-    FRAMES['env_viewer_frame'] = Frame(
+    FRAMES['main_menu_help_frame'] = Frame(
         root=WINDOWS['flatland_window'].window,
         width=SCREENWIDTH * 0.5,
         height=SCREENHEIGHT,
@@ -374,361 +414,90 @@ def build_env_viewer_frame():
         y=SCREENWIDTH * 0,
         background_color='#000000',
         border_width=0,
-        visibility=False
+        visibility=True
     )
 
-    CANVASES['env_viewer_canvas'] = EnvCanvas(
-        root=FRAMES['env_viewer_frame'].frame,
-        width=FRAMES['env_viewer_frame'].width,
-        height=FRAMES['env_viewer_frame'].height,
-        x=FRAMES['env_viewer_frame'].width * 0,
-        y=FRAMES['env_viewer_frame'].height * 0,
+    with open("../help_texts/main_menu_help_text.txt", "r") as file:
+        # TODO: change help text
+        help_displaytext = file.read()
+
+    TEXTS['main_menu_help_frame'] = Text(
+        root=FRAMES['main_menu_help_frame'].frame,
+        width=FRAMES['main_menu_help_frame'].width,
+        height=FRAMES['main_menu_help_frame'].height,
+        x=FRAMES['main_menu_help_frame'].width * 0,
+        y=FRAMES['main_menu_help_frame'].height * 0,
+        text=help_displaytext,
+        font=("Arial", 14),
+        wrap='word',
+        foreground_color='#CCCCCC',
+        background_color='#000000',
+        border_width=0,
+        state='disabled',
+        visibility=True,
+    )#
+
+def build_main_menu_env_viewer():
+    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT
+
+    FRAMES['main_menu_env_viewer_frame'] = Frame(
+        root=WINDOWS['flatland_window'].window,
+        width=SCREENWIDTH * 0.5,
+        height=SCREENHEIGHT,
+        x=SCREENWIDTH * 0,
+        y=SCREENWIDTH * 0,
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    CANVASES['main_menu_env_viewer_canvas'] = EnvCanvas(
+        root=FRAMES['main_menu_env_viewer_frame'].frame,
+        width=FRAMES['main_menu_env_viewer_frame'].width,
+        height=FRAMES['main_menu_env_viewer_frame'].height,
+        x=FRAMES['main_menu_env_viewer_frame'].width * 0,
+        y=FRAMES['main_menu_env_viewer_frame'].height * 0,
         background_color='#333333',
         border_width=0,
         image='env_001--4_2.png'
     )
 
-# parameter entries
+def toggle_main_menu_help():
+    if 'main_menu_help_frame' in FRAMES:
+        FRAMES['main_menu_help_frame'].toggle_visibility()
+    else:
+        build_main_menu_help_frame()
 
-def show_base_para_options(parent_frame: str):
-    LABELS['width_label'] = Label(
-        root=FRAMES[parent_frame].frame,
-        x=FRAMES[parent_frame].width * 0.05,
-        y=FRAMES[parent_frame].height * 0.1,
-        text='Environment width:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000'
-    )
+def switch_main_to_random_gen():
+    if 'main_menu_frame' in FRAMES:
+        FRAMES['main_menu_frame'].destroy_frame()
+        del FRAMES['main_menu_frame']
+    if 'main_menu_help_frame' in FRAMES:
+        FRAMES['main_menu_help_frame'].destroy_frame()
+        del FRAMES['main_menu_help_frame']
+    if 'main_menu_env_viewer_frame' in FRAMES:
+        FRAMES['main_menu_env_viewer_frame'].destroy_frame()
+        del FRAMES['main_menu_env_viewer_frame']
 
-    ENTRY_FIELDS['width_entry'] = EntryField(
-        root=FRAMES[parent_frame].frame,
-        width=10,
-        height=1,
-        x=FRAMES[parent_frame].width * 0.6,
-        y=FRAMES[parent_frame].height * 0.1,
-        text='e.g. 40',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-    )
+    build_random_gen_para_frame()
 
-    LABELS['height_label'] = Label(
-        root=FRAMES[parent_frame].frame,
-        x=FRAMES[parent_frame].width * 0.05,
-        y=FRAMES[parent_frame].height * 0.15,
-        text='Environment height:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000'
-    )
+def switch_main_to_builder():
+    if 'main_menu_frame' in FRAMES:
+        FRAMES['main_menu_frame'].destroy_frame()
+        del FRAMES['main_menu_frame']
+    if 'main_menu_help_frame' in FRAMES:
+        FRAMES['main_menu_help_frame'].destroy_frame()
+        del FRAMES['main_menu_help_frame']
+    if 'main_menu_env_viewer_frame' in FRAMES:
+        FRAMES['main_menu_env_viewer_frame'].destroy_frame()
+        del FRAMES['main_menu_env_viewer_frame']
 
-    ENTRY_FIELDS['height_entry'] = EntryField(
-        root=FRAMES[parent_frame].frame,
-        width=10,
-        height=1,
-        x=FRAMES[parent_frame].width * 0.6,
-        y=FRAMES[parent_frame].height * 0.15,
-        text='e.g. 40',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-    )
+    build_builder_para_frame()
 
-    LABELS['agents_label'] = Label(
-        root=FRAMES[parent_frame].frame,
-        x=FRAMES[parent_frame].width * 0.05,
-        y=FRAMES[parent_frame].height * 0.2,
-        text='Number of agents:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000'
-    )
 
-    ENTRY_FIELDS['agents_entry'] = EntryField(
-        root=FRAMES[parent_frame].frame,
-        width=10,
-        height=1,
-        x=FRAMES[parent_frame].width * 0.6,
-        y=FRAMES[parent_frame].height * 0.2,
-        text='e.g. 4',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-    )
 
-    LABELS['cities_label'] = Label(
-        root=FRAMES[parent_frame].frame,
-        x=FRAMES[parent_frame].width * 0.05,
-        y=FRAMES[parent_frame].height * 0.25,
-        text='Max. number of cities:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000'
-    )
 
-    ENTRY_FIELDS['cities_entry'] = EntryField(
-        root=FRAMES[parent_frame].frame,
-        width=10,
-        height=1,
-        x=FRAMES[parent_frame].width * 0.6,
-        y=FRAMES[parent_frame].height * 0.25,
-        text='e.g. 4',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-    )
-
-    LABELS['answer_label'] = Label(
-        root=FRAMES[parent_frame].frame,
-        x=FRAMES[parent_frame].width * 0.05,
-        y=FRAMES[parent_frame].height * 0.3,
-        text='Answer to display:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000'
-    )
-
-    ENTRY_FIELDS['answer_entry'] = EntryField(
-        root=FRAMES[parent_frame].frame,
-        width=10,
-        height=1,
-        x=FRAMES[parent_frame].width * 0.6,
-        y=FRAMES[parent_frame].height * 0.3,
-        text='e.g. 1',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-    )
-
-def show_advanced_para_options(parent_frame: str):
-    LABELS['seed_label'] = Label(
-        root=FRAMES[parent_frame].frame,
-        x=FRAMES[parent_frame].width * 0.05,
-        y=FRAMES[parent_frame].height * 0.35,
-        text='Random generator seed:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000'
-    )
-
-    ENTRY_FIELDS['seed_entry'] = EntryField(
-        root=FRAMES[parent_frame].frame,
-        width=10,
-        height=1,
-        x=FRAMES[parent_frame].width * 0.6,
-        y=FRAMES[parent_frame].height * 0.35,
-        text='e.g. 1',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-    )
-
-    LABELS['grid_label'] = Label(
-        root=FRAMES[parent_frame].frame,
-        x=FRAMES[parent_frame].width * 0.05,
-        y=FRAMES[parent_frame].height * 0.4,
-        text='Use grid mode:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000'
-    )
-
-    ENTRY_FIELDS['grid_entry'] = EntryField(
-        root=FRAMES[parent_frame].frame,
-        width=10,
-        height=1,
-        x=FRAMES[parent_frame].width * 0.6,
-        y=FRAMES[parent_frame].height * 0.4,
-        text='e.g. False',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-    )
-
-    LABELS['intercity_label'] = Label(
-        root=FRAMES[parent_frame].frame,
-        x=FRAMES[parent_frame].width * 0.05,
-        y=FRAMES[parent_frame].height * 0.45,
-        text='Max. number of rails between cities:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000'
-    )
-
-    ENTRY_FIELDS['intercity_entry'] = EntryField(
-        root=FRAMES[parent_frame].frame,
-        width=10,
-        height=1,
-        x=FRAMES[parent_frame].width * 0.6,
-        y=FRAMES[parent_frame].height * 0.45,
-        text='e.g. 2',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-    )
-
-    LABELS['incity_label'] = Label(
-        root=FRAMES[parent_frame].frame,
-        x=FRAMES[parent_frame].width * 0.05,
-        y=FRAMES[parent_frame].height * 0.5,
-        text='Max. number of rail pairs in cities:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000'
-    )
-
-    ENTRY_FIELDS['incity_entry'] = EntryField(
-        root=FRAMES[parent_frame].frame,
-        width=10,
-        height=1,
-        x=FRAMES[parent_frame].width * 0.6,
-        y=FRAMES[parent_frame].height * 0.5,
-        text='e.g. 2',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-    )
-
-    LABELS['remove_label'] = Label(
-        root=FRAMES[parent_frame].frame,
-        x=FRAMES[parent_frame].width * 0.05,
-        y=FRAMES[parent_frame].height * 0.55,
-        text='Remove agents on arrival:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000'
-    )
-
-    ENTRY_FIELDS['remove_entry'] = EntryField(
-        root=FRAMES[parent_frame].frame,
-        width=10,
-        height=1,
-        x=FRAMES[parent_frame].width * 0.6,
-        y=FRAMES[parent_frame].height * 0.55,
-        text='e.g. True',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-    )
-
-    LABELS['speed_label'] = Label(
-        root=FRAMES[parent_frame].frame,
-        x=FRAMES[parent_frame].width * 0.05,
-        y=FRAMES[parent_frame].height * 0.6,
-        text='Speed ratio map for trains:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000'
-    )
-
-    ENTRY_FIELDS['speed_entry'] = EntryField(
-        root=FRAMES[parent_frame].frame,
-        width=10,
-        height=1,
-        x=FRAMES[parent_frame].width * 0.6,
-        y=FRAMES[parent_frame].height * 0.6,
-        text='e.g. {1 : 1}',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-    )
-
-    LABELS['malfunction_label'] = Label(
-        root=FRAMES[parent_frame].frame,
-        x=FRAMES[parent_frame].width * 0.05,
-        y=FRAMES[parent_frame].height * 0.65,
-        text='Malfunction rate:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000'
-    )
-
-    ENTRY_FIELDS['malfunction_entry'] = EntryField(
-        root=FRAMES[parent_frame].frame,
-        width=10,
-        height=1,
-        x=FRAMES[parent_frame].width * 0.6,
-        y=FRAMES[parent_frame].height * 0.65,
-        text='e.g. 0/30',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-    )
-
-    LABELS['min_duration_label'] = Label(
-        root=FRAMES[parent_frame].frame,
-        x=FRAMES[parent_frame].width * 0.05,
-        y=FRAMES[parent_frame].height * 0.7,
-        text='Min. duration for malfunctions:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000'
-    )
-
-    ENTRY_FIELDS['min_duration_entry'] = EntryField(
-        root=FRAMES[parent_frame].frame,
-        width=10,
-        height=1,
-        x=FRAMES[parent_frame].width * 0.6,
-        y=FRAMES[parent_frame].height * 0.7,
-        text='e.g. 2',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-    )
-
-    LABELS['max_duration_label'] = Label(
-        root=FRAMES[parent_frame].frame,
-        x=FRAMES[parent_frame].width * 0.05,
-        y=FRAMES[parent_frame].height * 0.75,
-        text='Max. duration for malfunction:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000'
-    )
-
-    ENTRY_FIELDS['max_duration_entry'] = EntryField(
-        root=FRAMES[parent_frame].frame,
-        width=10,
-        height=1,
-        x=FRAMES[parent_frame].width * 0.6,
-        y=FRAMES[parent_frame].height * 0.75,
-        text='e.g. 6',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-    )
-
-# loop for random generation
+# random generation
 
 def build_random_gen_para_frame():
     global WINDOWS, FRAMES, LABELS, ENTRY_FIELDS, SCREENWIDTH, SCREENHEIGHT
@@ -741,13 +510,8 @@ def build_random_gen_para_frame():
         y=SCREENWIDTH * 0,
         background_color='#000000',
         border_width=0,
-        visibility=False
+        visibility=True
     )
-    if 'start_menu_frame' in FRAMES:
-        FRAMES['start_menu_frame'].switch_to_frame(FRAMES['random_gen_para_frame'])
-    else:
-        FRAMES['main_menu_frame'].switch_to_frame(FRAMES['random_gen_para_frame'])
-    show_base_para_options('random_gen_para_frame')
 
     BUTTONS['generate_button'] = Button(
         root=FRAMES['random_gen_para_frame'].frame,
@@ -755,12 +519,13 @@ def build_random_gen_para_frame():
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.05,
         y=FRAMES['random_gen_para_frame'].width * 0.95,
-        command=build_random_gen_viewer,
+        command=random_gen_para_to_env_frame,
         text='Generate',
         font=('Arial', 30, 'bold'),
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['advanced_options'] = Button(
@@ -769,21 +534,480 @@ def build_random_gen_para_frame():
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.6,
         y=FRAMES['random_gen_para_frame'].width * 0.95,
-        command=lambda : show_advanced_para_options('random_gen_para_frame'),
+        command=random_gen_toggle_advanced_para_options,
         text='Advanced Options',
         font=('Arial', 30, 'bold'),
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
+        visibility=True,
     )
 
-def build_random_gen_viewer():
-    build_env_viewer_frame()
-    if 'title_frame' in FRAMES:
-        FRAMES['title_frame'].switch_to_frame(FRAMES['env_viewer_frame'])
-    build_main_menu_view()
+    LABELS['width_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        x=FRAMES['random_gen_para_frame'].width * 0.05,
+        y=FRAMES['random_gen_para_frame'].height * 0.1,
+        text='Environment width:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
 
-# loop for build menu
+    ENTRY_FIELDS['width_entry'] = EntryField(
+        root=FRAMES['random_gen_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['random_gen_para_frame'].width * 0.6,
+        y=FRAMES['random_gen_para_frame'].height * 0.1,
+        text='e.g. 40',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    LABELS['height_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        x=FRAMES['random_gen_para_frame'].width * 0.05,
+        y=FRAMES['random_gen_para_frame'].height * 0.15,
+        text='Environment height:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    ENTRY_FIELDS['height_entry'] = EntryField(
+        root=FRAMES['random_gen_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['random_gen_para_frame'].width * 0.6,
+        y=FRAMES['random_gen_para_frame'].height * 0.15,
+        text='e.g. 40',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    LABELS['agents_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        x=FRAMES['random_gen_para_frame'].width * 0.05,
+        y=FRAMES['random_gen_para_frame'].height * 0.2,
+        text='Number of agents:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    ENTRY_FIELDS['agents_entry'] = EntryField(
+        root=FRAMES['random_gen_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['random_gen_para_frame'].width * 0.6,
+        y=FRAMES['random_gen_para_frame'].height * 0.2,
+        text='e.g. 4',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    LABELS['cities_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        x=FRAMES['random_gen_para_frame'].width * 0.05,
+        y=FRAMES['random_gen_para_frame'].height * 0.25,
+        text='Max. number of cities:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    ENTRY_FIELDS['cities_entry'] = EntryField(
+        root=FRAMES['random_gen_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['random_gen_para_frame'].width * 0.6,
+        y=FRAMES['random_gen_para_frame'].height * 0.25,
+        text='e.g. 4',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    LABELS['answer_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        x=FRAMES['random_gen_para_frame'].width * 0.05,
+        y=FRAMES['random_gen_para_frame'].height * 0.3,
+        text='Answer to display:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    ENTRY_FIELDS['answer_entry'] = EntryField(
+        root=FRAMES['random_gen_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['random_gen_para_frame'].width * 0.6,
+        y=FRAMES['random_gen_para_frame'].height * 0.3,
+        text='e.g. 1',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    LABELS['seed_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        x=FRAMES['random_gen_para_frame'].width * 0.05,
+        y=FRAMES['random_gen_para_frame'].height * 0.35,
+        text='Seed:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    ENTRY_FIELDS['seed_entry'] = EntryField(
+        root=FRAMES['random_gen_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['random_gen_para_frame'].width * 0.6,
+        y=FRAMES['random_gen_para_frame'].height * 0.35,
+        text='e.g. 1',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=False,
+    )
+
+    LABELS['grid_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        x=FRAMES['random_gen_para_frame'].width * 0.05,
+        y=FRAMES['random_gen_para_frame'].height * 0.4,
+        text='Use grid mode:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    ENTRY_FIELDS['grid_entry'] = EntryField(
+        root=FRAMES['random_gen_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['random_gen_para_frame'].width * 0.6,
+        y=FRAMES['random_gen_para_frame'].height * 0.4,
+        text='e.g. False',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=False,
+    )
+
+    LABELS['intercity_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        x=FRAMES['random_gen_para_frame'].width * 0.05,
+        y=FRAMES['random_gen_para_frame'].height * 0.45,
+        text='Max. number of rails between cities:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    ENTRY_FIELDS['intercity_entry'] = EntryField(
+        root=FRAMES['random_gen_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['random_gen_para_frame'].width * 0.6,
+        y=FRAMES['random_gen_para_frame'].height * 0.45,
+        text='e.g. 2',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=False,
+    )
+
+    LABELS['incity_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        x=FRAMES['random_gen_para_frame'].width * 0.05,
+        y=FRAMES['random_gen_para_frame'].height * 0.5,
+        text='Max. number of rail pairs in cities:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    ENTRY_FIELDS['incity_entry'] = EntryField(
+        root=FRAMES['random_gen_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['random_gen_para_frame'].width * 0.6,
+        y=FRAMES['random_gen_para_frame'].height * 0.5,
+        text='e.g. 2',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=False,
+    )
+
+    LABELS['remove_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        x=FRAMES['random_gen_para_frame'].width * 0.05,
+        y=FRAMES['random_gen_para_frame'].height * 0.55,
+        text='Remove agents on arrival:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    ENTRY_FIELDS['remove_entry'] = EntryField(
+        root=FRAMES['random_gen_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['random_gen_para_frame'].width * 0.6,
+        y=FRAMES['random_gen_para_frame'].height * 0.55,
+        text='e.g. True',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=False,
+    )
+
+    LABELS['speed_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        x=FRAMES['random_gen_para_frame'].width * 0.05,
+        y=FRAMES['random_gen_para_frame'].height * 0.6,
+        text='Speed ratio map for trains:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    ENTRY_FIELDS['speed_entry'] = EntryField(
+        root=FRAMES['random_gen_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['random_gen_para_frame'].width * 0.6,
+        y=FRAMES['random_gen_para_frame'].height * 0.6,
+        text='e.g. {1 : 1}',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=False,
+    )
+
+    LABELS['malfunction_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        x=FRAMES['random_gen_para_frame'].width * 0.05,
+        y=FRAMES['random_gen_para_frame'].height * 0.65,
+        text='Malfunction rate:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    ENTRY_FIELDS['malfunction_entry'] = EntryField(
+        root=FRAMES['random_gen_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['random_gen_para_frame'].width * 0.6,
+        y=FRAMES['random_gen_para_frame'].height * 0.65,
+        text='e.g. 0/30',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=False,
+    )
+
+    LABELS['min_duration_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        x=FRAMES['random_gen_para_frame'].width * 0.05,
+        y=FRAMES['random_gen_para_frame'].height * 0.7,
+        text='Min. duration for malfunctions:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    ENTRY_FIELDS['min_duration_entry'] = EntryField(
+        root=FRAMES['random_gen_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['random_gen_para_frame'].width * 0.6,
+        y=FRAMES['random_gen_para_frame'].height * 0.7,
+        text='e.g. 2',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=False,
+    )
+
+    LABELS['max_duration_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        x=FRAMES['random_gen_para_frame'].width * 0.05,
+        y=FRAMES['random_gen_para_frame'].height * 0.75,
+        text='Max. duration for malfunction:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    ENTRY_FIELDS['max_duration_entry'] = EntryField(
+        root=FRAMES['random_gen_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['random_gen_para_frame'].width * 0.6,
+        y=FRAMES['random_gen_para_frame'].height * 0.75,
+        text='e.g. 6',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=False,
+    )
+
+def random_gen_para_to_env_frame():
+    # TODO: save random gen parameters
+
+    if 'random_gen_para_frame' in FRAMES:
+        FRAMES['random_gen_para_frame'].destroy_frame()
+        del FRAMES['random_gen_para_frame']
+
+    build_random_gen_env_viewer()
+    build_random_gen_env_menu()
+
+def build_random_gen_env_viewer():
+    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT
+
+    FRAMES['random_gen_env_viewer_frame'] = Frame(
+        root=WINDOWS['flatland_window'].window,
+        width=SCREENWIDTH * 0.5,
+        height=SCREENHEIGHT,
+        x=SCREENWIDTH * 0,
+        y=SCREENWIDTH * 0,
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    CANVASES['gen_env_viewer_canvas'] = EnvCanvas(
+        root=FRAMES['random_gen_env_viewer_frame'].frame,
+        width=FRAMES['random_gen_env_viewer_frame'].width,
+        height=FRAMES['random_gen_env_viewer_frame'].height,
+        x=FRAMES['random_gen_env_viewer_frame'].width * 0,
+        y=FRAMES['random_gen_env_viewer_frame'].height * 0,
+        background_color='#333333',
+        border_width=0,
+        image='env_001--4_2.png'
+    )
+
+def build_random_gen_env_menu():
+    global WINDOWS, FRAMES, BUTTONS, SCREENWIDTH, SCREENHEIGHT
+
+    FRAMES['random_gen_env_menu_frame'] = Frame(
+        root=WINDOWS['flatland_window'].window,
+        width=SCREENWIDTH * 0.5,
+        height=SCREENHEIGHT,
+        x=SCREENWIDTH * 0.5,
+        y=SCREENWIDTH * 0,
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    BUTTONS['return_to_menu_button'] = Button(
+        root=FRAMES['random_gen_env_menu_frame'].frame,
+        width=20,
+        height=1,
+        x=FRAMES['random_gen_env_menu_frame'].width * 0.25,
+        y=FRAMES['random_gen_env_menu_frame'].width * 0.95,
+        command=switch_random_gen_to_main,
+        text='Return To Main Menu',
+        font=('Arial', 25, 'bold'),
+        foreground_color='#000000',
+        background_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+def random_gen_toggle_advanced_para_options():
+    LABELS['seed_label'].toggle_visibility()
+    ENTRY_FIELDS['seed_entry'].toggle_visibility()
+    LABELS['grid_label'].toggle_visibility()
+    ENTRY_FIELDS['grid_entry'].toggle_visibility()
+    LABELS['intercity_label'].toggle_visibility()
+    ENTRY_FIELDS['intercity_entry'].toggle_visibility()
+    LABELS['incity_label'].toggle_visibility()
+    ENTRY_FIELDS['incity_entry'].toggle_visibility()
+    LABELS['remove_label'].toggle_visibility()
+    ENTRY_FIELDS['remove_entry'].toggle_visibility()
+    LABELS['speed_label'].toggle_visibility()
+    ENTRY_FIELDS['speed_entry'].toggle_visibility()
+    LABELS['malfunction_label'].toggle_visibility()
+    ENTRY_FIELDS['malfunction_entry'].toggle_visibility()
+    LABELS['min_duration_label'].toggle_visibility()
+    ENTRY_FIELDS['min_duration_entry'].toggle_visibility()
+    LABELS['max_duration_label'].toggle_visibility()
+    ENTRY_FIELDS['max_duration_entry'].toggle_visibility()
+    return
+
+def switch_random_gen_to_main():
+    # TODO: Save random gen Env
+
+    if 'random_gen_env_viewer_frame' in FRAMES:
+        FRAMES['random_gen_env_viewer_frame'].destroy_frame()
+        del FRAMES['random_gen_env_viewer_frame']
+    if 'random_gen_env_menu_frame' in FRAMES:
+        FRAMES['random_gen_env_menu_frame'].destroy_frame()
+        del FRAMES['random_gen_env_menu_frame']
+
+    create_main_menu()
+
+
+
+
+# builder
 
 def build_builder_para_frame():
     global WINDOWS, FRAMES, LABELS, ENTRY_FIELDS, SCREENWIDTH, SCREENHEIGHT
@@ -796,13 +1020,8 @@ def build_builder_para_frame():
         y=SCREENWIDTH * 0,
         background_color='#000000',
         border_width=0,
-        visibility=False
+        visibility=True
     )
-    if 'start_menu_frame' in FRAMES:
-        FRAMES['start_menu_frame'].switch_to_frame(FRAMES['builder_para_frame'])
-    else:
-        FRAMES['main_menu_frame'].switch_to_frame(FRAMES['builder_para_frame'])
-    show_base_para_options('builder_para_frame')
 
     BUTTONS['build_button'] = Button(
         root=FRAMES['builder_para_frame'].frame,
@@ -810,12 +1029,13 @@ def build_builder_para_frame():
         height=1,
         x=FRAMES['builder_para_frame'].width * 0.05,
         y=FRAMES['builder_para_frame'].width * 0.95,
-        command=build_builder_view,
+        command=builder_para_to_builder_grid,
         text='Build',
         font=('Arial', 30, 'bold'),
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['advanced_options'] = Button(
@@ -824,23 +1044,388 @@ def build_builder_para_frame():
         height=1,
         x=FRAMES['builder_para_frame'].width * 0.6,
         y=FRAMES['builder_para_frame'].width * 0.95,
-        command=lambda : show_advanced_para_options('builder_para_frame'),
+        command=builder_toggle_advanced_para_options,
         text='Advanced Options',
         font=('Arial', 30, 'bold'),
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
+        visibility=True,
     )
 
-def build_builder_view():
+    LABELS['width_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        x=FRAMES['builder_para_frame'].width * 0.05,
+        y=FRAMES['builder_para_frame'].height * 0.1,
+        text='Environment width:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    ENTRY_FIELDS['width_entry'] = EntryField(
+        root=FRAMES['builder_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['builder_para_frame'].width * 0.6,
+        y=FRAMES['builder_para_frame'].height * 0.1,
+        text='e.g. 40',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    LABELS['height_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        x=FRAMES['builder_para_frame'].width * 0.05,
+        y=FRAMES['builder_para_frame'].height * 0.15,
+        text='Environment height:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    ENTRY_FIELDS['height_entry'] = EntryField(
+        root=FRAMES['builder_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['builder_para_frame'].width * 0.6,
+        y=FRAMES['builder_para_frame'].height * 0.15,
+        text='e.g. 40',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    LABELS['agents_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        x=FRAMES['builder_para_frame'].width * 0.05,
+        y=FRAMES['builder_para_frame'].height * 0.2,
+        text='Number of agents:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    ENTRY_FIELDS['agents_entry'] = EntryField(
+        root=FRAMES['builder_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['builder_para_frame'].width * 0.6,
+        y=FRAMES['builder_para_frame'].height * 0.2,
+        text='e.g. 4',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    LABELS['cities_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        x=FRAMES['builder_para_frame'].width * 0.05,
+        y=FRAMES['builder_para_frame'].height * 0.25,
+        text='Max. number of cities:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    ENTRY_FIELDS['cities_entry'] = EntryField(
+        root=FRAMES['builder_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['builder_para_frame'].width * 0.6,
+        y=FRAMES['builder_para_frame'].height * 0.25,
+        text='e.g. 4',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    LABELS['answer_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        x=FRAMES['builder_para_frame'].width * 0.05,
+        y=FRAMES['builder_para_frame'].height * 0.3,
+        text='Answer to display:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    ENTRY_FIELDS['answer_entry'] = EntryField(
+        root=FRAMES['builder_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['builder_para_frame'].width * 0.6,
+        y=FRAMES['builder_para_frame'].height * 0.3,
+        text='e.g. 1',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    LABELS['seed_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        x=FRAMES['builder_para_frame'].width * 0.05,
+        y=FRAMES['builder_para_frame'].height * 0.35,
+        text='Seed:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    ENTRY_FIELDS['seed_entry'] = EntryField(
+        root=FRAMES['builder_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['builder_para_frame'].width * 0.6,
+        y=FRAMES['builder_para_frame'].height * 0.35,
+        text='e.g. 1',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=False,
+    )
+
+    LABELS['grid_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        x=FRAMES['builder_para_frame'].width * 0.05,
+        y=FRAMES['builder_para_frame'].height * 0.4,
+        text='Use grid mode:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    ENTRY_FIELDS['grid_entry'] = EntryField(
+        root=FRAMES['builder_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['builder_para_frame'].width * 0.6,
+        y=FRAMES['builder_para_frame'].height * 0.4,
+        text='e.g. False',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=False,
+    )
+
+    LABELS['intercity_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        x=FRAMES['builder_para_frame'].width * 0.05,
+        y=FRAMES['builder_para_frame'].height * 0.45,
+        text='Max. number of rails between cities:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    ENTRY_FIELDS['intercity_entry'] = EntryField(
+        root=FRAMES['builder_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['builder_para_frame'].width * 0.6,
+        y=FRAMES['builder_para_frame'].height * 0.45,
+        text='e.g. 2',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=False,
+    )
+
+    LABELS['incity_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        x=FRAMES['builder_para_frame'].width * 0.05,
+        y=FRAMES['builder_para_frame'].height * 0.5,
+        text='Max. number of rail pairs in cities:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    ENTRY_FIELDS['incity_entry'] = EntryField(
+        root=FRAMES['builder_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['builder_para_frame'].width * 0.6,
+        y=FRAMES['builder_para_frame'].height * 0.5,
+        text='e.g. 2',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=False,
+    )
+
+    LABELS['remove_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        x=FRAMES['builder_para_frame'].width * 0.05,
+        y=FRAMES['builder_para_frame'].height * 0.55,
+        text='Remove agents on arrival:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    ENTRY_FIELDS['remove_entry'] = EntryField(
+        root=FRAMES['builder_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['builder_para_frame'].width * 0.6,
+        y=FRAMES['builder_para_frame'].height * 0.55,
+        text='e.g. True',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=False,
+    )
+
+    LABELS['speed_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        x=FRAMES['builder_para_frame'].width * 0.05,
+        y=FRAMES['builder_para_frame'].height * 0.6,
+        text='Speed ratio map for trains:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    ENTRY_FIELDS['speed_entry'] = EntryField(
+        root=FRAMES['builder_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['builder_para_frame'].width * 0.6,
+        y=FRAMES['builder_para_frame'].height * 0.6,
+        text='e.g. {1 : 1}',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=False,
+    )
+
+    LABELS['malfunction_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        x=FRAMES['builder_para_frame'].width * 0.05,
+        y=FRAMES['builder_para_frame'].height * 0.65,
+        text='Malfunction rate:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    ENTRY_FIELDS['malfunction_entry'] = EntryField(
+        root=FRAMES['builder_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['builder_para_frame'].width * 0.6,
+        y=FRAMES['builder_para_frame'].height * 0.65,
+        text='e.g. 0/30',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=False,
+    )
+
+    LABELS['min_duration_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        x=FRAMES['builder_para_frame'].width * 0.05,
+        y=FRAMES['builder_para_frame'].height * 0.7,
+        text='Min. duration for malfunctions:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    ENTRY_FIELDS['min_duration_entry'] = EntryField(
+        root=FRAMES['builder_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['builder_para_frame'].width * 0.6,
+        y=FRAMES['builder_para_frame'].height * 0.7,
+        text='e.g. 2',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=False,
+    )
+
+    LABELS['max_duration_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        x=FRAMES['builder_para_frame'].width * 0.05,
+        y=FRAMES['builder_para_frame'].height * 0.75,
+        text='Max. duration for malfunction:',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    ENTRY_FIELDS['max_duration_entry'] = EntryField(
+        root=FRAMES['builder_para_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['builder_para_frame'].width * 0.6,
+        y=FRAMES['builder_para_frame'].height * 0.75,
+        text='e.g. 6',
+        font=('Arial', 20, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=False,
+    )
+
+def builder_para_to_builder_grid():
+    # TODO: save builder parameters
+
+    if 'builder_para_frame' in FRAMES:
+        FRAMES['builder_para_frame'].destroy_frame()
+        del FRAMES['builder_para_frame']
+
     build_build_menu_frame()
     build_build_grid_frame()
-    if 'start_menu_frame' in FRAMES:
-        FRAMES['start_menu_frame'].switch_to_frame(FRAMES['build_menu_frame'])
-        FRAMES['title_frame'].switch_to_frame(FRAMES['build_grid_frame'])
-    else:
-        FRAMES['main_menu_frame'].switch_to_frame(FRAMES['build_menu_frame'])
-        FRAMES['env_viewer_frame'].switch_to_frame(FRAMES['build_grid_frame'])
 
 def build_build_menu_frame():
     FRAMES['build_menu_frame'] = Frame(
@@ -851,7 +1436,22 @@ def build_build_menu_frame():
         y=SCREENWIDTH * 0,
         background_color='#000000',
         border_width=0,
-        visibility=False
+        visibility=True
+    )
+
+    BUTTONS['finish_building_button'] = Button(
+        root=FRAMES['build_menu_frame'].frame,
+        width=20,
+        height=1,
+        x=FRAMES['build_menu_frame'].width * 0.25,
+        y=FRAMES['build_menu_frame'].width * 0.95,
+        command=builder_grid_to_builder_env,
+        text='Finish Building',
+        font=('Arial', 25, 'bold'),
+        foreground_color='#000000',
+        background_color='#FF0000',
+        border_width=0,
+        visibility=True,
     )
 
     BUTTONS['horizontal_straight_button'] = Button(
@@ -865,6 +1465,7 @@ def build_build_menu_frame():
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['vertical_straight_button'] = Button(
@@ -878,6 +1479,7 @@ def build_build_menu_frame():
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['corner_top_left_button'] = Button(
@@ -891,6 +1493,7 @@ def build_build_menu_frame():
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['corner_top_right_button'] = Button(
@@ -904,6 +1507,7 @@ def build_build_menu_frame():
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['corner_bottom_right_button'] = Button(
@@ -917,6 +1521,7 @@ def build_build_menu_frame():
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['corner_bottom_left_button'] = Button(
@@ -930,6 +1535,7 @@ def build_build_menu_frame():
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['switch_hor_top_left_button'] = Button(
@@ -943,6 +1549,7 @@ def build_build_menu_frame():
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['switch_hor_top_right_button'] = Button(
@@ -956,6 +1563,7 @@ def build_build_menu_frame():
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['switch_hor_bottom_right_button'] = Button(
@@ -969,6 +1577,7 @@ def build_build_menu_frame():
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['switch_hor_bottom_left_button'] = Button(
@@ -982,6 +1591,7 @@ def build_build_menu_frame():
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['switch_ver_top_left_button'] = Button(
@@ -995,6 +1605,7 @@ def build_build_menu_frame():
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['switch_ver_top_right_button'] = Button(
@@ -1008,6 +1619,7 @@ def build_build_menu_frame():
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['switch_ver_bottom_right_button'] = Button(
@@ -1021,6 +1633,7 @@ def build_build_menu_frame():
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['switch_ver_bottom_left_button'] = Button(
@@ -1034,6 +1647,7 @@ def build_build_menu_frame():
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['diamond_crossing_button'] = Button(
@@ -1047,6 +1661,7 @@ def build_build_menu_frame():
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['single_slip_top_left_button'] = Button(
@@ -1061,6 +1676,7 @@ def build_build_menu_frame():
         background_color='#000000',
         border_width=0,
         rotation=270,
+        visibility=True,
     )
 
     BUTTONS['single_slip_top_right_button'] = Button(
@@ -1075,6 +1691,7 @@ def build_build_menu_frame():
         background_color='#000000',
         border_width=0,
         rotation=180,
+        visibility=True,
     )
 
     BUTTONS['single_slip_bottom_right_button'] = Button(
@@ -1089,6 +1706,7 @@ def build_build_menu_frame():
         background_color='#000000',
         border_width=0,
         rotation=90,
+        visibility=True,
     )
 
     BUTTONS['single_slip_bottom_left_button'] = Button(
@@ -1103,6 +1721,7 @@ def build_build_menu_frame():
         background_color='#000000',
         border_width=0,
         rotation=0,
+        visibility=True,
     )
 
     BUTTONS['double_slip_top_left_bottom_right_button'] = Button(
@@ -1117,6 +1736,7 @@ def build_build_menu_frame():
         background_color='#000000',
         border_width=0,
         rotation=90,
+        visibility=True,
     )
 
     BUTTONS['double_slip_bottom_left_top_right_button'] = Button(
@@ -1131,6 +1751,7 @@ def build_build_menu_frame():
         background_color='#000000',
         border_width=0,
         rotation=0,
+        visibility=True,
     )
 
     BUTTONS['symmetrical_top_left_top_right_button'] = Button(
@@ -1145,6 +1766,7 @@ def build_build_menu_frame():
         background_color='#000000',
         border_width=0,
         rotation=180,
+        visibility=True,
     )
 
     BUTTONS['symmetrical_top_right_bottom_right_button'] = Button(
@@ -1159,6 +1781,7 @@ def build_build_menu_frame():
         background_color='#000000',
         border_width=0,
         rotation=90,
+        visibility=True,
     )
 
     BUTTONS['symmetrical_bottom_left_bottom_right_button'] = Button(
@@ -1173,6 +1796,7 @@ def build_build_menu_frame():
         background_color='#000000',
         border_width=0,
         rotation=0,
+        visibility=True,
     )
 
     BUTTONS['symmetrical_top_left_bottom_left_button'] = Button(
@@ -1187,6 +1811,7 @@ def build_build_menu_frame():
         background_color='#000000',
         border_width=0,
         rotation=270,
+        visibility=True,
     )
 
     BUTTONS['train_north_button'] = Button(
@@ -1201,6 +1826,7 @@ def build_build_menu_frame():
         background_color='#000000',
         border_width=0,
         rotation=0,
+        visibility=True,
     )
 
     BUTTONS['train_east_button'] = Button(
@@ -1215,6 +1841,7 @@ def build_build_menu_frame():
         background_color='#000000',
         border_width=0,
         rotation=270,
+        visibility=True,
     )
 
     BUTTONS['train_south_button'] = Button(
@@ -1229,6 +1856,7 @@ def build_build_menu_frame():
         background_color='#000000',
         border_width=0,
         rotation=180,
+        visibility=True,
     )
 
     BUTTONS['train_west_button'] = Button(
@@ -1243,6 +1871,7 @@ def build_build_menu_frame():
         background_color='#000000',
         border_width=0,
         rotation=90,
+        visibility=True,
     )
 
     BUTTONS['station_button'] = Button(
@@ -1257,6 +1886,7 @@ def build_build_menu_frame():
         background_color='#000000',
         border_width=0,
         rotation=0,
+        visibility=True,
     )
 
     BUTTONS['delete_button'] = Button(
@@ -1271,26 +1901,13 @@ def build_build_menu_frame():
         background_color='#000000',
         border_width=0,
         rotation=0,
-    )
-
-    BUTTONS['finish_building_button'] = Button(
-        root=FRAMES['build_menu_frame'].frame,
-        width=20,
-        height=1,
-        x=FRAMES['build_menu_frame'].width * 0.25,
-        y=FRAMES['build_menu_frame'].width * 0.95,
-        command=build_finished_build_viewer,
-        text='Finish Building',
-        font=('Arial', 25, 'bold'),
-        foreground_color='#000000',
-        background_color='#FF0000',
-        border_width=0,
+        visibility=True,
     )
 
 def build_build_grid_frame():
     global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT
 
-    FRAMES['build_grid_frame'] = Frame(
+    FRAMES['builder_grid_frame'] = Frame(
         root=WINDOWS['flatland_window'].window,
         width=SCREENWIDTH * 0.5,
         height=SCREENHEIGHT,
@@ -1298,33 +1915,129 @@ def build_build_grid_frame():
         y=SCREENWIDTH * 0,
         background_color='#000000',
         border_width=0,
-        visibility=False
+        visibility=True
     )
 
-    CANVASES['build_grid_canvas'] = BuildCanvas(
-        root=FRAMES['build_grid_frame'].frame,
-        width=FRAMES['build_grid_frame'].width,
-        height=FRAMES['build_grid_frame'].height,
-        x=FRAMES['build_grid_frame'].width * 0,
-        y=FRAMES['build_grid_frame'].height * 0,
+    CANVASES['builder_grid_canvas'] = BuildCanvas(
+        root=FRAMES['builder_grid_frame'].frame,
+        width=FRAMES['builder_grid_frame'].width,
+        height=FRAMES['builder_grid_frame'].height,
+        x=FRAMES['builder_grid_frame'].width * 0,
+        y=FRAMES['builder_grid_frame'].height * 0,
         background_color='#333333',
         border_width=0,
         array=np.zeros((3, 40, 40)),
     )
 
-def build_finished_build_viewer():
-    build_env_viewer_frame()
-    if 'title_frame' in FRAMES:
-        FRAMES['title_frame'].switch_to_frame(FRAMES['env_viewer_frame'])
-    build_main_menu_view()
+def builder_grid_to_builder_env():
+    # TODO: save builder array and dataframe
 
-# loop for result view
+    if 'build_menu_frame' in FRAMES:
+        FRAMES['build_menu_frame'].destroy_frame()
+        del FRAMES['build_menu_frame']
+    if 'builder_grid_frame' in FRAMES:
+        FRAMES['builder_grid_frame'].destroy_frame()
+        del FRAMES['builder_grid_frame']
 
-def build_result_view():
+    build_builder_env_viewer()
+    build_builder_env_menu()
+
+def build_builder_env_viewer():
+    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT
+
+    FRAMES['builder_env_viewer_frame'] = Frame(
+        root=WINDOWS['flatland_window'].window,
+        width=SCREENWIDTH * 0.5,
+        height=SCREENHEIGHT,
+        x=SCREENWIDTH * 0,
+        y=SCREENWIDTH * 0,
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    CANVASES['builder_env_viewer_canvas'] = EnvCanvas(
+        root=FRAMES['builder_env_viewer_frame'].frame,
+        width=FRAMES['builder_env_viewer_frame'].width,
+        height=FRAMES['builder_env_viewer_frame'].height,
+        x=FRAMES['builder_env_viewer_frame'].width * 0,
+        y=FRAMES['builder_env_viewer_frame'].height * 0,
+        background_color='#333333',
+        border_width=0,
+        image='env_001--4_2.png'
+    )
+
+def build_builder_env_menu():
+    global WINDOWS, FRAMES, BUTTONS, SCREENWIDTH, SCREENHEIGHT
+
+    FRAMES['builder_env_menu_frame'] = Frame(
+        root=WINDOWS['flatland_window'].window,
+        width=SCREENWIDTH * 0.5,
+        height=SCREENHEIGHT,
+        x=SCREENWIDTH * 0.5,
+        y=SCREENWIDTH * 0,
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    BUTTONS['return_to_menu_button'] = Button(
+        root=FRAMES['builder_env_menu_frame'].frame,
+        width=20,
+        height=1,
+        x=FRAMES['builder_env_menu_frame'].width * 0.25,
+        y=FRAMES['builder_env_menu_frame'].width * 0.95,
+        command=switch_builder_to_main,
+        text='Return To Main Menu',
+        font=('Arial', 25, 'bold'),
+        foreground_color='#000000',
+        background_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+def builder_toggle_advanced_para_options():
+    LABELS['seed_label'].toggle_visibility()
+    ENTRY_FIELDS['seed_entry'].toggle_visibility()
+    LABELS['grid_label'].toggle_visibility()
+    ENTRY_FIELDS['grid_entry'].toggle_visibility()
+    LABELS['intercity_label'].toggle_visibility()
+    ENTRY_FIELDS['intercity_entry'].toggle_visibility()
+    LABELS['incity_label'].toggle_visibility()
+    ENTRY_FIELDS['incity_entry'].toggle_visibility()
+    LABELS['remove_label'].toggle_visibility()
+    ENTRY_FIELDS['remove_entry'].toggle_visibility()
+    LABELS['speed_label'].toggle_visibility()
+    ENTRY_FIELDS['speed_entry'].toggle_visibility()
+    LABELS['malfunction_label'].toggle_visibility()
+    ENTRY_FIELDS['malfunction_entry'].toggle_visibility()
+    LABELS['min_duration_label'].toggle_visibility()
+    ENTRY_FIELDS['min_duration_entry'].toggle_visibility()
+    LABELS['max_duration_label'].toggle_visibility()
+    ENTRY_FIELDS['max_duration_entry'].toggle_visibility()
+    return
+
+def switch_builder_to_main():
+    # TODO: save builder env
+
+    if 'builder_env_viewer_frame' in FRAMES:
+        FRAMES['builder_env_viewer_frame'].destroy_frame()
+        del FRAMES['builder_env_viewer_frame']
+    if 'builder_env_menu_frame' in FRAMES:
+        FRAMES['builder_env_menu_frame'].destroy_frame()
+        del FRAMES['builder_env_menu_frame']
+
+    create_main_menu()
+
+
+
+
+
+# result menu
+
+def create_result_menu():
     build_result_menu()
     build_result_env_viewer()
-    FRAMES['main_menu_frame'].switch_to_frame(FRAMES['result_menu_frame'])
-    FRAMES['env_viewer_frame'].switch_to_frame(FRAMES['result_viewer_frame'])
 
 def build_result_menu():
     FRAMES['result_menu_frame'] = Frame(
@@ -1335,7 +2048,7 @@ def build_result_menu():
         y=SCREENWIDTH * 0,
         background_color='#000000',
         border_width=0,
-        visibility=False
+        visibility=True
     )
 
     BUTTONS['return_to_menu_button'] = Button(
@@ -1344,12 +2057,13 @@ def build_result_menu():
         height=1,
         x=FRAMES['result_menu_frame'].width * 0.25,
         y=FRAMES['result_menu_frame'].width * 0.95,
-        command=build_main_menu_view,
+        command=switch_result_to_main,
         text='Return To Main Menu',
         font=('Arial', 25, 'bold'),
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['show_time_table_button'] = Button(
@@ -1364,6 +2078,7 @@ def build_result_menu():
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['show_gif_button'] = Button(
@@ -1378,6 +2093,7 @@ def build_result_menu():
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
+        visibility=True,
     )
 
     BUTTONS['show_all_paths_button'] = Button(
@@ -1392,6 +2108,7 @@ def build_result_menu():
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
+        visibility=True,
     )
 
 def build_result_env_viewer():
@@ -1418,6 +2135,25 @@ def build_result_env_viewer():
         border_width=0,
         image='env_001--4_2.png',
     )
+
+def switch_result_to_main():
+    # TODO: Is there anything to save in the result view?
+
+    if 'result_viewer_frame' in FRAMES:
+        FRAMES['result_viewer_frame'].destroy_frame()
+        del FRAMES['result_viewer_frame']
+    if 'result_menu_frame' in FRAMES:
+        FRAMES['result_menu_frame'].destroy_frame()
+        del FRAMES['result_menu_frame']
+
+    create_main_menu()
+
+
+# stubs
+
+def exit_stub():
+    global WINDOWS
+    WINDOWS['flatland_window'].close_window()
 
 def stub():
     return

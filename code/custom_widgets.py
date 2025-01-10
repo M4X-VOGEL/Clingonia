@@ -82,12 +82,20 @@ class Frame:
         self.frame.place(x=self.x, y=self.y)
         self.visibility = True
 
+    def hide_frame(self):
+        self.frame.place_forget()
+        self.visibility = False
+
+    def destroy_frame(self):
+        self.visibility = False
+        self.frame.destroy()
+
     def toggle_visibility(self):
         if self.visibility:
             self.frame.place_forget()
             self.visibility = False
         else:
-            self.place_frame()
+            self.frame.place(x=self.x, y=self.y)
             self.visibility = True
         return
 
@@ -109,6 +117,7 @@ class Button:
             foreground_color: str,
             background_color: str,
             border_width: int,
+            visibility: bool,
             text: str | None = None,
             font: [[str, int], [str, int, str, ...], None]  = None,
             image: str | None = None,
@@ -124,6 +133,7 @@ class Button:
         self.foreground_color = foreground_color
         self.background_color = background_color
         self.border_width = border_width
+        self.visibility = visibility
         self.text = text
         self.image = image
         self.rotation = rotation
@@ -133,7 +143,8 @@ class Button:
 
         self.button = self.create_button()
 
-        self.place_button()
+        if visibility:
+            self.place_button()
 
     def create_button(self):
         if self.text:
@@ -159,6 +170,21 @@ class Button:
 
     def place_button(self):
         self.button.place(x=self.x, y=self.y)
+        self.visibility = True
+
+    def hide_button(self):
+        if self.visibility:
+            self.button.place_forget()
+            self.visibility = False
+
+    def toggle_visibility(self):
+        if self.visibility:
+            self.button.place_forget()
+            self.visibility = False
+        else:
+            self.button.place(x=self.x, y=self.y)
+            self.visibility = True
+        return
 
     def get_image(self, image_path):
         image = Image.open(image_path)
@@ -178,6 +204,7 @@ class Label:
             font: [[str, int],[str, int, str,...]],
             foreground_color: str,
             background_color: str,
+            visibility: bool,
     ):
         self.root = root
         self.x = x
@@ -186,10 +213,12 @@ class Label:
         self.font = font
         self.foreground_color = foreground_color
         self.background_color = background_color
+        self.visibility = visibility
 
         self.label = self.create_label()
 
-        self.place_label()
+        if visibility:
+            self.place_label()
 
     def create_label(self):
         label = tk.Label(
@@ -201,6 +230,20 @@ class Label:
 
     def place_label(self):
         self.label.place(x=self.x, y=self.y)
+        self.visibility = True
+
+    def hide_label(self):
+        self.label.place_forget()
+        self.visibility = False
+
+    def toggle_visibility(self):
+        if self.visibility:
+            self.label.place_forget()
+            self.visibility = False
+        else:
+            self.label.place(x=self.x, y=self.y)
+            self.visibility = True
+        return
 
 
 class Picture:
@@ -214,6 +257,7 @@ class Picture:
             image: str,
             foreground_color: str,
             background_color: str,
+            visibility: bool,
     ):
         self.root = root
         self.width = width
@@ -222,11 +266,13 @@ class Picture:
         self.y = y
         self.foreground_color = foreground_color
         self.background_color = background_color
+        self.visibility = visibility
 
         self.image = self.get_image(image)
         self.label = self.create_label()
 
-        self.place_label()
+        if visibility:
+            self.place_label()
 
     def create_label(self):
         label = tk.Label(
@@ -239,6 +285,20 @@ class Picture:
 
     def place_label(self):
         self.label.place(x=self.x, y=self.y)
+        self.visibility = True
+
+    def hide_label(self):
+        self.label.place_forget()
+        self.visibility = False
+
+    def toggle_visibility(self):
+        if self.visibility:
+            self.label.place_forget()
+            self.visibility = False
+        else:
+            self.label.place(x=self.x, y=self.y)
+            self.visibility = True
+        return
 
     @staticmethod
     def get_image(image_path):
@@ -263,6 +323,7 @@ class EntryField:
             background_color: str,
             example_color: str,
             border_width: int,
+            visibility: bool,
     ):
         self.root = root
         self.width = width
@@ -275,10 +336,13 @@ class EntryField:
         self.background_color = background_color
         self.example_color = example_color
         self.border_width = border_width
+        self.visibility = visibility
 
         self.entry_field = self.create_entry_field()
         self.add_example_text()
-        self.place_entry_field()
+
+        if visibility:
+            self.place_entry_field()
 
     def create_entry_field(self):
         entry_field = tk.Entry(
@@ -315,6 +379,20 @@ class EntryField:
 
     def place_entry_field(self):
         self.entry_field.place(x=self.x, y=self.y)
+        self.visibility = True
+
+    def hide_entry_field(self):
+        self.entry_field.place_forget()
+        self.visibility = False
+
+    def toggle_visibility(self):
+        if self.visibility:
+            self.entry_field.place_forget()
+            self.visibility = False
+        else:
+            self.entry_field.place(x=self.x, y=self.y)
+            self.visibility = True
+        return
 
 
 class Popup:
@@ -356,6 +434,7 @@ class Text:
             background_color: str,
             border_width: int,
             state: str,
+            visibility: bool,
     ):
         self.root = root
         self.width = width
@@ -369,10 +448,12 @@ class Text:
         self.background_color = background_color
         self.border_width = border_width
         self.state = state
+        self.visibility = visibility
 
         self.text = self.create_text()
 
-        self.place_text()
+        if visibility:
+            self.place_text()
 
     def create_text(self):
         text = tk.Text(
@@ -386,7 +467,20 @@ class Text:
         return text
 
     def place_text(self):
-        self.text.place(
-            width=self.width, height=self.height,
-            x=self.x, y=self.y,
-        )
+        self.text.place(width=self.width, height=self.height,x=self.x, y=self.y)
+        self.visibility = True
+
+    def hide_text(self):
+        self.text.place_forget()
+        self.visibility = False
+
+    def toggle_visibility(self):
+        if self.visibility:
+            self.text.place_forget()
+            self.visibility = False
+        else:
+            self.text.place(
+                width=self.width, height=self.height, x=self.x, y=self.y
+            )
+            self.visibility = True
+        return
