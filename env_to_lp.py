@@ -1,6 +1,5 @@
+import os
 import pandas as pd
-
-lp_file = "env/env.lp"
 
 ### TEST-EINGABE
 tracks = [
@@ -20,12 +19,31 @@ trains = pd.DataFrame({
 })
 ###
 
-with open(lp_file, 'w') as lp:
-    for i, row in trains.iterrows():
-        lp.write(f"train({row['id']}).\n")
-        lp.write(f"start({row['id']},({row['x']},{row['y']}),{row['e_dep']},{row['dir']}).\n")
-        lp.write(f"end({row['id']},({row['x_end']},{row['y_end']}),{row['l_arr']}).\n\n")
+def env_to_lp(tracks, trains):
+    ensure_directory("env")
+    path = "env/env.lp"
+    with open(path, 'w') as lp:
+        write_trains(trains, lp)
+        write_tracks(tracks, lp)
+
+
+def ensure_directory(d):
+    os.makedirs(d, exist_ok=True)
+
+
+def write_trains(trains, lp):
+    for _, row in trains.iterrows():
+        lp.write(
+            f"train({row['id']}).\n"
+            f"start({row['id']},({row['x']},{row['y']}),{row['e_dep']},{row['dir']}).\n"
+            f"end({row['id']},({row['x_end']},{row['y_end']}),{row['l_arr']}).\n\n"
+        )
+
+def write_tracks(tracks, lp):
     for i, row in enumerate(tracks):
         for j, track in enumerate(row):
             lp.write(f"cell({i},{j},{track}).\n")
         lp.write(f'\n')
+
+# Call
+env_to_lp(tracks, trains)
