@@ -2,6 +2,7 @@ from views import *
 
 
 def main():
+    build_flatland_window()
     create_start_menu()
     WINDOWS['flatland_window'].run()
 

@@ -1,7 +1,6 @@
-import tkinter as tk
-
 import numpy as np
-from PIL import Image, ImageTk
+
+from custom_widgets import *
 
 class EnvCanvas:
     def __init__(
@@ -460,15 +459,22 @@ class BuildCanvas:
         row = int(adjusted_y / self.cell_size)
         col = int(adjusted_x / self.cell_size)
         if self.current_selection:
+            # place object
             if self.current_selection in [1,2,3,4,5]:
+                # place train or station
                 if self.current_selection == 5:
+                    # place station
                     self.array[2][row, col] = self.current_selection
                 else:
+                    # place train
                     self.array[1][row, col] = self.current_selection
             else:
+                # place track
                 self.array[0][row, col] = self.current_selection
         else:
+            #erase object
             for i in [2,1,0]:
+                # erase top most object
                 if self.array[i][row, col]:
                     self.array[i][row, col] = 0
                     break
