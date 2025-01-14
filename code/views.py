@@ -7,7 +7,22 @@ WINDOWS, FRAMES, BUTTONS, LABELS, CANVASES, ENTRY_FIELDS, PICTURES, TEXTS = (
 
 SCREENWIDTH, SCREENHEIGHT = 0, 0
 
-
+DEFAULT_ENV_PARAS = {
+    'width': 40,
+    'height': 40,
+    'agents': 4,
+    'cities': 4,
+    'answer': 1,
+    'seed': 1,
+    'grid': False,
+    'intercity': 2,
+    'incity': 2,
+    'remove': True,
+    'speed': {1 : 1},
+    'malfunction': (0, 30),
+    'min': 2,
+    'max': 6,
+}
 
 
 
@@ -529,7 +544,8 @@ def random_gen_para_to_main():
     create_main_menu()
 
 def build_random_gen_para_frame():
-    global WINDOWS, FRAMES, LABELS, ENTRY_FIELDS, SCREENWIDTH, SCREENHEIGHT
+    global WINDOWS, FRAMES, LABELS, ENTRY_FIELDS, SCREENWIDTH, SCREENHEIGHT, \
+        DEFAULT_ENV_PARAS
 
     FRAMES['random_gen_para_frame'] = Frame(
         root=WINDOWS['flatland_window'].window,
@@ -604,7 +620,7 @@ def build_random_gen_para_frame():
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.6,
         y=FRAMES['random_gen_para_frame'].height * 0.1,
-        text='e.g. 40',
+        text=f'e.g. {DEFAULT_ENV_PARAS["width"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -630,7 +646,7 @@ def build_random_gen_para_frame():
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.6,
         y=FRAMES['random_gen_para_frame'].height * 0.15,
-        text='e.g. 40',
+        text=f'e.g. {DEFAULT_ENV_PARAS["height"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -656,7 +672,7 @@ def build_random_gen_para_frame():
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.6,
         y=FRAMES['random_gen_para_frame'].height * 0.2,
-        text='e.g. 4',
+        text=f'e.g. {DEFAULT_ENV_PARAS["agents"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -682,7 +698,7 @@ def build_random_gen_para_frame():
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.6,
         y=FRAMES['random_gen_para_frame'].height * 0.25,
-        text='e.g. 4',
+        text=f'e.g. {DEFAULT_ENV_PARAS["cities"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -708,7 +724,7 @@ def build_random_gen_para_frame():
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.6,
         y=FRAMES['random_gen_para_frame'].height * 0.3,
-        text='e.g. 1',
+        text=f'e.g. {DEFAULT_ENV_PARAS["answer"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -734,7 +750,7 @@ def build_random_gen_para_frame():
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.6,
         y=FRAMES['random_gen_para_frame'].height * 0.35,
-        text='e.g. 1',
+        text=f'e.g. {DEFAULT_ENV_PARAS["seed"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -760,7 +776,7 @@ def build_random_gen_para_frame():
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.6,
         y=FRAMES['random_gen_para_frame'].height * 0.4,
-        text='e.g. False',
+        text=f'e.g. {DEFAULT_ENV_PARAS["grid"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -786,7 +802,7 @@ def build_random_gen_para_frame():
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.6,
         y=FRAMES['random_gen_para_frame'].height * 0.45,
-        text='e.g. 2',
+        text=f'e.g. {DEFAULT_ENV_PARAS["intercity"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -812,7 +828,7 @@ def build_random_gen_para_frame():
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.6,
         y=FRAMES['random_gen_para_frame'].height * 0.5,
-        text='e.g. 2',
+        text=f'e.g. {DEFAULT_ENV_PARAS["incity"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -838,7 +854,7 @@ def build_random_gen_para_frame():
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.6,
         y=FRAMES['random_gen_para_frame'].height * 0.55,
-        text='e.g. True',
+        text=f'e.g. {DEFAULT_ENV_PARAS["remove"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -864,7 +880,7 @@ def build_random_gen_para_frame():
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.6,
         y=FRAMES['random_gen_para_frame'].height * 0.6,
-        text='e.g. {1 : 1}',
+        text=f'e.g. {DEFAULT_ENV_PARAS["speed"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -890,7 +906,8 @@ def build_random_gen_para_frame():
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.6,
         y=FRAMES['random_gen_para_frame'].height * 0.65,
-        text='e.g. 0/30',
+        text=f'e.g. {DEFAULT_ENV_PARAS["malfunction"][0]}/'
+             f'{DEFAULT_ENV_PARAS["malfunction"][1]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -916,7 +933,7 @@ def build_random_gen_para_frame():
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.6,
         y=FRAMES['random_gen_para_frame'].height * 0.7,
-        text='e.g. 2',
+        text=f'e.g. {DEFAULT_ENV_PARAS["min"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -942,7 +959,7 @@ def build_random_gen_para_frame():
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.6,
         y=FRAMES['random_gen_para_frame'].height * 0.75,
-        text='e.g. 6',
+        text=f'e.g. {DEFAULT_ENV_PARAS["max"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1183,7 +1200,7 @@ def build_builder_para_frame():
         height=1,
         x=FRAMES['builder_para_frame'].width * 0.6,
         y=FRAMES['builder_para_frame'].height * 0.1,
-        text='e.g. 40',
+        text=f'e.g. {DEFAULT_ENV_PARAS["width"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1209,59 +1226,7 @@ def build_builder_para_frame():
         height=1,
         x=FRAMES['builder_para_frame'].width * 0.6,
         y=FRAMES['builder_para_frame'].height * 0.15,
-        text='e.g. 40',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-        visibility=True,
-    )
-
-    LABELS['agents_label'] = Label(
-        root=FRAMES['builder_para_frame'].frame,
-        x=FRAMES['builder_para_frame'].width * 0.05,
-        y=FRAMES['builder_para_frame'].height * 0.2,
-        text='Number of agents:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000',
-        visibility=True,
-    )
-
-    ENTRY_FIELDS['agents_entry'] = EntryField(
-        root=FRAMES['builder_para_frame'].frame,
-        width=10,
-        height=1,
-        x=FRAMES['builder_para_frame'].width * 0.6,
-        y=FRAMES['builder_para_frame'].height * 0.2,
-        text='e.g. 4',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-        visibility=True,
-    )
-
-    LABELS['cities_label'] = Label(
-        root=FRAMES['builder_para_frame'].frame,
-        x=FRAMES['builder_para_frame'].width * 0.05,
-        y=FRAMES['builder_para_frame'].height * 0.25,
-        text='Max. number of cities:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000',
-        visibility=True,
-    )
-
-    ENTRY_FIELDS['cities_entry'] = EntryField(
-        root=FRAMES['builder_para_frame'].frame,
-        width=10,
-        height=1,
-        x=FRAMES['builder_para_frame'].width * 0.6,
-        y=FRAMES['builder_para_frame'].height * 0.25,
-        text='e.g. 4',
+        text=f'e.g. {DEFAULT_ENV_PARAS["height"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1273,7 +1238,7 @@ def build_builder_para_frame():
     LABELS['answer_label'] = Label(
         root=FRAMES['builder_para_frame'].frame,
         x=FRAMES['builder_para_frame'].width * 0.05,
-        y=FRAMES['builder_para_frame'].height * 0.3,
+        y=FRAMES['builder_para_frame'].height * 0.2,
         text='Answer to display:',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
@@ -1286,8 +1251,8 @@ def build_builder_para_frame():
         width=10,
         height=1,
         x=FRAMES['builder_para_frame'].width * 0.6,
-        y=FRAMES['builder_para_frame'].height * 0.3,
-        text='e.g. 1',
+        y=FRAMES['builder_para_frame'].height * 0.2,
+        text=f'e.g. {DEFAULT_ENV_PARAS["answer"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1296,114 +1261,10 @@ def build_builder_para_frame():
         visibility=True,
     )
 
-    LABELS['seed_label'] = Label(
-        root=FRAMES['builder_para_frame'].frame,
-        x=FRAMES['builder_para_frame'].width * 0.05,
-        y=FRAMES['builder_para_frame'].height * 0.35,
-        text='Seed:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000',
-        visibility=False,
-    )
-
-    ENTRY_FIELDS['seed_entry'] = EntryField(
-        root=FRAMES['builder_para_frame'].frame,
-        width=10,
-        height=1,
-        x=FRAMES['builder_para_frame'].width * 0.6,
-        y=FRAMES['builder_para_frame'].height * 0.35,
-        text='e.g. 1',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-        visibility=False,
-    )
-
-    LABELS['grid_label'] = Label(
-        root=FRAMES['builder_para_frame'].frame,
-        x=FRAMES['builder_para_frame'].width * 0.05,
-        y=FRAMES['builder_para_frame'].height * 0.4,
-        text='Use grid mode:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000',
-        visibility=False,
-    )
-
-    ENTRY_FIELDS['grid_entry'] = EntryField(
-        root=FRAMES['builder_para_frame'].frame,
-        width=10,
-        height=1,
-        x=FRAMES['builder_para_frame'].width * 0.6,
-        y=FRAMES['builder_para_frame'].height * 0.4,
-        text='e.g. False',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-        visibility=False,
-    )
-
-    LABELS['intercity_label'] = Label(
-        root=FRAMES['builder_para_frame'].frame,
-        x=FRAMES['builder_para_frame'].width * 0.05,
-        y=FRAMES['builder_para_frame'].height * 0.45,
-        text='Max. number of rails between cities:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000',
-        visibility=False,
-    )
-
-    ENTRY_FIELDS['intercity_entry'] = EntryField(
-        root=FRAMES['builder_para_frame'].frame,
-        width=10,
-        height=1,
-        x=FRAMES['builder_para_frame'].width * 0.6,
-        y=FRAMES['builder_para_frame'].height * 0.45,
-        text='e.g. 2',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-        visibility=False,
-    )
-
-    LABELS['incity_label'] = Label(
-        root=FRAMES['builder_para_frame'].frame,
-        x=FRAMES['builder_para_frame'].width * 0.05,
-        y=FRAMES['builder_para_frame'].height * 0.5,
-        text='Max. number of rail pairs in cities:',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000',
-        visibility=False,
-    )
-
-    ENTRY_FIELDS['incity_entry'] = EntryField(
-        root=FRAMES['builder_para_frame'].frame,
-        width=10,
-        height=1,
-        x=FRAMES['builder_para_frame'].width * 0.6,
-        y=FRAMES['builder_para_frame'].height * 0.5,
-        text='e.g. 2',
-        font=('Arial', 20, 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-        visibility=False,
-    )
-
     LABELS['remove_label'] = Label(
         root=FRAMES['builder_para_frame'].frame,
         x=FRAMES['builder_para_frame'].width * 0.05,
-        y=FRAMES['builder_para_frame'].height * 0.55,
+        y=FRAMES['builder_para_frame'].height * 0.25,
         text='Remove agents on arrival:',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
@@ -1416,8 +1277,8 @@ def build_builder_para_frame():
         width=10,
         height=1,
         x=FRAMES['builder_para_frame'].width * 0.6,
-        y=FRAMES['builder_para_frame'].height * 0.55,
-        text='e.g. True',
+        y=FRAMES['builder_para_frame'].height * 0.25,
+        text=f'e.g. {DEFAULT_ENV_PARAS["remove"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1429,7 +1290,7 @@ def build_builder_para_frame():
     LABELS['speed_label'] = Label(
         root=FRAMES['builder_para_frame'].frame,
         x=FRAMES['builder_para_frame'].width * 0.05,
-        y=FRAMES['builder_para_frame'].height * 0.6,
+        y=FRAMES['builder_para_frame'].height * 0.3,
         text='Speed ratio map for trains:',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
@@ -1442,8 +1303,8 @@ def build_builder_para_frame():
         width=10,
         height=1,
         x=FRAMES['builder_para_frame'].width * 0.6,
-        y=FRAMES['builder_para_frame'].height * 0.6,
-        text='e.g. {1 : 1}',
+        y=FRAMES['builder_para_frame'].height * 0.3,
+        text=f'e.g. {DEFAULT_ENV_PARAS["speed"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1455,7 +1316,7 @@ def build_builder_para_frame():
     LABELS['malfunction_label'] = Label(
         root=FRAMES['builder_para_frame'].frame,
         x=FRAMES['builder_para_frame'].width * 0.05,
-        y=FRAMES['builder_para_frame'].height * 0.65,
+        y=FRAMES['builder_para_frame'].height * 0.35,
         text='Malfunction rate:',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
@@ -1468,8 +1329,9 @@ def build_builder_para_frame():
         width=10,
         height=1,
         x=FRAMES['builder_para_frame'].width * 0.6,
-        y=FRAMES['builder_para_frame'].height * 0.65,
-        text='e.g. 0/30',
+        y=FRAMES['builder_para_frame'].height * 0.35,
+        text=f'e.g. {DEFAULT_ENV_PARAS["malfunction"][0]}/'
+             f'{DEFAULT_ENV_PARAS["malfunction"][1]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1481,7 +1343,7 @@ def build_builder_para_frame():
     LABELS['min_duration_label'] = Label(
         root=FRAMES['builder_para_frame'].frame,
         x=FRAMES['builder_para_frame'].width * 0.05,
-        y=FRAMES['builder_para_frame'].height * 0.7,
+        y=FRAMES['builder_para_frame'].height * 0.4,
         text='Min. duration for malfunctions:',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
@@ -1494,8 +1356,8 @@ def build_builder_para_frame():
         width=10,
         height=1,
         x=FRAMES['builder_para_frame'].width * 0.6,
-        y=FRAMES['builder_para_frame'].height * 0.7,
-        text='e.g. 2',
+        y=FRAMES['builder_para_frame'].height * 0.4,
+        text=f'e.g. {DEFAULT_ENV_PARAS["min"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1507,7 +1369,7 @@ def build_builder_para_frame():
     LABELS['max_duration_label'] = Label(
         root=FRAMES['builder_para_frame'].frame,
         x=FRAMES['builder_para_frame'].width * 0.05,
-        y=FRAMES['builder_para_frame'].height * 0.75,
+        y=FRAMES['builder_para_frame'].height * 0.45,
         text='Max. duration for malfunction:',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
@@ -1520,8 +1382,8 @@ def build_builder_para_frame():
         width=10,
         height=1,
         x=FRAMES['builder_para_frame'].width * 0.6,
-        y=FRAMES['builder_para_frame'].height * 0.75,
-        text='e.g. 6',
+        y=FRAMES['builder_para_frame'].height * 0.45,
+        text=f'e.g. {DEFAULT_ENV_PARAS["max"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -2165,14 +2027,6 @@ def build_builder_env_menu():
     )
 
 def builder_toggle_advanced_para_options():
-    LABELS['seed_label'].toggle_visibility()
-    ENTRY_FIELDS['seed_entry'].toggle_visibility()
-    LABELS['grid_label'].toggle_visibility()
-    ENTRY_FIELDS['grid_entry'].toggle_visibility()
-    LABELS['intercity_label'].toggle_visibility()
-    ENTRY_FIELDS['intercity_entry'].toggle_visibility()
-    LABELS['incity_label'].toggle_visibility()
-    ENTRY_FIELDS['incity_entry'].toggle_visibility()
     LABELS['remove_label'].toggle_visibility()
     ENTRY_FIELDS['remove_entry'].toggle_visibility()
     LABELS['speed_label'].toggle_visibility()
@@ -2334,9 +2188,9 @@ def stub():
 # TODOS
 
 # GUI
+# TODO: use .grid instead of .place for buttons, labels, and entry fields ?
+# TODO: change to smaller font size ?
 # TODO: add help buttons in random gen, builder and result menus
-# TODO: remove some of the parameter options from the builder like number of
-#  cities, tracks and agents
 
 # TODO: add CURRENT_ARRAY, CURRENT_DF to global variables to store the active
 #  environment and train list to hand to other functions or views

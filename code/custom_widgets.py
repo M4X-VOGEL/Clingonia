@@ -348,7 +348,7 @@ class EntryField:
         entry_field = tk.Entry(
             self.root,
             width=self.width, font=self.font,
-            fg=self.foreground_color, bg=self.background_color,
+            fg=self.example_color, bg=self.background_color,
         )
         return entry_field
 
