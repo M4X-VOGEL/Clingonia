@@ -232,7 +232,7 @@ class BuildCanvas:
         self.canvas = self.create_canvas()
         self.place_canvas()
 
-        self.dict = self.set_dict()
+        self.img_dict = self.set_img_dict()
 
         # populate canvas
         self.pan_start = (0, 0)
@@ -273,7 +273,7 @@ class BuildCanvas:
         self.canvas.place(x=self.x, y=self.y)
 
     @staticmethod
-    def set_dict():
+    def set_img_dict():
         dictionary = {
             0: ('eraser', 0),
             1: ('Zug_Gleis_#0091ea', 0),
@@ -353,7 +353,7 @@ class BuildCanvas:
             col = int(adjusted_x / self.cell_size )
             coords_text = f"[{row}, {col}]"
 
-            image, rotation = self.dict[self.current_selection]
+            image, rotation = self.img_dict[self.current_selection]
             image = f'../png/{image}.png'
             image = Image.open(image).resize((30,30)).rotate(rotation)
             self.current_selection_image = ImageTk.PhotoImage(image)
@@ -491,7 +491,7 @@ class BuildCanvas:
                 for col in range(self.cols):
                     value = self.array[i][row, col]
                     if value:
-                        image, rotation = self.dict[value]
+                        image, rotation = self.img_dict[value]
 
                         image = f'../png/{image}.png'
                         image = Image.open(image).resize(

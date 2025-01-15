@@ -1,3 +1,8 @@
+import ast
+
+import pandas as pd
+import json
+
 from custom_canvas import *
 
 
@@ -24,7 +29,25 @@ DEFAULT_ENV_PARAS = {
     'max': 6,
 }
 
+USER_ENV_PARAS = {
+    'width': None,
+    'height': None,
+    'agents': None,
+    'cities': None,
+    'answer': None,
+    'seed': None,
+    'grid': None,
+    'intercity': None,
+    'incity': None,
+    'remove': None,
+    'speed': None,
+    'malfunction': None,
+    'min': None,
+    'max': None,
+}
 
+CURRENT_ARRAY = np.zeros((3,40,40), dtype=int)
+CURRENT_DF = pd.DataFrame()
 
 # start menu
 
@@ -526,7 +549,7 @@ def random_gen_change_to_start_or_main():
         create_main_menu()
 
 def random_gen_para_to_start():
-    # TODO: save random gen parameters
+    save_random_gen_env_params()
 
     if 'random_gen_para_frame' in FRAMES:
         FRAMES['random_gen_para_frame'].destroy_frame()
@@ -535,7 +558,7 @@ def random_gen_para_to_start():
     create_start_menu()
 
 def random_gen_para_to_main():
-    # TODO: save random gen parameters
+    save_random_gen_env_params()
 
     if 'random_gen_para_frame' in FRAMES:
         FRAMES['random_gen_para_frame'].destroy_frame()
@@ -967,9 +990,10 @@ def build_random_gen_para_frame():
         border_width=0,
         visibility=False,
     )
+    load_random_gen_env_params()
 
 def random_gen_para_to_env():
-    # TODO: save random gen parameters
+    save_random_gen_env_params()
 
     if 'random_gen_para_frame' in FRAMES:
         FRAMES['random_gen_para_frame'].destroy_frame()
@@ -1092,6 +1116,62 @@ def switch_random_gen_to_main():
 
     create_main_menu()
 
+def save_random_gen_env_params():
+    for field in ENTRY_FIELDS:
+        key = field.split('_')[0]
+        if key not in DEFAULT_ENV_PARAS:
+            continue
+
+        data = ENTRY_FIELDS[field].entry_field.get()
+
+        try:
+            if data.startswith('e.g.'):
+                data = None
+            elif data == '':
+                data = None
+            elif key == 'grid' or key == 'remove':
+                data = data.lower() == 'true'
+            elif key == 'speed':
+                data = ast.literal_eval(data)
+            elif key == 'malfunction':
+                data = (int(data.split('/')[0]),int(data.split('/')[1]))
+            else:
+                data = int(data)
+        except Exception as e:
+            print(f"Input error for key '{key}': {str(e)}")
+            # TODO: display error message next tor Entry field using LABELS[key]
+
+        if type(data) is not str:
+            USER_ENV_PARAS[key] = data
+
+    save_dictionary_to_json(USER_ENV_PARAS, '../data/user_params.json')
+
+def load_random_gen_env_params():
+    global USER_ENV_PARAS
+
+    data = load_dictionary_from_json('../data/user_params.json')
+
+    if data['speed'] is not None:
+        data['speed'] = {int(k): v for k, v in data['speed'].items()}
+    if data['malfunction'] is not None:
+        data['malfunction'] = (data['malfunction'][0], data['malfunction'][1])
+
+    USER_ENV_PARAS = data
+
+    for field in ENTRY_FIELDS:
+        key = field.split('_')[0]
+        if key not in DEFAULT_ENV_PARAS:
+            continue
+        elif USER_ENV_PARAS[key] is None:
+            continue
+        elif key == 'malfunction':
+            ENTRY_FIELDS[field].insert_string(
+                f'{USER_ENV_PARAS["malfunction"][0]}/'
+                f'{USER_ENV_PARAS["malfunction"][1]}'
+            )
+        else:
+            ENTRY_FIELDS[field].insert_string(str(USER_ENV_PARAS[key]))
+
 
 
 
@@ -1107,7 +1187,7 @@ def builder_change_to_start_or_main():
         create_main_menu()
 
 def builder_para_to_start():
-    # TODO: save builder parameters
+    save_builder_env_params()
 
     if 'builder_para_frame' in FRAMES:
         FRAMES['builder_para_frame'].destroy_frame()
@@ -1116,7 +1196,7 @@ def builder_para_to_start():
     create_start_menu()
 
 def builder_para_to_main():
-    # TODO: save builder parameters
+    save_builder_env_params()
 
     if 'builder_para_frame' in FRAMES:
         FRAMES['builder_para_frame'].destroy_frame()
@@ -1391,9 +1471,10 @@ def build_builder_para_frame():
         border_width=0,
         visibility=False,
     )
+    load_builder_env_params()
 
 def builder_para_to_grid():
-    # TODO: save builder parameters
+    save_builder_env_params()
 
     if 'builder_para_frame' in FRAMES:
         FRAMES['builder_para_frame'].destroy_frame()
@@ -1415,6 +1496,8 @@ def builder_grid_to_para():
     build_builder_para_frame()
 
 def build_builder_menu_frame():
+    global WINDOWS, FRAMES, BUTTONS, SCREENWIDTH, SCREENHEIGHT
+
     FRAMES['builder_menu_frame'] = Frame(
         root=WINDOWS['flatland_window'].window,
         width=SCREENWIDTH * 0.5,
@@ -1431,7 +1514,7 @@ def build_builder_menu_frame():
         width=2,
         height=1,
         x=FRAMES['builder_menu_frame'].width * 0.06,
-        y=FRAMES['builder_menu_frame'].width * 0,
+        y=FRAMES['builder_menu_frame'].height * 0,
         command= builder_grid_to_para,
         text='<',
         font=('Arial', 25, 'bold'),
@@ -1446,7 +1529,7 @@ def build_builder_menu_frame():
         width=20,
         height=1,
         x=FRAMES['builder_menu_frame'].width * 0.25,
-        y=FRAMES['builder_menu_frame'].width * 0.95,
+        y=FRAMES['builder_menu_frame'].height * 0.9,
         command=builder_grid_to_env,
         text='Finish Building',
         font=('Arial', 25, 'bold'),
@@ -1461,7 +1544,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.02,
-        y=FRAMES['builder_menu_frame'].width * 0.1,
+        y=FRAMES['builder_menu_frame'].height * 0.1,
         command=lambda: CANVASES['builder_grid_canvas'].select(32800),
         image='../png/Gleis_horizontal.png',
         foreground_color='#000000',
@@ -1475,7 +1558,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.14,
-        y=FRAMES['builder_menu_frame'].width * 0.1,
+        y=FRAMES['builder_menu_frame'].height * 0.1,
         command=lambda: CANVASES['builder_grid_canvas'].select(1025),
         image='../png/Gleis_vertikal.png',
         foreground_color='#000000',
@@ -1489,7 +1572,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.52,
-        y=FRAMES['builder_menu_frame'].width * 0.1,
+        y=FRAMES['builder_menu_frame'].height * 0.1,
         command=lambda: CANVASES['builder_grid_canvas'].select(2064),
         image='../png/Gleis_kurve_oben_links.png',
         foreground_color='#000000',
@@ -1503,7 +1586,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.64,
-        y=FRAMES['builder_menu_frame'].width * 0.1,
+        y=FRAMES['builder_menu_frame'].height * 0.1,
         command=lambda: CANVASES['builder_grid_canvas'].select(72),
         image='../png/Gleis_kurve_oben_rechts.png',
         foreground_color='#000000',
@@ -1517,7 +1600,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.76,
-        y=FRAMES['builder_menu_frame'].width * 0.1,
+        y=FRAMES['builder_menu_frame'].height * 0.1,
         command=lambda: CANVASES['builder_grid_canvas'].select(16386),
         image='../png/Gleis_kurve_unten_rechts.png',
         foreground_color='#000000',
@@ -1531,7 +1614,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.88,
-        y=FRAMES['builder_menu_frame'].width * 0.1,
+        y=FRAMES['builder_menu_frame'].height * 0.1,
         command=lambda: CANVASES['builder_grid_canvas'].select(4608),
         image='../png/Gleis_kurve_unten_links.png',
         foreground_color='#000000',
@@ -1545,7 +1628,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.02,
-        y=FRAMES['builder_menu_frame'].width * 0.25,
+        y=FRAMES['builder_menu_frame'].height * 0.25,
         command=lambda: CANVASES['builder_grid_canvas'].select(3089),
         image='../png/Weiche_horizontal_oben_links.png',
         foreground_color='#000000',
@@ -1559,7 +1642,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.14,
-        y=FRAMES['builder_menu_frame'].width * 0.25,
+        y=FRAMES['builder_menu_frame'].height * 0.25,
         command=lambda: CANVASES['builder_grid_canvas'].select(32872),
         image='../png/Weiche_horizontal_oben_rechts.png',
         foreground_color='#000000',
@@ -1573,7 +1656,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.26,
-        y=FRAMES['builder_menu_frame'].width * 0.25,
+        y=FRAMES['builder_menu_frame'].height * 0.25,
         command=lambda: CANVASES['builder_grid_canvas'].select(17411),
         image='../png/Weiche_horizontal_unten_rechts.png',
         foreground_color='#000000',
@@ -1587,7 +1670,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.38,
-        y=FRAMES['builder_menu_frame'].width * 0.25,
+        y=FRAMES['builder_menu_frame'].height * 0.25,
         command=lambda: CANVASES['builder_grid_canvas'].select(38408),
         image='../png/Weiche_horizontal_unten_links.png',
         foreground_color='#000000',
@@ -1601,7 +1684,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.52,
-        y=FRAMES['builder_menu_frame'].width * 0.25,
+        y=FRAMES['builder_menu_frame'].height * 0.25,
         command=lambda: CANVASES['builder_grid_canvas'].select(34864),
         image='../png/Weiche_vertikal_oben_links.png',
         foreground_color='#000000',
@@ -1615,7 +1698,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.64,
-        y=FRAMES['builder_menu_frame'].width * 0.25,
+        y=FRAMES['builder_menu_frame'].height * 0.25,
         command=lambda: CANVASES['builder_grid_canvas'].select(1097),
         image='../png/Weiche_vertikal_oben_rechts.png',
         foreground_color='#000000',
@@ -1629,7 +1712,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.76,
-        y=FRAMES['builder_menu_frame'].width * 0.25,
+        y=FRAMES['builder_menu_frame'].height * 0.25,
         command=lambda: CANVASES['builder_grid_canvas'].select(49186),
         image='../png/Weiche_vertikal_unten_rechts.png',
         foreground_color='#000000',
@@ -1643,7 +1726,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.88,
-        y=FRAMES['builder_menu_frame'].width * 0.25,
+        y=FRAMES['builder_menu_frame'].height * 0.25,
         command=lambda: CANVASES['builder_grid_canvas'].select(5633),
         image='../png/Weiche_vertikal_unten_links.png',
         foreground_color='#000000',
@@ -1657,7 +1740,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.02,
-        y=FRAMES['builder_menu_frame'].width * 0.4,
+        y=FRAMES['builder_menu_frame'].height * 0.4,
         command=lambda: CANVASES['builder_grid_canvas'].select(33825),
         image='../png/Gleis_Diamond_Crossing.png',
         foreground_color='#000000',
@@ -1671,7 +1754,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.52,
-        y=FRAMES['builder_menu_frame'].width * 0.4,
+        y=FRAMES['builder_menu_frame'].height * 0.4,
         command=lambda: CANVASES['builder_grid_canvas'].select(35889),
         image='../png/Weiche_Single_Slip.png',
         foreground_color='#000000',
@@ -1686,7 +1769,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.64,
-        y=FRAMES['builder_menu_frame'].width * 0.4,
+        y=FRAMES['builder_menu_frame'].height * 0.4,
         command=lambda: CANVASES['builder_grid_canvas'].select(33897),
         image='../png/Weiche_Single_Slip.png',
         foreground_color='#000000',
@@ -1701,7 +1784,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.76,
-        y=FRAMES['builder_menu_frame'].width * 0.4,
+        y=FRAMES['builder_menu_frame'].height * 0.4,
         command=lambda: CANVASES['builder_grid_canvas'].select(50211),
         image='../png/Weiche_Single_Slip.png',
         foreground_color='#000000',
@@ -1716,7 +1799,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.88,
-        y=FRAMES['builder_menu_frame'].width * 0.4,
+        y=FRAMES['builder_menu_frame'].height * 0.4,
         command=lambda: CANVASES['builder_grid_canvas'].select(38433),
         image='../png/Weiche_Single_Slip.png',
         foreground_color='#000000',
@@ -1731,7 +1814,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.02,
-        y=FRAMES['builder_menu_frame'].width * 0.55,
+        y=FRAMES['builder_menu_frame'].height * 0.55,
         command=lambda: CANVASES['builder_grid_canvas'].select(52275),
         image='../png/Weiche_Double_Slip.png',
         foreground_color='#000000',
@@ -1746,7 +1829,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.14,
-        y=FRAMES['builder_menu_frame'].width * 0.55,
+        y=FRAMES['builder_menu_frame'].height * 0.55,
         command=lambda: CANVASES['builder_grid_canvas'].select(38505),
         image='../png/Weiche_Double_Slip.png',
         foreground_color='#000000',
@@ -1761,7 +1844,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.52,
-        y=FRAMES['builder_menu_frame'].width * 0.55,
+        y=FRAMES['builder_menu_frame'].height * 0.55,
         command=lambda: CANVASES['builder_grid_canvas'].select(2136),
         image='../png/Weiche_Symetrical.png',
         foreground_color='#000000',
@@ -1776,7 +1859,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.64,
-        y=FRAMES['builder_menu_frame'].width * 0.55,
+        y=FRAMES['builder_menu_frame'].height * 0.55,
         command=lambda: CANVASES['builder_grid_canvas'].select(16458),
         image='../png/Weiche_Symetrical.png',
         foreground_color='#000000',
@@ -1791,7 +1874,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.76,
-        y=FRAMES['builder_menu_frame'].width * 0.55,
+        y=FRAMES['builder_menu_frame'].height * 0.55,
         command=lambda: CANVASES['builder_grid_canvas'].select(20994),
         image='../png/Weiche_Symetrical.png',
         foreground_color='#000000',
@@ -1806,7 +1889,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.88,
-        y=FRAMES['builder_menu_frame'].width * 0.55,
+        y=FRAMES['builder_menu_frame'].height * 0.55,
         command=lambda: CANVASES['builder_grid_canvas'].select(6672),
         image='../png/Weiche_Symetrical.png',
         foreground_color='#000000',
@@ -1821,7 +1904,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.02,
-        y=FRAMES['builder_menu_frame'].width * 0.7,
+        y=FRAMES['builder_menu_frame'].height * 0.7,
         command=lambda: CANVASES['builder_grid_canvas'].select(1),
         image='../png/Zug_Gleis_#0091ea.png',
         foreground_color='#000000',
@@ -1836,7 +1919,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.14,
-        y=FRAMES['builder_menu_frame'].width * 0.7,
+        y=FRAMES['builder_menu_frame'].height * 0.7,
         command=lambda: CANVASES['builder_grid_canvas'].select(2),
         image='../png/Zug_Gleis_#0091ea.png',
         foreground_color='#000000',
@@ -1851,7 +1934,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.26,
-        y=FRAMES['builder_menu_frame'].width * 0.7,
+        y=FRAMES['builder_menu_frame'].height * 0.7,
         command=lambda: CANVASES['builder_grid_canvas'].select(3),
         image='../png/Zug_Gleis_#0091ea.png',
         foreground_color='#000000',
@@ -1866,7 +1949,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.38,
-        y=FRAMES['builder_menu_frame'].width * 0.7,
+        y=FRAMES['builder_menu_frame'].height * 0.7,
         command=lambda: CANVASES['builder_grid_canvas'].select(4),
         image='../png/Zug_Gleis_#0091ea.png',
         foreground_color='#000000',
@@ -1881,7 +1964,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.52,
-        y=FRAMES['builder_menu_frame'].width * 0.7,
+        y=FRAMES['builder_menu_frame'].height * 0.7,
         command=lambda: CANVASES['builder_grid_canvas'].select(5),
         image='../png/Bahnhof_#d50000.png',
         foreground_color='#000000',
@@ -1896,7 +1979,7 @@ def build_builder_menu_frame():
         width=100,
         height=100,
         x=FRAMES['builder_menu_frame'].width * 0.76,
-        y=FRAMES['builder_menu_frame'].width * 0.7,
+        y=FRAMES['builder_menu_frame'].height * 0.7,
         command=lambda: CANVASES['builder_grid_canvas'].select(0),
         image='../png/eraser.png',
         foreground_color='#000000',
@@ -1907,7 +1990,8 @@ def build_builder_menu_frame():
     )
 
 def build_builder_grid_frame():
-    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT
+    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT, \
+        CURRENT_ARRAY
 
     FRAMES['builder_grid_frame'] = Frame(
         root=WINDOWS['flatland_window'].window,
@@ -1928,7 +2012,7 @@ def build_builder_grid_frame():
         y=FRAMES['builder_grid_frame'].height * 0,
         background_color='#333333',
         border_width=0,
-        array=np.zeros((3, 40, 40)),
+        array=CURRENT_ARRAY,
     )
 
 def builder_grid_to_env():
@@ -2051,6 +2135,67 @@ def switch_builder_to_main():
 
     create_main_menu()
 
+def save_builder_env_params():
+    for field in ENTRY_FIELDS:
+        key = field.split('_')[0]
+        if key not in DEFAULT_ENV_PARAS:
+            continue
+        if key in ['agents', 'cities', 'seed', 'grid', 'intercity', 'incity']:
+            continue
+
+        data = ENTRY_FIELDS[field].entry_field.get()
+
+        try:
+            if data.startswith('e.g.'):
+                data = None
+            elif data == '':
+                data = None
+            elif key == 'grid' or key == 'remove':
+                data = data.lower() == 'true'
+            elif key == 'speed':
+                data = ast.literal_eval(data)
+            elif key == 'malfunction':
+                data = (int(data.split('/')[0]),int(data.split('/')[1]))
+            else:
+                data = int(data)
+        except Exception as e:
+            print(f"Input error for key '{key}': {str(e)}")
+            # TODO: display error message next tor Entry field using LABELS[key]
+
+        if type(data) is not str:
+            USER_ENV_PARAS[key] = data
+
+    save_dictionary_to_json(USER_ENV_PARAS, '../data/user_params.json')
+
+def load_builder_env_params():
+    global USER_ENV_PARAS
+
+    data = load_dictionary_from_json('../data/user_params.json')
+
+    if data['speed'] is not None:
+        data['speed'] = {int(k): v for k, v in data['speed'].items()}
+    if data['malfunction'] is not None:
+        data['malfunction'] = (data['malfunction'][0], data['malfunction'][1])
+
+    USER_ENV_PARAS = data
+
+    for field in ENTRY_FIELDS:
+        key = field.split('_')[0]
+        if key not in DEFAULT_ENV_PARAS:
+            continue
+        elif key in ['agents', 'cities', 'seed', 'grid', 'intercity', 'incity']:
+            continue
+        elif USER_ENV_PARAS[key] is None:
+            continue
+        elif key == 'malfunction':
+            ENTRY_FIELDS[field].insert_string(
+                f'{USER_ENV_PARAS["malfunction"][0]}/'
+                f'{USER_ENV_PARAS["malfunction"][1]}'
+            )
+        else:
+            ENTRY_FIELDS[field].insert_string(str(USER_ENV_PARAS[key]))
+
+
 
 
 
@@ -2172,7 +2317,17 @@ def switch_result_to_main():
 
 
 
+# functions
 
+def save_dictionary_to_json(dictionary: dict, file_path: str):
+    with open(file_path, 'w') as file:
+        json.dump(dictionary, file, indent=4)
+    return
+
+def load_dictionary_from_json(file_path: str):
+    with open(file_path, 'r') as file:
+        dictionary = json.load(file)
+    return dictionary
 
 # stubs
 
@@ -2195,14 +2350,21 @@ def stub():
 # TODO: add CURRENT_ARRAY, CURRENT_DF to global variables to store the active
 #  environment and train list to hand to other functions or views
 
-# TODO: change train and station placement in builder so that on click it --------------- maybe different approach - check after data saving is implemented
-#  opens a popup for the other parameters to be entered via entry field these
-#  are saved in a df with the id and direction
-#  - maybe on train placement hide the trains and show the station until the
-#  station was placed then show the trains again
-#  - print the df as a self drawn table with '-' and '|' as lines in a text
-#  field
-#  - add a button to show/hide the df text frame
+# TODO: separate track and train/station builder
+# TODO: add view for train/station builder
+# TODO: train/station builder has
+#  buttons to place trains and add the m to the current data frame
+#  a scrollable list of text and buttons to select the trains based on the
+#  current dataframe
+# TODO: button opens a frame ontop to enter LA and ED as well as turn on
+#  station placement mode and a button to save the data back to the df and
+#  close the window
+# TODO: in station placement mode a single click on the grid get the station
+#  coords and turns off the placement mode
+
+# TODO: move train placement buttons from builder menu to train/station view
+#  and remove the station button
+
 
 # TODO: add path selector in result view
 

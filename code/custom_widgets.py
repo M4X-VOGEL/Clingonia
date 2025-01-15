@@ -394,6 +394,11 @@ class EntryField:
             self.visibility = True
         return
 
+    def insert_string(self, string):
+        self.entry_field.delete(0, tk.END)
+        self.entry_field.insert(0, string)
+        self.entry_field.config(fg=self.foreground_color)
+
 
 class Popup:
     def __init__(
