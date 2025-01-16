@@ -254,7 +254,7 @@ class BuildCanvas:
         self.canvas.bind("<Leave>", self.remove_mouse_symbols)
         self.canvas.bind("<Motion>", self.draw_mouse_symbols)
 
-        self.current_selection = 0
+        self.current_selection = None
         self.image_refs = []
         self.array = array
         self.rows, self.cols = array[0].shape
@@ -360,28 +360,35 @@ class BuildCanvas:
         grid_width = self.cols * self.cell_size
         grid_height = self.rows * self.cell_size
 
-        if 0 <= adjusted_x < grid_width and 0 <= adjusted_y < grid_height:
-            row = int(adjusted_y / self.cell_size )
-            col = int(adjusted_x / self.cell_size )
-            coords_text = f"[{row}, {col}]"
+        if not (0 <= adjusted_x < grid_width and 0 <= adjusted_y < grid_height):
+            self.canvas.delete(self.text_label)
+            self.canvas.delete(self.mouse_image)
+            self.text_label = None
+            self.mouse_image = None
+            return
 
+        row = int(adjusted_y / self.cell_size )
+        col = int(adjusted_x / self.cell_size )
+        coords_text = f"[{row}, {col}]"
+
+        if self.text_label is None:
+            self.text_label = self.canvas.create_text(
+                event.x + 10,
+                event.y + 10,
+                text=coords_text,
+                font=("Arial", 20),
+                fill="#FFFFFF",
+                anchor="nw"
+            )
+        else:
+            self.canvas.itemconfig(self.text_label, text=coords_text)
+            self.canvas.coords(self.text_label, event.x + 10, event.y + 10)
+
+        if self.current_selection is not None:
             image, rotation = self.img_dict[self.current_selection]
             image = f'../png/{image}.png'
-            image = Image.open(image).resize((30,30)).rotate(rotation)
+            image = Image.open(image).resize((30, 30)).rotate(rotation)
             self.current_selection_image = ImageTk.PhotoImage(image)
-
-            if self.text_label is None:
-                self.text_label = self.canvas.create_text(
-                    event.x + 10,
-                    event.y + 10,
-                    text=coords_text,
-                    font=("Arial", 20),
-                    fill="#FFFFFF",
-                    anchor="nw"
-                )
-            else:
-                self.canvas.itemconfig(self.text_label, text=coords_text)
-                self.canvas.coords(self.text_label, event.x + 10, event.y + 10)
 
             if self.mouse_image is None:
                 self.mouse_image = self.canvas.create_image(
@@ -396,11 +403,6 @@ class BuildCanvas:
                     image=self.current_selection_image
                 )
                 self.canvas.coords(self.mouse_image, event.x + 10, event.y - 20)
-        else:
-            self.canvas.delete(self.text_label)
-            self.canvas.delete(self.mouse_image)
-            self.text_label = None
-            self.mouse_image = None
 
     def remove_mouse_symbols(self, event):
         """Clear the coordinates label when the mouse leaves the canvas."""
@@ -494,7 +496,7 @@ class BuildCanvas:
             else:
                 # place track
                 self.array[0][row, col] = self.current_selection
-        else:
+        elif self.current_selection == 0:
             # erase track
             self.array[0][row, col] = 0
         self.draw_images()
@@ -609,7 +611,7 @@ class TrainListCanvas:
                 font=('Arial', 20),
                 fg='#FFFFFF', bg='#333333',
                 text='configure',
-                command=lambda index=idx: self.open_config_window(index)
+                command=lambda index=idx: self.open_train_config_window(index)
             )
             self.config_dict[idx].pack(side='left', padx=10)
 
@@ -670,19 +672,18 @@ class TrainListCanvas:
         self.grid.draw_images()
         return
 
-    def open_config_window(self, index):
+    def open_train_config_window(self, index):
         config_window = tk.Toplevel(self.root)
         config_window.title(f"Configure Train {index}")
         config_window.geometry(f"500x500")
-        config_window.configure(bg='#000000')  # Black background
+        config_window.configure(bg='#000000')
 
         close_button = tk.Button(
             config_window,
             text="Close",
             font=('Arial', 20),
-            fg='#FFFFFF', bg='#FF0000',  # Red close button
+            fg='#FFFFFF', bg='#FF0000',
             command=config_window.destroy
-            # Close the config window when clicked
         )
         close_button.pack(side='bottom', pady=20)
 

@@ -1946,12 +1946,16 @@ def builder_track_to_train():
         FRAMES['track_builder_menu_frame'].destroy_frame()
         del FRAMES['track_builder_menu_frame']
 
+    CANVASES['builder_grid_canvas'].current_selection = None
+
     build_train_builder_menu_frame()
 
 def builder_train_to_track():
     if 'train_builder_menu_frame' in FRAMES:
         FRAMES['train_builder_menu_frame'].destroy_frame()
         del FRAMES['train_builder_menu_frame']
+
+    CANVASES['builder_grid_canvas'].current_selection = None
 
     build_track_builder_menu_frame()
 
