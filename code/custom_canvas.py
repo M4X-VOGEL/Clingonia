@@ -260,6 +260,7 @@ class BuildCanvas:
         self.rows, self.cols = array[0].shape
         self.train_data = train_data
         self.train_list = None
+        self.train_index = None
 
         self.dir = {
             1: 'n',
@@ -478,7 +479,11 @@ class BuildCanvas:
                 # place train or station
                 if self.current_selection == 5:
                     # station
+                    self.array[2] = np.zeros(self.array[2].shape)
                     self.array[2][row, col] = self.current_selection
+                    self.train_data.at[
+                        self.train_index, 'end_pos'
+                    ] = (row, col)
                 else:
                     # train
                     self.array[1][row, col] = self.current_selection
@@ -555,6 +560,10 @@ class TrainListCanvas:
         self.config_dict = {}
         self.remove_dict = {}
 
+        self.station_img = Image.open('../png/Bahnhof_#d50000.png')
+        self.station_img = self.station_img.resize(size=(60, 60))
+        self.station_img = ImageTk.PhotoImage(self.station_img)
+
         self.canvas = self.create_canvas()
         self.pack_canvas()
 
@@ -611,7 +620,7 @@ class TrainListCanvas:
                 font=('Arial', 20),
                 fg='#FFFFFF', bg='#333333',
                 text='configure',
-                command=lambda index=idx: self.open_train_config_window(index)
+                command=lambda index=idx: self.open_train_config_frame(index)
             )
             self.config_dict[idx].pack(side='left', padx=10)
 
@@ -672,22 +681,120 @@ class TrainListCanvas:
         self.grid.draw_images()
         return
 
-    def open_train_config_window(self, index):
-        config_window = tk.Toplevel(self.root)
-        config_window.title(f"Configure Train {index}")
-        config_window.geometry(f"500x500")
-        config_window.configure(bg='#000000')
-
-        close_button = tk.Button(
-            config_window,
-            text="Close",
-            font=('Arial', 20),
-            fg='#FFFFFF', bg='#FF0000',
-            command=config_window.destroy
+    def open_train_config_frame(self, index):
+        config_frame = Frame(
+            root=self.root,
+            width=self.root.winfo_width(),
+            height=self.root.winfo_height(),
+            x=0,
+            y=0,
+            background_color='#000000',
+            border_width=0,
+            visibility=True
         )
-        close_button.pack(side='bottom', pady=20)
+
+        self.grid.current_selection = None
+        self.grid.train_index = index
+
+        config_label = tk.Label(
+            config_frame.frame,
+            text=f'Configure: Train {index}', font=('Arial', 40),
+            foreground='#FFFFFF', background='#000000', bd=0,
+        )
+        config_label.place(
+            x=config_frame.width * 0.2, y=config_frame.height * 0.3
+        )
+
+        ed_label = tk.Label(
+            config_frame.frame,
+            text='Earliest Departure:', font=('Arial', 20),
+            foreground='#FFFFFF', background='#000000', bd=0,
+        )
+        ed_label.place(
+            x=config_frame.width * 0.2, y=config_frame.height * 0.4
+        )
+
+        la_label = tk.Label(
+            config_frame.frame,
+            text='Latest Arrival:', font=('Arial', 20),
+            foreground='#FFFFFF', background='#000000',
+            bd=0,
+        )
+        la_label.place(
+            x=config_frame.width * 0.2, y=config_frame.height * 0.45
+        )
+
+        ed_entry = tk.Entry(
+            config_frame.frame,
+            width=5, font=('Arial', 20),
+            foreground='#FFFFFF', background='#333333', bd=1,
+        )
+        ed_entry.place(
+            x=config_frame.width * 0.5, y=config_frame.height * 0.4
+        )
+
+        la_entry = tk.Entry(
+            config_frame.frame,
+            width=5, font=('Arial', 20),
+            foreground='#FFFFFF', background='#333333', bd=1,
+        )
+        la_entry.place(
+            x=config_frame.width * 0.5, y=config_frame.height * 0.45
+        )
+
+        station_label = tk.Label(
+            config_frame.frame,
+            text='Place Station:', font=('Arial', 20),
+            foreground='#FFFFFF', background='#000000',
+            bd=0,
+        )
+        station_label.place(
+            x=config_frame.width * 0.2, y=config_frame.height * 0.5
+        )
+
+        place_station = tk.Button(
+            config_frame.frame,
+            width=60, height=60,
+            command=lambda: self.grid.select(5),
+            image=self.station_img,
+            foreground='#000000', background='#000000', bd=0
+        )
+        place_station.place(
+            x=config_frame.width * 0.51, y=config_frame.height * 0.49
+        )
+
+        save = tk.Button(
+            config_frame.frame,
+            width=5, height=1,
+            command=lambda: self.save_ed_la(
+                index, ed_entry, la_entry, config_frame
+            ),
+            text='Save', font=('Arial', 20),
+            foreground='#000000', background='#777777', bd=0
+        )
+        save.place(
+            x=config_frame.width * 0.5, y=config_frame.height * 0.55
+        )
 
 
+    def save_ed_la(self, index, ed_entry, la_entry, config_frame):
+        try:
+            ed = int(ed_entry.get())
+            la = int(la_entry.get())
+        except ValueError:
+            # TODO: show error message in config window ?
+            print('Only Integers allowed in '
+                  'Earliest Departure and Latest Arrival')
+            ed = np.nan
+            la = np.nan
+
+        self.train_data.loc[index, 'e_dep'] = ed
+        self.train_data.loc[index, 'l_arr'] = la
+        self.grid.current_selection = None
+        self.grid.train_index = None
+        self.grid.array[2] = np.zeros(self.grid.array[2].shape)
+        self.grid.draw_images()
+        config_frame.destroy_frame()
 
 class ResultCanvas:
     def __init__(

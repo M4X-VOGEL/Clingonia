@@ -2086,6 +2086,8 @@ def builder_train_grid_to_env():
         FRAMES['builder_grid_frame'].destroy_frame()
         del FRAMES['builder_grid_frame']
 
+    print(CURRENT_DF)
+
     build_builder_env_viewer()
     build_builder_env_menu()
 
@@ -2258,21 +2260,6 @@ def load_builder_env_params():
 
 
 
-# BUTTONS['station_button'] = Button(
-#     root=FRAMES['track_builder_menu_frame'].frame,
-#     width=100,
-#     height=100,
-#     x=FRAMES['track_builder_menu_frame'].width * 0.52,
-#     y=FRAMES['track_builder_menu_frame'].height * 0.7,
-#     command=lambda: CANVASES['builder_grid_canvas'].select(5),
-#     image='../png/Bahnhof_#d50000.png',
-#     foreground_color='#000000',
-#     background_color='#000000',
-#     border_width=0,
-#     rotation=0,
-#     visibility=True,
-# )
-
 
 
 
@@ -2422,24 +2409,6 @@ def stub():
 # TODO: use .grid instead of .place for buttons, labels, and entry fields ?
 # TODO: change to smaller font size ?
 # TODO: add help buttons in random gen, builder and result menus
-
-# TODO: add CURRENT_ARRAY, CURRENT_DF to global variables to store the active
-#  environment and train list to hand to other functions or views
-
-# TODO: separate track and train/station builder
-# TODO: add view for train/station builder
-# TODO: train/station builder has
-#  buttons to place trains and add the m to the current data frame
-#  a scrollable list of text and buttons to select the trains based on the
-#  current dataframe
-# TODO: button opens a frame ontop to enter LA and ED as well as turn on
-#  station placement mode and a button to save the data back to the df and
-#  close the window
-# TODO: in station placement mode a single click on the grid get the station
-#  coords and turns off the placement mode
-
-# TODO: move train placement buttons from builder menu to train/station view
-#  and remove the station button
 
 
 # TODO: add path selector in result view
