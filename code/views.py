@@ -1,6 +1,4 @@
 import ast
-
-import pandas as pd
 import json
 
 from custom_canvas import *
@@ -47,7 +45,9 @@ USER_ENV_PARAS = {
 }
 
 CURRENT_ARRAY = np.zeros((3,40,40), dtype=int)
-CURRENT_DF = pd.DataFrame()
+CURRENT_DF = pd.DataFrame(
+    columns=['start_pos', 'dir', 'end_pos', 'e_dep', 'l_arr']
+)
 
 # start menu
 
@@ -1497,7 +1497,7 @@ def builder_track_grid_to_para():
 
 def build_builder_grid_frame():
     global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT, \
-        CURRENT_ARRAY
+        CURRENT_ARRAY, CURRENT_DF
 
     FRAMES['builder_grid_frame'] = Frame(
         root=WINDOWS['flatland_window'].window,
@@ -1519,6 +1519,7 @@ def build_builder_grid_frame():
         background_color='#333333',
         border_width=0,
         array=CURRENT_ARRAY,
+        train_data=CURRENT_DF,
     )
 
 def build_track_builder_menu_frame():
@@ -1955,7 +1956,7 @@ def builder_train_to_track():
     build_track_builder_menu_frame()
 
 def build_train_builder_menu_frame():
-    global WINDOWS, FRAMES, BUTTONS, SCREENWIDTH, SCREENHEIGHT
+    global WINDOWS, FRAMES, BUTTONS, SCREENWIDTH, SCREENHEIGHT, CURRENT_DF
 
     FRAMES['train_builder_menu_frame'] = Frame(
         root=WINDOWS['flatland_window'].window,
@@ -2072,6 +2073,18 @@ def build_train_builder_menu_frame():
         rotation=0,
         visibility=True,
     )
+
+    CANVASES['train_config_list'] = TrainBuilderCanvas(
+        root=FRAMES['train_builder_menu_frame'].frame,
+        width=FRAMES['train_builder_menu_frame'].width * 0.5,
+        height=FRAMES['train_builder_menu_frame'].height * 0.5,
+        x=FRAMES['train_builder_menu_frame'].width * 0.25,
+        y=FRAMES['train_builder_menu_frame'].height * 0.25,
+        background_color='#000000',
+        border_width=0,
+        train_data=CURRENT_DF,
+    )
+    CANVASES['builder_grid_canvas'].train_list = CANVASES['train_config_list']
 
 def builder_train_grid_to_env():
     # TODO: save builder array and dataframe
@@ -2405,7 +2418,7 @@ def load_dictionary_from_json(file_path: str):
 # stubs
 
 def exit_stub():
-    global WINDOWS
+    global WINDOWS, CURRENT_DF
     WINDOWS['flatland_window'].close_window()
 
 def stub():

@@ -1,6 +1,8 @@
 import numpy as np
+import pandas as pd
 
 from custom_widgets import *
+
 
 class EnvCanvas:
     def __init__(
@@ -220,6 +222,7 @@ class BuildCanvas:
             background_color: str,
             border_width: int,
             array: np.ndarray,
+            train_data: pd.DataFrame,
     ):
         self.root = root
         self.width = width
@@ -255,6 +258,15 @@ class BuildCanvas:
         self.image_refs = []
         self.array = array
         self.rows, self.cols = array[0].shape
+        self.train_data = train_data
+        self.train_list = None
+
+        self.dir = {
+            1: 'n',
+            2: 'e',
+            3: 's',
+            4: 'w',
+        }
 
         self.draw_images()
 
@@ -468,6 +480,17 @@ class BuildCanvas:
                 else:
                     # place train
                     self.array[1][row, col] = self.current_selection
+
+                    data = {
+                        'start_pos': (row, col),
+                        'dir': self.dir[self.current_selection],
+                        'end_pos': (np.nan, np.nan),
+                        'e_dep': np.nan,
+                        'l_arr': np.nan,
+                    }
+                    self.train_data.loc[len(self.train_data)] = data
+                    if self.train_list:
+                        self.train_list.update_labels()
             else:
                 # place track
                 self.array[0][row, col] = self.current_selection
@@ -477,6 +500,18 @@ class BuildCanvas:
                 # erase top most object
                 if self.array[i][row, col]:
                     self.array[i][row, col] = 0
+
+                    # if erasing a train, delete train_data entry
+                    if i == 1:
+                        self.train_data.drop(
+                            self.train_data[
+                                self.train_data['start_pos'] == (row, col)
+                            ].index,
+                            inplace=True
+                        )
+                        self.train_data.reset_index(drop=True, inplace=True)
+                        if self.train_list:
+                            self.train_list.update_labels()
                     break
                 else:
                     continue
@@ -508,6 +543,90 @@ class BuildCanvas:
                             x1, y1, anchor="nw", image=image,
                             tags="grid_image"
                         )
+
+
+class TrainBuilderCanvas:
+    def __init__(
+            self,
+            root: tk.Tk,
+            width: int,
+            height: int,
+            x: int,
+            y: int,
+            background_color: str,
+            border_width: int,
+            train_data: pd.DataFrame,
+    ):
+        self.root = root
+        self.width = width
+        self.height = height
+        self.x = x
+        self.y = y
+        self.background_color = background_color
+        self.border_width = border_width
+        self.train_data = train_data
+
+        self.canvas = self.create_canvas()
+        self.pack_canvas()
+
+        self.scrollbar = tk.Scrollbar(
+            self.root, orient='vertical', command=self.canvas.yview
+        )
+        self.scrollbar.pack(side='right', fill='y')
+
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+
+        self.scroll_frame = tk.Frame(self.canvas, bg='#000000')
+        self.canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
+
+        self.scroll_frame.update_idletasks()
+        self.canvas.config(scrollregion=self.canvas.bbox("all"))
+
+        self.scroll_frame.bind("<Configure>", self.on_frame_configure)
+        self.scroll_frame.bind('<Enter>', self._bound_to_mousewheel)
+        self.scroll_frame.bind('<Leave>', self._unbound_to_mousewheel)
+
+        self.update_labels()
+
+    def create_canvas(self):
+        canvas = tk.Canvas(
+            self.root,
+            width=self.width, height=self.height,
+            bg=self.background_color, bd=self.border_width,
+            highlightthickness=0
+        )
+        return canvas
+
+    def pack_canvas(self):  #
+        self.canvas.pack(side='top', padx=self.x, pady=self.y, anchor='nw')
+
+    def update_labels(self):
+        for widget in self.scroll_frame.winfo_children():
+            widget.destroy()
+
+        for idx, row in self.train_data.iterrows():
+            label = tk.Label(
+                self.scroll_frame,
+                font=('Arial', 20),
+                fg='#FFFFFF', bg='#000000',
+                text=f'Train {idx}: {row["start_pos"]}',
+            )
+            label.pack()
+
+    def on_frame_configure(self, event):
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+
+    def _bound_to_mousewheel(self, event):
+        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+
+    def _unbound_to_mousewheel(self, event):
+        self.canvas.unbind_all("<MouseWheel>")
+
+    def _on_mousewheel(self, event):
+        self.canvas.yview_scroll(
+            int(-1 * (event.delta / 120)),
+            "units"
+        )
 
 
 class ResultCanvas:
