@@ -475,10 +475,10 @@ class BuildCanvas:
             if self.current_selection in [1,2,3,4,5]:
                 # place train or station
                 if self.current_selection == 5:
-                    # place station
+                    # station
                     self.array[2][row, col] = self.current_selection
                 else:
-                    # place train
+                    # train
                     self.array[1][row, col] = self.current_selection
 
                     data = {
@@ -495,26 +495,8 @@ class BuildCanvas:
                 # place track
                 self.array[0][row, col] = self.current_selection
         else:
-            #erase object
-            for i in [2,1,0]:
-                # erase top most object
-                if self.array[i][row, col]:
-                    self.array[i][row, col] = 0
-
-                    # if erasing a train, delete train_data entry
-                    if i == 1:
-                        self.train_data.drop(
-                            self.train_data[
-                                self.train_data['start_pos'] == (row, col)
-                            ].index,
-                            inplace=True
-                        )
-                        self.train_data.reset_index(drop=True, inplace=True)
-                        if self.train_list:
-                            self.train_list.update_labels()
-                    break
-                else:
-                    continue
+            # erase track
+            self.array[0][row, col] = 0
         self.draw_images()
 
     def draw_images(self):
@@ -545,7 +527,7 @@ class BuildCanvas:
                         )
 
 
-class TrainBuilderCanvas:
+class TrainListCanvas:
     def __init__(
             self,
             root: tk.Tk,
@@ -555,6 +537,7 @@ class TrainBuilderCanvas:
             y: int,
             background_color: str,
             border_width: int,
+            grid: BuildCanvas,
             train_data: pd.DataFrame,
     ):
         self.root = root
@@ -564,7 +547,11 @@ class TrainBuilderCanvas:
         self.y = y
         self.background_color = background_color
         self.border_width = border_width
+        self.grid = grid
         self.train_data = train_data
+
+        self.config_dict = {}
+        self.remove_dict = {}
 
         self.canvas = self.create_canvas()
         self.pack_canvas()
@@ -605,13 +592,36 @@ class TrainBuilderCanvas:
             widget.destroy()
 
         for idx, row in self.train_data.iterrows():
+            frame = tk.Frame(self.scroll_frame, bg='#000000')
+            frame.pack(fill='x', pady=5)
+
             label = tk.Label(
-                self.scroll_frame,
-                font=('Arial', 20),
+                frame,
+                width=20, font=('Arial', 20),
                 fg='#FFFFFF', bg='#000000',
-                text=f'Train {idx}: {row["start_pos"]}',
+                text=f'Train {idx}: {row["start_pos"]}, {row["dir"]}',
             )
-            label.pack()
+            label.pack(side='left', padx=0)
+
+            self.config_dict[idx] = tk.Button(
+                frame,
+                width=7,height=1,
+                font=('Arial', 20),
+                fg='#FFFFFF', bg='#333333',
+                text='configure',
+                command=lambda index=idx: self.open_config_window(index)
+            )
+            self.config_dict[idx].pack(side='left', padx=10)
+
+            self.remove_dict[idx] = tk.Button(
+                frame,
+                width=7, height=1,
+                font=('Arial', 20),
+                fg='#FFFFFF', bg='#333333',
+                text='remove',
+                command=lambda index=idx: self.remove_train(index)
+            )
+            self.remove_dict[idx].pack(side='left', padx=10)
 
     def on_frame_configure(self, event):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
@@ -627,6 +637,55 @@ class TrainBuilderCanvas:
             int(-1 * (event.delta / 120)),
             "units"
         )
+
+    def remove_train(self, index):
+
+        # get number of trains at the same position as the deleted one
+        df = self.train_data[
+            self.train_data['start_pos'] ==
+            self.train_data['start_pos'].iloc[index]
+        ]
+
+        if len(df) == 1:
+            # remove train from grid
+            self.grid.array[1][
+                self.train_data['start_pos'].iloc[index]
+            ] = 0
+        else:
+            # drop index to be deleted
+            df = df.drop(index)
+            # get first index from remaining trains on the same position
+            replacement = df.index[0]
+            # get the direction of that train
+            new_dir = self.train_data['dir'].iloc[replacement]
+
+            # replace the old trains direction in the grid
+            self.grid.array[1][
+                self.train_data['start_pos'].iloc[index]
+            ] = next(k for k, d in self.grid.dir.items() if d == new_dir)
+
+        self.train_data.drop(index, inplace=True)
+        self.train_data.reset_index(drop=True, inplace=True)
+        self.update_labels()
+        self.grid.draw_images()
+        return
+
+    def open_config_window(self, index):
+        config_window = tk.Toplevel(self.root)
+        config_window.title(f"Configure Train {index}")
+        config_window.geometry(f"500x500")
+        config_window.configure(bg='#000000')  # Black background
+
+        close_button = tk.Button(
+            config_window,
+            text="Close",
+            font=('Arial', 20),
+            fg='#FFFFFF', bg='#FF0000',  # Red close button
+            command=config_window.destroy
+            # Close the config window when clicked
+        )
+        close_button.pack(side='bottom', pady=20)
+
 
 
 class ResultCanvas:

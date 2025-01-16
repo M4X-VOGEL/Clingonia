@@ -2059,29 +2059,15 @@ def build_train_builder_menu_frame():
         visibility=True,
     )
 
-    BUTTONS['delete_button'] = Button(
+    CANVASES['train_config_list'] = TrainListCanvas(
         root=FRAMES['train_builder_menu_frame'].frame,
-        width=100,
-        height=100,
-        x=FRAMES['train_builder_menu_frame'].width * 0.52,
-        y=FRAMES['train_builder_menu_frame'].height * 0.1,
-        command=lambda: CANVASES['builder_grid_canvas'].select(0),
-        image='../png/eraser.png',
-        foreground_color='#000000',
-        background_color='#000000',
-        border_width=0,
-        rotation=0,
-        visibility=True,
-    )
-
-    CANVASES['train_config_list'] = TrainBuilderCanvas(
-        root=FRAMES['train_builder_menu_frame'].frame,
-        width=FRAMES['train_builder_menu_frame'].width * 0.5,
-        height=FRAMES['train_builder_menu_frame'].height * 0.5,
-        x=FRAMES['train_builder_menu_frame'].width * 0.25,
+        width=FRAMES['train_builder_menu_frame'].width * 0.7,
+        height=FRAMES['train_builder_menu_frame'].height * 0.6,
+        x=FRAMES['train_builder_menu_frame'].width * 0.2,
         y=FRAMES['train_builder_menu_frame'].height * 0.25,
         background_color='#000000',
         border_width=0,
+        grid=CANVASES['builder_grid_canvas'],
         train_data=CURRENT_DF,
     )
     CANVASES['builder_grid_canvas'].train_list = CANVASES['train_config_list']
