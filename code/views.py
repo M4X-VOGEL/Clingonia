@@ -2404,6 +2404,8 @@ def switch_result_to_main():
 
 
 
+
+
 # functions
 
 def save_dictionary_to_json(dictionary: dict, file_path: str):
@@ -2429,13 +2431,19 @@ def stub():
 
 # TODOS
 
-# GUI
-# TODO: use .grid instead of .place for buttons, labels, and entry fields ?
-# TODO: change to smaller font size ?
-# TODO: add help buttons in random gen, builder and result menus
+# TODO: add flatland environment generation from parameters and array for
+#  random gen, builder menus
+
+# TODO: path viewer in results grid and connecting to path list
+# TODO: timetable views in env viewer after generating or building
+# TODO: Load and save functions in main menu
+# TODO: show time table and gif functions in Results
 
 # BACKEND
 # TODO: add save data functions for random gen, builder, stat and main menus
 # TODO: save data in files / datastructures and pass it to ÄD and flatland
-# TODO: add flatland environment generation from parameters and array for
-#  random gen, builder menus
+
+# GUI
+# TODO: use .grid instead of .place for buttons, labels, and entry fields ?
+# TODO: change to smaller font size ?
+# TODO: add help buttons in random gen, builder and result menus
