@@ -434,7 +434,7 @@ def build_main_menu():
         height=2,
         x=FRAMES['main_menu_frame'].width * 0.25,
         y=FRAMES['main_menu_frame'].height * 0.75,
-        command=create_result_menu,
+        command=switch_main_to_result,
         text='Run Simulation',
         font=('Arial', 20, 'bold'),
         foreground_color='#000000',
@@ -533,6 +533,19 @@ def switch_main_to_builder():
         del FRAMES['main_menu_env_viewer_frame']
 
     build_builder_para_frame()
+
+def switch_main_to_result():
+    if 'main_menu_frame' in FRAMES:
+        FRAMES['main_menu_frame'].destroy_frame()
+        del FRAMES['main_menu_frame']
+    if 'main_menu_help_frame' in FRAMES:
+        FRAMES['main_menu_help_frame'].destroy_frame()
+        del FRAMES['main_menu_help_frame']
+    if 'main_menu_env_viewer_frame' in FRAMES:
+        FRAMES['main_menu_env_viewer_frame'].destroy_frame()
+        del FRAMES['main_menu_env_viewer_frame']
+
+    create_result_menu()
 
 
 
@@ -2286,7 +2299,7 @@ def build_result_menu():
         width=20,
         height=1,
         x=FRAMES['result_menu_frame'].width * 0.25,
-        y=FRAMES['result_menu_frame'].width * 0.95,
+        y=FRAMES['result_menu_frame'].height * 0.9,
         command=switch_result_to_main,
         text='Return To Main Menu',
         font=('Arial', 25, 'bold'),
@@ -2301,7 +2314,7 @@ def build_result_menu():
         width=20,
         height=1,
         x=FRAMES['result_menu_frame'].width * 0.25,
-        y=FRAMES['result_menu_frame'].width * 0.1,
+        y=FRAMES['result_menu_frame'].height * 0.1,
         command=stub,
         text='Show Time Table',
         font=('Arial', 25, 'bold'),
@@ -2316,7 +2329,7 @@ def build_result_menu():
         width=20,
         height=1,
         x=FRAMES['result_menu_frame'].width * 0.25,
-        y=FRAMES['result_menu_frame'].width * 0.2,
+        y=FRAMES['result_menu_frame'].height * 0.2,
         command=stub,
         text='Show GIF',
         font=('Arial', 25, 'bold'),
@@ -2326,19 +2339,30 @@ def build_result_menu():
         visibility=True,
     )
 
-    BUTTONS['show_all_paths_button'] = Button(
+    BUTTONS['toggle_all_paths_button'] = Button(
         root=FRAMES['result_menu_frame'].frame,
         width=20,
         height=1,
         x=FRAMES['result_menu_frame'].width * 0.25,
-        y=FRAMES['result_menu_frame'].width * 0.3,
+        y=FRAMES['result_menu_frame'].height * 0.3,
         command=stub,
-        text='Show All Paths',
+        text='Toggle All Paths',
         font=('Arial', 25, 'bold'),
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
         visibility=True,
+    )
+
+    CANVASES['path_list_canvas'] = PathListCanvas(
+        root=FRAMES['result_menu_frame'].frame,
+        width=FRAMES['result_menu_frame'].width * 0.42,
+        height=FRAMES['result_menu_frame'].height * 0.25,
+        x=FRAMES['result_menu_frame'].width * 0.25,
+        y=FRAMES['result_menu_frame'].height * 0.4,
+        background_color='#000000',
+        border_width=0,
+        train_data=CURRENT_DF,
     )
 
 def build_result_env_viewer():
@@ -2352,7 +2376,7 @@ def build_result_env_viewer():
         y=SCREENWIDTH * 0,
         background_color='#000000',
         border_width=0,
-        visibility=False
+        visibility=True
     )
 
     CANVASES['result_viewer_canvas'] = ResultCanvas(

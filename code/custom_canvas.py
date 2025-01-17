@@ -776,7 +776,6 @@ class TrainListCanvas:
             x=config_frame.width * 0.5, y=config_frame.height * 0.55
         )
 
-
     def save_ed_la(self, index, ed_entry, la_entry, config_frame):
         try:
             ed = int(ed_entry.get())
@@ -795,6 +794,7 @@ class TrainListCanvas:
         self.grid.array[2] = np.zeros(self.grid.array[2].shape)
         self.grid.draw_images()
         config_frame.destroy_frame()
+
 
 class ResultCanvas:
     def __init__(
@@ -1001,3 +1001,104 @@ class ResultCanvas:
                 fill='#FFFFFF',
                 tags="grid_label"
             )
+
+
+class PathListCanvas:
+    def __init__(
+            self,
+            root: tk.Tk,
+            width: int,
+            height: int,
+            x: int,
+            y: int,
+            background_color: str,
+            border_width: int,
+            train_data: pd.DataFrame,
+    ):
+        self.root = root
+        self.width = width
+        self.height = height
+        self.x = x
+        self.y = y
+        self.background_color = background_color
+        self.border_width = border_width
+        self.train_data = train_data
+
+        self.checkvar_dict = {}
+        self.checkbox_dict = {}
+
+        self.canvas = self.create_canvas()
+        self.pack_canvas()
+
+        self.scrollbar = tk.Scrollbar(
+            self.root, orient='vertical', command=self.canvas.yview
+        )
+        self.scrollbar.pack(side='right', fill='y')
+
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+
+        self.scroll_frame = tk.Frame(self.canvas, bg='#000000')
+        self.canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
+
+        self.scroll_frame.update_idletasks()
+        self.canvas.config(scrollregion=self.canvas.bbox("all"))
+
+        self.scroll_frame.bind("<Configure>", self.on_frame_configure)
+        self.scroll_frame.bind('<Enter>', self._bound_to_mousewheel)
+        self.scroll_frame.bind('<Leave>', self._unbound_to_mousewheel)
+
+        self.update_labels()
+
+    def create_canvas(self):
+        canvas = tk.Canvas(
+            self.root,
+            width=self.width, height=self.height,
+            bg=self.background_color, bd=self.border_width,
+            highlightthickness=0
+        )
+        return canvas
+
+    def pack_canvas(self):  #
+        self.canvas.pack(side='top', padx=self.x, pady=self.y, anchor='nw')
+
+    def update_labels(self):
+        for widget in self.scroll_frame.winfo_children():
+            widget.destroy()
+
+        for idx, row in self.train_data.iterrows():
+            frame = tk.Frame(self.scroll_frame, bg='#000000')
+            frame.pack(fill='x', pady=5)
+
+            self.checkvar_dict[idx] = tk.BooleanVar()
+
+            label = tk.Label(
+                frame,
+                width=20, font=('Arial', 20),
+                fg='#FFFFFF', bg='#000000',
+                text=f'Train {idx}: {row["start_pos"]}, {row["dir"]}',
+            )
+            label.pack(side='left', padx=0)
+
+            self.checkbox_dict[idx] = tk.Checkbutton(
+                frame,
+                width=2,height=2,
+                fg='#FFFFFF', bg='#000000',
+                variable=self.checkvar_dict[idx],
+                command=lambda index=idx: print(index)
+            )
+            self.checkbox_dict[idx].pack(side='left', padx=10)
+
+    def on_frame_configure(self, event):
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+
+    def _bound_to_mousewheel(self, event):
+        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+
+    def _unbound_to_mousewheel(self, event):
+        self.canvas.unbind_all("<MouseWheel>")
+
+    def _on_mousewheel(self, event):
+        self.canvas.yview_scroll(
+            int(-1 * (event.delta / 120)),
+            "units"
+        )
