@@ -2294,6 +2294,17 @@ def build_result_menu():
         visibility=True
     )
 
+    CANVASES['path_list_canvas'] = PathListCanvas(
+        root=FRAMES['result_menu_frame'].frame,
+        width=FRAMES['result_menu_frame'].width * 0.5,
+        height=FRAMES['result_menu_frame'].height * 0.25,
+        x=FRAMES['result_menu_frame'].width * 0.25,
+        y=FRAMES['result_menu_frame'].height * 0.4,
+        background_color='#000000',
+        border_width=0,
+        train_data=CURRENT_DF,
+    )
+
     BUTTONS['return_to_menu_button'] = Button(
         root=FRAMES['result_menu_frame'].frame,
         width=20,
@@ -2345,24 +2356,13 @@ def build_result_menu():
         height=1,
         x=FRAMES['result_menu_frame'].width * 0.25,
         y=FRAMES['result_menu_frame'].height * 0.3,
-        command=stub,
+        command=CANVASES['path_list_canvas'].toggle_all_paths,
         text='Toggle All Paths',
         font=('Arial', 25, 'bold'),
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
         visibility=True,
-    )
-
-    CANVASES['path_list_canvas'] = PathListCanvas(
-        root=FRAMES['result_menu_frame'].frame,
-        width=FRAMES['result_menu_frame'].width * 0.42,
-        height=FRAMES['result_menu_frame'].height * 0.25,
-        x=FRAMES['result_menu_frame'].width * 0.25,
-        y=FRAMES['result_menu_frame'].height * 0.4,
-        background_color='#000000',
-        border_width=0,
-        train_data=CURRENT_DF,
     )
 
 def build_result_env_viewer():
@@ -2433,9 +2433,6 @@ def stub():
 # TODO: use .grid instead of .place for buttons, labels, and entry fields ?
 # TODO: change to smaller font size ?
 # TODO: add help buttons in random gen, builder and result menus
-
-
-# TODO: add path selector in result view
 
 # BACKEND
 # TODO: add save data functions for random gen, builder, stat and main menus

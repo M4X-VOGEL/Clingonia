@@ -1024,8 +1024,9 @@ class PathListCanvas:
         self.border_width = border_width
         self.train_data = train_data
 
-        self.checkvar_dict = {}
-        self.checkbox_dict = {}
+        self.show_button_dict = {}
+        self.show_list = [False] * len(self.train_data)
+        self.current_all = False
 
         self.canvas = self.create_canvas()
         self.pack_canvas()
@@ -1047,7 +1048,7 @@ class PathListCanvas:
         self.scroll_frame.bind('<Enter>', self._bound_to_mousewheel)
         self.scroll_frame.bind('<Leave>', self._unbound_to_mousewheel)
 
-        self.update_labels()
+        self.add_labels()
 
     def create_canvas(self):
         canvas = tk.Canvas(
@@ -1061,15 +1062,10 @@ class PathListCanvas:
     def pack_canvas(self):  #
         self.canvas.pack(side='top', padx=self.x, pady=self.y, anchor='nw')
 
-    def update_labels(self):
-        for widget in self.scroll_frame.winfo_children():
-            widget.destroy()
-
+    def add_labels(self):
         for idx, row in self.train_data.iterrows():
             frame = tk.Frame(self.scroll_frame, bg='#000000')
             frame.pack(fill='x', pady=5)
-
-            self.checkvar_dict[idx] = tk.BooleanVar()
 
             label = tk.Label(
                 frame,
@@ -1079,14 +1075,15 @@ class PathListCanvas:
             )
             label.pack(side='left', padx=0)
 
-            self.checkbox_dict[idx] = tk.Checkbutton(
+            self.show_button_dict[idx] = tk.Button(
                 frame,
-                width=2,height=2,
-                fg='#FFFFFF', bg='#000000',
-                variable=self.checkvar_dict[idx],
-                command=lambda index=idx: print(index)
+                width=7,height=1,
+                font=('Arial', 20),
+                fg='#000000', bg='#008800',
+                text='show',
+                command=lambda index=idx: self.toggle_path(index)
             )
-            self.checkbox_dict[idx].pack(side='left', padx=10)
+            self.show_button_dict[idx].pack(side='left', padx=10)
 
     def on_frame_configure(self, event):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
@@ -1102,3 +1099,25 @@ class PathListCanvas:
             int(-1 * (event.delta / 120)),
             "units"
         )
+
+    def toggle_all_paths(self):
+        if self.current_all:
+            for i in self.show_button_dict:
+                self.show_list = [False] * len(self.show_list)
+                self.show_button_dict[i].config(bg='#008800', text='show')
+            self.current_all = False
+        else:
+            for i in self.show_button_dict:
+                self.show_list = [True] * len(self.show_list)
+                self.show_button_dict[i].config(bg='#880000', text='hide')
+            self.current_all = True
+        # TODO: call update result_grid_canvas_function
+
+    def toggle_path(self, index):
+        if self.show_list[index]:
+            self.show_button_dict[index].config(bg='#008800', text='show')
+            self.show_list[index] = False
+        else:
+            self.show_button_dict[index].config(bg='#880000', text='hide')
+            self.show_list[index] = True
+        # TODO: call update result_grid_canvas_function
