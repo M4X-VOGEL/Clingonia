@@ -628,7 +628,7 @@ class TrainListCanvas:
                 frame,
                 width=7, height=1,
                 font=('Arial', 20),
-                fg='#FFFFFF', bg='#333333',
+                fg='#000000', bg='#880000',
                 text='remove',
                 command=lambda index=idx: self.remove_train(index)
             )
@@ -732,6 +732,11 @@ class TrainListCanvas:
         ed_entry.place(
             x=config_frame.width * 0.5, y=config_frame.height * 0.4
         )
+        if not np.isnan(self.train_data.loc[index, 'e_dep']):
+            ed_entry.insert(
+                0,
+                str(int(self.train_data.loc[index, 'e_dep']))
+            )
 
         la_entry = tk.Entry(
             config_frame.frame,
@@ -741,6 +746,11 @@ class TrainListCanvas:
         la_entry.place(
             x=config_frame.width * 0.5, y=config_frame.height * 0.45
         )
+        if not np.isnan(self.train_data.loc[index, 'l_arr']):
+            la_entry.insert(
+                0,
+                str(int(self.train_data.loc[index, 'l_arr']))
+            )
 
         station_label = tk.Label(
             config_frame.frame,
@@ -762,6 +772,10 @@ class TrainListCanvas:
         place_station.place(
             x=config_frame.width * 0.51, y=config_frame.height * 0.49
         )
+        if not np.isnan(self.train_data.loc[index, 'end_pos'][0]):
+            row, col = self.train_data.loc[index, 'end_pos']
+            self.grid.array[2][row, col] = 5
+            self.grid.draw_images()
 
         save = tk.Button(
             config_frame.frame,
