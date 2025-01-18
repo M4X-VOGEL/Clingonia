@@ -489,7 +489,7 @@ def build_main_menu_help_frame():
         border_width=0,
         state='disabled',
         visibility=True,
-    )#
+    )
 
 def build_main_menu_env_viewer():
     global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT
@@ -1086,7 +1086,8 @@ def build_random_gen_env_viewer():
     )
 
 def build_random_gen_env_menu():
-    global WINDOWS, FRAMES, BUTTONS, SCREENWIDTH, SCREENHEIGHT
+    global WINDOWS, FRAMES, BUTTONS, SCREENWIDTH, SCREENHEIGHT, TEXTS, \
+        CURRENT_DF
 
     FRAMES['random_gen_env_menu_frame'] = Frame(
         root=WINDOWS['flatland_window'].window,
@@ -1126,6 +1127,26 @@ def build_random_gen_env_menu():
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
+        visibility=True,
+    )
+
+    current_df_to_env_text()
+    with open("../data/current_df.txt", "r") as file:
+        displaytext = file.read()
+
+    TEXTS['random_gen_env_trains'] = Text(
+        root=FRAMES['random_gen_env_menu_frame'].frame,
+        width=FRAMES['random_gen_env_menu_frame'].width,
+        height=FRAMES['random_gen_env_menu_frame'].height * 0.85,
+        x=FRAMES['random_gen_env_menu_frame'].width * 0,
+        y=FRAMES['random_gen_env_menu_frame'].height * 0,
+        text=displaytext,
+        font=("Courier", 16),
+        wrap='word',
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        border_width=0,
+        state='disabled',
         visibility=True,
     )
 
@@ -2200,8 +2221,6 @@ def builder_train_grid_to_env():
         FRAMES['builder_grid_frame'].destroy_frame()
         del FRAMES['builder_grid_frame']
 
-    print(CURRENT_DF)
-
     build_builder_env_viewer()
     build_builder_env_menu()
 
@@ -2244,7 +2263,8 @@ def build_builder_env_viewer():
     )
 
 def build_builder_env_menu():
-    global WINDOWS, FRAMES, BUTTONS, SCREENWIDTH, SCREENHEIGHT
+    global WINDOWS, FRAMES, BUTTONS, SCREENWIDTH, SCREENHEIGHT, TEXTS, \
+        CURRENT_DF
 
     FRAMES['builder_env_menu_frame'] = Frame(
         root=WINDOWS['flatland_window'].window,
@@ -2284,6 +2304,26 @@ def build_builder_env_menu():
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
+        visibility=True,
+    )
+
+    current_df_to_env_text()
+    with open("../data/current_df.txt", "r") as file:
+        displaytext = file.read()
+
+    TEXTS['builder_env_trains'] = Text(
+        root=FRAMES['builder_env_menu_frame'].frame,
+        width=FRAMES['builder_env_menu_frame'].width,
+        height=FRAMES['builder_env_menu_frame'].height * 0.85,
+        x=FRAMES['builder_env_menu_frame'].width * 0,
+        y=FRAMES['builder_env_menu_frame'].height * 0,
+        text=displaytext,
+        font=("Courier", 16),
+        wrap='word',
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        border_width=0,
+        state='disabled',
         visibility=True,
     )
 
@@ -2512,6 +2552,27 @@ def switch_result_to_main():
 
 # functions
 
+def current_df_to_env_text():
+    global CURRENT_DF
+
+    def format_row(index, row):
+        new_line = (f"| {index:>8} | {str(row['start_pos']):>14} "
+                    f"| {row['dir']:^3} | {str(row['end_pos']):>14} "
+                    f"| {row['e_dep']:>7} | {row['l_arr']:>7} |")
+        return new_line
+
+    header = ("| Train ID | Start Position | Dir |   "
+              "End Position |   E Dep |   L Arr |")
+    divider = ("|----------|----------------|-----|"
+               "----------------|---------|---------|")
+
+    new_rows = [format_row(index, row) for index, row in CURRENT_DF.iterrows()]
+
+    with open('../data/current_df.txt', "w") as file:
+        file.write(header + "\n")
+        file.write(divider + "\n")
+        file.writelines(new_row + "\n" for new_row in new_rows)
+
 def save_dictionary_to_json(dictionary: dict, file_path: str):
     with open(file_path, 'w') as file:
         json.dump(dictionary, file, indent=4)
@@ -2539,7 +2600,6 @@ def stub():
 #  random gen, builder menus
 
 # TODO: path viewer in results grid and connecting to path list
-# TODO: timetable views in env viewer after generating or building
 # TODO: Load and save functions in main menu
 # TODO: show time table and gif functions in Results
 
