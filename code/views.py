@@ -11,8 +11,8 @@ WINDOWS, FRAMES, BUTTONS, LABELS, CANVASES, ENTRY_FIELDS, PICTURES, TEXTS = (
 SCREENWIDTH, SCREENHEIGHT = 0, 0
 
 DEFAULT_ENV_PARAS = {
-    'width': 40,
-    'height': 40,
+    'rows': 40,
+    'cols': 40,
     'agents': 4,
     'cities': 4,
     'answer': 1,
@@ -28,8 +28,8 @@ DEFAULT_ENV_PARAS = {
 }
 
 USER_ENV_PARAS = {
-    'width': None,
-    'height': None,
+    'rows': None,
+    'cols': None,
     'agents': None,
     'cities': None,
     'answer': None,
@@ -49,6 +49,9 @@ CURRENT_DF = pd.DataFrame(
     columns=['start_pos', 'dir', 'end_pos', 'e_dep', 'l_arr']
 )
 
+BUILD_MODE = None
+LAST_MENU = None
+
 # start menu
 
 def build_flatland_window():
@@ -66,6 +69,10 @@ def build_flatland_window():
     SCREENHEIGHT = WINDOWS['flatland_window'].window.winfo_screenheight()
 
 def create_start_menu():
+    global LAST_MENU
+
+    LAST_MENU = 'start'
+
     build_title_frame()
     build_start_menu_frame()
 
@@ -125,7 +132,7 @@ def build_start_menu_frame():
         width=2,
         height=1,
         x=FRAMES['start_menu_frame'].width * 0.95,
-        y=FRAMES['start_menu_frame'].width * 0,
+        y=FRAMES['start_menu_frame'].height * 0,
         command=exit_stub,
         text='X',
         font=('Arial', 25, 'bold'),
@@ -284,6 +291,9 @@ def switch_start_to_random_gen():
     build_random_gen_para_frame()
 
 def switch_start_to_builder():
+    global BUILD_MODE
+    BUILD_MODE = 'build'
+
     if 'title_frame' in FRAMES:
         FRAMES['title_frame'].destroy_frame()
         del FRAMES['title_frame']
@@ -306,6 +316,10 @@ def switch_start_to_builder():
 # main menu
 
 def create_main_menu():
+    global LAST_MENU
+
+    LAST_MENU = 'main'
+
     build_main_menu()
     build_main_menu_env_viewer()
 
@@ -328,7 +342,7 @@ def build_main_menu():
         width=2,
         height=1,
         x=FRAMES['main_menu_frame'].width * 0.95,
-        y=FRAMES['main_menu_frame'].width * 0,
+        y=FRAMES['main_menu_frame'].height * 0,
         command=exit_stub,
         text='X',
         font=('Arial', 25, 'bold'),
@@ -389,7 +403,7 @@ def build_main_menu():
         height=2,
         x=FRAMES['main_menu_frame'].width * 0.25,
         y=FRAMES['main_menu_frame'].height * 0.45,
-        command=switch_main_to_builder,
+        command=switch_main_to_modify,
         text='Modify Existing Environment',
         font=('Arial', 20, 'bold'),
         foreground_color='#000000',
@@ -522,6 +536,25 @@ def switch_main_to_random_gen():
     build_random_gen_para_frame()
 
 def switch_main_to_builder():
+    global BUILD_MODE
+    BUILD_MODE = 'build'
+
+    if 'main_menu_frame' in FRAMES:
+        FRAMES['main_menu_frame'].destroy_frame()
+        del FRAMES['main_menu_frame']
+    if 'main_menu_help_frame' in FRAMES:
+        FRAMES['main_menu_help_frame'].destroy_frame()
+        del FRAMES['main_menu_help_frame']
+    if 'main_menu_env_viewer_frame' in FRAMES:
+        FRAMES['main_menu_env_viewer_frame'].destroy_frame()
+        del FRAMES['main_menu_env_viewer_frame']
+
+    build_builder_para_frame()
+
+def switch_main_to_modify():
+    global BUILD_MODE
+    BUILD_MODE = 'modify'
+
     if 'main_menu_frame' in FRAMES:
         FRAMES['main_menu_frame'].destroy_frame()
         del FRAMES['main_menu_frame']
@@ -554,9 +587,9 @@ def switch_main_to_result():
 # random generation
 
 def random_gen_change_to_start_or_main():
-    # TODO: Determine if switching to main or start
-    x = True
-    if x:
+    global LAST_MENU
+
+    if LAST_MENU == 'start':
         create_start_menu()
     else:
         create_main_menu()
@@ -599,7 +632,7 @@ def build_random_gen_para_frame():
         width=2,
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.06,
-        y=FRAMES['random_gen_para_frame'].width * 0,
+        y=FRAMES['random_gen_para_frame'].height * 0,
         command=random_gen_change_to_start_or_main,
         text='<',
         font=('Arial', 25, 'bold'),
@@ -614,7 +647,7 @@ def build_random_gen_para_frame():
         width=15,
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.05,
-        y=FRAMES['random_gen_para_frame'].width * 0.95,
+        y=FRAMES['random_gen_para_frame'].height * 0.9,
         command=random_gen_para_to_env,
         text='Generate',
         font=('Arial', 30, 'bold'),
@@ -629,7 +662,7 @@ def build_random_gen_para_frame():
         width=15,
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.6,
-        y=FRAMES['random_gen_para_frame'].width * 0.95,
+        y=FRAMES['random_gen_para_frame'].height * 0.9,
         command=random_gen_toggle_advanced_para_options,
         text='Advanced Options',
         font=('Arial', 30, 'bold'),
@@ -639,24 +672,24 @@ def build_random_gen_para_frame():
         visibility=True,
     )
 
-    LABELS['width_label'] = Label(
+    LABELS['rows_label'] = Label(
         root=FRAMES['random_gen_para_frame'].frame,
         x=FRAMES['random_gen_para_frame'].width * 0.05,
         y=FRAMES['random_gen_para_frame'].height * 0.1,
-        text='Environment width:',
+        text='Environment rows:',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
         visibility=True,
     )
 
-    ENTRY_FIELDS['width_entry'] = EntryField(
+    ENTRY_FIELDS['rows_entry'] = EntryField(
         root=FRAMES['random_gen_para_frame'].frame,
         width=10,
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.6,
         y=FRAMES['random_gen_para_frame'].height * 0.1,
-        text=f'e.g. {DEFAULT_ENV_PARAS["width"]}',
+        text=f'e.g. {DEFAULT_ENV_PARAS["rows"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -665,24 +698,24 @@ def build_random_gen_para_frame():
         visibility=True,
     )
 
-    LABELS['height_label'] = Label(
+    LABELS['cols_label'] = Label(
         root=FRAMES['random_gen_para_frame'].frame,
         x=FRAMES['random_gen_para_frame'].width * 0.05,
         y=FRAMES['random_gen_para_frame'].height * 0.15,
-        text='Environment height:',
+        text='Environment columns:',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
         visibility=True,
     )
 
-    ENTRY_FIELDS['height_entry'] = EntryField(
+    ENTRY_FIELDS['cols_entry'] = EntryField(
         root=FRAMES['random_gen_para_frame'].frame,
         width=10,
         height=1,
         x=FRAMES['random_gen_para_frame'].width * 0.6,
         y=FRAMES['random_gen_para_frame'].height * 0.15,
-        text=f'e.g. {DEFAULT_ENV_PARAS["height"]}',
+        text=f'e.g. {DEFAULT_ENV_PARAS["cols"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1071,7 +1104,7 @@ def build_random_gen_env_menu():
         width=2,
         height=1,
         x=FRAMES['random_gen_env_menu_frame'].width * 0.06,
-        y=FRAMES['random_gen_env_menu_frame'].width * 0,
+        y=FRAMES['random_gen_env_menu_frame'].height * 0,
         command=random_gen_env_to_para,
         text='<',
         font=('Arial', 25, 'bold'),
@@ -1086,7 +1119,7 @@ def build_random_gen_env_menu():
         width=20,
         height=1,
         x=FRAMES['random_gen_env_menu_frame'].width * 0.25,
-        y=FRAMES['random_gen_env_menu_frame'].width * 0.95,
+        y=FRAMES['random_gen_env_menu_frame'].height * 0.9,
         command=switch_random_gen_to_main,
         text='Return To Main Menu',
         font=('Arial', 25, 'bold'),
@@ -1192,14 +1225,17 @@ def load_random_gen_env_params():
 # builder
 
 def builder_change_to_start_or_main():
-    # TODO: Determine if switching to main or start
-    x = True
-    if x:
+    global LAST_MENU
+
+    if LAST_MENU == 'start':
         create_start_menu()
     else:
         create_main_menu()
 
 def builder_para_to_start():
+    global BUILD_MODE
+    BUILD_MODE = None
+
     save_builder_env_params()
 
     if 'builder_para_frame' in FRAMES:
@@ -1209,6 +1245,9 @@ def builder_para_to_start():
     create_start_menu()
 
 def builder_para_to_main():
+    global BUILD_MODE
+    BUILD_MODE = None
+
     save_builder_env_params()
 
     if 'builder_para_frame' in FRAMES:
@@ -1236,7 +1275,7 @@ def build_builder_para_frame():
         width=2,
         height=1,
         x=FRAMES['builder_para_frame'].width * 0.06,
-        y=FRAMES['builder_para_frame'].width * 0,
+        y=FRAMES['builder_para_frame'].height * 0,
         command= builder_change_to_start_or_main,
         text='<',
         font=('Arial', 25, 'bold'),
@@ -1251,7 +1290,7 @@ def build_builder_para_frame():
         width=15,
         height=1,
         x=FRAMES['builder_para_frame'].width * 0.05,
-        y=FRAMES['builder_para_frame'].width * 0.95,
+        y=FRAMES['builder_para_frame'].height * 0.9,
         command=builder_para_to_track_grid,
         text='Build',
         font=('Arial', 30, 'bold'),
@@ -1266,7 +1305,7 @@ def build_builder_para_frame():
         width=15,
         height=1,
         x=FRAMES['builder_para_frame'].width * 0.6,
-        y=FRAMES['builder_para_frame'].width * 0.95,
+        y=FRAMES['builder_para_frame'].height * 0.9,
         command=builder_toggle_advanced_para_options,
         text='Advanced Options',
         font=('Arial', 30, 'bold'),
@@ -1276,24 +1315,24 @@ def build_builder_para_frame():
         visibility=True,
     )
 
-    LABELS['width_label'] = Label(
+    LABELS['rows_label'] = Label(
         root=FRAMES['builder_para_frame'].frame,
         x=FRAMES['builder_para_frame'].width * 0.05,
         y=FRAMES['builder_para_frame'].height * 0.1,
-        text='Environment width:',
+        text='Environment rows:',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
         visibility=True,
     )
 
-    ENTRY_FIELDS['width_entry'] = EntryField(
+    ENTRY_FIELDS['rows_entry'] = EntryField(
         root=FRAMES['builder_para_frame'].frame,
         width=10,
         height=1,
         x=FRAMES['builder_para_frame'].width * 0.6,
         y=FRAMES['builder_para_frame'].height * 0.1,
-        text=f'e.g. {DEFAULT_ENV_PARAS["width"]}',
+        text=f'e.g. {DEFAULT_ENV_PARAS["rows"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1302,24 +1341,24 @@ def build_builder_para_frame():
         visibility=True,
     )
 
-    LABELS['height_label'] = Label(
+    LABELS['cols_label'] = Label(
         root=FRAMES['builder_para_frame'].frame,
         x=FRAMES['builder_para_frame'].width * 0.05,
         y=FRAMES['builder_para_frame'].height * 0.15,
-        text='Environment height:',
+        text='Environment columns:',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
         visibility=True,
     )
 
-    ENTRY_FIELDS['height_entry'] = EntryField(
+    ENTRY_FIELDS['cols_entry'] = EntryField(
         root=FRAMES['builder_para_frame'].frame,
         width=10,
         height=1,
         x=FRAMES['builder_para_frame'].width * 0.6,
         y=FRAMES['builder_para_frame'].height * 0.15,
-        text=f'e.g. {DEFAULT_ENV_PARAS["height"]}',
+        text=f'e.g. {DEFAULT_ENV_PARAS["cols"]}',
         font=('Arial', 20, 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1487,11 +1526,73 @@ def build_builder_para_frame():
     load_builder_env_params()
 
 def builder_para_to_track_grid():
+    global BUILD_MODE, CURRENT_ARRAY, CURRENT_DF, DEFAULT_ENV_PARAS, \
+        USER_ENV_PARAS
+
     save_builder_env_params()
 
     if 'builder_para_frame' in FRAMES:
         FRAMES['builder_para_frame'].destroy_frame()
         del FRAMES['builder_para_frame']
+
+    if USER_ENV_PARAS['rows'] is not None:
+        rows = USER_ENV_PARAS['rows']
+    else:
+        rows = DEFAULT_ENV_PARAS['rows']
+
+    if USER_ENV_PARAS['cols'] is not None:
+        cols = USER_ENV_PARAS['cols']
+    else:
+        cols = DEFAULT_ENV_PARAS['cols']
+
+    if BUILD_MODE == 'build':
+        CURRENT_ARRAY = np.zeros((3,rows,cols), dtype=int)
+        CURRENT_DF = pd.DataFrame(
+            columns=['start_pos', 'dir', 'end_pos', 'e_dep', 'l_arr']
+        )
+    else:
+        current_rows, current_cols = CURRENT_ARRAY.shape[1:3]
+
+        if (rows,cols) != (current_rows,current_cols):
+            if current_rows < rows:
+                # add array rows
+                CURRENT_ARRAY = np.pad(
+                    CURRENT_ARRAY,
+                    pad_width=[(0, 0), (0, rows-current_rows), (0, 0)],
+                    mode='constant',
+                    constant_values=0
+                )
+            elif current_rows > rows:
+                # remove array rows
+                CURRENT_ARRAY = CURRENT_ARRAY[:, :rows, :]
+
+            if current_cols < cols:
+                # add array cols
+                CURRENT_ARRAY = np.pad(
+                    CURRENT_ARRAY,
+                    pad_width=[(0, 0), (0, 0), (0, cols-current_cols)],
+                    mode='constant',
+                    constant_values=0
+                )
+            elif current_cols > cols:
+                # remove array cols
+                CURRENT_ARRAY = CURRENT_ARRAY[:, :, :cols]
+
+            if len(CURRENT_DF) > 0:
+                # remove trains not on the grid anymore
+                CURRENT_DF.drop(
+                    index=CURRENT_DF[CURRENT_DF['start_pos'].apply(
+                        lambda t: t[0] > rows-1 or t[1] > cols-1
+                    )].index,
+                    inplace=True
+                )
+                CURRENT_DF.reset_index(drop=True, inplace=True)
+
+                # reset station not on the grid anymore
+                for index, row in CURRENT_DF.iterrows():
+                    if (row['end_pos'][0] > rows - 1 or
+                            row['end_pos'][1] > cols - 1):
+                        CURRENT_DF.at[index, 'end_pos'] = (np.nan, np.nan)
 
     build_track_builder_menu_frame()
     build_builder_grid_frame()
@@ -2161,7 +2262,7 @@ def build_builder_env_menu():
         width=2,
         height=1,
         x=FRAMES['builder_env_menu_frame'].width * 0.06,
-        y=FRAMES['builder_env_menu_frame'].width * 0,
+        y=FRAMES['builder_env_menu_frame'].height * 0,
         command= builder_env_to_train_grid,
         text='<',
         font=('Arial', 25, 'bold'),
@@ -2176,7 +2277,7 @@ def build_builder_env_menu():
         width=20,
         height=1,
         x=FRAMES['builder_env_menu_frame'].width * 0.25,
-        y=FRAMES['builder_env_menu_frame'].width * 0.95,
+        y=FRAMES['builder_env_menu_frame'].height * 0.9,
         command=switch_builder_to_main,
         text='Return To Main Menu',
         font=('Arial', 25, 'bold'),
@@ -2200,6 +2301,9 @@ def builder_toggle_advanced_para_options():
     return
 
 def switch_builder_to_main():
+    global BUILD_MODE
+    BUILD_MODE = None
+
     # TODO: save builder env
 
     if 'builder_env_viewer_frame' in FRAMES:

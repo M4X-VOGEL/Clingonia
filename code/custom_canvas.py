@@ -791,15 +791,29 @@ class TrainListCanvas:
         )
 
     def save_ed_la(self, index, ed_entry, la_entry, config_frame):
-        try:
-            ed = int(ed_entry.get())
-            la = int(la_entry.get())
-        except ValueError:
-            # TODO: show error message in config window ?
-            print('Only Integers allowed in '
-                  'Earliest Departure and Latest Arrival')
+        ed = ed_entry.get()
+        la = la_entry.get()
+        if ed == '':
             ed = np.nan
+        else:
+            try:
+                ed = int(ed)
+            except ValueError:
+                # TODO: show error message in config window ?
+                print('Only Integers allowed in '
+                      'Earliest Departure and Latest Arrival')
+                ed = np.nan
+
+        if la == '':
             la = np.nan
+        else:
+            try:
+                la = int(la)
+            except ValueError:
+                # TODO: show error message in config window ?
+                print('Only Integers allowed in '
+                      'Earliest Departure and Latest Arrival')
+                la = np.nan
 
         self.train_data.loc[index, 'e_dep'] = ed
         self.train_data.loc[index, 'l_arr'] = la
