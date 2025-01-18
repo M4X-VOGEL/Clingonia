@@ -835,6 +835,7 @@ class ResultCanvas:
             background_color: str,
             border_width: int,
             image: str,
+            paths_df: pd.DataFrame,
     ):
         self.root = root
         self.width = width
@@ -868,6 +869,10 @@ class ResultCanvas:
         self.canvas.bind("<Motion>", self.draw_mouse_symbols)
 
         self.draw_image()
+
+        self.paths_df = paths_df
+        self.show_df = pd.DataFrame()
+        self.show_list = []
 
     def create_canvas(self):
         canvas = tk.Canvas(
@@ -907,6 +912,7 @@ class ResultCanvas:
         self.scale = new_scale
 
         self.draw_image()
+        self.draw_paths()
 
     def start_pan(self, event):
         self.pan_start = (event.x, event.y)
@@ -920,6 +926,7 @@ class ResultCanvas:
         self.pan_start = (event.x, event.y)
 
         self.draw_image()
+        self.draw_paths()
 
     def draw_mouse_symbols(self, event):
         adjusted_x = (event.x - self.x_offset) / self.scale
@@ -1030,6 +1037,66 @@ class ResultCanvas:
                 tags="grid_label"
             )
 
+    def update_paths(self):
+        show_dict = {idx: val for idx, val in enumerate(self.show_list)}
+
+        self.show_df = (self.paths_df[self.paths_df['trainID'].map(show_dict)]
+                        .copy())
+
+        self.show_df['count'] = (self.show_df.groupby(['x', 'y'])['x']
+                                 .transform('count'))
+
+        self.show_df['cell_offset'] = (self.show_df.groupby(['x', 'y'])
+                                       .cumcount()
+                                       .where(self.show_df['count'] > 1, 0) % 9)
+
+        self.show_df.drop(columns=['count'], inplace=True)
+
+        self.draw_paths()
+
+    def draw_paths(self):
+        self.canvas.delete("path_labels")
+        adjusted_cell_size = self.cell_size * self.scale
+
+        # position label on a 3x3 grid in each cell to avoid overlay
+        # 0 is the center position 1 is on the left and then go clockwise
+        offset_dict = {
+            0: (adjusted_cell_size * 0.5, adjusted_cell_size * 0.5),
+            1: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.5),
+            2: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.25),
+            3: (adjusted_cell_size * 0.5, adjusted_cell_size * 0.25),
+            4: (adjusted_cell_size * 0.75, adjusted_cell_size * 0.25),
+            5: (adjusted_cell_size * 0.75, adjusted_cell_size * 0.5),
+            6: (adjusted_cell_size * 0.75, adjusted_cell_size * 0.75),
+            7: (adjusted_cell_size * 0.5, adjusted_cell_size * 0.75),
+            8: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.75),
+        }
+
+        unique_trains = self.show_df['trainID'].unique()
+
+        colors = []
+        n = len(unique_trains)
+        for i in range(n):
+            r = int(255 * (i / n))
+            g = int(255 * (1 - abs((i / n) * 2 - 1)))
+            b = int(255 * (1 - abs((i / n) * 2 - 0.5)))
+            colors.append(f'#{r:02X}{g:02X}{b:02X}')
+
+        train_colors = dict(zip(unique_trains, colors))
+
+        for _, row in self.show_df.iterrows():
+            self.canvas.create_text(
+                (self.x_offset + row['x'] * adjusted_cell_size +
+                 offset_dict[row['cell_offset']][0]),
+                (self.y_offset + row['y'] * adjusted_cell_size +
+                 offset_dict[row['cell_offset']][1]),
+                text=row['timestep'],
+                anchor="center",
+                font=("Courier", 15, 'bold'),
+                fill=train_colors[row['trainID']],
+                tags="path_labels"
+            )
+
 
 class PathListCanvas:
     def __init__(
@@ -1042,6 +1109,7 @@ class PathListCanvas:
             background_color: str,
             border_width: int,
             train_data: pd.DataFrame,
+            grid: ResultCanvas
     ):
         self.root = root
         self.width = width
@@ -1051,6 +1119,7 @@ class PathListCanvas:
         self.background_color = background_color
         self.border_width = border_width
         self.train_data = train_data
+        self.grid = grid
 
         self.show_button_dict = {}
         self.show_list = [False] * len(self.train_data)
@@ -1139,7 +1208,9 @@ class PathListCanvas:
                 self.show_list = [True] * len(self.show_list)
                 self.show_button_dict[i].config(bg='#880000', text='hide')
             self.current_all = True
-        # TODO: call update result_grid_canvas_function
+
+        self.grid.show_list = self.show_list
+        self.grid.update_paths()
 
     def toggle_path(self, index):
         if self.show_list[index]:
@@ -1148,4 +1219,6 @@ class PathListCanvas:
         else:
             self.show_button_dict[index].config(bg='#880000', text='hide')
             self.show_list[index] = True
-        # TODO: call update result_grid_canvas_function
+
+        self.grid.show_list = self.show_list
+        self.grid.update_paths()

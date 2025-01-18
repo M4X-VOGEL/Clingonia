@@ -2,6 +2,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import warnings
 
+
 class Window:
     def __init__(
             self,

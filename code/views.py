@@ -2423,8 +2423,34 @@ def load_builder_env_params():
 # result menu
 
 def create_result_menu():
-    build_result_menu()
     build_result_env_viewer()
+    build_result_menu()
+
+def build_result_env_viewer():
+    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT
+
+    FRAMES['result_viewer_frame'] = Frame(
+        root=WINDOWS['flatland_window'].window,
+        width=SCREENWIDTH * 0.5,
+        height=SCREENHEIGHT,
+        x=SCREENWIDTH * 0,
+        y=SCREENWIDTH * 0,
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    CANVASES['result_viewer_canvas'] = ResultCanvas(
+        root=FRAMES['result_viewer_frame'].frame,
+        width=FRAMES['result_viewer_frame'].width,
+        height=FRAMES['result_viewer_frame'].height,
+        x=FRAMES['result_viewer_frame'].width * 0,
+        y=FRAMES['result_viewer_frame'].height * 0,
+        background_color='#333333',
+        border_width=0,
+        image='env_001--4_2.png',
+        paths_df=pd.read_csv('../data/positions.csv')
+    )
 
 def build_result_menu():
     FRAMES['result_menu_frame'] = Frame(
@@ -2447,6 +2473,7 @@ def build_result_menu():
         background_color='#000000',
         border_width=0,
         train_data=CURRENT_DF,
+        grid=CANVASES['result_viewer_canvas']
     )
 
     BUTTONS['return_to_menu_button'] = Button(
@@ -2507,31 +2534,6 @@ def build_result_menu():
         background_color='#777777',
         border_width=0,
         visibility=True,
-    )
-
-def build_result_env_viewer():
-    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT
-
-    FRAMES['result_viewer_frame'] = Frame(
-        root=WINDOWS['flatland_window'].window,
-        width=SCREENWIDTH * 0.5,
-        height=SCREENHEIGHT,
-        x=SCREENWIDTH * 0,
-        y=SCREENWIDTH * 0,
-        background_color='#000000',
-        border_width=0,
-        visibility=True
-    )
-
-    CANVASES['result_viewer_canvas'] = ResultCanvas(
-        root=FRAMES['result_viewer_frame'].frame,
-        width=FRAMES['result_viewer_frame'].width,
-        height=FRAMES['result_viewer_frame'].height,
-        x=FRAMES['result_viewer_frame'].width * 0,
-        y=FRAMES['result_viewer_frame'].height * 0,
-        background_color='#333333',
-        border_width=0,
-        image='env_001--4_2.png',
     )
 
 def switch_result_to_main():
@@ -2599,7 +2601,6 @@ def stub():
 # TODO: add flatland environment generation from parameters and array for
 #  random gen, builder menus
 
-# TODO: path viewer in results grid and connecting to path list
 # TODO: Load and save functions in main menu
 # TODO: show time table and gif functions in Results
 
