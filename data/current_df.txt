@@ -1,2 +1,4 @@
 | Train ID | Start Position | Dir |   End Position |   E Dep |   L Arr |
 |----------|----------------|-----|----------------|---------|---------|
+|        0 |         (5, 9) |  n  |     (nan, nan) |     nan |     nan |
+|        1 |         (7, 7) |  n  |     (nan, nan) |     nan |     nan |

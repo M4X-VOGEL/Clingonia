@@ -608,7 +608,7 @@ class TrainListCanvas:
 
             label = tk.Label(
                 frame,
-                width=20, font=('Arial', 20),
+                width=20, font=('Arial', 15),
                 fg='#FFFFFF', bg='#000000',
                 text=f'Train {idx}: {row["start_pos"]}, {row["dir"]}',
             )
@@ -617,7 +617,7 @@ class TrainListCanvas:
             self.config_dict[idx] = tk.Button(
                 frame,
                 width=7,height=1,
-                font=('Arial', 20),
+                font=('Arial', 15),
                 fg='#FFFFFF', bg='#333333',
                 text='configure',
                 command=lambda index=idx: self.open_train_config_frame(index)
@@ -627,7 +627,7 @@ class TrainListCanvas:
             self.remove_dict[idx] = tk.Button(
                 frame,
                 width=7, height=1,
-                font=('Arial', 20),
+                font=('Arial', 15),
                 fg='#000000', bg='#880000',
                 text='remove',
                 command=lambda index=idx: self.remove_train(index)
@@ -698,39 +698,39 @@ class TrainListCanvas:
 
         config_label = tk.Label(
             config_frame.frame,
-            text=f'Configure: Train {index}', font=('Arial', 40),
+            text=f'Configure: Train {index}', font=('Arial', 30),
             foreground='#FFFFFF', background='#000000', bd=0,
         )
         config_label.place(
-            x=config_frame.width * 0.2, y=config_frame.height * 0.3
+            x=config_frame.width * 0.1, y=config_frame.height * 0.3
         )
 
         ed_label = tk.Label(
             config_frame.frame,
-            text='Earliest Departure:', font=('Arial', 20),
+            text='Earliest Departure:', font=('Arial', 15),
             foreground='#FFFFFF', background='#000000', bd=0,
         )
         ed_label.place(
-            x=config_frame.width * 0.2, y=config_frame.height * 0.4
+            x=config_frame.width * 0.1, y=config_frame.height * 0.4
         )
 
         la_label = tk.Label(
             config_frame.frame,
-            text='Latest Arrival:', font=('Arial', 20),
+            text='Latest Arrival:', font=('Arial', 15),
             foreground='#FFFFFF', background='#000000',
             bd=0,
         )
         la_label.place(
-            x=config_frame.width * 0.2, y=config_frame.height * 0.45
+            x=config_frame.width * 0.1, y=config_frame.height * 0.45
         )
 
         ed_entry = tk.Entry(
             config_frame.frame,
-            width=5, font=('Arial', 20),
+            width=5, font=('Arial', 15),
             foreground='#FFFFFF', background='#333333', bd=1,
         )
         ed_entry.place(
-            x=config_frame.width * 0.5, y=config_frame.height * 0.4
+            x=config_frame.width * 0.4, y=config_frame.height * 0.4
         )
         if not np.isnan(self.train_data.loc[index, 'e_dep']):
             ed_entry.insert(
@@ -740,11 +740,11 @@ class TrainListCanvas:
 
         la_entry = tk.Entry(
             config_frame.frame,
-            width=5, font=('Arial', 20),
+            width=5, font=('Arial', 15),
             foreground='#FFFFFF', background='#333333', bd=1,
         )
         la_entry.place(
-            x=config_frame.width * 0.5, y=config_frame.height * 0.45
+            x=config_frame.width * 0.4, y=config_frame.height * 0.45
         )
         if not np.isnan(self.train_data.loc[index, 'l_arr']):
             la_entry.insert(
@@ -754,23 +754,23 @@ class TrainListCanvas:
 
         station_label = tk.Label(
             config_frame.frame,
-            text='Place Station:', font=('Arial', 20),
+            text='Place Station:', font=('Arial', 15),
             foreground='#FFFFFF', background='#000000',
             bd=0,
         )
         station_label.place(
-            x=config_frame.width * 0.2, y=config_frame.height * 0.5
+            x=config_frame.width * 0.1, y=config_frame.height * 0.5
         )
 
         place_station = tk.Button(
             config_frame.frame,
-            width=60, height=60,
+            width=45, height=45,
             command=lambda: self.grid.select(5),
             image=self.station_img,
             foreground='#000000', background='#000000', bd=0
         )
         place_station.place(
-            x=config_frame.width * 0.51, y=config_frame.height * 0.49
+            x=config_frame.width * 0.41, y=config_frame.height * 0.49
         )
         if not np.isnan(self.train_data.loc[index, 'end_pos'][0]):
             row, col = self.train_data.loc[index, 'end_pos']
@@ -783,11 +783,11 @@ class TrainListCanvas:
             command=lambda: self.save_ed_la(
                 index, ed_entry, la_entry, config_frame
             ),
-            text='Save', font=('Arial', 20),
+            text='Save', font=('Arial', 15),
             foreground='#000000', background='#777777', bd=0
         )
         save.place(
-            x=config_frame.width * 0.5, y=config_frame.height * 0.55
+            x=config_frame.width * 0.4, y=config_frame.height * 0.55
         )
 
     def save_ed_la(self, index, ed_entry, la_entry, config_frame):
@@ -1166,7 +1166,7 @@ class PathListCanvas:
 
             label = tk.Label(
                 frame,
-                width=20, font=('Arial', 20),
+                width=20, font=('Arial', 15),
                 fg='#FFFFFF', bg='#000000',
                 text=f'Train {idx}: {row["start_pos"]}, {row["dir"]}',
             )
@@ -1175,7 +1175,7 @@ class PathListCanvas:
             self.show_button_dict[idx] = tk.Button(
                 frame,
                 width=7,height=1,
-                font=('Arial', 20),
+                font=('Arial', 15),
                 fg='#000000', bg='#008800',
                 text='show',
                 command=lambda index=idx: self.toggle_path(index)
