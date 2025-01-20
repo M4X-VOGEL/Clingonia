@@ -35,15 +35,17 @@ def write_trains(trains, lp):
     for _, row in trains.iterrows():
         lp.write(
             f"train({row['id']}).\n"
-            f"start({row['id']},({row['x']},{row['y']}),{row['e_dep']},{row['dir']}).\n"
-            f"end({row['id']},({row['x_end']},{row['y_end']}),{row['l_arr']}).\n\n"
+            f"start({row['id']},({row['y']},{row['x']}),{row['e_dep']},{row['dir']}).\n"
+            f"end({row['id']},({row['y_end']},{row['x_end']}),{row['l_arr']}).\n\n"
         )
+
 
 def write_tracks(tracks, lp):
     for i, row in enumerate(tracks):
         for j, track in enumerate(row):
-            lp.write(f"cell({i},{j},{track}).\n")
+            lp.write(f"cell(({i},{j}),{track}).\n")
         lp.write(f'\n')
+
 
 # Call
 env_to_lp(tracks, trains)

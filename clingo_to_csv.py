@@ -2,11 +2,11 @@ import subprocess
 import sys
 import csv
 
-import params
-clingo_path = params.clingo_path
-lp_files = params.lp_files
-answer_number = params.answer_number
-
+### TEST-EINGABE
+clingo_path = "clingo"
+lp_files = ["asp/flat.lp", "asp/trans.lp", "env/env.lp"]
+answer_number = 1
+###
 
 def clingo_to_csv(clingo_path="clingo", lp_files=[], answer_number=1):
   """Runs clingo program and writes the reduced output of the stated answer into a CSV.
@@ -90,12 +90,17 @@ def get_action_params(clingo_answer):
   # Only consider Action Predicates
   actions = [s for s in clingo_answer.split() if "action" in s]
   # Trim Action Predicates
+  train_ids = []
   action_params = []
   for action in actions:
     # Remove redundant Characters
     params = action.replace("action(train(", "")
     params = params[:-1]
     params = params.replace("),", ",")
+    # Skip move to starting position
+    if params[0] not in train_ids:
+      train_ids.append(params[0])
+      continue
     # Save trimmed Version
     action_params.append(params)
   return action_params

@@ -41,12 +41,12 @@ def act_to_pos():
             # Write start position when reaching new ID
             if id not in train_ids:
                 x, y, dir = get_start_pos(id)
-                writer.writerow([id, x, y, dir, t])
+                writer.writerow([id, x, y, dir, t-1])
                 train_ids.append(id)
 
             # Following Positions
             x, y, dir = next_pos(x, y, action, dir)
-            writer.writerow([id, x, y, dir, t+1])
+            writer.writerow([id, x, y, dir, t])
 
 
 def get_start_pos(train_id):

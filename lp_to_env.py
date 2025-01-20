@@ -39,7 +39,7 @@ def prep_tracks_and_trains(path):
 
 
 def add_cell(df_tracks, row):
-    cell = row[5:-3].split(',')
+    cell = row[5:-3].replace('(', '').replace(')', '').split(',')
     y, x = int(cell[0]), int(cell[1])
     track = int(cell[2])
     df_tracks.loc[len(df_tracks)] = [x, y, track]
@@ -86,3 +86,9 @@ def create_df_of_trains(tse_list):
 
 
 tracks, trains = lp_to_env("env.lp")
+
+### Test
+print(tracks)
+print()
+print(trains)
+###
