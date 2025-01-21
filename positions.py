@@ -1,13 +1,13 @@
 import pandas as pd
-import csv
+import actions
 
-output_file = "data/positions.csv"
+### TEST-EINGABE 1
+clingo_path = "clingo"
+lp_files = ["asp/flat.lp", "asp/trans.lp", "env/env.lp"]
+answer_number = 1
+###
 
-actions_file = "data/action_params.csv"
-df_actions = pd.read_csv(actions_file)
-df_actions = df_actions.sort_values(by=["trainID", "timestep"], ascending=[True, True])
-
-### TEST-EINGABE
+### TEST-EINGABE 2
 tracks = [
     [16386,1025,17411,1025,5633,1025,4608],
     [32800,0,32800,0,32800,0,32800],
@@ -17,42 +17,43 @@ trains = pd.DataFrame({
     "id": [0,1],
     "x": [4,6],
     "y": [1,1],
-    "dir": ['s','n']
+    "dir": ['s','n'],
+    "x_end": [1,0],
+    "y_end": [2,1],
+    "e_dep": [1,1],
+    "l_arr": [20,20]
 })
 ###
 
-def act_to_pos():
+def position_df():
+    df_actions = actions.clingo_to_df(clingo_path, lp_files, answer_number)
+    df_actions = df_actions.sort_values(by=["trainID", "timestep"], ascending=[True, True])
+    df_pos = pd.DataFrame(columns=["trainID", "x", "y", "dir", "timestep"])
+    # Train IDs
+    train_ids = []
+    for _, row in df_actions.iterrows():
+        create_pos(df_pos, train_ids, row)
+    return df_pos
 
-    with open(output_file, mode='w', newline='', encoding="utf-8") as file:
-        writer = csv.writer(file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
 
-        # Write CSV Headers
-        writer.writerow(["trainID", 'x', 'y', "dir", "timestep"])
-
-        # Train IDs
-        train_ids = []
-
-        # Position for each action
-        for i, row in df_actions.iterrows():
-            id = row['trainID']
-            action = row["action"]
-            t = row["timestep"]
-
-            # Write start position when reaching new ID
-            if id not in train_ids:
-                x, y, dir = get_start_pos(id)
-                writer.writerow([id, x, y, dir, t-1])
-                train_ids.append(id)
-
-            # Following Positions
-            x, y, dir = next_pos(x, y, action, dir)
-            writer.writerow([id, x, y, dir, t])
+def create_pos(df_pos, train_ids, row):
+    id = row['trainID']
+    action = row["action"]
+    t = row["timestep"]
+    # Add start position when reaching new ID
+    if id not in train_ids:
+        x, y, dir = get_start_pos(id)
+        df_pos.loc[len(df_pos)] = [id, x, y, dir, t-1]
+        train_ids.append(id)
+    # Following Positions
+    x, y, dir = next_pos(x, y, action, dir)
+    df_pos.loc[len(df_pos)] = [id, x, y, dir, t]
 
 
 def get_start_pos(train_id):
-    x = trains[trains["id"] == train_id]["x"].values[0]
-    y = trains[trains["id"] == train_id]["y"].values[0]
-    dir = trains[trains["id"] == train_id]["dir"].values[0]
+    x = trains.loc[trains["id"] == train_id, "x"].iloc[0]
+    y = trains.loc[trains["id"] == train_id, "y"].iloc[0]
+    dir = trains.loc[trains["id"] == train_id, "dir"].iloc[0]
     return x, y, dir
 
 
@@ -126,5 +127,7 @@ def pos_change(x, y, dir):
     return x, y
 
 
-# Call
-act_to_pos()
+### Test
+df_positions = position_df()
+print(df_positions)
+###

@@ -85,9 +85,8 @@ def create_df_of_trains(tse_list):
     return trains
 
 
-tracks, trains = lp_to_env("env.lp")
-
 ### Test
+tracks, trains = lp_to_env("env.lp")
 print(tracks)
 print()
 print(trains)
