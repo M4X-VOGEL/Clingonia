@@ -45,9 +45,11 @@ USER_ENV_PARAS = {
 }
 
 CURRENT_ARRAY = np.zeros((3,40,40), dtype=int)
+CURRENT_BACKUP_ARRAY = CURRENT_ARRAY.copy()
 CURRENT_DF = pd.DataFrame(
     columns=['start_pos', 'dir', 'end_pos', 'e_dep', 'l_arr']
 )
+CURRENT_BACKUP_DF = CURRENT_DF.copy()
 
 BUILD_MODE = None
 LAST_MENU = None
@@ -179,7 +181,7 @@ def build_start_menu_frame():
         x=FRAMES['start_menu_frame'].width * 0.25,
         y=FRAMES['start_menu_frame'].height * 0.35,
         command=switch_start_to_builder,
-        text='Build Custom Environment',
+        text='Build New Environment',
         font=('Arial', 15, 'bold'),
         foreground_color='#000000',
         background_color='#777777',
@@ -389,7 +391,7 @@ def build_main_menu():
         x=FRAMES['main_menu_frame'].width * 0.25,
         y=FRAMES['main_menu_frame'].height * 0.35,
         command=switch_main_to_builder,
-        text='Build Custom Environment',
+        text='Build New Environment',
         font=('Arial', 15, 'bold'),
         foreground_color='#000000',
         background_color='#777777',
@@ -1548,7 +1550,7 @@ def build_builder_para_frame():
 
 def builder_para_to_track_grid():
     global BUILD_MODE, CURRENT_ARRAY, CURRENT_DF, DEFAULT_ENV_PARAS, \
-        USER_ENV_PARAS
+        USER_ENV_PARAS, CURRENT_BACKUP_ARRAY, CURRENT_BACKUP_DF
 
     save_builder_env_params()
 
@@ -1615,10 +1617,14 @@ def builder_para_to_track_grid():
                             row['end_pos'][1] > cols - 1):
                         CURRENT_DF.at[index, 'end_pos'] = (np.nan, np.nan)
 
+    CURRENT_BACKUP_ARRAY = CURRENT_ARRAY.copy()
+    CURRENT_BACKUP_DF = CURRENT_DF.copy()
+
     build_track_builder_menu_frame()
     build_builder_grid_frame()
 
 def builder_track_grid_to_para():
+    global FRAMES
     # TODO: save builder array and dataframe
 
     if 'track_builder_menu_frame' in FRAMES:
@@ -1693,10 +1699,25 @@ def build_track_builder_menu_frame():
         x=FRAMES['track_builder_menu_frame'].width * 0.25,
         y=FRAMES['track_builder_menu_frame'].height * 0.9,
         command=builder_track_to_train,
-        text='Train Builder',
+        text='Trains',
         font=('Arial', 15, 'bold'),
         foreground_color='#000000',
         background_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    BUTTONS['reset_button'] = Button(
+        root=FRAMES['track_builder_menu_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['track_builder_menu_frame'].width * 0.8,
+        y=FRAMES['track_builder_menu_frame'].height * 0.7,
+        command=lambda: open_reset_frame(FRAMES['track_builder_menu_frame']),
+        text='RESET',
+        font=('Arial', 15, 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
         border_width=0,
         visibility=True,
     )
@@ -2077,6 +2098,8 @@ def build_track_builder_menu_frame():
     )
 
 def builder_track_to_train():
+    global FRAMES, CANVASES
+
     if 'track_builder_menu_frame' in FRAMES:
         FRAMES['track_builder_menu_frame'].destroy_frame()
         del FRAMES['track_builder_menu_frame']
@@ -2086,6 +2109,8 @@ def builder_track_to_train():
     build_train_builder_menu_frame()
 
 def builder_train_to_track():
+    global FRAMES, CANVASES
+
     if 'train_builder_menu_frame' in FRAMES:
         FRAMES['train_builder_menu_frame'].destroy_frame()
         del FRAMES['train_builder_menu_frame']
@@ -2117,6 +2142,21 @@ def build_train_builder_menu_frame():
         command= builder_train_to_track,
         text='<',
         font=('Arial', 25, 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        border_width=0,
+        visibility=True,
+    )
+
+    BUTTONS['reset_button'] = Button(
+        root=FRAMES['train_builder_menu_frame'].frame,
+        width=10,
+        height=1,
+        x=FRAMES['train_builder_menu_frame'].width * 0.7,
+        y=FRAMES['train_builder_menu_frame'].height * 0.11,
+        command=lambda: open_reset_frame(FRAMES['train_builder_menu_frame']),
+        text='RESET',
+        font=('Arial', 15, 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         border_width=0,
@@ -2212,6 +2252,7 @@ def build_train_builder_menu_frame():
     CANVASES['builder_grid_canvas'].train_list = CANVASES['train_config_list']
 
 def builder_train_grid_to_env():
+    global FRAMES, CANVASES, CURRENT_BACKUP_ARRAY, CURRENT_BACKUP_DF
     # TODO: save builder array and dataframe
 
     if 'train_builder_menu_frame' in FRAMES:
@@ -2221,21 +2262,11 @@ def builder_train_grid_to_env():
         FRAMES['builder_grid_frame'].destroy_frame()
         del FRAMES['builder_grid_frame']
 
+    CURRENT_BACKUP_ARRAY = CURRENT_ARRAY.copy()
+    CURRENT_BACKUP_DF = CURRENT_DF.copy()
+
     build_builder_env_viewer()
     build_builder_env_menu()
-
-def builder_env_to_train_grid():
-    # TODO: maybe save changes in dataframe
-
-    if 'builder_env_menu_frame' in FRAMES:
-        FRAMES['builder_env_menu_frame'].destroy_frame()
-        del FRAMES['builder_env_menu_frame']
-    if 'builder_env_viewer_frame' in FRAMES:
-        FRAMES['builder_env_viewer_frame'].destroy_frame()
-        del FRAMES['builder_env_viewer_frame']
-
-    build_builder_grid_frame()
-    build_train_builder_menu_frame()
 
 def build_builder_env_viewer():
     global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT
@@ -2275,21 +2306,6 @@ def build_builder_env_menu():
         background_color='#000000',
         border_width=0,
         visibility=True
-    )
-
-    BUTTONS['back_button'] = Button(
-        root=FRAMES['builder_env_menu_frame'].frame,
-        width=2,
-        height=1,
-        x=FRAMES['builder_env_menu_frame'].width * 0.06,
-        y=FRAMES['builder_env_menu_frame'].height * 0,
-        command= builder_env_to_train_grid,
-        text='<',
-        font=('Arial', 25, 'bold'),
-        foreground_color='#FF0000',
-        background_color='#000000',
-        border_width=0,
-        visibility=True,
     )
 
     BUTTONS['return_to_menu_button'] = Button(
@@ -2414,6 +2430,80 @@ def load_builder_env_params():
             )
         else:
             ENTRY_FIELDS[field].insert_string(str(USER_ENV_PARAS[key]))
+
+def open_reset_frame(parent_frame):
+    global FRAMES, LABELS, BUTTONS
+
+    FRAMES['reset_frame'] = Frame(
+        root=parent_frame.frame,
+        width=SCREENWIDTH * 0.5,
+        height=SCREENHEIGHT,
+        x=0,
+        y=0,
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    LABELS['reset_label'] = Label(
+        root=FRAMES['reset_frame'].frame,
+        x=FRAMES['reset_frame'].width * 0.4,
+        y=FRAMES['reset_frame'].height * 0.1,
+        text='RESET GRID?',
+        font=('Arial', 30, 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    BUTTONS['yes_reset_button'] = Button(
+        root=FRAMES['reset_frame'].frame,
+        width=4,
+        height=1,
+        x=FRAMES['reset_frame'].width * 0.45,
+        y=FRAMES['reset_frame'].height * 0.2,
+        command=reset_builder_grid,
+        text='YES',
+        font=('Arial', 15),
+        foreground_color='#000000',
+        background_color='#FF0000',
+        border_width=0,
+        visibility=True,
+    )
+
+    BUTTONS['no_reset_button'] = Button(
+        root=FRAMES['reset_frame'].frame,
+        width=4,
+        height=1,
+        x=FRAMES['reset_frame'].width * 0.55,
+        y=FRAMES['reset_frame'].height * 0.2,
+        command=FRAMES['reset_frame'].destroy_frame,
+        text='NO',
+        font=('Arial', 15),
+        foreground_color='#000000',
+        background_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+def reset_builder_grid():
+    global CURRENT_ARRAY, CURRENT_DF, CURRENT_BACKUP_ARRAY, CURRENT_BACKUP_DF
+
+    CURRENT_ARRAY = CURRENT_BACKUP_ARRAY.copy()
+    CURRENT_DF = CURRENT_BACKUP_DF.copy()
+
+    if 'track_builder_menu_frame' in FRAMES:
+        FRAMES['track_builder_menu_frame'].destroy_frame()
+        del FRAMES['track_builder_menu_frame']
+    if 'train_builder_menu_frame' in FRAMES:
+        FRAMES['train_builder_menu_frame'].destroy_frame()
+        del FRAMES['train_builder_menu_frame']
+    if 'builder_grid_frame' in FRAMES:
+        FRAMES['builder_grid_frame'].destroy_frame()
+        del FRAMES['builder_grid_frame']
+
+    build_track_builder_menu_frame()
+    build_builder_grid_frame()
 
 
 

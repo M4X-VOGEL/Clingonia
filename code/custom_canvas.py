@@ -267,6 +267,10 @@ class BuildCanvas:
             2: 'e',
             3: 's',
             4: 'w',
+            'n': 1,
+            'e': 2,
+            's': 3,
+            'w': 4,
         }
 
         self.draw_images()
@@ -480,14 +484,13 @@ class BuildCanvas:
                 if self.current_selection == 5:
                     # station
                     self.array[2] = np.zeros(self.array[2].shape)
-                    self.array[2][row, col] = self.current_selection
-                    self.train_data.at[
-                        self.train_index, 'end_pos'
-                    ] = (row, col)
+                    self.train_data.at[self.train_index, 'end_pos'] = (row, col)
+                    for r,c in self.train_data['end_pos']:
+                        if not np.isnan(r):
+                            self.array[2][r, c] = 5
                 else:
                     # train
-                    self.array[1][row, col] = self.current_selection
-
+                    self.array[1] = np.zeros(self.array[1].shape)
                     data = {
                         'start_pos': (row, col),
                         'dir': self.dir[self.current_selection],
@@ -496,6 +499,8 @@ class BuildCanvas:
                         'l_arr': np.nan,
                     }
                     self.train_data.loc[len(self.train_data)] = data
+                    for _,r in self.train_data.iterrows():
+                            self.array[1][r['start_pos']] = self.dir[r['dir']]
                     if self.train_list:
                         self.train_list.update_labels()
             else:
@@ -509,6 +514,21 @@ class BuildCanvas:
     def draw_images(self):
         self.draw_grid()
         self.canvas.delete("grid_image")
+        self.canvas.delete("id_labels")
+
+        adjusted_cell_size = self.cell_size * self.scale
+
+        offset_dict = {
+            0: (adjusted_cell_size * 0.5, adjusted_cell_size * 0.5),
+            1: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.5),
+            2: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.25),
+            3: (adjusted_cell_size * 0.5, adjusted_cell_size * 0.25),
+            4: (adjusted_cell_size * 0.75, adjusted_cell_size * 0.25),
+            5: (adjusted_cell_size * 0.75, adjusted_cell_size * 0.5),
+            6: (adjusted_cell_size * 0.75, adjusted_cell_size * 0.75),
+            7: (adjusted_cell_size * 0.5, adjusted_cell_size * 0.75),
+            8: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.75),
+        }
 
         for i in range(3):
             for row in range(self.rows):
@@ -519,19 +539,75 @@ class BuildCanvas:
 
                         image = f'../png/{image}.png'
                         image = Image.open(image).resize(
-                            (int(self.cell_size * self.scale),
-                             int(self.cell_size * self.scale))
+                            (int(adjusted_cell_size),
+                             int(adjusted_cell_size))
                         ).rotate(rotation)
                         image = ImageTk.PhotoImage(image)
 
                         self.image_refs.append(image)
 
-                        x1 = self.x_offset + col * self.cell_size * self.scale
-                        y1 = self.y_offset + row * self.cell_size * self.scale
+                        x1 = self.x_offset + col * adjusted_cell_size
+                        y1 = self.y_offset + row * adjusted_cell_size
                         self.canvas.create_image(
                             x1, y1, anchor="nw", image=image,
                             tags="grid_image"
                         )
+
+            # draw id on trains
+            if i == 1:
+                self.train_data['count'] = (
+                    self.train_data.groupby('start_pos')['end_pos']
+                    .transform('count')
+                )
+                self.train_data['cell_offset'] = (
+                        self.train_data.groupby('start_pos')
+                        .cumcount()
+                        .where(self.train_data['count'] > 1,0) % 9
+                )
+
+                for index, row in self.train_data.iterrows():
+                    self.canvas.create_text(
+                        (self.x_offset + offset_dict[row['cell_offset']][0] +
+                         row['start_pos'][1] * adjusted_cell_size),
+                        (self.y_offset + offset_dict[row['cell_offset']][1] +
+                        row['start_pos'][0] * adjusted_cell_size),
+                        text=str(index),
+                        anchor="center",
+                        font=("Courier", 15, 'bold'),
+                        fill='#00FFFF',
+                        tags="id_labels"
+                    )
+
+                self.train_data.drop(columns=['count'], inplace=True)
+                self.train_data.drop(columns=['cell_offset'], inplace=True)
+
+            # draw id on station
+            if i == 2:
+                self.train_data['count'] = (
+                    self.train_data.groupby('end_pos')['end_pos']
+                    .transform('count')
+                )
+                self.train_data['cell_offset'] = (
+                        self.train_data.groupby('end_pos')
+                        .cumcount()
+                        .where(self.train_data['count'] > 1,0) % 9
+                )
+
+                for index, row in self.train_data.iterrows():
+                    self.canvas.create_text(
+                        (self.x_offset + offset_dict[row['cell_offset']][0] +
+                         row['end_pos'][1] * adjusted_cell_size),
+                        (self.y_offset + offset_dict[row['cell_offset']][1] +
+                        row['end_pos'][0] * adjusted_cell_size),
+                        text=str(index),
+                        anchor="center",
+                        font=("Courier", 15, 'bold'),
+                        fill='#00FFFF',
+                        tags="id_labels"
+                    )
+
+                self.train_data.drop(columns=['count'], inplace=True)
+                self.train_data.drop(columns=['cell_offset'], inplace=True)
 
 
 class TrainListCanvas:
@@ -608,7 +684,7 @@ class TrainListCanvas:
 
             label = tk.Label(
                 frame,
-                width=20, font=('Arial', 15),
+                width=25, font=('Arial', 15),
                 fg='#FFFFFF', bg='#000000',
                 text=f'Train {idx}: {row["start_pos"]}, {row["dir"]}',
             )
@@ -616,19 +692,19 @@ class TrainListCanvas:
 
             self.config_dict[idx] = tk.Button(
                 frame,
-                width=7,height=1,
+                width=8,height=1,
                 font=('Arial', 15),
                 fg='#FFFFFF', bg='#333333',
                 text='configure',
                 command=lambda index=idx: self.open_train_config_frame(index)
             )
-            self.config_dict[idx].pack(side='left', padx=10)
+            self.config_dict[idx].pack(side='left', padx=15)
 
             self.remove_dict[idx] = tk.Button(
                 frame,
                 width=7, height=1,
                 font=('Arial', 15),
-                fg='#000000', bg='#880000',
+                fg='#FF0000', bg='#000000', bd=0,
                 text='remove',
                 command=lambda index=idx: self.remove_train(index)
             )
@@ -651,7 +727,7 @@ class TrainListCanvas:
 
     def remove_train(self, index):
 
-        # get number of trains at the same position as the deleted one
+        # get list of trains at the same position as the deleted one
         df = self.train_data[
             self.train_data['start_pos'] ==
             self.train_data['start_pos'].iloc[index]
@@ -673,7 +749,17 @@ class TrainListCanvas:
             # replace the old trains direction in the grid
             self.grid.array[1][
                 self.train_data['start_pos'].iloc[index]
-            ] = next(k for k, d in self.grid.dir.items() if d == new_dir)
+            ] = self.grid.dir[new_dir]
+
+        if self.train_data['end_pos'].iloc[index] != (np.nan, np.nan):
+            # get list of stations at the same position as the deleted one
+            station_count = self.train_data[
+                self.train_data['end_pos'] ==
+                self.train_data['end_pos'].iloc[index]
+                ].count()
+
+            if station_count['end_pos'] == 1:
+                self.grid.array[2][self.train_data['end_pos'].iloc[index]] = 0
 
         self.train_data.drop(index, inplace=True)
         self.train_data.reset_index(drop=True, inplace=True)
@@ -819,7 +905,6 @@ class TrainListCanvas:
         self.train_data.loc[index, 'l_arr'] = la
         self.grid.current_selection = None
         self.grid.train_index = None
-        self.grid.array[2] = np.zeros(self.grid.array[2].shape)
         self.grid.draw_images()
         config_frame.destroy_frame()
 
