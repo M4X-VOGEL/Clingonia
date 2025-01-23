@@ -32,22 +32,18 @@ def position_df():
     # Train IDs
     train_ids = []
     for _, row in df_actions.iterrows():
-        create_pos(df_pos, train_ids, row)
+        id = row['trainID']
+        action = row["action"]
+        t = row["timestep"]
+        # Add start position when reaching new ID
+        if id not in train_ids:
+            x, y, dir = get_start_pos(id)
+            df_pos.loc[len(df_pos)] = [id, x, y, dir, t-1]
+            train_ids.append(id)
+        # Following Positions
+        x, y, dir = next_pos(x, y, action, dir)
+        df_pos.loc[len(df_pos)] = [id, x, y, dir, t]
     return df_pos
-
-
-def create_pos(df_pos, train_ids, row):
-    id = row['trainID']
-    action = row["action"]
-    t = row["timestep"]
-    # Add start position when reaching new ID
-    if id not in train_ids:
-        x, y, dir = get_start_pos(id)
-        df_pos.loc[len(df_pos)] = [id, x, y, dir, t-1]
-        train_ids.append(id)
-    # Following Positions
-    x, y, dir = next_pos(x, y, action, dir)
-    df_pos.loc[len(df_pos)] = [id, x, y, dir, t]
 
 
 def get_start_pos(train_id):
