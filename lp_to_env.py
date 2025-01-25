@@ -9,7 +9,7 @@ def lp_to_env(lp_file):
     
     Returns:
         tracks (list): 2D-list with track-types
-        trains (pd.DataFrame): DataFrame with train-info 
+        trains (pd.DataFrame): Train-configuration.
     """
     path = f"env/{lp_file}"
     if not file_in_directory(path):
