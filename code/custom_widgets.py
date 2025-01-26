@@ -49,17 +49,24 @@ class Frame:
             root: tk.Tk,
             width: int,
             height: int,
-            x: int,
-            y: int,
+            grid_pos: [int, int],
+            padding: [
+                [int, int], [[int, int], [int, int]],
+                [int, [int, int]], [[int, int], int]
+            ],
             background_color: str,
             border_width: int,
             visibility: bool,
+            sticky: str | None = None,
+            columnspan: int | None = None,
     ):
         self.root = root
         self.width = width
         self.height = height
-        self.x = x
-        self.y = y
+        self.grid_pos = grid_pos
+        self.padding = padding
+        self.sticky = sticky
+        self.columnspan = columnspan
         self.background_color = background_color
         self.border_width = border_width
         self.visibility = visibility
@@ -80,11 +87,15 @@ class Frame:
         return  frame
 
     def place_frame(self):
-        self.frame.place(x=self.x, y=self.y)
+        self.frame.grid(
+            row=self.grid_pos[0], column=self.grid_pos[1],
+            padx=self.padding[0], pady=self.padding[1],
+            sticky=self.sticky, columnspan=self.columnspan,
+        )
         self.visibility = True
 
     def hide_frame(self):
-        self.frame.place_forget()
+        self.frame.grid_forget()
         self.visibility = False
 
     def destroy_frame(self):
@@ -93,10 +104,14 @@ class Frame:
 
     def toggle_visibility(self):
         if self.visibility:
-            self.frame.place_forget()
+            self.frame.grid_forget()
             self.visibility = False
         else:
-            self.frame.place(x=self.x, y=self.y)
+            self.frame.grid(
+                row=self.grid_pos[0], column=self.grid_pos[1],
+                padx=self.padding[0], pady=self.padding[1],
+                sticky=self.sticky, columnspan=self.columnspan,
+            )
             self.visibility = True
         return
 
@@ -112,13 +127,18 @@ class Button:
             root,
             width: int,
             height: int,
-            x: int,
-            y: int,
+            grid_pos: [int, int],
+            padding: [
+                [int, int], [[int, int],[int, int]],
+                [int, [int, int]], [[int, int], int]
+            ],
             command: callable,
             foreground_color: str,
             background_color: str,
             border_width: int,
             visibility: bool,
+            sticky: str | None = None,
+            columnspan: int | None = None,
             text: str | None = None,
             font: [[str, int], [str, int, str, ...], None]  = None,
             image: str | None = None,
@@ -127,8 +147,10 @@ class Button:
         self.root = root
         self.width = width
         self.height = height
-        self.x = x
-        self.y = y
+        self.grid_pos = grid_pos
+        self.padding = padding
+        self.sticky = sticky
+        self.columnspan = columnspan
         self.command = command
         self.font = font
         self.foreground_color = foreground_color
@@ -170,20 +192,28 @@ class Button:
             warnings.warn('No text or image given to Button', UserWarning)
 
     def place_button(self):
-        self.button.place(x=self.x, y=self.y)
+        self.button.grid(
+            row=self.grid_pos[0], column=self.grid_pos[1],
+            padx=self.padding[0], pady=self.padding[1],
+            sticky=self.sticky, columnspan=self.columnspan,
+        )
         self.visibility = True
 
     def hide_button(self):
         if self.visibility:
-            self.button.place_forget()
+            self.button.grid_forget()
             self.visibility = False
 
     def toggle_visibility(self):
         if self.visibility:
-            self.button.place_forget()
+            self.button.grid_forget()
             self.visibility = False
         else:
-            self.button.place(x=self.x, y=self.y)
+            self.button.grid(
+                row=self.grid_pos[0], column=self.grid_pos[1],
+                padx=self.padding[0], pady=self.padding[1],
+                sticky=self.sticky, columnspan=self.columnspan,
+            )
             self.visibility = True
         return
 
@@ -199,17 +229,24 @@ class Label:
     def __init__(
             self,
             root,
-            x: int,
-            y: int,
+            grid_pos: [int, int],
+            padding: [
+                [int, int], [[int, int],[int, int]],
+                [int, [int, int]], [[int, int], int]
+            ],
             text: str,
             font: [[str, int],[str, int, str,...]],
             foreground_color: str,
             background_color: str,
             visibility: bool,
+            sticky: str | None = None,
+            columnspan: int | None = None,
     ):
         self.root = root
-        self.x = x
-        self.y = y
+        self.grid_pos = grid_pos
+        self.padding = padding
+        self.sticky = sticky
+        self.columnspan = columnspan
         self.text = text
         self.font = font
         self.foreground_color = foreground_color
@@ -230,19 +267,27 @@ class Label:
         return label
 
     def place_label(self):
-        self.label.place(x=self.x, y=self.y)
+        self.label.grid(
+            row=self.grid_pos[0], column=self.grid_pos[1],
+            padx=self.padding[0], pady=self.padding[1],
+            sticky=self.sticky, columnspan=self.columnspan,
+        )
         self.visibility = True
 
     def hide_label(self):
-        self.label.place_forget()
+        self.label.grid_forget()
         self.visibility = False
 
     def toggle_visibility(self):
         if self.visibility:
-            self.label.place_forget()
+            self.label.grid_forget()
             self.visibility = False
         else:
-            self.label.place(x=self.x, y=self.y)
+            self.label.grid(
+                row=self.grid_pos[0], column=self.grid_pos[1],
+                padx=self.padding[0], pady=self.padding[1],
+                sticky=self.sticky, columnspan=self.columnspan,
+            )
             self.visibility = True
         return
 
@@ -253,18 +298,25 @@ class Picture:
             root,
             width: int,
             height: int,
-            x: int,
-            y: int,
+            grid_pos: [int, int],
+            padding: [
+                [int, int], [[int, int],[int, int]],
+                [int, [int, int]], [[int, int], int]
+            ],
             image: str,
             foreground_color: str,
             background_color: str,
             visibility: bool,
+            sticky: str | None = None,
+            columnspan: int | None = None,
     ):
         self.root = root
         self.width = width
         self.height = height
-        self.x = x
-        self.y = y
+        self.grid_pos = grid_pos
+        self.padding = padding
+        self.sticky = sticky
+        self.columnspan = columnspan
         self.foreground_color = foreground_color
         self.background_color = background_color
         self.visibility = visibility
@@ -285,27 +337,34 @@ class Picture:
         return label
 
     def place_label(self):
-        self.label.place(x=self.x, y=self.y)
+        self.label.grid(
+            row=self.grid_pos[0], column=self.grid_pos[1],
+            padx=self.padding[0], pady=self.padding[1],
+            sticky=self.sticky, columnspan=self.columnspan,
+        )
         self.visibility = True
 
     def hide_label(self):
-        self.label.place_forget()
+        self.label.grid_forget()
         self.visibility = False
 
     def toggle_visibility(self):
         if self.visibility:
-            self.label.place_forget()
+            self.label.grid_forget()
             self.visibility = False
         else:
-            self.label.place(x=self.x, y=self.y)
+            self.label.grid(
+                row=self.grid_pos[0], column=self.grid_pos[1],
+                padx=self.padding[0], pady=self.padding[1],
+                sticky=self.sticky, columnspan=self.columnspan,
+            )
             self.visibility = True
         return
 
-    @staticmethod
-    def get_image(image_path):
+    def get_image(self, image_path):
         image = Image.open(image_path)
-        crop_box = (0, 0, image.width - 4, image.height - 4)
-        image = image.crop(crop_box)
+        image = image.crop((0, 0, image.width - 4, image.height - 4))
+        image = image.resize((int(self.width), int(self.height)))
         image = ImageTk.PhotoImage(image)
         return image
 
@@ -316,8 +375,11 @@ class EntryField:
             root,
             width: int,
             height: int,
-            x: int,
-            y: int,
+            grid_pos: [int, int],
+            padding: [
+                [int, int], [[int, int],[int, int]],
+                [int, [int, int]], [[int, int], int]
+            ],
             text: str,
             font: [[str, int],[str, int, str,...]],
             foreground_color: str,
@@ -325,12 +387,16 @@ class EntryField:
             example_color: str,
             border_width: int,
             visibility: bool,
+            sticky: str | None = None,
+            columnspan: int | None = None,
     ):
         self.root = root
         self.width = width
         self.height = height
-        self.x = x
-        self.y = y
+        self.grid_pos = grid_pos
+        self.padding = padding
+        self.sticky = sticky
+        self.columnspan = columnspan
         self.text = text
         self.font = font
         self.foreground_color = foreground_color
@@ -379,19 +445,27 @@ class EntryField:
             self.entry_field.config(fg=self.example_color)
 
     def place_entry_field(self):
-        self.entry_field.place(x=self.x, y=self.y)
+        self.entry_field.grid(
+            row=self.grid_pos[0], column=self.grid_pos[1],
+            padx=self.padding[0], pady=self.padding[1],
+            sticky=self.sticky, columnspan=self.columnspan,
+        )
         self.visibility = True
 
     def hide_entry_field(self):
-        self.entry_field.place_forget()
+        self.entry_field.grid_forget()
         self.visibility = False
 
     def toggle_visibility(self):
         if self.visibility:
-            self.entry_field.place_forget()
+            self.entry_field.grid_forget()
             self.visibility = False
         else:
-            self.entry_field.place(x=self.x, y=self.y)
+            self.entry_field.grid(
+                row=self.grid_pos[0], column=self.grid_pos[1],
+                padx=self.padding[0], pady=self.padding[1],
+                sticky=self.sticky, columnspan=self.columnspan,
+            )
             self.visibility = True
         return
 
@@ -431,8 +505,11 @@ class Text:
             root: tk.Tk,
             width: int,
             height: int,
-            x: int,
-            y: int,
+            grid_pos: [int, int],
+            padding: [
+                [int, int], [[int, int],[int, int]],
+                [int, [int, int]], [[int, int], int]
+            ],
             text: str,
             font: [[str, int],[str, int, str,...]],
             wrap: str,
@@ -441,12 +518,16 @@ class Text:
             border_width: int,
             state: str,
             visibility: bool,
+            sticky: str | None = None,
+            columnspan: int | None = None,
     ):
         self.root = root
         self.width = width
         self.height = height
-        self.x = x
-        self.y = y
+        self.grid_pos = grid_pos
+        self.padding = padding
+        self.sticky = sticky
+        self.columnspan = columnspan
         self.text_data = text
         self.font = font
         self.wrap = wrap
@@ -473,20 +554,26 @@ class Text:
         return text
 
     def place_text(self):
-        self.text.place(width=self.width, height=self.height,x=self.x, y=self.y)
+        self.text.grid(
+            row=self.grid_pos[0], column=self.grid_pos[1],
+            padx=self.padding[0], pady=self.padding[1],
+            sticky=self.sticky, columnspan=self.columnspan,
+        )
         self.visibility = True
 
     def hide_text(self):
-        self.text.place_forget()
+        self.text.grid_forget()
         self.visibility = False
 
     def toggle_visibility(self):
         if self.visibility:
-            self.text.place_forget()
+            self.text.grid_forget()
             self.visibility = False
         else:
-            self.text.place(
-                width=self.width, height=self.height, x=self.x, y=self.y
+            self.text.grid(
+                row=self.grid_pos[0], column=self.grid_pos[1],
+                padx=self.padding[0], pady=self.padding[1],
+                sticky=self.sticky, columnspan=self.columnspan,
             )
             self.visibility = True
         return
