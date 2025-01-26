@@ -3,7 +3,6 @@
     "cols": null,
     "agents": null,
     "cities": null,
-    "answer": null,
     "seed": null,
     "grid": null,
     "intercity": null,
@@ -12,5 +11,8 @@
     "speed": null,
     "malfunction": null,
     "min": null,
-    "max": null
+    "max": null,
+    "clingo": null,
+    "answer": null,
+    "lpFiles": []
 }
