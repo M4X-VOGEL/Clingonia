@@ -24,7 +24,6 @@ class Window:
         window = tk.Tk()
         window.title(self.title)
         window.configure(bg=self.background_color)
-        window.bind('<Escape>', self.close_window)
 
         if self.fullscreen is False:
             if self.width is None and self.height is None:
@@ -36,7 +35,7 @@ class Window:
 
         return window
 
-    def close_window(self, event=None):
+    def close_window(self):
         self.window.quit()
 
     def run(self):

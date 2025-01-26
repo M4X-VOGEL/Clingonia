@@ -1,5 +1,6 @@
 import ast
 import json
+from tkinter import filedialog
 
 from custom_canvas import *
 
@@ -19,12 +20,11 @@ LAST_MENU = None
 
 
 # Data storages
-DEFAULT_ENV_PARAS = {
+DEFAULT_PARAMS = {
     'rows': 40,
     'cols': 40,
     'agents': 4,
     'cities': 4,
-    'answer': 1,
     'seed': 1,
     'grid': False,
     'intercity': 2,
@@ -34,13 +34,15 @@ DEFAULT_ENV_PARAS = {
     'malfunction': (0, 30),
     'min': 2,
     'max': 6,
+    'answer': 1,
+    'clingo': 'clingo',
+    'lpFiles': []
 }
-USER_ENV_PARAS = {
+USER_PARAMS = {
     'rows': None,
     'cols': None,
     'agents': None,
     'cities': None,
-    'answer': None,
     'seed': None,
     'grid': None,
     'intercity': None,
@@ -50,6 +52,9 @@ USER_ENV_PARAS = {
     'malfunction': None,
     'min': None,
     'max': None,
+    'answer': None,
+    'clingo': None,
+    'lpFiles': [],
 }
 
 CURRENT_ARRAY = np.zeros((3,40,40), dtype=int)
@@ -69,13 +74,16 @@ CURRENT_BACKUP_DF = CURRENT_DF.copy()
 def build_flatland_window():
     global WINDOWS, SCREENWIDTH, SCREENHEIGHT, FONT_SCALE
 
+    load_user_data_from_file()
+
     WINDOWS['flatland_window'] = Window(
         width=None,
         height=None,
         fullscreen=True,
-        background_color='#00FF00',
+        background_color='#000000',
         title='Flatland'
     )
+    WINDOWS['flatland_window'].window.bind('<Escape>', exit_gui)
 
     SCREENWIDTH = WINDOWS['flatland_window'].window.winfo_screenwidth()
     SCREENHEIGHT = WINDOWS['flatland_window'].window.winfo_screenheight()
@@ -111,7 +119,7 @@ def build_title_frame():
     LABELS['title_label'] = Label(
         root=FRAMES['title_frame'].frame,
         grid_pos=(0, 0),
-        padding=(0, 50),
+        padding=(0, 0),
         sticky='nsew',
         text='FLATLAND',
         font=('Arial', int(FONT_SCALE * 80), 'bold'),
@@ -175,7 +183,7 @@ def build_start_menu_frame():
         grid_pos=(0, 2),
         padding=(0, 0),
         sticky='ne',
-        command=exit_stub,
+        command=exit_gui,
         text='X',
         font=('Arial', 25, 'bold'),
         foreground_color='#FF0000',
@@ -406,7 +414,7 @@ def build_main_menu():
         grid_pos=(0, 2),
         padding=(0, 0),
         sticky='ne',
-        command=exit_stub,
+        command=exit_gui,
         text='X',
         font=('Arial', 25, 'bold'),
         foreground_color='#FF0000',
@@ -502,7 +510,7 @@ def build_main_menu():
         grid_pos=(6, 1),
         padding=(0, 0),
         sticky='n',
-        command=switch_main_to_result,
+        command=switch_main_to_clingo_para,
         text='Run Simulation',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#000000',
@@ -580,6 +588,152 @@ def build_main_menu_env_viewer():
         image='env_001--4_2.png'
     )
 
+def build_clingo_para_frame():
+    global FRAMES, LABELS, BUTTONS, USER_PARAMS
+
+    FRAMES['clingo_para_frame'] = Frame(
+        root=WINDOWS['flatland_window'].window,
+        width=SCREENWIDTH * 0.5,
+        height=SCREENHEIGHT,
+        grid_pos=(0, 1),
+        padding=(0, 0),
+        sticky='nesw',
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    BUTTONS['back_button'] = Button(
+        root=FRAMES['clingo_para_frame'].frame,
+        width=2,
+        height=1,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nw',
+        command=switch_clingo_para_to_main,
+        text='<',
+        font=('Arial', 25, 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        border_width=0,
+        visibility=True,
+    )
+
+    LABELS['clingo_label'] = Label(
+        root=FRAMES['clingo_para_frame'].frame,
+        grid_pos=(1, 1),
+        padding=(0, 0),
+        sticky='nw',
+        text='Clingo Path:',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    ENTRY_FIELDS['clingo_entry'] = EntryField(
+        root=FRAMES['clingo_para_frame'].frame,
+        width=10,
+        height=1,
+        grid_pos=(1, 2),
+        padding=(0, 0),
+        sticky='nw',
+        text=f'e.g. {DEFAULT_PARAMS["clingo"]}',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    LABELS['answer_label'] = Label(
+        root=FRAMES['clingo_para_frame'].frame,
+        grid_pos=(2, 1),
+        padding=(0, 0),
+        sticky='nw',
+        text='Answer to display:',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    ENTRY_FIELDS['answer_entry'] = EntryField(
+        root=FRAMES['clingo_para_frame'].frame,
+        width=10,
+        height=1,
+        grid_pos=(2, 2),
+        padding=(0, 0),
+        sticky='nw',
+        text=f'e.g. {DEFAULT_PARAMS["answer"]}',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    BUTTONS['select_lp_files_button'] = Button(
+        root=FRAMES['clingo_para_frame'].frame,
+        width=15,
+        height=1,
+        grid_pos=(3, 1),
+        padding=(0, 0),
+        sticky='n',
+        columnspan=2,
+        command=load_lp_files,
+        text='Select LP Files',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#000000',
+        background_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    LABELS['clingo_paths_label'] = Label(
+        root=FRAMES['clingo_para_frame'].frame,
+        grid_pos=(4, 1),
+        padding=(0, 0),
+        sticky='n',
+        columnspan=2,
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    BUTTONS['run_sim_button'] = Button(
+        root=FRAMES['clingo_para_frame'].frame,
+        width=30,
+        height=2,
+        grid_pos=(5, 1),
+        padding=(0, 0),
+        sticky='n',
+        columnspan=2,
+        command=switch_clingo_para_to_result,
+        text='Run Simulation',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#000000',
+        background_color='#FF0000',
+        border_width=0,
+        visibility=True,
+    )
+
+    FRAMES['clingo_para_frame'].frame.rowconfigure(0, weight=1)
+    FRAMES['clingo_para_frame'].frame.columnconfigure(0, weight=1)
+    FRAMES['clingo_para_frame'].frame.rowconfigure(
+        tuple(range(1,6)), weight=2
+    )
+    FRAMES['clingo_para_frame'].frame.columnconfigure(
+        tuple(range(1,3)), weight=2
+    )
+    FRAMES['clingo_para_frame'].frame.grid_propagate(False)
+
+    load_clingo_params()
+
 def toggle_main_menu_help():
     if 'main_menu_help_frame' in FRAMES:
         FRAMES['main_menu_help_frame'].toggle_visibility()
@@ -631,18 +785,100 @@ def switch_main_to_modify():
 
     build_builder_para_frame()
 
-def switch_main_to_result():
+def switch_main_to_clingo_para():
     if 'main_menu_frame' in FRAMES:
         FRAMES['main_menu_frame'].destroy_frame()
         del FRAMES['main_menu_frame']
     if 'main_menu_help_frame' in FRAMES:
         FRAMES['main_menu_help_frame'].destroy_frame()
         del FRAMES['main_menu_help_frame']
+
+    build_clingo_para_frame()
+
+def switch_clingo_para_to_main():
+    save_clingo_params()
+
+    if 'clingo_para_frame' in FRAMES:
+        FRAMES['clingo_para_frame'].destroy_frame()
+        del FRAMES['clingo_para_frame']
     if 'main_menu_env_viewer_frame' in FRAMES:
         FRAMES['main_menu_env_viewer_frame'].destroy_frame()
         del FRAMES['main_menu_env_viewer_frame']
 
+    create_main_menu()
+
+def switch_clingo_para_to_result():
+    save_clingo_params()
+
+    if 'clingo_para_frame' in FRAMES:
+        FRAMES['clingo_para_frame'].destroy_frame()
+        del FRAMES['clingo_para_frame']
+    if 'main_menu_env_viewer_frame' in FRAMES:
+        FRAMES['main_menu_env_viewer_frame'].destroy_frame()
+        del FRAMES['main_menu_env_viewer_frame']
+
+    # TODO: run_simulation()
     create_result_menu()
+
+def load_lp_files():
+    files = filedialog.askopenfilenames(
+        title="Select LP Files",
+        initialdir='.',
+        defaultextension=".lp",
+        filetypes=[("Clingo Files", "*.lp"), ("All Files", "*.*")],
+    )
+
+    USER_PARAMS["lpFiles"] = list(files)
+    displaytext = "\n".join(files)
+
+    LABELS['clingo_paths_label'].label.config(text=displaytext)
+
+def save_clingo_params():
+    global USER_PARAMS, DEFAULT_PARAMS
+
+    for field in ENTRY_FIELDS:
+        key = field.split('_')[0]
+        if key not in DEFAULT_PARAMS:
+            continue
+        elif key not in ['answer', 'clingo']:
+            continue
+
+        data = ENTRY_FIELDS[field].entry_field.get()
+
+        try:
+            if data.startswith('e.g.'):
+                data = None
+            elif data == '':
+                data = None
+            elif key == 'clingo':
+                data = data
+            else:
+                data = int(data)
+        except Exception as e:
+            print(f"Input error for key '{key}': {str(e)}")
+            # TODO: display error message next tor Entry field using LABELS[key]
+
+        if type(data) is not str or key == 'clingo':
+            USER_PARAMS[key] = data
+
+def load_clingo_params():
+    global USER_PARAMS, DEFAULT_PARAMS
+
+    for field in ENTRY_FIELDS:
+        key = field.split('_')[0]
+        if key not in DEFAULT_PARAMS:
+            continue
+        elif key not in ['answer', 'clingo']:
+            continue
+        elif USER_PARAMS[key] is None:
+            continue
+        else:
+            ENTRY_FIELDS[field].insert_string(str(USER_PARAMS[key]))
+
+    if USER_PARAMS['lpFiles'] is not None:
+        displaytext = "\n".join(USER_PARAMS["lpFiles"])
+        LABELS['clingo_paths_label'].label.config(text=displaytext)
+    return
 
 
 
@@ -653,14 +889,14 @@ def switch_main_to_result():
 def random_gen_change_to_start_or_main():
     global LAST_MENU
 
-    if LAST_MENU == 'start':
-        create_start_menu()
-    else:
-        create_main_menu()
-
-def random_gen_para_to_start():
     save_random_gen_env_params()
 
+    if LAST_MENU == 'start':
+        random_gen_para_to_start()
+    else:
+        random_gen_para_to_main()
+
+def random_gen_para_to_start():
     if 'random_gen_para_frame' in FRAMES:
         FRAMES['random_gen_para_frame'].destroy_frame()
         del FRAMES['random_gen_para_frame']
@@ -668,8 +904,6 @@ def random_gen_para_to_start():
     create_start_menu()
 
 def random_gen_para_to_main():
-    save_random_gen_env_params()
-
     if 'random_gen_para_frame' in FRAMES:
         FRAMES['random_gen_para_frame'].destroy_frame()
         del FRAMES['random_gen_para_frame']
@@ -678,7 +912,7 @@ def random_gen_para_to_main():
 
 def build_random_gen_para_frame():
     global WINDOWS, FRAMES, LABELS, ENTRY_FIELDS, SCREENWIDTH, SCREENHEIGHT, \
-        DEFAULT_ENV_PARAS
+        DEFAULT_PARAMS
 
     FRAMES['random_gen_para_frame'] = Frame(
         root=WINDOWS['flatland_window'].window,
@@ -727,7 +961,7 @@ def build_random_gen_para_frame():
         grid_pos=(1, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["rows"]}',
+        text=f'e.g. {DEFAULT_PARAMS["rows"]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -755,7 +989,7 @@ def build_random_gen_para_frame():
         grid_pos=(2, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["cols"]}',
+        text=f'e.g. {DEFAULT_PARAMS["cols"]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -783,7 +1017,7 @@ def build_random_gen_para_frame():
         grid_pos=(3, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["agents"]}',
+        text=f'e.g. {DEFAULT_PARAMS["agents"]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -811,35 +1045,7 @@ def build_random_gen_para_frame():
         grid_pos=(4, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["cities"]}',
-        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-        visibility=True,
-    )
-
-    LABELS['answer_label'] = Label(
-        root=FRAMES['random_gen_para_frame'].frame,
-        grid_pos=(5, 1),
-        padding=(0, 0),
-        sticky='nw',
-        text='Answer to display:',
-        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000',
-        visibility=True,
-    )
-
-    ENTRY_FIELDS['answer_entry'] = EntryField(
-        root=FRAMES['random_gen_para_frame'].frame,
-        width=10,
-        height=1,
-        grid_pos=(5, 2),
-        padding=(0, 0),
-        sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["answer"]}',
+        text=f'e.g. {DEFAULT_PARAMS["cities"]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -850,7 +1056,7 @@ def build_random_gen_para_frame():
 
     LABELS['seed_label'] = Label(
         root=FRAMES['random_gen_para_frame'].frame,
-        grid_pos=(6, 1),
+        grid_pos=(5, 1),
         padding=(0, 0),
         sticky='nw',
         text='Seed:',
@@ -864,10 +1070,10 @@ def build_random_gen_para_frame():
         root=FRAMES['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(6, 2),
+        grid_pos=(5, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["seed"]}',
+        text=f'e.g. {DEFAULT_PARAMS["seed"]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -878,7 +1084,7 @@ def build_random_gen_para_frame():
 
     LABELS['grid_label'] = Label(
         root=FRAMES['random_gen_para_frame'].frame,
-        grid_pos=(7, 1),
+        grid_pos=(6, 1),
         padding=(0, 0),
         sticky='nw',
         text='Use grid mode:',
@@ -892,10 +1098,10 @@ def build_random_gen_para_frame():
         root=FRAMES['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(7, 2),
+        grid_pos=(6, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["grid"]}',
+        text=f'e.g. {DEFAULT_PARAMS["grid"]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -906,7 +1112,7 @@ def build_random_gen_para_frame():
 
     LABELS['intercity_label'] = Label(
         root=FRAMES['random_gen_para_frame'].frame,
-        grid_pos=(8, 1),
+        grid_pos=(7, 1),
         padding=(0, 0),
         sticky='nw',
         text='Max. number of rails between cities:',
@@ -920,10 +1126,10 @@ def build_random_gen_para_frame():
         root=FRAMES['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(8, 2),
+        grid_pos=(7, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["intercity"]}',
+        text=f'e.g. {DEFAULT_PARAMS["intercity"]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -934,7 +1140,7 @@ def build_random_gen_para_frame():
 
     LABELS['incity_label'] = Label(
         root=FRAMES['random_gen_para_frame'].frame,
-        grid_pos=(9, 1),
+        grid_pos=(8, 1),
         padding=(0, 0),
         sticky='nw',
         text='Max. number of rail pairs in cities:',
@@ -948,10 +1154,10 @@ def build_random_gen_para_frame():
         root=FRAMES['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(9, 2),
+        grid_pos=(8, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["incity"]}',
+        text=f'e.g. {DEFAULT_PARAMS["incity"]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -962,7 +1168,7 @@ def build_random_gen_para_frame():
 
     LABELS['remove_label'] = Label(
         root=FRAMES['random_gen_para_frame'].frame,
-        grid_pos=(10, 1),
+        grid_pos=(9, 1),
         padding=(0, 0),
         sticky='nw',
         text='Remove agents on arrival:',
@@ -976,10 +1182,10 @@ def build_random_gen_para_frame():
         root=FRAMES['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(10, 2),
+        grid_pos=(9, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["remove"]}',
+        text=f'e.g. {DEFAULT_PARAMS["remove"]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -990,7 +1196,7 @@ def build_random_gen_para_frame():
 
     LABELS['speed_label'] = Label(
         root=FRAMES['random_gen_para_frame'].frame,
-        grid_pos=(11, 1),
+        grid_pos=(10, 1),
         padding=(0, 0),
         sticky='nw',
         text='Speed ratio map for trains:',
@@ -1004,10 +1210,10 @@ def build_random_gen_para_frame():
         root=FRAMES['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(11, 2),
+        grid_pos=(10, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["speed"]}',
+        text=f'e.g. {DEFAULT_PARAMS["speed"]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1018,7 +1224,7 @@ def build_random_gen_para_frame():
 
     LABELS['malfunction_label'] = Label(
         root=FRAMES['random_gen_para_frame'].frame,
-        grid_pos=(12, 1),
+        grid_pos=(11, 1),
         padding=(0, 0),
         sticky='nw',
         text='Malfunction rate:',
@@ -1032,11 +1238,11 @@ def build_random_gen_para_frame():
         root=FRAMES['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(12, 2),
+        grid_pos=(11, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["malfunction"][0]}/'
-             f'{DEFAULT_ENV_PARAS["malfunction"][1]}',
+        text=f'e.g. {DEFAULT_PARAMS["malfunction"][0]}/'
+             f'{DEFAULT_PARAMS["malfunction"][1]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1047,7 +1253,7 @@ def build_random_gen_para_frame():
 
     LABELS['min_duration_label'] = Label(
         root=FRAMES['random_gen_para_frame'].frame,
-        grid_pos=(13, 1),
+        grid_pos=(12, 1),
         padding=(0, 0),
         sticky='nw',
         text='Min. duration for malfunctions:',
@@ -1061,10 +1267,10 @@ def build_random_gen_para_frame():
         root=FRAMES['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(13, 2),
+        grid_pos=(12, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["min"]}',
+        text=f'e.g. {DEFAULT_PARAMS["min"]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1075,7 +1281,7 @@ def build_random_gen_para_frame():
 
     LABELS['max_duration_label'] = Label(
         root=FRAMES['random_gen_para_frame'].frame,
-        grid_pos=(14, 1),
+        grid_pos=(13, 1),
         padding=(0, 0),
         sticky='nw',
         text='Max. duration for malfunction:',
@@ -1089,10 +1295,10 @@ def build_random_gen_para_frame():
         root=FRAMES['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(14, 2),
+        grid_pos=(13, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["max"]}',
+        text=f'e.g. {DEFAULT_PARAMS["max"]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1105,7 +1311,7 @@ def build_random_gen_para_frame():
         root=FRAMES['random_gen_para_frame'].frame,
         width=15,
         height=1,
-        grid_pos=(15, 1),
+        grid_pos=(14, 1),
         padding=(0, 0),
         sticky='nw',
         command=random_gen_para_to_env,
@@ -1121,7 +1327,7 @@ def build_random_gen_para_frame():
         root=FRAMES['random_gen_para_frame'].frame,
         width=15,
         height=1,
-        grid_pos=(15, 2),
+        grid_pos=(14, 2),
         padding=(0, 0),
         sticky='nw',
         command=random_gen_toggle_advanced_para_options,
@@ -1134,7 +1340,7 @@ def build_random_gen_para_frame():
     )
 
     FRAMES['random_gen_para_frame'].frame.rowconfigure(
-        tuple(range(16)), weight=1
+        tuple(range(15)), weight=1
     )
     FRAMES['random_gen_para_frame'].frame.columnconfigure(
         tuple(range(3)), weight=1
@@ -1299,9 +1505,13 @@ def switch_random_gen_to_main():
     create_main_menu()
 
 def save_random_gen_env_params():
+    global USER_PARAMS, DEFAULT_PARAMS
+
     for field in ENTRY_FIELDS:
         key = field.split('_')[0]
-        if key not in DEFAULT_ENV_PARAS:
+        if key not in DEFAULT_PARAMS:
+            continue
+        elif key in ['answer', 'clingo', 'lpFiles']:
             continue
 
         data = ENTRY_FIELDS[field].entry_field.get()
@@ -1324,35 +1534,26 @@ def save_random_gen_env_params():
             # TODO: display error message next tor Entry field using LABELS[key]
 
         if type(data) is not str:
-            USER_ENV_PARAS[key] = data
-
-    save_dictionary_to_json(USER_ENV_PARAS, '../data/user_params.json')
+            USER_PARAMS[key] = data
 
 def load_random_gen_env_params():
-    global USER_ENV_PARAS
-
-    data = load_dictionary_from_json('../data/user_params.json')
-
-    if data['speed'] is not None:
-        data['speed'] = {int(k): v for k, v in data['speed'].items()}
-    if data['malfunction'] is not None:
-        data['malfunction'] = (data['malfunction'][0], data['malfunction'][1])
-
-    USER_ENV_PARAS = data
+    global USER_PARAMS, DEFAULT_PARAMS
 
     for field in ENTRY_FIELDS:
         key = field.split('_')[0]
-        if key not in DEFAULT_ENV_PARAS:
+        if key not in DEFAULT_PARAMS:
             continue
-        elif USER_ENV_PARAS[key] is None:
+        elif key in ['answer', 'clingo', 'lpFiles']:
+            continue
+        elif USER_PARAMS[key] is None:
             continue
         elif key == 'malfunction':
             ENTRY_FIELDS[field].insert_string(
-                f'{USER_ENV_PARAS["malfunction"][0]}/'
-                f'{USER_ENV_PARAS["malfunction"][1]}'
+                f'{USER_PARAMS["malfunction"][0]}/'
+                f'{USER_PARAMS["malfunction"][1]}'
             )
         else:
-            ENTRY_FIELDS[field].insert_string(str(USER_ENV_PARAS[key]))
+            ENTRY_FIELDS[field].insert_string(str(USER_PARAMS[key]))
 
 
 
@@ -1363,16 +1564,16 @@ def load_random_gen_env_params():
 def builder_change_to_start_or_main():
     global LAST_MENU
 
+    save_builder_env_params()
+
     if LAST_MENU == 'start':
-        create_start_menu()
+        builder_para_to_start()
     else:
-        create_main_menu()
+        builder_para_to_main()
 
 def builder_para_to_start():
     global BUILD_MODE
     BUILD_MODE = None
-
-    save_builder_env_params()
 
     if 'builder_para_frame' in FRAMES:
         FRAMES['builder_para_frame'].destroy_frame()
@@ -1383,8 +1584,6 @@ def builder_para_to_start():
 def builder_para_to_main():
     global BUILD_MODE
     BUILD_MODE = None
-
-    save_builder_env_params()
 
     if 'builder_para_frame' in FRAMES:
         FRAMES['builder_para_frame'].destroy_frame()
@@ -1442,7 +1641,7 @@ def build_builder_para_frame():
         grid_pos=(1, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["rows"]}',
+        text=f'e.g. {DEFAULT_PARAMS["rows"]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1470,35 +1669,7 @@ def build_builder_para_frame():
         grid_pos=(2, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["cols"]}',
-        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#222222',
-        example_color='#777777',
-        border_width=0,
-        visibility=True,
-    )
-
-    LABELS['answer_label'] = Label(
-        root=FRAMES['builder_para_frame'].frame,
-        grid_pos=(3, 1),
-        padding=(0, 0),
-        sticky='nw',
-        text='Answer to display:',
-        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000',
-        visibility=True,
-    )
-
-    ENTRY_FIELDS['answer_entry'] = EntryField(
-        root=FRAMES['builder_para_frame'].frame,
-        width=10,
-        height=1,
-        grid_pos=(3, 2),
-        padding=(0, 0),
-        sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["answer"]}',
+        text=f'e.g. {DEFAULT_PARAMS["cols"]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1509,7 +1680,7 @@ def build_builder_para_frame():
 
     LABELS['remove_label'] = Label(
         root=FRAMES['builder_para_frame'].frame,
-        grid_pos=(4, 1),
+        grid_pos=(3, 1),
         padding=(0, 0),
         sticky='nw',
         text='Remove agents on arrival:',
@@ -1523,10 +1694,10 @@ def build_builder_para_frame():
         root=FRAMES['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(4, 2),
+        grid_pos=(3, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["remove"]}',
+        text=f'e.g. {DEFAULT_PARAMS["remove"]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1537,7 +1708,7 @@ def build_builder_para_frame():
 
     LABELS['speed_label'] = Label(
         root=FRAMES['builder_para_frame'].frame,
-        grid_pos=(5, 1),
+        grid_pos=(4, 1),
         padding=(0, 0),
         sticky='nw',
         text='Speed ratio map for trains:',
@@ -1551,10 +1722,10 @@ def build_builder_para_frame():
         root=FRAMES['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(5, 2),
+        grid_pos=(4, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["speed"]}',
+        text=f'e.g. {DEFAULT_PARAMS["speed"]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1565,7 +1736,7 @@ def build_builder_para_frame():
 
     LABELS['malfunction_label'] = Label(
         root=FRAMES['builder_para_frame'].frame,
-        grid_pos=(6, 1),
+        grid_pos=(5, 1),
         padding=(0, 0),
         sticky='nw',
         text='Malfunction rate:',
@@ -1579,11 +1750,11 @@ def build_builder_para_frame():
         root=FRAMES['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(6, 2),
+        grid_pos=(5, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["malfunction"][0]}/'
-             f'{DEFAULT_ENV_PARAS["malfunction"][1]}',
+        text=f'e.g. {DEFAULT_PARAMS["malfunction"][0]}/'
+             f'{DEFAULT_PARAMS["malfunction"][1]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1594,7 +1765,7 @@ def build_builder_para_frame():
 
     LABELS['min_duration_label'] = Label(
         root=FRAMES['builder_para_frame'].frame,
-        grid_pos=(7, 1),
+        grid_pos=(6, 1),
         padding=(0, 0),
         sticky='nw',
         text='Min. duration for malfunctions:',
@@ -1608,10 +1779,10 @@ def build_builder_para_frame():
         root=FRAMES['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(7, 2),
+        grid_pos=(6, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["min"]}',
+        text=f'e.g. {DEFAULT_PARAMS["min"]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1622,7 +1793,7 @@ def build_builder_para_frame():
 
     LABELS['max_duration_label'] = Label(
         root=FRAMES['builder_para_frame'].frame,
-        grid_pos=(8, 1),
+        grid_pos=(7, 1),
         padding=(0, 0),
         sticky='nw',
         text='Max. duration for malfunction:',
@@ -1636,10 +1807,10 @@ def build_builder_para_frame():
         root=FRAMES['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(8, 2),
+        grid_pos=(7, 2),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {DEFAULT_ENV_PARAS["max"]}',
+        text=f'e.g. {DEFAULT_PARAMS["max"]}',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1652,7 +1823,7 @@ def build_builder_para_frame():
         root=FRAMES['builder_para_frame'].frame,
         width=15,
         height=1,
-        grid_pos=(9, 1),
+        grid_pos=(8, 1),
         padding=(0, 0),
         sticky='nw',
         command=builder_para_to_track_grid,
@@ -1668,7 +1839,7 @@ def build_builder_para_frame():
         root=FRAMES['builder_para_frame'].frame,
         width=15,
         height=1,
-        grid_pos=(9, 2),
+        grid_pos=(8, 2),
         padding=(0, 0),
         sticky='nw',
         command=builder_toggle_advanced_para_options,
@@ -1681,7 +1852,7 @@ def build_builder_para_frame():
     )
 
     FRAMES['builder_para_frame'].frame.rowconfigure(
-        tuple(range(10)), weight=1
+        tuple(range(9)), weight=1
     )
     FRAMES['builder_para_frame'].frame.columnconfigure(
         tuple(range(3)), weight=1
@@ -1691,8 +1862,8 @@ def build_builder_para_frame():
     load_builder_env_params()
 
 def builder_para_to_track_grid():
-    global BUILD_MODE, CURRENT_ARRAY, CURRENT_DF, DEFAULT_ENV_PARAS, \
-        USER_ENV_PARAS, CURRENT_BACKUP_ARRAY, CURRENT_BACKUP_DF
+    global BUILD_MODE, CURRENT_ARRAY, CURRENT_DF, DEFAULT_PARAMS, \
+        USER_PARAMS, CURRENT_BACKUP_ARRAY, CURRENT_BACKUP_DF
 
     save_builder_env_params()
 
@@ -1700,15 +1871,15 @@ def builder_para_to_track_grid():
         FRAMES['builder_para_frame'].destroy_frame()
         del FRAMES['builder_para_frame']
 
-    if USER_ENV_PARAS['rows'] is not None:
-        rows = USER_ENV_PARAS['rows']
+    if USER_PARAMS['rows'] is not None:
+        rows = USER_PARAMS['rows']
     else:
-        rows = DEFAULT_ENV_PARAS['rows']
+        rows = DEFAULT_PARAMS['rows']
 
-    if USER_ENV_PARAS['cols'] is not None:
-        cols = USER_ENV_PARAS['cols']
+    if USER_PARAMS['cols'] is not None:
+        cols = USER_PARAMS['cols']
     else:
-        cols = DEFAULT_ENV_PARAS['cols']
+        cols = DEFAULT_PARAMS['cols']
 
     if BUILD_MODE == 'build':
         CURRENT_ARRAY = np.zeros((3,rows,cols), dtype=int)
@@ -2576,9 +2747,10 @@ def switch_builder_to_main():
 def save_builder_env_params():
     for field in ENTRY_FIELDS:
         key = field.split('_')[0]
-        if key not in DEFAULT_ENV_PARAS:
+        if key not in DEFAULT_PARAMS:
             continue
-        if key in ['agents', 'cities', 'seed', 'grid', 'intercity', 'incity']:
+        if key in ['answer', 'clingo', 'lpFiles', 'agents', 'cities', 'seed',
+                   'grid', 'intercity', 'incity']:
             continue
 
         data = ENTRY_FIELDS[field].entry_field.get()
@@ -2601,37 +2773,27 @@ def save_builder_env_params():
             # TODO: display error message next tor Entry field using LABELS[key]
 
         if type(data) is not str:
-            USER_ENV_PARAS[key] = data
-
-    save_dictionary_to_json(USER_ENV_PARAS, '../data/user_params.json')
+            USER_PARAMS[key] = data
 
 def load_builder_env_params():
-    global USER_ENV_PARAS
-
-    data = load_dictionary_from_json('../data/user_params.json')
-
-    if data['speed'] is not None:
-        data['speed'] = {int(k): v for k, v in data['speed'].items()}
-    if data['malfunction'] is not None:
-        data['malfunction'] = (data['malfunction'][0], data['malfunction'][1])
-
-    USER_ENV_PARAS = data
+    global USER_PARAMS
 
     for field in ENTRY_FIELDS:
         key = field.split('_')[0]
-        if key not in DEFAULT_ENV_PARAS:
+        if key not in DEFAULT_PARAMS:
             continue
-        elif key in ['agents', 'cities', 'seed', 'grid', 'intercity', 'incity']:
+        elif key in ['answer', 'clingo', 'lpFiles', 'agents', 'cities', 'seed',
+                     'grid', 'intercity', 'incity']:
             continue
-        elif USER_ENV_PARAS[key] is None:
+        elif USER_PARAMS[key] is None:
             continue
         elif key == 'malfunction':
             ENTRY_FIELDS[field].insert_string(
-                f'{USER_ENV_PARAS["malfunction"][0]}/'
-                f'{USER_ENV_PARAS["malfunction"][1]}'
+                f'{USER_PARAMS["malfunction"][0]}/'
+                f'{USER_PARAMS["malfunction"][1]}'
             )
         else:
-            ENTRY_FIELDS[field].insert_string(str(USER_ENV_PARAS[key]))
+            ENTRY_FIELDS[field].insert_string(str(USER_PARAMS[key]))
 
 def open_reset_frame(parent_frame):
     global FRAMES, LABELS, BUTTONS
@@ -2902,21 +3064,39 @@ def current_df_to_env_text():
         file.write(divider + "\n")
         file.writelines(new_row + "\n" for new_row in new_rows)
 
-def save_dictionary_to_json(dictionary: dict, file_path: str):
-    with open(file_path, 'w') as file:
-        json.dump(dictionary, file, indent=4)
-    return
+def save_user_data_to_file():
+    global USER_PARAMS
 
-def load_dictionary_from_json(file_path: str):
-    with open(file_path, 'r') as file:
-        dictionary = json.load(file)
-    return dictionary
+    with open('../data/user_params.json', 'w') as file:
+        json.dump(USER_PARAMS, file, indent=4)
+
+def load_user_data_from_file():
+    global USER_PARAMS, DEFAULT_PARAMS
+
+    with open('../data/user_params.json', 'r') as file:
+        data = json.load(file)
+
+    if data['speed'] is not None:
+        data['speed'] = {int(k): v for k, v in data['speed'].items()}
+    if data['malfunction'] is not None:
+        data['malfunction'] = (data['malfunction'][0], data['malfunction'][1])
+
+    USER_PARAMS = data
+
+    # use default if no user parameters given
+    for key in USER_PARAMS:
+        if USER_PARAMS[key] is None or USER_PARAMS[key] == []:
+            USER_PARAMS[key] = DEFAULT_PARAMS[key]
+
+def exit_gui(event):
+    global WINDOWS
+
+    save_user_data_to_file()
+
+    WINDOWS['flatland_window'].close_window()
+
 
 # stubs
-
-def exit_stub():
-    global WINDOWS, CURRENT_DF
-    WINDOWS['flatland_window'].close_window()
 
 def stub():
     return
@@ -2930,9 +3110,6 @@ def stub():
 
 # TODO: Load and save functions in main menu
 # TODO: show time table and gif functions in Results
-
-# TODO: Eingabe für lp files, 'clingo path' und answer im main menu
-# TODO: move answer entry to the same eingabe option
 
 # BACKEND
 # TODO: add save data functions for random gen, builder, stat and main menus
