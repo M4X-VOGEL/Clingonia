@@ -1,18 +1,23 @@
 {
-    "rows": null,
-    "cols": null,
-    "agents": null,
-    "cities": null,
-    "seed": null,
-    "grid": null,
-    "intercity": null,
-    "incity": null,
-    "remove": null,
-    "speed": null,
-    "malfunction": null,
-    "min": null,
-    "max": null,
-    "clingo": null,
-    "answer": null,
+    "rows": 40,
+    "cols": 40,
+    "agents": 4,
+    "cities": 4,
+    "seed": 1,
+    "grid": false,
+    "intercity": 2,
+    "incity": 2,
+    "remove": true,
+    "speed": {
+        "1": 1
+    },
+    "malfunction": [
+        0,
+        30
+    ],
+    "min": 2,
+    "max": 6,
+    "clingo": "clingo",
+    "answer": 1,
     "lpFiles": []
 }

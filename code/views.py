@@ -3,7 +3,9 @@ import json
 from tkinter import filedialog
 
 from custom_canvas import *
-
+# from env import save_env
+# from lp_to_env import lp_to_env
+# from positions import position_df
 
 # Base style parameters
 SCREENWIDTH, SCREENHEIGHT = 1920, 1080
@@ -61,6 +63,7 @@ CURRENT_ARRAY = np.zeros((3,40,40), dtype=int)
 CURRENT_DF = pd.DataFrame(
     columns=['start_pos', 'dir', 'end_pos', 'e_dep', 'l_arr']
 )
+CURRENT_PATHS = pd.DataFrame()
 
 CURRENT_BACKUP_ARRAY = CURRENT_ARRAY.copy()
 CURRENT_BACKUP_DF = CURRENT_DF.copy()
@@ -231,7 +234,7 @@ def build_start_menu_frame():
         grid_pos=(3, 1),
         padding=(0, 0),
         sticky='n',
-        command=lambda: stub,
+        command=load_env_from_file,
         text='Load Custom Environment',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#000000',
@@ -478,7 +481,7 @@ def build_main_menu():
         grid_pos=(4, 1),
         padding=(0, 0),
         sticky='n',
-        command=lambda: stub,
+        command=load_env_from_file,
         text='Load Custom Environment',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#000000',
@@ -494,7 +497,7 @@ def build_main_menu():
         grid_pos=(5, 1),
         padding=(0, 0),
         sticky='n',
-        command=lambda: stub,
+        command=save_env_to_file,
         text='Save Custom Environment',
         font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
         foreground_color='#000000',
@@ -817,13 +820,13 @@ def switch_clingo_para_to_result():
         FRAMES['main_menu_env_viewer_frame'].destroy_frame()
         del FRAMES['main_menu_env_viewer_frame']
 
-    # TODO: run_simulation()
+    run_simulation()
     create_result_menu()
 
 def load_lp_files():
     files = filedialog.askopenfilenames(
         title="Select LP Files",
-        initialdir='.',
+        initialdir='../data',
         defaultextension=".lp",
         filetypes=[("Clingo Files", "*.lp"), ("All Files", "*.*")],
     )
@@ -2894,7 +2897,7 @@ def create_result_menu():
     build_result_menu()
 
 def build_result_env_viewer():
-    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT
+    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT, CURRENT_PATHS
 
     FRAMES['result_viewer_frame'] = Frame(
         root=WINDOWS['flatland_window'].window,
@@ -2917,7 +2920,7 @@ def build_result_env_viewer():
         background_color='#333333',
         border_width=0,
         image='env_001--4_2.png',
-        paths_df=pd.read_csv('../data/positions.csv')
+        paths_df=CURRENT_PATHS,
     )
     FRAMES['result_viewer_frame'].frame.rowconfigure(0, weight=1)
     FRAMES['result_viewer_frame'].frame.columnconfigure(0, weight=1)
@@ -3088,6 +3091,102 @@ def load_user_data_from_file():
         if USER_PARAMS[key] is None or USER_PARAMS[key] == []:
             USER_PARAMS[key] = DEFAULT_PARAMS[key]
 
+def load_env_from_file():
+    global CURRENT_ARRAY, CURRENT_DF
+
+    file = filedialog.askopenfilename(
+        title="Select LP Environment File",
+        initialdir='../env',
+        defaultextension=".lp",
+        filetypes=[("Clingo Files", "*.lp"), ("All Files", "*.*")],
+    )
+
+    tracks, trains = lp_to_env(file)
+
+    start_pos = list(zip(trains['y'], trains['x']))
+    end_pos = list(zip(trains['y_end'], trains['x_end']))
+
+    CURRENT_DF = pd.DataFrame({
+        'start_pos': start_pos,
+        'dir': trains['dir'],
+        'end_pos': end_pos,
+        'e_dep': trains['e_dep'],
+        'l_arr': trains['l_arr']
+    })
+
+    direction = {
+        'n': 1,
+        'e': 2,
+        's': 3,
+        'w': 4,
+    }
+
+    CURRENT_ARRAY = np.zeros((3, *tracks.shape))
+    CURRENT_ARRAY[0] = tracks
+
+    for _, row in CURRENT_DF.iterrows():
+        CURRENT_ARRAY[1][row['start_pos']] = direction[row['dir']]
+        CURRENT_ARRAY[3][row['end_pos']] = 5
+
+def save_env_to_file():
+    global CURRENT_ARRAY, CURRENT_DF
+
+    file = filedialog.askopenfilename(
+        title="Select LP Environment File",
+        initialdir='../env',
+        defaultextension=".lp",
+        filetypes=[("Clingo Files", "*.lp"), ("All Files", "*.*")],
+    )
+
+    tracks = CURRENT_ARRAY[0]
+    x = [t[1] for t in CURRENT_DF['start_pos']]
+    y = [t[0] for t in CURRENT_DF['start_pos']]
+    x_end = [t[1] for t in CURRENT_DF['end_pos']]
+    y_end = [t[0] for t in CURRENT_DF['end_pos']]
+
+    trains = pd.DataFrame({
+        'id': CURRENT_DF.index,
+        'x': x,
+        'y': y,
+        'dir': CURRENT_DF['dir'],
+        "x_end": x_end,
+        "y_end": y_end,
+        "e_dep": CURRENT_DF['e_dep'],
+        "l_arr": CURRENT_DF['l_arr']
+    })
+
+    save_env(tracks, trains, name=file)
+
+def run_simulation():
+    global CURRENT_ARRAY, CURRENT_DF, USER_PARAMS, CURRENT_PATHS
+
+    tracks = CURRENT_ARRAY[0]
+    x = [t[1] for t in CURRENT_DF['start_pos']]
+    y = [t[0] for t in CURRENT_DF['start_pos']]
+    x_end = [t[1] for t in CURRENT_DF['end_pos']]
+    y_end = [t[0] for t in CURRENT_DF['end_pos']]
+
+    trains = pd.DataFrame({
+        'id': CURRENT_DF.index,
+        'x': x,
+        'y': y,
+        'dir': CURRENT_DF['dir'],
+        "x_end": x_end,
+        "y_end": y_end,
+        "e_dep": CURRENT_DF['e_dep'],
+        "l_arr": CURRENT_DF['l_arr']
+    })
+
+    CURRENT_PATHS = position_df(
+        tracks,
+        trains,
+        USER_PARAMS['clingo'],
+        USER_PARAMS['lpFiles'],
+        USER_PARAMS['answer']
+    )
+
+    CURRENT_PATHS = pd.read_csv('../data/positions.csv')
+
 def exit_gui(event):
     global WINDOWS
 
@@ -3108,7 +3207,6 @@ def stub():
 # TODO: add flatland environment generation from parameters and array for
 #  random gen, builder menus
 
-# TODO: Load and save functions in main menu
 # TODO: show time table and gif functions in Results
 
 # BACKEND
