@@ -64,6 +64,7 @@ CURRENT_DF = pd.DataFrame(
     columns=['start_pos', 'dir', 'end_pos', 'e_dep', 'l_arr']
 )
 CURRENT_PATHS = pd.DataFrame()
+CURRENT_IMG = None
 
 CURRENT_BACKUP_ARRAY = CURRENT_ARRAY.copy()
 CURRENT_BACKUP_DF = CURRENT_DF.copy()
@@ -364,6 +365,22 @@ def switch_start_to_builder():
         del FRAMES['start_menu_env_viewer_frame']
 
     build_builder_para_frame()
+
+def switch_start_to_main():
+    if 'title_frame' in FRAMES:
+        FRAMES['title_frame'].destroy_frame()
+        del FRAMES['title_frame']
+    if 'start_menu_frame' in FRAMES:
+        FRAMES['start_menu_frame'].destroy_frame()
+        del FRAMES['start_menu_frame']
+    if 'start_menu_help_frame' in FRAMES:
+        FRAMES['start_menu_help_frame'].destroy_frame()
+        del FRAMES['start_menu_help_frame']
+    if 'start_menu_env_viewer_frame' in FRAMES:
+        FRAMES['start_menu_env_viewer_frame'].destroy_frame()
+        del FRAMES['start_menu_env_viewer_frame']
+
+    create_main_menu()
 
 
 
@@ -3092,7 +3109,7 @@ def load_user_data_from_file():
             USER_PARAMS[key] = DEFAULT_PARAMS[key]
 
 def load_env_from_file():
-    global CURRENT_ARRAY, CURRENT_DF
+    global CURRENT_ARRAY, CURRENT_DF, CURRENT_IMG, LAST_MENU
 
     file = filedialog.askopenfilename(
         title="Select LP Environment File",
@@ -3127,6 +3144,12 @@ def load_env_from_file():
     for _, row in CURRENT_DF.iterrows():
         CURRENT_ARRAY[1][row['start_pos']] = direction[row['dir']]
         CURRENT_ARRAY[3][row['end_pos']] = 5
+
+    if LAST_MENU == 'start':
+        switch_start_to_main()
+
+    # TODO: generate environment pic as if it came from the build menu
+    CURRENT_IMG = ''
 
 def save_env_to_file():
     global CURRENT_ARRAY, CURRENT_DF
@@ -3204,14 +3227,10 @@ def stub():
 
 # TODOS
 
-# TODO: add flatland environment generation from parameters and array for
-#  random gen, builder menus
-
 # TODO: show time table and gif functions in Results
 
 # BACKEND
 # TODO: add save data functions for random gen, builder, stat and main menus
-# TODO: save data in files / datastructures and pass it to ÄD and flatland
 
 # GUI
 # TODO: add help buttons in random gen, builder and result menus
