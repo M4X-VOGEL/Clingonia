@@ -1,6 +1,6 @@
 {
-    "rows": 40,
-    "cols": 40,
+    "rows": 3,
+    "cols": 7,
     "agents": 4,
     "cities": 4,
     "seed": 1,
@@ -19,5 +19,8 @@
     "max": 6,
     "clingo": "clingo",
     "answer": 1,
-    "lpFiles": []
+    "lpFiles": [
+        "G:/Praktikum/asp/flat.lp",
+        "G:/Praktikum/asp/trans.lp"
+    ]
 }

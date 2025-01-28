@@ -298,20 +298,20 @@ class BuildCanvas:
             3: ('Zug_Gleis_#0091ea', 180),
             4: ('Zug_Gleis_#0091ea', 90),
             5: ('Bahnhof_#d50000', 0),
-            32800: ('Gleis_horizontal', 0),
-            1025: ('Gleis_vertikal', 0),
+            32800: ('Gleis_vertikal', 0),
+            1025: ('Gleis_horizontal', 0),
             2064: ('Gleis_kurve_oben_links', 0),
             72: ('Gleis_kurve_oben_rechts', 0),
             16386: ('Gleis_kurve_unten_rechts', 0),
             4608: ('Gleis_kurve_unten_links', 0),
             3089: ('Weiche_horizontal_oben_links', 0),
-            32872: ('Weiche_horizontal_oben_rechts', 0),
+            1097: ('Weiche_horizontal_oben_rechts', 0),
             17411: ('Weiche_horizontal_unten_rechts', 0),
-            38408: ('Weiche_horizontal_unten_links', 0),
+            5633: ('Weiche_horizontal_unten_links', 0),
             34864: ('Weiche_vertikal_oben_links', 0),
-            1097: ('Weiche_vertikal_oben_rechts', 0),
+            32872: ('Weiche_vertikal_oben_rechts', 0),
             49186: ('Weiche_vertikal_unten_rechts', 0),
-            5633: ('Weiche_vertikal_unten_links', 0),
+            37408: ('Weiche_vertikal_unten_links', 0),
             33825: ('Gleis_Diamond_Crossing', 0),
             35889: ('Weiche_Single_Slip', 270),
             33897: ('Weiche_Single_Slip', 180),
@@ -486,7 +486,7 @@ class BuildCanvas:
                     self.array[2] = np.zeros(self.array[2].shape)
                     self.train_data.at[self.train_index, 'end_pos'] = (row, col)
                     for r,c in self.train_data['end_pos']:
-                        if not np.isnan(r):
+                        if r != -1:
                             self.array[2][r, c] = 5
                 else:
                     # train
@@ -494,9 +494,9 @@ class BuildCanvas:
                     data = {
                         'start_pos': (row, col),
                         'dir': self.dir[self.current_selection],
-                        'end_pos': (np.nan, np.nan),
-                        'e_dep': np.nan,
-                        'l_arr': np.nan,
+                        'end_pos': (-1, -1),
+                        'e_dep': -1,
+                        'l_arr': -1,
                     }
                     self.train_data.loc[len(self.train_data)] = data
                     for _,r in self.train_data.iterrows():
@@ -594,17 +594,18 @@ class BuildCanvas:
                 )
 
                 for index, row in self.train_data.iterrows():
-                    self.canvas.create_text(
-                        (self.x_offset + offset_dict[row['cell_offset']][0] +
-                         row['end_pos'][1] * adjusted_cell_size),
-                        (self.y_offset + offset_dict[row['cell_offset']][1] +
-                        row['end_pos'][0] * adjusted_cell_size),
-                        text=str(index),
-                        anchor="center",
-                        font=("Courier", 15, 'bold'),
-                        fill='#00FFFF',
-                        tags="id_labels"
-                    )
+                    if row['end_pos'] != (-1, -1):
+                        self.canvas.create_text(
+                            (self.x_offset + offset_dict[row['cell_offset']][0] +
+                             row['end_pos'][1] * adjusted_cell_size),
+                            (self.y_offset + offset_dict[row['cell_offset']][1] +
+                            row['end_pos'][0] * adjusted_cell_size),
+                            text=str(index),
+                            anchor="center",
+                            font=("Courier", 15, 'bold'),
+                            fill='#00FFFF',
+                            tags="id_labels"
+                        )
 
                 self.train_data.drop(columns=['count'], inplace=True)
                 self.train_data.drop(columns=['cell_offset'], inplace=True)
@@ -757,7 +758,7 @@ class TrainListCanvas:
                 self.train_data['start_pos'].iloc[index]
             ] = self.grid.dir[new_dir]
 
-        if self.train_data['end_pos'].iloc[index] != (np.nan, np.nan):
+        if self.train_data['end_pos'].iloc[index] != (-1, -1):
             # get list of stations at the same position as the deleted one
             station_count = self.train_data[
                 self.train_data['end_pos'] ==
@@ -829,7 +830,7 @@ class TrainListCanvas:
             x=self.outer_frame.winfo_width() * 0.4,
             y=self.outer_frame.winfo_height() * 0.4
         )
-        if not np.isnan(self.train_data.loc[index, 'e_dep']):
+        if self.train_data.loc[index, 'e_dep'] != -1:
             ed_entry.insert(
                 0,
                 str(int(self.train_data.loc[index, 'e_dep']))
@@ -844,7 +845,7 @@ class TrainListCanvas:
             x=self.outer_frame.winfo_width() * 0.4,
             y=self.outer_frame.winfo_height() * 0.45
         )
-        if not np.isnan(self.train_data.loc[index, 'l_arr']):
+        if self.train_data.loc[index, 'l_arr'] != -1:
             la_entry.insert(
                 0,
                 str(int(self.train_data.loc[index, 'l_arr']))
@@ -873,7 +874,7 @@ class TrainListCanvas:
             x=self.outer_frame.winfo_width() * 0.41,
             y=self.outer_frame.winfo_height() * 0.49
         )
-        if not np.isnan(self.train_data.loc[index, 'end_pos'][0]):
+        if self.train_data.loc[index, 'end_pos'][0] != -1:
             row, col = self.train_data.loc[index, 'end_pos']
             self.grid.array[2][row, col] = 5
             self.grid.draw_images()
@@ -896,7 +897,7 @@ class TrainListCanvas:
         ed = ed_entry.get()
         la = la_entry.get()
         if ed == '':
-            ed = np.nan
+            ed = -1
         else:
             try:
                 ed = int(ed)
@@ -904,10 +905,10 @@ class TrainListCanvas:
                 # TODO: show error message in config window ?
                 print('Only Integers allowed in '
                       'Earliest Departure and Latest Arrival')
-                ed = np.nan
+                ed = -1
 
         if la == '':
-            la = np.nan
+            la = -1
         else:
             try:
                 la = int(la)
@@ -915,7 +916,7 @@ class TrainListCanvas:
                 # TODO: show error message in config window ?
                 print('Only Integers allowed in '
                       'Earliest Departure and Latest Arrival')
-                la = np.nan
+                la = -1
 
         self.train_data.loc[index, 'e_dep'] = ed
         self.train_data.loc[index, 'l_arr'] = la

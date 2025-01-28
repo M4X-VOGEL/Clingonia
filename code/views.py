@@ -3,9 +3,9 @@ import json
 from tkinter import filedialog
 
 from custom_canvas import *
-# from env import save_env
-# from lp_to_env import lp_to_env
-# from positions import position_df
+from env import save_env, delete_tmp_lp
+from lp_to_env import lp_to_env
+from positions import position_df
 
 # Base style parameters
 SCREENWIDTH, SCREENHEIGHT = 1920, 1080
@@ -1948,7 +1948,7 @@ def builder_para_to_track_grid():
                 for index, row in CURRENT_DF.iterrows():
                     if (row['end_pos'][0] > rows - 1 or
                             row['end_pos'][1] > cols - 1):
-                        CURRENT_DF.at[index, 'end_pos'] = (np.nan, np.nan)
+                        CURRENT_DF.at[index, 'end_pos'] = (-1, -1)
 
     CURRENT_BACKUP_ARRAY = CURRENT_ARRAY.copy()
     CURRENT_BACKUP_DF = CURRENT_DF.copy()
@@ -3118,10 +3118,13 @@ def load_env_from_file():
         filetypes=[("Clingo Files", "*.lp"), ("All Files", "*.*")],
     )
 
+    if not file:
+        return
+
     tracks, trains = lp_to_env(file)
 
-    start_pos = list(zip(trains['y'], trains['x']))
-    end_pos = list(zip(trains['y_end'], trains['x_end']))
+    start_pos = list(zip(trains['x'], trains['y']))
+    end_pos = list(zip(trains['x_end'], trains['y_end']))
 
     CURRENT_DF = pd.DataFrame({
         'start_pos': start_pos,
@@ -3138,12 +3141,14 @@ def load_env_from_file():
         'w': 4,
     }
 
-    CURRENT_ARRAY = np.zeros((3, *tracks.shape))
+    tracks = np.array(tracks)
+    CURRENT_ARRAY = np.zeros((3, *tracks.shape), dtype=int)
     CURRENT_ARRAY[0] = tracks
 
     for _, row in CURRENT_DF.iterrows():
         CURRENT_ARRAY[1][row['start_pos']] = direction[row['dir']]
-        CURRENT_ARRAY[3][row['end_pos']] = 5
+        if row['end_pos'] != (-1, -1):
+            CURRENT_ARRAY[2][row['end_pos']] = 5
 
     if LAST_MENU == 'start':
         switch_start_to_main()
@@ -3200,15 +3205,17 @@ def run_simulation():
         "l_arr": CURRENT_DF['l_arr']
     })
 
+    save_env(tracks, trains)
+
     CURRENT_PATHS = position_df(
         tracks,
         trains,
         USER_PARAMS['clingo'],
-        USER_PARAMS['lpFiles'],
+        USER_PARAMS['lpFiles'] + ['./env/running_tmp.lp'],
         USER_PARAMS['answer']
     )
 
-    CURRENT_PATHS = pd.read_csv('../data/positions.csv')
+    delete_tmp_lp()
 
 def exit_gui(event):
     global WINDOWS

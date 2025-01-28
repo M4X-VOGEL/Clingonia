@@ -1,31 +1,7 @@
 import pandas as pd
 import actions
 
-### TEST-EINGABE 1
-clingo_path = "clingo"
-lp_files = ["asp/flat.lp", "asp/trans.lp", "env/env.lp"]
-answer_number = 1
-###
-
-### TEST-EINGABE 2
-tracks = [
-    [16386,1025,17411,1025,5633,1025,4608],
-    [32800,0,32800,0,32800,0,32800],
-    [72,1025,2064,0,72,1025,2064]
-    ]
-trains = pd.DataFrame({
-    "id": [0,1],
-    "x": [4,6],
-    "y": [1,1],
-    "dir": ['s','n'],
-    "x_end": [1,0],
-    "y_end": [2,1],
-    "e_dep": [1,1],
-    "l_arr": [20,20]
-})
-###
-
-def position_df():
+def position_df(tracks, trains, clingo_path, lp_files, answer_number):
     """Creates a DataFrame of the x-y-position and direction for the trains at each timestep.
     
     Returns:
@@ -42,33 +18,33 @@ def position_df():
         t = row["timestep"]
         # Add start position when reaching new ID
         if id not in train_ids:
-            x, y, dir = get_start_pos(id)
+            x, y, dir = get_start_pos(id, trains)
             df_pos.loc[len(df_pos)] = [id, x, y, dir, t-1]
             train_ids.append(id)
         # Following Positions
-        x, y, dir = next_pos(x, y, action, dir)
+        x, y, dir = next_pos(x, y, action, dir, tracks)
         df_pos.loc[len(df_pos)] = [id, x, y, dir, t]
     return df_pos
 
 
-def get_start_pos(train_id):
+def get_start_pos(train_id, trains):
     x = trains.loc[trains["id"] == train_id, "x"].iloc[0]
     y = trains.loc[trains["id"] == train_id, "y"].iloc[0]
     dir = trains.loc[trains["id"] == train_id, "dir"].iloc[0]
     return x, y, dir
 
 
-def next_pos(x, y, action, dir):
+def next_pos(x, y, action, dir, tracks):
     # Direction change
     if action in ["move_forward", "move_left", "move_right"]:
-        dir_new = dir_change(x, y, action, dir)
+        dir_new = dir_change(x, y, action, dir, tracks)
         x_new, y_new = pos_change(x, y, dir_new)
     else:  # wait-action
         return x, y, dir
     return x_new, y_new, dir_new
     
 
-def dir_change(x, y, action, dir):
+def dir_change(x, y, action, dir, tracks):
     # Tracks with dir-change
     dir_tr = [4608,16386,72,2064,
             20994,16458,2136,6672,
@@ -126,9 +102,3 @@ def pos_change(x, y, dir):
     elif dir == 's': y += 1
     elif dir == 'w': x -= 1
     return x, y
-
-
-### Test
-df_positions = position_df()
-print(df_positions)
-###

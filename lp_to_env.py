@@ -5,13 +5,13 @@ def lp_to_env(lp_file):
     """Extracts a list of tracks and a DataFrame with train-info from a .lp-file.
     
     Args:
-        lp_file (str): File of the environment encoded in ASP.
+        lp_file (str): Path to file with the environment encoded in ASP.
     
     Returns:
         tracks (list): 2D-list with track-types
         trains (pd.DataFrame): Train-configuration.
     """
-    path = f"env/{lp_file}"
+    path = lp_file
     if not file_in_directory(path):
         return -1, -1  # FileNotFoundError
     df_tracks, tse_list = prep_tracks_and_trains(path)
@@ -39,23 +39,30 @@ def prep_tracks_and_trains(path):
 
 
 def add_cell(df_tracks, row):
-    cell = row[5:-3].replace('(', '').replace(')', '').split(',')
+    if row[-1] == '\n': # General case
+        cell = row[5:-3].replace('(', '').replace(')', '').split(',')
+    else:  # If last line of file is a cell
+        cell = row[5:-2].replace('(', '').replace(')', '').split(',')
     y, x = int(cell[0]), int(cell[1])
     track = int(cell[2])
     df_tracks.loc[len(df_tracks)] = [x, y, track]
 
 
 def fill_tse(tse_list, row):
+    if row[-1] == '\n': # General case
+        args_end = -3
+    else: # If last line of file is a predicate
+        args_end = -2
     if row[0] == 't':  # train
-        id = int(row[6:-3])
+        id = int(row[6:args_end])
         tse_list.append(id)
     elif row[0] == 's':  # start
-        start = row[6:-3].replace('(', '').replace(')', '').split(',')
+        start = row[6:args_end].replace('(', '').replace(')', '').split(',')
         id, e_dep, dir = int(start[0]), int(start[3]), start[4]
         x, y = int(start[1]), int(start[2])
         tse_list.append(["start", id, x, y, e_dep, dir])
     elif row[0] == 'e':  # end
-        end = row[4:-3].replace('(', '').replace(')', '').split(',')
+        end = row[4:args_end].replace('(', '').replace(')', '').split(',')
         id, l_arr = int(end[0]), int(end[3])
         x_end, y_end = int(end[1]), int(end[2])
         tse_list.append(["end", id, x_end, y_end, l_arr])
@@ -83,11 +90,3 @@ def create_df_of_trains(tse_list):
                     l_arr = l[4]
         trains.loc[len(trains)] = [id, x, y, dir, x_end, y_end, e_dep, l_arr]
     return trains
-
-
-### Test
-tracks, trains = lp_to_env("env.lp")
-print(tracks)
-print()
-print(trains)
-###

@@ -1,25 +1,7 @@
 import os
 import pandas as pd
 
-### TEST-EINGABE
-tracks = [
-    [16386,1025,17411,1025,5633,1025,4608],
-    [32800,0,32800,0,32800,0,32800],
-    [72,1025,2064,0,72,1025,2064]
-    ]
-trains = pd.DataFrame({
-    "id": [0,1],
-    "x": [4,6],
-    "y": [1,1],
-    "dir": ['s','n'],
-    "x_end": [1,0],
-    "y_end": [2,1],
-    "e_dep": [1,1],
-    "l_arr": [20,20]
-})
-###
-
-def save_env(tracks, trains, name="running_tmp"):
+def save_env(tracks, trains, name="env/running_tmp.lp"):
     """Saves the env as a .lp file.
 
     Args:
@@ -28,7 +10,7 @@ def save_env(tracks, trains, name="running_tmp"):
         name (str): Name of the file.  
     """
     ensure_directory("env")
-    path = f"env/{name}.lp"
+    path = name
     with open(path, 'w') as lp:
         write_trains(trains, lp)
         write_tracks(tracks, lp)
@@ -80,10 +62,3 @@ def write_tracks(tracks, lp):
         for j, track in enumerate(row):
             lp.write(f"cell(({i},{j}),{track}).\n")
         lp.write(f'\n')
-
-
-# Calls
-save_env(tracks, trains)  # running_tmp.lp
-delete_tmp_lp()  # running_tmp.lp löschen
-delete_tmp_png()  # running_tmp.png löschen
-save_env(tracks, trains, "env")  # env.lp
