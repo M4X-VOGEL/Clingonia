@@ -1,48 +1,9 @@
-import os
 import numpy as np
-import pandas as pd
 from flatland.envs.rail_env import RailEnv
 from flatland.envs.rail_generators import rail_from_grid_transition_map
 from flatland.envs.malfunction_generators import MalfunctionParameters, ParamMalfunctionGen
 from flatland.utils.rendertools import RenderTool
 from flatland.core.transition_map import GridTransitionMap
-
-### TEST-EINGABE 1
-DEFAULT_ENV_PARAMS = {
-    'rows': 3,
-    'cols': 7,
-    'agents': 2,
-    'cities': 1,
-    'answer': 1,
-    'seed': 1,
-    'grid': False,
-    'intercity': 2,
-    'incity': 2,
-    'remove': True,
-    'speed': {1 : 1},
-    'malfunction': (0, 30),
-    'min': 2,
-    'max': 6,
-}
-###
-
-### TEST-EINGABE 2
-tracks = [
-    [16386,1025,17411,1025,5633,1025,4608],
-    [32800,0,32800,0,32800,0,32800],
-    [72,1025,2064,0,72,1025,2064]
-    ]
-trains = pd.DataFrame({
-    "id": [0,1],
-    "x": [4,6],
-    "y": [1,1],
-    "dir": ['s','n'],
-    "x_end": [1,0],
-    "y_end": [2,1],
-    "e_dep": [1,1],
-    "l_arr": [20,20]
-})
-###
 
 # Numeric directions
 DIR_MAP = {'n': 0, 'e': 1, 's': 2, 'w': 3}
@@ -101,7 +62,7 @@ class DummyObservationBuilder:
 
 
 def create_custom_env(tracks, trains, params):
-    """Creates environment with specified tracks, trains and parameters.
+    """Creates environment with specified tracks, trains and parameters for the PNG.
 
     Args:
         tracks (list): 2D-list of track-types.
@@ -177,9 +138,3 @@ def save_png(env, path="env/running_tmp.png"):
     # Save image
     renderer.gl.save_image(path)
     renderer.reset()
-
-
-# Call
-env = create_custom_env(tracks, trains, DEFAULT_ENV_PARAMS)
-os.makedirs("env", exist_ok=True)
-save_png(env, "env/running_tmp.png")

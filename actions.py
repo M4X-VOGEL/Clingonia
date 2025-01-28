@@ -19,7 +19,6 @@ def clingo_to_df(clingo_path="clingo", lp_files=[], answer_number=1):
     answer = get_clingo_answer(output, answer_number)
     params = get_action_params(answer)
     df_actions = create_df(params)
-    print(df_actions)
     return df_actions
 
 

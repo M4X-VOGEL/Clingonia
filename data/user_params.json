@@ -1,8 +1,8 @@
 {
     "rows": 3,
     "cols": 7,
-    "agents": 4,
-    "cities": 4,
+    "agents": 2,
+    "cities": 3,
     "seed": 1,
     "grid": false,
     "intercity": 2,

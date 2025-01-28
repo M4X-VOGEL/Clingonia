@@ -8,26 +8,6 @@ from flatland.envs.malfunction_generators import MalfunctionParameters, ParamMal
 from flatland.utils.rendertools import RenderTool
 from flatland.envs.agent_utils import SpeedCounter
 
-### TEST-EINGABE
-DEFAULT_ENV_PARAMS = {
-    'rows': 40,
-    'cols': 40,
-    'agents': 2,
-    'cities': 2,
-    'answer': 1,
-    'seed': 1,
-    'grid': False,
-    'intercity': 2,
-    'incity': 2,
-    'remove': True,
-    'speed': {1: 1},
-    'malfunction': (0, 30),
-    'min': 2,
-    'max': 6
-}
-###
-
-
 def create_env(env_params):
     """Creates environment based on parameters.
     
@@ -79,7 +59,7 @@ def create_env(env_params):
     return env
 
 
-def gen_env(env_params=DEFAULT_ENV_PARAMS):
+def gen_env(env_params):
     """Creates environment and corresponding png.
 
     Args:
@@ -104,7 +84,3 @@ def gen_env(env_params=DEFAULT_ENV_PARAMS):
             print("1. Grid Size: try at least 40 rows and 40 cols.")
             print("2. Grid-Mode: set to True.")
             print("3. Cities: reduce amount of cities.")
-
-
-# Call
-gen_env(DEFAULT_ENV_PARAMS)

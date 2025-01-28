@@ -14,7 +14,9 @@ class EnvCanvas:
             y: int,
             background_color: str,
             border_width: int,
-            image:str,
+            image: str,
+            rows: int,
+            cols: int,
     ):
         self.root = root
         self.width = width
@@ -32,8 +34,8 @@ class EnvCanvas:
         self.place_canvas()
 
         # populate canvas
-        self.rows = 40
-        self.cols = 40
+        self.rows = rows
+        self.cols = cols
         self.pan_start = (0, 0)
         self.x_offset = 50
         self.y_offset = 50
@@ -134,8 +136,8 @@ class EnvCanvas:
 
     def draw_image(self):
         self.cell_size = self.image.width / self.rows
-        width = int(self.rows * self.cell_size * self.scale)
-        height = int(self.cols * self.cell_size * self.scale)
+        width = int(self.cols * self.cell_size * self.scale)
+        height = int(self.rows * self.cell_size * self.scale)
         self.display_image = ImageTk.PhotoImage(
             self.image.resize((width, height))
         )
@@ -937,6 +939,8 @@ class ResultCanvas:
             background_color: str,
             border_width: int,
             image: str,
+            rows: int,
+            cols: int,
             paths_df: pd.DataFrame,
     ):
         self.root = root
@@ -955,8 +959,8 @@ class ResultCanvas:
         self.place_canvas()
 
         # populate canvas
-        self.rows = 40
-        self.cols = 40
+        self.rows = rows
+        self.cols = cols
         self.pan_start = (0, 0)
         self.x_offset = 50
         self.y_offset = 50
@@ -973,7 +977,9 @@ class ResultCanvas:
         self.draw_image()
 
         self.paths_df = paths_df
-        self.show_df = pd.DataFrame()
+        self.show_df = pd.DataFrame(
+            columns=['trainID','start_pos', 'dir', 'end_pos', 'e_dep', 'l_arr']
+        )
         self.show_list = []
 
     def create_canvas(self):
@@ -1063,8 +1069,8 @@ class ResultCanvas:
 
     def draw_image(self):
         self.cell_size = self.image.width / self.rows
-        width = int(self.rows * self.cell_size * self.scale)
-        height = int(self.cols * self.cell_size * self.scale)
+        width = int(self.cols * self.cell_size * self.scale)
+        height = int(self.rows * self.cell_size * self.scale)
         self.display_image = ImageTk.PhotoImage(
             self.image.resize((width, height))
         )

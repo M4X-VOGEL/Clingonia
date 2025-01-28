@@ -1,9 +1,12 @@
+import os
 import ast
 import json
 from tkinter import filedialog
 
+from build_png import create_custom_env, save_png
 from custom_canvas import *
-from env import save_env, delete_tmp_lp
+from env import save_env, delete_tmp_lp, delete_tmp_png
+from gen_png import gen_env
 from lp_to_env import lp_to_env
 from positions import position_df
 
@@ -288,43 +291,6 @@ def build_start_menu_help_frame():
     FRAMES['start_menu_help_frame'].frame.columnconfigure(0, weight=1)
     FRAMES['start_menu_help_frame'].frame.grid_propagate(False)
 
-def title_to_start_viewer():
-    if 'title_frame' in FRAMES:
-        FRAMES['title_frame'].destroy_frame()
-        del FRAMES['title_frame']
-
-    build_start_menu_env_viewer()
-
-def build_start_menu_env_viewer():
-    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT
-
-    FRAMES['start_menu_env_viewer_frame'] = Frame(
-        root=WINDOWS['flatland_window'].window,
-        width=SCREENWIDTH * 0.5,
-        height=SCREENHEIGHT,
-        grid_pos=(0, 0),
-        padding=(0, 0),
-        sticky='nesw',
-        background_color='#000000',
-        border_width=0,
-        visibility=True
-    )
-
-    CANVASES['start_menu_env_viewer_canvas'] = EnvCanvas(
-        root=FRAMES['start_menu_env_viewer_frame'].frame,
-        width=FRAMES['start_menu_env_viewer_frame'].width,
-        height=FRAMES['start_menu_env_viewer_frame'].height,
-        x=FRAMES['start_menu_env_viewer_frame'].width * 0,
-        y=FRAMES['start_menu_env_viewer_frame'].height * 0,
-        background_color='#333333',
-        border_width=0,
-        image='env_001--4_2.png'
-    )
-
-    FRAMES['start_menu_env_viewer_frame'].frame.rowconfigure(0, weight=1)
-    FRAMES['start_menu_env_viewer_frame'].frame.columnconfigure(0, weight=1)
-    FRAMES['start_menu_env_viewer_frame'].frame.grid_propagate(False)
-
 def toggle_start_menu_help():
     if 'start_menu_help_frame' in FRAMES:
         FRAMES['start_menu_help_frame'].toggle_visibility()
@@ -584,7 +550,7 @@ def build_main_menu_help_frame():
     FRAMES['main_menu_help_frame'].frame.grid_propagate(False)
 
 def build_main_menu_env_viewer():
-    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT
+    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT, CURRENT_IMG
 
     FRAMES['main_menu_env_viewer_frame'] = Frame(
         root=WINDOWS['flatland_window'].window,
@@ -605,7 +571,9 @@ def build_main_menu_env_viewer():
         y=FRAMES['main_menu_env_viewer_frame'].height * 0,
         background_color='#333333',
         border_width=0,
-        image='env_001--4_2.png'
+        image=CURRENT_IMG,
+        rows=USER_PARAMS['rows'],
+        cols=USER_PARAMS['cols'],
     )
 
 def build_clingo_para_frame():
@@ -1370,7 +1338,14 @@ def build_random_gen_para_frame():
     load_random_gen_env_params()
 
 def random_gen_para_to_env():
+    global CURRENT_IMG
+
     save_random_gen_env_params()
+
+    gen_env(USER_PARAMS)
+    # TODO: CURRENT_ARRAY = gen_env(USER_PARAMS)
+
+    CURRENT_IMG = 'env/running_tmp.png'
 
     if 'random_gen_para_frame' in FRAMES:
         FRAMES['random_gen_para_frame'].destroy_frame()
@@ -1392,7 +1367,7 @@ def random_gen_env_to_para():
     build_random_gen_para_frame()
 
 def build_random_gen_env_viewer():
-    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT
+    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT, CURRENT_IMG
 
     FRAMES['random_gen_env_viewer_frame'] = Frame(
         root=WINDOWS['flatland_window'].window,
@@ -1414,7 +1389,9 @@ def build_random_gen_env_viewer():
         y=FRAMES['random_gen_env_viewer_frame'].height * 0,
         background_color='#333333',
         border_width=0,
-        image='env_001--4_2.png'
+        image=CURRENT_IMG,
+        rows=USER_PARAMS['rows'],
+        cols=USER_PARAMS['cols'],
     )
 
 def build_random_gen_env_menu():
@@ -2038,7 +2015,7 @@ def build_track_builder_menu_frame():
         height=int(FONT_SCALE * 80),
         grid_pos=(1, 1),
         padding=(0, 0),
-        command=lambda: CANVASES['builder_grid_canvas'].select(32800),
+        command=lambda: CANVASES['builder_grid_canvas'].select(1025),
         image='../png/Gleis_horizontal.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -2052,7 +2029,7 @@ def build_track_builder_menu_frame():
         height=int(FONT_SCALE * 80),
         grid_pos=(1, 2),
         padding=(0, 0),
-        command=lambda: CANVASES['builder_grid_canvas'].select(1025),
+        command=lambda: CANVASES['builder_grid_canvas'].select(32800),
         image='../png/Gleis_vertikal.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -2136,7 +2113,7 @@ def build_track_builder_menu_frame():
         height=int(FONT_SCALE * 80),
         grid_pos=(2, 2),
         padding=(0, 0),
-        command=lambda: CANVASES['builder_grid_canvas'].select(32872),
+        command=lambda: CANVASES['builder_grid_canvas'].select(1097),
         image='../png/Weiche_horizontal_oben_rechts.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -2164,7 +2141,7 @@ def build_track_builder_menu_frame():
         height=int(FONT_SCALE * 80),
         grid_pos=(2, 4),
         padding=(0, 0),
-        command=lambda: CANVASES['builder_grid_canvas'].select(38408),
+        command=lambda: CANVASES['builder_grid_canvas'].select(5633),
         image='../png/Weiche_horizontal_unten_links.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -2192,7 +2169,7 @@ def build_track_builder_menu_frame():
         height=int(FONT_SCALE * 80),
         grid_pos=(2, 6),
         padding=(0, 0),
-        command=lambda: CANVASES['builder_grid_canvas'].select(1097),
+        command=lambda: CANVASES['builder_grid_canvas'].select(32872),
         image='../png/Weiche_vertikal_oben_rechts.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -2220,7 +2197,7 @@ def build_track_builder_menu_frame():
         height=int(FONT_SCALE * 80),
         grid_pos=(2, 8),
         padding=(0, 0),
-        command=lambda: CANVASES['builder_grid_canvas'].select(5633),
+        command=lambda: CANVASES['builder_grid_canvas'].select(37408),
         image='../png/Weiche_vertikal_unten_links.png',
         foreground_color='#000000',
         background_color='#000000',
@@ -2632,8 +2609,34 @@ def build_train_builder_menu_frame():
     CANVASES['builder_grid_canvas'].train_list = CANVASES['train_config_list']
 
 def builder_train_grid_to_env():
-    global FRAMES, CANVASES, CURRENT_BACKUP_ARRAY, CURRENT_BACKUP_DF
+    global FRAMES, CANVASES, CURRENT_BACKUP_ARRAY, CURRENT_BACKUP_DF, \
+        CURRENT_IMG
     # TODO: save builder array and dataframe
+
+    tracks = CURRENT_ARRAY[0]
+    x = [t[1] for t in CURRENT_DF['start_pos']]
+    y = [t[0] for t in CURRENT_DF['start_pos']]
+    x_end = [t[1] for t in CURRENT_DF['end_pos']]
+    y_end = [t[0] for t in CURRENT_DF['end_pos']]
+
+    trains = pd.DataFrame({
+        'id': CURRENT_DF.index,
+        'x': x,
+        'y': y,
+        'dir': CURRENT_DF['dir'],
+        "x_end": x_end,
+        "y_end": y_end,
+        "e_dep": CURRENT_DF['e_dep'],
+        "l_arr": CURRENT_DF['l_arr']
+    })
+
+    USER_PARAMS['agents'] = len(trains)
+
+    env = create_custom_env(tracks, trains, USER_PARAMS)
+    os.makedirs("env", exist_ok=True)
+    save_png(env, "env/running_tmp.png")
+
+    CURRENT_IMG = 'env/running_tmp.png'
 
     if 'train_builder_menu_frame' in FRAMES:
         FRAMES['train_builder_menu_frame'].destroy_frame()
@@ -2649,7 +2652,7 @@ def builder_train_grid_to_env():
     build_builder_env_menu()
 
 def build_builder_env_viewer():
-    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT
+    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT, CURRENT_IMG
 
     FRAMES['builder_env_viewer_frame'] = Frame(
         root=WINDOWS['flatland_window'].window,
@@ -2671,7 +2674,9 @@ def build_builder_env_viewer():
         y=FRAMES['builder_env_viewer_frame'].height * 0,
         background_color='#333333',
         border_width=0,
-        image='env_001--4_2.png'
+        image=CURRENT_IMG,
+        rows=USER_PARAMS['rows'],
+        cols=USER_PARAMS['cols'],
     )
 
     FRAMES['builder_env_viewer_frame'].frame.rowconfigure(0, weight=1)
@@ -2914,7 +2919,8 @@ def create_result_menu():
     build_result_menu()
 
 def build_result_env_viewer():
-    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT, CURRENT_PATHS
+    global WINDOWS, FRAMES, CANVASES, SCREENWIDTH, SCREENHEIGHT, CURRENT_PATHS, \
+        CURRENT_IMG
 
     FRAMES['result_viewer_frame'] = Frame(
         root=WINDOWS['flatland_window'].window,
@@ -2936,8 +2942,10 @@ def build_result_env_viewer():
         y=FRAMES['result_viewer_frame'].height * 0,
         background_color='#333333',
         border_width=0,
-        image='env_001--4_2.png',
+        image=CURRENT_IMG,
         paths_df=CURRENT_PATHS,
+        rows=USER_PARAMS['rows'],
+        cols=USER_PARAMS['cols'],
     )
     FRAMES['result_viewer_frame'].frame.rowconfigure(0, weight=1)
     FRAMES['result_viewer_frame'].frame.columnconfigure(0, weight=1)
@@ -3109,7 +3117,7 @@ def load_user_data_from_file():
             USER_PARAMS[key] = DEFAULT_PARAMS[key]
 
 def load_env_from_file():
-    global CURRENT_ARRAY, CURRENT_DF, CURRENT_IMG, LAST_MENU
+    global CURRENT_ARRAY, CURRENT_DF, CURRENT_IMG, LAST_MENU, USER_PARAMS
 
     file = filedialog.askopenfilename(
         title="Select LP Environment File",
@@ -3150,11 +3158,25 @@ def load_env_from_file():
         if row['end_pos'] != (-1, -1):
             CURRENT_ARRAY[2][row['end_pos']] = 5
 
+    USER_PARAMS['rows'] = tracks.shape[0]
+    USER_PARAMS['cols'] = tracks.shape[1]
+
+    temp = trains['x']
+    trains['x'] = trains['y']
+    trains['y'] = temp
+
+    temp = trains['x_end']
+    trains['x_end'] = trains['y_end']
+    trains['y_end'] = temp
+
+    env = create_custom_env(tracks, trains, USER_PARAMS)
+    os.makedirs("env", exist_ok=True)
+    save_png(env, "env/running_tmp.png")
+
+    CURRENT_IMG = 'env/running_tmp.png'
+
     if LAST_MENU == 'start':
         switch_start_to_main()
-
-    # TODO: generate environment pic as if it came from the build menu
-    CURRENT_IMG = ''
 
 def save_env_to_file():
     global CURRENT_ARRAY, CURRENT_DF
@@ -3221,6 +3243,7 @@ def exit_gui(event):
     global WINDOWS
 
     save_user_data_to_file()
+    delete_tmp_png()
 
     WINDOWS['flatland_window'].close_window()
 
