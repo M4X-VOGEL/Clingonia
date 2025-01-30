@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-def save_env(tracks, trains, name="env/running_tmp.lp"):
+def save_env(tracks, trains, name="../data/running_tmp.lp"):
     """Saves the env as a .lp file.
 
     Args:
@@ -9,7 +9,7 @@ def save_env(tracks, trains, name="env/running_tmp.lp"):
         trains (pd.DataFrame): Train-configuration.
         name (str): Name of the file.  
     """
-    ensure_directory("env")
+    ensure_directory("../data")
     path = name
     with open(path, 'w') as lp:
         write_trains(trains, lp)
@@ -19,8 +19,8 @@ def save_env(tracks, trains, name="env/running_tmp.lp"):
 def delete_tmp_lp():
     """Deletes the temporary file of the env.  
     """
-    ensure_directory("env")
-    path = "env/running_tmp.lp"
+    ensure_directory("../data")
+    path = "../data/running_tmp.lp"
     if os.path.isfile(path):
         try:
             os.remove(path)
@@ -33,8 +33,8 @@ def delete_tmp_lp():
 def delete_tmp_png():
     """Deletes the temporary image of the env.  
     """
-    ensure_directory("env")
-    path = "env/running_tmp.png"
+    ensure_directory("../data")
+    path = "../data/running_tmp.png"
     if os.path.isfile(path):
         try:
             os.remove(path)

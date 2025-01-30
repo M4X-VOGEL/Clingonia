@@ -76,7 +76,7 @@ def gen_env(env_params):
             renderer.render_env(show=False)
             # Save image
             image_data = renderer.get_image()
-            path = "env/running_tmp.png"
+            path = "../data/running_tmp.png"
             plt.imsave(path, image_data)
             print(f"\n✅ Erfolg! Environment erstellt.")
         except OverflowError as e:

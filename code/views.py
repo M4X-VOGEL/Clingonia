@@ -3,12 +3,12 @@ import ast
 import json
 from tkinter import filedialog
 
-from build_png import create_custom_env, save_png
-from custom_canvas import *
-from env import save_env, delete_tmp_lp, delete_tmp_png
-from gen_png import gen_env
-from lp_to_env import lp_to_env
-from positions import position_df
+from code.build_png import create_custom_env, save_png
+from code.custom_canvas import *
+from code.env import save_env, delete_tmp_lp, delete_tmp_png
+from code.gen_png import gen_env
+from code.lp_to_env import lp_to_env
+from code.positions import position_df
 
 # Base style parameters
 SCREENWIDTH, SCREENHEIGHT = 1920, 1080
@@ -142,7 +142,7 @@ def build_title_frame():
         grid_pos=(1,0),
         padding=(0, 0),
         sticky='nsew',
-        image='./env_001--4_2.png',
+        image='../data/png/title_image.png',
         foreground_color='#FFFFFF',
         background_color='#000000',
         visibility=True,
@@ -808,6 +808,15 @@ def switch_clingo_para_to_result():
     run_simulation()
     create_result_menu()
 
+def reload_main_env_viewer():
+    global FRAMES
+
+    if 'main_menu_env_viewer_frame' in FRAMES:
+        FRAMES['main_menu_env_viewer_frame'].destroy_frame()
+        del FRAMES['main_menu_env_viewer_frame']
+
+    build_main_menu_env_viewer()
+
 def load_lp_files():
     files = filedialog.askopenfilenames(
         title="Select LP Files",
@@ -1343,9 +1352,9 @@ def random_gen_para_to_env():
     save_random_gen_env_params()
 
     gen_env(USER_PARAMS)
-    # TODO: CURRENT_ARRAY = gen_env(USER_PARAMS)
+    # TODO: CURRENT_ARRAY, CURRENT_DF = gen_env(USER_PARAMS)
 
-    CURRENT_IMG = 'env/running_tmp.png'
+    CURRENT_IMG = '../data/running_tmp.png'
 
     if 'random_gen_para_frame' in FRAMES:
         FRAMES['random_gen_para_frame'].destroy_frame()
@@ -1355,8 +1364,6 @@ def random_gen_para_to_env():
     build_random_gen_env_menu()
 
 def random_gen_env_to_para():
-    # TODO: maybe Save random gen Env?
-
     if 'random_gen_env_viewer_frame' in FRAMES:
         FRAMES['random_gen_env_viewer_frame'].destroy_frame()
         del FRAMES['random_gen_env_viewer_frame']
@@ -1490,8 +1497,6 @@ def random_gen_toggle_advanced_para_options():
     return
 
 def switch_random_gen_to_main():
-    # TODO: Save random gen Env
-
     if 'random_gen_env_viewer_frame' in FRAMES:
         FRAMES['random_gen_env_viewer_frame'].destroy_frame()
         del FRAMES['random_gen_env_viewer_frame']
@@ -1935,7 +1940,6 @@ def builder_para_to_track_grid():
 
 def builder_track_grid_to_para():
     global FRAMES
-    # TODO: save builder array and dataframe
 
     if 'track_builder_menu_frame' in FRAMES:
         FRAMES['track_builder_menu_frame'].destroy_frame()
@@ -2016,7 +2020,7 @@ def build_track_builder_menu_frame():
         grid_pos=(1, 1),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(1025),
-        image='../png/Gleis_horizontal.png',
+        image='../data/png/Gleis_horizontal.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2030,7 +2034,7 @@ def build_track_builder_menu_frame():
         grid_pos=(1, 2),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(32800),
-        image='../png/Gleis_vertikal.png',
+        image='../data/png/Gleis_vertikal.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2044,7 +2048,7 @@ def build_track_builder_menu_frame():
         grid_pos=(1, 5),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(2064),
-        image='../png/Gleis_kurve_oben_links.png',
+        image='../data/png/Gleis_kurve_oben_links.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2058,7 +2062,7 @@ def build_track_builder_menu_frame():
         grid_pos=(1, 6),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(72),
-        image='../png/Gleis_kurve_oben_rechts.png',
+        image='../data/png/Gleis_kurve_oben_rechts.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2072,7 +2076,7 @@ def build_track_builder_menu_frame():
         grid_pos=(1, 7),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(16386),
-        image='../png/Gleis_kurve_unten_rechts.png',
+        image='../data/png/Gleis_kurve_unten_rechts.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2086,7 +2090,7 @@ def build_track_builder_menu_frame():
         grid_pos=(1, 8),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(4608),
-        image='../png/Gleis_kurve_unten_links.png',
+        image='../data/png/Gleis_kurve_unten_links.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2100,7 +2104,7 @@ def build_track_builder_menu_frame():
         grid_pos=(2, 1),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(3089),
-        image='../png/Weiche_horizontal_oben_links.png',
+        image='../data/png/Weiche_horizontal_oben_links.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2114,7 +2118,7 @@ def build_track_builder_menu_frame():
         grid_pos=(2, 2),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(1097),
-        image='../png/Weiche_horizontal_oben_rechts.png',
+        image='../data/png/Weiche_horizontal_oben_rechts.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2128,7 +2132,7 @@ def build_track_builder_menu_frame():
         grid_pos=(2, 3),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(17411),
-        image='../png/Weiche_horizontal_unten_rechts.png',
+        image='../data/png/Weiche_horizontal_unten_rechts.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2142,7 +2146,7 @@ def build_track_builder_menu_frame():
         grid_pos=(2, 4),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(5633),
-        image='../png/Weiche_horizontal_unten_links.png',
+        image='../data/png/Weiche_horizontal_unten_links.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2156,7 +2160,7 @@ def build_track_builder_menu_frame():
         grid_pos=(2, 5),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(34864),
-        image='../png/Weiche_vertikal_oben_links.png',
+        image='../data/png/Weiche_vertikal_oben_links.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2170,7 +2174,7 @@ def build_track_builder_menu_frame():
         grid_pos=(2, 6),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(32872),
-        image='../png/Weiche_vertikal_oben_rechts.png',
+        image='../data/png/Weiche_vertikal_oben_rechts.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2184,7 +2188,7 @@ def build_track_builder_menu_frame():
         grid_pos=(2, 7),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(49186),
-        image='../png/Weiche_vertikal_unten_rechts.png',
+        image='../data/png/Weiche_vertikal_unten_rechts.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2198,7 +2202,7 @@ def build_track_builder_menu_frame():
         grid_pos=(2, 8),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(37408),
-        image='../png/Weiche_vertikal_unten_links.png',
+        image='../data/png/Weiche_vertikal_unten_links.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2212,7 +2216,7 @@ def build_track_builder_menu_frame():
         grid_pos=(3, 1),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(33825),
-        image='../png/Gleis_Diamond_Crossing.png',
+        image='../data/png/Gleis_Diamond_Crossing.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2226,7 +2230,7 @@ def build_track_builder_menu_frame():
         grid_pos=(3, 5),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(35889),
-        image='../png/Weiche_Single_Slip.png',
+        image='../data/png/Weiche_Single_Slip.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2241,7 +2245,7 @@ def build_track_builder_menu_frame():
         grid_pos=(3, 6),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(33897),
-        image='../png/Weiche_Single_Slip.png',
+        image='../data/png/Weiche_Single_Slip.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2256,7 +2260,7 @@ def build_track_builder_menu_frame():
         grid_pos=(3, 7),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(50211),
-        image='../png/Weiche_Single_Slip.png',
+        image='../data/png/Weiche_Single_Slip.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2271,7 +2275,7 @@ def build_track_builder_menu_frame():
         grid_pos=(3, 8),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(38433),
-        image='../png/Weiche_Single_Slip.png',
+        image='../data/png/Weiche_Single_Slip.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2286,7 +2290,7 @@ def build_track_builder_menu_frame():
         grid_pos=(4, 1),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(52275),
-        image='../png/Weiche_Double_Slip.png',
+        image='../data/png/Weiche_Double_Slip.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2301,7 +2305,7 @@ def build_track_builder_menu_frame():
         grid_pos=(4, 2),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(38505),
-        image='../png/Weiche_Double_Slip.png',
+        image='../data/png/Weiche_Double_Slip.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2316,7 +2320,7 @@ def build_track_builder_menu_frame():
         grid_pos=(4, 5),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(2136),
-        image='../png/Weiche_Symetrical.png',
+        image='../data/png/Weiche_Symetrical.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2331,7 +2335,7 @@ def build_track_builder_menu_frame():
         grid_pos=(4, 6),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(16458),
-        image='../png/Weiche_Symetrical.png',
+        image='../data/png/Weiche_Symetrical.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2346,7 +2350,7 @@ def build_track_builder_menu_frame():
         grid_pos=(4, 7),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(20994),
-        image='../png/Weiche_Symetrical.png',
+        image='../data/png/Weiche_Symetrical.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2361,7 +2365,7 @@ def build_track_builder_menu_frame():
         grid_pos=(4, 8),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(6672),
-        image='../png/Weiche_Symetrical.png',
+        image='../data/png/Weiche_Symetrical.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2376,7 +2380,7 @@ def build_track_builder_menu_frame():
         grid_pos=(5, 1),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(0),
-        image='../png/eraser.png',
+        image='../data/png/eraser.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2486,7 +2490,7 @@ def build_train_builder_menu_frame():
         grid_pos=(1, 1),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(1),
-        image='../png/Zug_Gleis_#0091ea.png',
+        image='../data/png/Zug_Gleis_#0091ea.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2501,7 +2505,7 @@ def build_train_builder_menu_frame():
         grid_pos=(1, 2),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(2),
-        image='../png/Zug_Gleis_#0091ea.png',
+        image='../data/png/Zug_Gleis_#0091ea.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2516,7 +2520,7 @@ def build_train_builder_menu_frame():
         grid_pos=(1, 3),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(3),
-        image='../png/Zug_Gleis_#0091ea.png',
+        image='../data/png/Zug_Gleis_#0091ea.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2531,7 +2535,7 @@ def build_train_builder_menu_frame():
         grid_pos=(1, 4),
         padding=(0, 0),
         command=lambda: CANVASES['builder_grid_canvas'].select(4),
-        image='../png/Zug_Gleis_#0091ea.png',
+        image='../data/png/Zug_Gleis_#0091ea.png',
         foreground_color='#000000',
         background_color='#000000',
         border_width=0,
@@ -2611,7 +2615,6 @@ def build_train_builder_menu_frame():
 def builder_train_grid_to_env():
     global FRAMES, CANVASES, CURRENT_BACKUP_ARRAY, CURRENT_BACKUP_DF, \
         CURRENT_IMG
-    # TODO: save builder array and dataframe
 
     tracks = CURRENT_ARRAY[0]
     x = [t[1] for t in CURRENT_DF['start_pos']]
@@ -2633,10 +2636,10 @@ def builder_train_grid_to_env():
     USER_PARAMS['agents'] = len(trains)
 
     env = create_custom_env(tracks, trains, USER_PARAMS)
-    os.makedirs("env", exist_ok=True)
-    save_png(env, "env/running_tmp.png")
+    os.makedirs("../data", exist_ok=True)
+    save_png(env, "../data/running_tmp.png")
 
-    CURRENT_IMG = 'env/running_tmp.png'
+    CURRENT_IMG = '../data/running_tmp.png'
 
     if 'train_builder_menu_frame' in FRAMES:
         FRAMES['train_builder_menu_frame'].destroy_frame()
@@ -2757,8 +2760,6 @@ def builder_toggle_advanced_para_options():
 def switch_builder_to_main():
     global BUILD_MODE
     BUILD_MODE = None
-
-    # TODO: save builder env
 
     if 'builder_env_viewer_frame' in FRAMES:
         FRAMES['builder_env_viewer_frame'].destroy_frame()
@@ -3054,8 +3055,6 @@ def build_result_menu():
     )
 
 def switch_result_to_main():
-    # TODO: Is there anything to save in the result view?
-
     if 'result_viewer_frame' in FRAMES:
         FRAMES['result_viewer_frame'].destroy_frame()
         del FRAMES['result_viewer_frame']
@@ -3121,7 +3120,7 @@ def load_env_from_file():
 
     file = filedialog.askopenfilename(
         title="Select LP Environment File",
-        initialdir='../env',
+        initialdir='../environments',
         defaultextension=".lp",
         filetypes=[("Clingo Files", "*.lp"), ("All Files", "*.*")],
     )
@@ -3160,6 +3159,7 @@ def load_env_from_file():
 
     USER_PARAMS['rows'] = tracks.shape[0]
     USER_PARAMS['cols'] = tracks.shape[1]
+    USER_PARAMS['agents'] = len(trains)
 
     temp = trains['x']
     trains['x'] = trains['y']
@@ -3170,23 +3170,28 @@ def load_env_from_file():
     trains['y_end'] = temp
 
     env = create_custom_env(tracks, trains, USER_PARAMS)
-    os.makedirs("env", exist_ok=True)
-    save_png(env, "env/running_tmp.png")
+    os.makedirs("../data", exist_ok=True)
+    save_png(env, "../data/running_tmp.png")
 
-    CURRENT_IMG = 'env/running_tmp.png'
+    CURRENT_IMG = '../data/running_tmp.png'
 
     if LAST_MENU == 'start':
         switch_start_to_main()
+    else:
+        reload_main_env_viewer()
 
 def save_env_to_file():
     global CURRENT_ARRAY, CURRENT_DF
 
-    file = filedialog.askopenfilename(
+    file = filedialog.asksaveasfilename(
         title="Select LP Environment File",
-        initialdir='../env',
+        initialdir='../environments',
         defaultextension=".lp",
         filetypes=[("Clingo Files", "*.lp"), ("All Files", "*.*")],
     )
+
+    if not file:
+        return
 
     tracks = CURRENT_ARRAY[0]
     x = [t[1] for t in CURRENT_DF['start_pos']]
@@ -3233,7 +3238,7 @@ def run_simulation():
         tracks,
         trains,
         USER_PARAMS['clingo'],
-        USER_PARAMS['lpFiles'] + ['./env/running_tmp.lp'],
+        USER_PARAMS['lpFiles'] + ['../data/running_tmp.lp'],
         USER_PARAMS['answer']
     )
 
@@ -3257,10 +3262,9 @@ def stub():
 
 # TODOS
 
+# TODO: ERROR Message displays with Labels using toggle_visibility and .config(text='xyz')
+#  - for all entry fields
+#  - any where else ?
+# TODO: loading symbols with Labels using toggle_visibility
 # TODO: show time table and gif functions in Results
-
-# BACKEND
-# TODO: add save data functions for random gen, builder, stat and main menus
-
-# GUI
 # TODO: add help buttons in random gen, builder and result menus

@@ -120,7 +120,7 @@ def create_custom_env(tracks, trains, params):
     return env
 
 
-def save_png(env, path="env/running_tmp.png"):
+def save_png(env, path="../data/running_tmp.png"):
     """Renders and saves the PNG-image.
     
     Args:

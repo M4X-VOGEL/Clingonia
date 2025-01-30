@@ -1,5 +1,5 @@
 import pandas as pd
-import actions
+from code import actions
 
 def position_df(tracks, trains, clingo_path, lp_files, answer_number):
     """Creates a DataFrame of the x-y-position and direction for the trains at each timestep.
