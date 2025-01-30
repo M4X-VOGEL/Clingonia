@@ -1,7 +1,7 @@
 {
-    "rows": 9,
-    "cols": 9,
-    "agents": 4,
+    "rows": 3,
+    "cols": 3,
+    "agents": 2,
     "cities": 2,
     "seed": 0,
     "grid": false,
