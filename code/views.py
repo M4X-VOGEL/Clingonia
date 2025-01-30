@@ -3,12 +3,12 @@ import ast
 import json
 from tkinter import filedialog
 
-from build_png import create_custom_env, save_png
-from custom_canvas import *
-from env import save_env, delete_tmp_lp, delete_tmp_png
-from gen_png import gen_env
-from lp_to_env import lp_to_env
-from positions import position_df
+from code.build_png import create_custom_env, save_png
+from code.custom_canvas import *
+from code.env import save_env, delete_tmp_lp, delete_tmp_png
+from code.gen_png import gen_env
+from code.lp_to_env import lp_to_env
+from code.positions import position_df
 
 # Base style parameters
 SCREENWIDTH, SCREENHEIGHT = 1920, 1080
@@ -142,7 +142,7 @@ def build_title_frame():
         grid_pos=(1,0),
         padding=(0, 0),
         sticky='nsew',
-        image='./env_001--4_2.png',
+        image='../data/title_image.png',
         foreground_color='#FFFFFF',
         background_color='#000000',
         visibility=True,
@@ -808,6 +808,15 @@ def switch_clingo_para_to_result():
     run_simulation()
     create_result_menu()
 
+def reload_main_env_viewer():
+    global FRAMES
+
+    if 'main_menu_env_viewer_frame' in FRAMES:
+        FRAMES['main_menu_env_viewer_frame'].destroy_frame()
+        del FRAMES['main_menu_env_viewer_frame']
+
+    build_main_menu_env_viewer()
+
 def load_lp_files():
     files = filedialog.askopenfilenames(
         title="Select LP Files",
@@ -1345,7 +1354,7 @@ def random_gen_para_to_env():
     gen_env(USER_PARAMS)
     # TODO: CURRENT_ARRAY = gen_env(USER_PARAMS)
 
-    CURRENT_IMG = 'env/running_tmp.png'
+    CURRENT_IMG = '../data/running_tmp.png'
 
     if 'random_gen_para_frame' in FRAMES:
         FRAMES['random_gen_para_frame'].destroy_frame()
@@ -2633,10 +2642,10 @@ def builder_train_grid_to_env():
     USER_PARAMS['agents'] = len(trains)
 
     env = create_custom_env(tracks, trains, USER_PARAMS)
-    os.makedirs("env", exist_ok=True)
-    save_png(env, "env/running_tmp.png")
+    os.makedirs("../data", exist_ok=True)
+    save_png(env, "../data/running_tmp.png")
 
-    CURRENT_IMG = 'env/running_tmp.png'
+    CURRENT_IMG = '../data/running_tmp.png'
 
     if 'train_builder_menu_frame' in FRAMES:
         FRAMES['train_builder_menu_frame'].destroy_frame()
@@ -3121,7 +3130,7 @@ def load_env_from_file():
 
     file = filedialog.askopenfilename(
         title="Select LP Environment File",
-        initialdir='../env',
+        initialdir='../environments',
         defaultextension=".lp",
         filetypes=[("Clingo Files", "*.lp"), ("All Files", "*.*")],
     )
@@ -3160,6 +3169,7 @@ def load_env_from_file():
 
     USER_PARAMS['rows'] = tracks.shape[0]
     USER_PARAMS['cols'] = tracks.shape[1]
+    USER_PARAMS['agents'] = len(trains)
 
     temp = trains['x']
     trains['x'] = trains['y']
@@ -3170,20 +3180,22 @@ def load_env_from_file():
     trains['y_end'] = temp
 
     env = create_custom_env(tracks, trains, USER_PARAMS)
-    os.makedirs("env", exist_ok=True)
-    save_png(env, "env/running_tmp.png")
+    os.makedirs("../data", exist_ok=True)
+    save_png(env, "../data/running_tmp.png")
 
-    CURRENT_IMG = 'env/running_tmp.png'
+    CURRENT_IMG = '../data/running_tmp.png'
 
     if LAST_MENU == 'start':
         switch_start_to_main()
+    else:
+        reload_main_env_viewer()
 
 def save_env_to_file():
     global CURRENT_ARRAY, CURRENT_DF
 
     file = filedialog.askopenfilename(
         title="Select LP Environment File",
-        initialdir='../env',
+        initialdir='../environments',
         defaultextension=".lp",
         filetypes=[("Clingo Files", "*.lp"), ("All Files", "*.*")],
     )
@@ -3233,7 +3245,7 @@ def run_simulation():
         tracks,
         trains,
         USER_PARAMS['clingo'],
-        USER_PARAMS['lpFiles'] + ['./env/running_tmp.lp'],
+        USER_PARAMS['lpFiles'] + ['../data/running_tmp.lp'],
         USER_PARAMS['answer']
     )
 

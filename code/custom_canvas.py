@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from custom_widgets import *
+from code.custom_widgets import *
 
 
 class EnvCanvas:
