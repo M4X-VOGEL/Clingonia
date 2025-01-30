@@ -181,7 +181,8 @@ class EnvCanvas:
                 tags='grid_line',
             )
 
-        self.draw_grid_labels()
+        # Uncomment to draw row and column labels on the canvas
+        # self.draw_grid_labels()
 
     def draw_grid_labels(self):
         self.canvas.delete("grid_label")
@@ -393,7 +394,7 @@ class BuildCanvas:
 
         if self.current_selection is not None:
             image, rotation = self.img_dict[self.current_selection]
-            image = f'../png/{image}.png'
+            image = f'../data/png/{image}.png'
             image = Image.open(image).resize((30, 30)).rotate(rotation)
             self.current_selection_image = ImageTk.PhotoImage(image)
 
@@ -440,7 +441,8 @@ class BuildCanvas:
                 tags='grid_line',
             )
 
-        self.draw_grid_labels()
+        # Uncomment to draw row and column labels on the canvas
+        # self.draw_grid_labels()
 
     def draw_grid_labels(self):
         self.canvas.delete("grid_label")
@@ -539,7 +541,7 @@ class BuildCanvas:
                     if value:
                         image, rotation = self.img_dict[value]
 
-                        image = f'../png/{image}.png'
+                        image = f'../data/png/{image}.png'
                         image = Image.open(image).resize(
                             (int(adjusted_cell_size),
                              int(adjusted_cell_size))
@@ -576,7 +578,7 @@ class BuildCanvas:
                         text=str(index),
                         anchor="center",
                         font=("Courier", 15, 'bold'),
-                        fill='#00FFFF',
+                        fill='#000000',
                         tags="id_labels"
                     )
 
@@ -605,7 +607,7 @@ class BuildCanvas:
                             text=str(index),
                             anchor="center",
                             font=("Courier", 15, 'bold'),
-                            fill='#00FFFF',
+                            fill='#000000',
                             tags="id_labels"
                         )
 
@@ -645,7 +647,7 @@ class TrainListCanvas:
         self.config_dict = {}
         self.remove_dict = {}
 
-        self.station_img = Image.open('../png/Bahnhof_#d50000.png')
+        self.station_img = Image.open('../data/png/Bahnhof_#d50000.png')
         self.station_img = self.station_img.resize(size=(60, 60))
         self.station_img = ImageTk.PhotoImage(self.station_img)
 
@@ -1114,7 +1116,8 @@ class ResultCanvas:
                 tags='grid_line',
             )
 
-        self.draw_grid_labels()
+        # Uncomment to draw row and column labels on the canvas
+        # self.draw_grid_labels()
 
     def draw_grid_labels(self):
         self.canvas.delete("grid_label")
@@ -1180,18 +1183,6 @@ class ResultCanvas:
             8: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.75),
         }
 
-        unique_trains = self.show_df['trainID'].unique()
-
-        colors = []
-        n = len(unique_trains)
-        for i in range(n):
-            r = int(255 * (i / n))
-            g = int(255 * (1 - abs((i / n) * 2 - 1)))
-            b = int(255 * (1 - abs((i / n) * 2 - 0.5)))
-            colors.append(f'#{r:02X}{g:02X}{b:02X}')
-
-        train_colors = dict(zip(unique_trains, colors))
-
         for _, row in self.show_df.iterrows():
             self.canvas.create_text(
                 (self.x_offset + row['x'] * adjusted_cell_size +
@@ -1201,7 +1192,7 @@ class ResultCanvas:
                 text=row['timestep'],
                 anchor="center",
                 font=("Courier", 15, 'bold'),
-                fill=train_colors[row['trainID']],
+                fill='#000000',
                 tags="path_labels"
             )
 
