@@ -3183,7 +3183,7 @@ def load_env_from_file():
 def save_env_to_file():
     global CURRENT_ARRAY, CURRENT_DF
 
-    file = filedialog.askopenfilename(
+    file = filedialog.asksaveasfilename(
         title="Select LP Environment File",
         initialdir='../environments',
         defaultextension=".lp",
