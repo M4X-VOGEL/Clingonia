@@ -813,18 +813,6 @@ class TrainListCanvas:
             y=self.outer_frame.winfo_height() * 0.4
         )
 
-        la_label = tk.Label(
-            config_frame,
-            text='Latest Arrival:',
-            font=('Arial', int(self.font_scale * self.base_font)),
-            foreground='#FFFFFF', background='#000000',
-            bd=0,
-        )
-        la_label.place(
-            x=self.outer_frame.winfo_width() * 0.1,
-            y=self.outer_frame.winfo_height() * 0.45
-        )
-
         ed_entry = tk.Entry(
             config_frame,
             width=5, font=('Arial', int(self.font_scale * self.base_font)),
@@ -834,11 +822,36 @@ class TrainListCanvas:
             x=self.outer_frame.winfo_width() * 0.4,
             y=self.outer_frame.winfo_height() * 0.4
         )
+
         if self.train_data.loc[index, 'e_dep'] != -1:
             ed_entry.insert(
                 0,
                 str(int(self.train_data.loc[index, 'e_dep']))
             )
+
+        ed_err_label = tk.Label(
+            config_frame,
+            text='',
+            font=('Arial', int(self.font_scale * self.base_font)),
+            foreground='#FF0000', background='#000000',
+            bd=0,
+        )
+        ed_err_label.place(
+            x=self.outer_frame.winfo_width() * 0.1,
+            y=self.outer_frame.winfo_height() * 0.45
+        )
+
+        la_label = tk.Label(
+            config_frame,
+            text='Latest Arrival:',
+            font=('Arial', int(self.font_scale * self.base_font)),
+            foreground='#FFFFFF', background='#000000',
+            bd=0,
+        )
+        la_label.place(
+            x=self.outer_frame.winfo_width() * 0.1,
+            y=self.outer_frame.winfo_height() * 0.5
+        )
 
         la_entry = tk.Entry(
             config_frame,
@@ -847,13 +860,21 @@ class TrainListCanvas:
         )
         la_entry.place(
             x=self.outer_frame.winfo_width() * 0.4,
-            y=self.outer_frame.winfo_height() * 0.45
+            y=self.outer_frame.winfo_height() * 0.5
         )
         if self.train_data.loc[index, 'l_arr'] != -1:
             la_entry.insert(
                 0,
                 str(int(self.train_data.loc[index, 'l_arr']))
             )
+
+        la_err_label = tk.Label(
+            config_frame,
+            text='',
+            font=('Arial', int(self.font_scale * self.base_font)),
+            foreground='#FF0000', background='#000000',
+            bd=0,
+        )
 
         station_label = tk.Label(
             config_frame,
@@ -864,7 +885,7 @@ class TrainListCanvas:
         )
         station_label.place(
             x=self.outer_frame.winfo_width() * 0.1,
-            y=self.outer_frame.winfo_height() * 0.5
+            y=self.outer_frame.winfo_height() * 0.6
         )
 
         place_station = tk.Button(
@@ -876,7 +897,7 @@ class TrainListCanvas:
         )
         place_station.place(
             x=self.outer_frame.winfo_width() * 0.41,
-            y=self.outer_frame.winfo_height() * 0.49
+            y=self.outer_frame.winfo_height() * 0.59
         )
         if self.train_data.loc[index, 'end_pos'][0] != -1:
             row, col = self.train_data.loc[index, 'end_pos']
@@ -887,17 +908,31 @@ class TrainListCanvas:
             config_frame,
             width=5, height=1,
             command=lambda: self.save_ed_la(
-                index, ed_entry, la_entry, config_frame
+                index,
+                ed_entry,
+                la_entry,
+                ed_err_label,
+                la_err_label,
+                config_frame
             ),
             text='Save', font=('Arial', int(self.font_scale * self.base_font)),
             foreground='#000000', background='#777777', bd=0
         )
         save.place(
             x=self.outer_frame.winfo_width() * 0.4,
-            y=self.outer_frame.winfo_height() * 0.55
+            y=self.outer_frame.winfo_height() * 0.65
         )
 
-    def save_ed_la(self, index, ed_entry, la_entry, config_frame):
+    def save_ed_la(
+            self,
+            index,
+            ed_entry,
+            la_entry,
+            ed_err_label,
+            la_err_label,
+            config_frame
+    ):
+        err_count = 0
         ed = ed_entry.get()
         la = la_entry.get()
         if ed == '':
@@ -905,22 +940,31 @@ class TrainListCanvas:
         else:
             try:
                 ed = int(ed)
+                ed_err_label.place_forget()
             except ValueError:
-                # TODO: show error message in config window ?
-                print('Only Integers allowed in '
-                      'Earliest Departure and Latest Arrival')
-                ed = -1
+                ed_err_label.config(text='has to be an integer > 0')
+                la_err_label.place(
+                    x=self.outer_frame.winfo_width() * 0.1,
+                    y=self.outer_frame.winfo_height() * 0.45
+                )
+                err_count += 1
 
         if la == '':
             la = -1
         else:
             try:
                 la = int(la)
+                la_err_label.place_forget()
             except ValueError:
-                # TODO: show error message in config window ?
-                print('Only Integers allowed in '
-                      'Earliest Departure and Latest Arrival')
-                la = -1
+                la_err_label.config(text='has to be an integer > 0')
+                la_err_label.place(
+                    x=self.outer_frame.winfo_width() * 0.1,
+                    y=self.outer_frame.winfo_height() * 0.55
+                )
+                err_count += 1
+
+        if err_count:
+            return -1
 
         self.train_data.loc[index, 'e_dep'] = ed
         self.train_data.loc[index, 'l_arr'] = la

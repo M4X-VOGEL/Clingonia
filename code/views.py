@@ -61,6 +61,26 @@ USER_PARAMS = {
     'clingo': None,
     'lpFiles': [],
 }
+ERR_DICT = {
+    'rows': {ValueError: 'has to be an integer > 0',},
+    'cols': {ValueError: 'has to be an integer > 0'},
+    'agents': {ValueError: 'has to be an integer > 0'},
+    'cities': {ValueError: 'has to be an integer > 0'},
+    'seed': {ValueError: 'has to be an integer > 0'},
+    'grid': {ValueError: 'has to be true or false'},
+    'intercity': {ValueError: 'has to be an integer > 0'},
+    'incity': {ValueError: 'has to be an integer > 0'},
+    'remove': {ValueError: 'has to be true or false'},
+    'speed': {ValueError: 'has to be a dictionary like: {integer > 0 : integer > 0, ...}',
+              SyntaxError: 'has to be a dictionary like: {integer > 0 : integer > 0, ...}'},
+    'malfunction': {ValueError: 'has to be a fraction like: integer / integer',
+                    IndexError: 'has to be a fraction like: integer / integer'},
+    'min': {ValueError: 'has to be an integer > 0'},
+    'max': {ValueError: 'has to be an integer > 0'},
+    'answer': {ValueError: 'has to be an integer > 0'},
+    'clingo': {},
+    'lpFiles': {},
+}
 
 CURRENT_ARRAY = np.zeros((3,40,40), dtype=int)
 CURRENT_DF = pd.DataFrame(
@@ -635,9 +655,22 @@ def build_clingo_para_frame():
         visibility=True,
     )
 
-    LABELS['answer_label'] = Label(
+    LABELS['clingo_error_label'] = Label(
         root=FRAMES['clingo_para_frame'].frame,
         grid_pos=(2, 1),
+        padding=(0, 0),
+        sticky='nw',
+        columnspan=2,
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    LABELS['answer_label'] = Label(
+        root=FRAMES['clingo_para_frame'].frame,
+        grid_pos=(3, 1),
         padding=(0, 0),
         sticky='nw',
         text='Answer to display:',
@@ -651,7 +684,7 @@ def build_clingo_para_frame():
         root=FRAMES['clingo_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(2, 2),
+        grid_pos=(3, 2),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {DEFAULT_PARAMS["answer"]}',
@@ -663,11 +696,24 @@ def build_clingo_para_frame():
         visibility=True,
     )
 
+    LABELS['answer_error_label'] = Label(
+        root=FRAMES['clingo_para_frame'].frame,
+        grid_pos=(4, 1),
+        padding=(0, 0),
+        sticky='nw',
+        columnspan=2,
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        visibility=False,
+    )
+
     BUTTONS['select_lp_files_button'] = Button(
         root=FRAMES['clingo_para_frame'].frame,
         width=15,
         height=1,
-        grid_pos=(3, 1),
+        grid_pos=(5, 1),
         padding=(0, 0),
         sticky='n',
         columnspan=2,
@@ -682,7 +728,7 @@ def build_clingo_para_frame():
 
     LABELS['clingo_paths_label'] = Label(
         root=FRAMES['clingo_para_frame'].frame,
-        grid_pos=(4, 1),
+        grid_pos=(6, 1),
         padding=(0, 0),
         sticky='n',
         columnspan=2,
@@ -697,7 +743,7 @@ def build_clingo_para_frame():
         root=FRAMES['clingo_para_frame'].frame,
         width=30,
         height=2,
-        grid_pos=(5, 1),
+        grid_pos=(7, 1),
         padding=(0, 0),
         sticky='n',
         columnspan=2,
@@ -713,7 +759,7 @@ def build_clingo_para_frame():
     FRAMES['clingo_para_frame'].frame.rowconfigure(0, weight=1)
     FRAMES['clingo_para_frame'].frame.columnconfigure(0, weight=1)
     FRAMES['clingo_para_frame'].frame.rowconfigure(
-        tuple(range(1,6)), weight=2
+        tuple(range(1,8)), weight=2
     )
     FRAMES['clingo_para_frame'].frame.columnconfigure(
         tuple(range(1,3)), weight=2
@@ -796,7 +842,8 @@ def switch_clingo_para_to_main():
     create_main_menu()
 
 def switch_clingo_para_to_result():
-    save_clingo_params()
+    if save_clingo_params() == -1:
+        return
 
     if 'clingo_para_frame' in FRAMES:
         FRAMES['clingo_para_frame'].destroy_frame()
@@ -825,13 +872,15 @@ def load_lp_files():
         filetypes=[("Clingo Files", "*.lp"), ("All Files", "*.*")],
     )
 
-    USER_PARAMS["lpFiles"] = list(files)
+    USER_PARAMS['lpFiles'] = list(files)
     displaytext = "\n".join(files)
 
     LABELS['clingo_paths_label'].label.config(text=displaytext)
 
 def save_clingo_params():
     global USER_PARAMS, DEFAULT_PARAMS
+
+    err_count = 0
 
     for field in ENTRY_FIELDS:
         key = field.split('_')[0]
@@ -851,12 +900,25 @@ def save_clingo_params():
                 data = data
             else:
                 data = int(data)
+
+            LABELS[f'{key}_error_label'].hide_label()
         except Exception as e:
-            print(f"Input error for key '{key}': {str(e)}")
-            # TODO: display error message next tor Entry field using LABELS[key]
+            err = type(e)
+            LABELS[f'{key}_error_label'].label.config(text=ERR_DICT[key][err])
+            LABELS[f'{key}_error_label'].place_label()
+            if err not in ERR_DICT[key]:
+                print(e)
+                print(err)
+                print(data)
+            err_count += 1
 
         if type(data) is not str or key == 'clingo':
             USER_PARAMS[key] = data
+
+    if err_count:
+        return -1
+    else:
+        return 0
 
 def load_clingo_params():
     global USER_PARAMS, DEFAULT_PARAMS
@@ -913,9 +975,9 @@ def build_random_gen_para_frame():
 
     FRAMES['random_gen_para_frame'] = Frame(
         root=WINDOWS['flatland_window'].window,
-        width=SCREENWIDTH * 0.5,
+        width=SCREENWIDTH,
         height=SCREENHEIGHT,
-        grid_pos=(0, 1),
+        grid_pos=(0, 0),
         padding=(0, 0),
         sticky='nes',
         background_color='#000000',
@@ -967,6 +1029,18 @@ def build_random_gen_para_frame():
         visibility=True,
     )
 
+    LABELS['rows_error_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        grid_pos=(1, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        visibility=False,
+    )
+
     LABELS['cols_label'] = Label(
         root=FRAMES['random_gen_para_frame'].frame,
         grid_pos=(2, 1),
@@ -993,6 +1067,18 @@ def build_random_gen_para_frame():
         example_color='#777777',
         border_width=0,
         visibility=True,
+    )
+
+    LABELS['cols_error_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        grid_pos=(2, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        visibility=False,
     )
 
     LABELS['agents_label'] = Label(
@@ -1023,6 +1109,18 @@ def build_random_gen_para_frame():
         visibility=True,
     )
 
+    LABELS['agents_error_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        grid_pos=(3, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        visibility=False,
+    )
+
     LABELS['cities_label'] = Label(
         root=FRAMES['random_gen_para_frame'].frame,
         grid_pos=(4, 1),
@@ -1051,6 +1149,18 @@ def build_random_gen_para_frame():
         visibility=True,
     )
 
+    LABELS['cities_error_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        grid_pos=(4, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        visibility=False,
+    )
+
     LABELS['seed_label'] = Label(
         root=FRAMES['random_gen_para_frame'].frame,
         grid_pos=(5, 1),
@@ -1076,6 +1186,18 @@ def build_random_gen_para_frame():
         background_color='#222222',
         example_color='#777777',
         border_width=0,
+        visibility=False,
+    )
+
+    LABELS['seed_error_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        grid_pos=(5, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
         visibility=False,
     )
 
@@ -1107,6 +1229,18 @@ def build_random_gen_para_frame():
         visibility=False,
     )
 
+    LABELS['grid_error_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        grid_pos=(6, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        visibility=False,
+    )
+
     LABELS['intercity_label'] = Label(
         root=FRAMES['random_gen_para_frame'].frame,
         grid_pos=(7, 1),
@@ -1132,6 +1266,18 @@ def build_random_gen_para_frame():
         background_color='#222222',
         example_color='#777777',
         border_width=0,
+        visibility=False,
+    )
+
+    LABELS['intercity_error_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        grid_pos=(7, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
         visibility=False,
     )
 
@@ -1163,6 +1309,18 @@ def build_random_gen_para_frame():
         visibility=False,
     )
 
+    LABELS['incity_error_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        grid_pos=(8, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        visibility=False,
+    )
+
     LABELS['remove_label'] = Label(
         root=FRAMES['random_gen_para_frame'].frame,
         grid_pos=(9, 1),
@@ -1191,6 +1349,18 @@ def build_random_gen_para_frame():
         visibility=False,
     )
 
+    LABELS['remove_error_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        grid_pos=(9, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        visibility=False,
+    )
+
     LABELS['speed_label'] = Label(
         root=FRAMES['random_gen_para_frame'].frame,
         grid_pos=(10, 1),
@@ -1216,6 +1386,18 @@ def build_random_gen_para_frame():
         background_color='#222222',
         example_color='#777777',
         border_width=0,
+        visibility=False,
+    )
+
+    LABELS['speed_error_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        grid_pos=(10, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
         visibility=False,
     )
 
@@ -1248,6 +1430,18 @@ def build_random_gen_para_frame():
         visibility=False,
     )
 
+    LABELS['malfunction_error_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        grid_pos=(11, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        visibility=False,
+    )
+
     LABELS['min_duration_label'] = Label(
         root=FRAMES['random_gen_para_frame'].frame,
         grid_pos=(12, 1),
@@ -1276,6 +1470,18 @@ def build_random_gen_para_frame():
         visibility=False,
     )
 
+    LABELS['min_error_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        grid_pos=(12, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        visibility=False,
+    )
+
     LABELS['max_duration_label'] = Label(
         root=FRAMES['random_gen_para_frame'].frame,
         grid_pos=(13, 1),
@@ -1301,6 +1507,18 @@ def build_random_gen_para_frame():
         background_color='#222222',
         example_color='#777777',
         border_width=0,
+        visibility=False,
+    )
+
+    LABELS['max_error_label'] = Label(
+        root=FRAMES['random_gen_para_frame'].frame,
+        grid_pos=(13, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
         visibility=False,
     )
 
@@ -1340,7 +1558,7 @@ def build_random_gen_para_frame():
         tuple(range(15)), weight=1
     )
     FRAMES['random_gen_para_frame'].frame.columnconfigure(
-        tuple(range(3)), weight=1
+        tuple(range(4)), weight=1
     )
     FRAMES['random_gen_para_frame'].frame.grid_propagate(False)
 
@@ -1349,7 +1567,8 @@ def build_random_gen_para_frame():
 def random_gen_para_to_env():
     global CURRENT_IMG
 
-    save_random_gen_env_params()
+    if save_random_gen_env_params() == -1:
+        return
 
     gen_env(USER_PARAMS)
     # TODO: CURRENT_ARRAY, CURRENT_DF = gen_env(USER_PARAMS)
@@ -1509,6 +1728,17 @@ def switch_random_gen_to_main():
 def save_random_gen_env_params():
     global USER_PARAMS, DEFAULT_PARAMS
 
+    def str_to_bool(s):
+        if isinstance(s, str):
+            s = s.lower()
+            if s == "true":
+                return True
+            elif s == "false":
+                return False
+        raise ValueError(f"Invalid boolean string: {s}")
+
+    err_count = 0
+
     for field in ENTRY_FIELDS:
         key = field.split('_')[0]
         if key not in DEFAULT_PARAMS:
@@ -1524,19 +1754,32 @@ def save_random_gen_env_params():
             elif data == '':
                 data = None
             elif key == 'grid' or key == 'remove':
-                data = data.lower() == 'true'
+                data = str_to_bool(data)
             elif key == 'speed':
                 data = ast.literal_eval(data)
             elif key == 'malfunction':
                 data = (int(data.split('/')[0]),int(data.split('/')[1]))
             else:
                 data = int(data)
+
+            LABELS[f'{key}_error_label'].hide_label()
         except Exception as e:
-            print(f"Input error for key '{key}': {str(e)}")
-            # TODO: display error message next tor Entry field using LABELS[key]
+            err = type(e)
+            LABELS[f'{key}_error_label'].label.config(text=ERR_DICT[key][err])
+            LABELS[f'{key}_error_label'].place_label()
+            if err not in ERR_DICT[key]:
+                print(e)
+                print(err)
+                print(data)
+            err_count += 1
 
         if type(data) is not str:
             USER_PARAMS[key] = data
+
+    if err_count:
+        return -1
+    else:
+        return 0
 
 def load_random_gen_env_params():
     global USER_PARAMS, DEFAULT_PARAMS
@@ -1598,9 +1841,9 @@ def build_builder_para_frame():
 
     FRAMES['builder_para_frame'] = Frame(
         root=WINDOWS['flatland_window'].window,
-        width=SCREENWIDTH * 0.5,
+        width=SCREENWIDTH,
         height=SCREENHEIGHT,
-        grid_pos=(0, 1),
+        grid_pos=(0, 0),
         padding=(0, 0),
         sticky='nes',
         background_color='#000000',
@@ -1652,6 +1895,18 @@ def build_builder_para_frame():
         visibility=True,
     )
 
+    LABELS['rows_error_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        grid_pos=(1, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        visibility=False,
+    )
+
     LABELS['cols_label'] = Label(
         root=FRAMES['builder_para_frame'].frame,
         grid_pos=(2, 1),
@@ -1678,6 +1933,18 @@ def build_builder_para_frame():
         example_color='#777777',
         border_width=0,
         visibility=True,
+    )
+
+    LABELS['cols_error_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        grid_pos=(2, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        visibility=False,
     )
 
     LABELS['remove_label'] = Label(
@@ -1708,6 +1975,18 @@ def build_builder_para_frame():
         visibility=False,
     )
 
+    LABELS['remove_error_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        grid_pos=(3, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        visibility=False,
+    )
+
     LABELS['speed_label'] = Label(
         root=FRAMES['builder_para_frame'].frame,
         grid_pos=(4, 1),
@@ -1733,6 +2012,18 @@ def build_builder_para_frame():
         background_color='#222222',
         example_color='#777777',
         border_width=0,
+        visibility=False,
+    )
+
+    LABELS['speed_error_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        grid_pos=(4, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
         visibility=False,
     )
 
@@ -1765,6 +2056,18 @@ def build_builder_para_frame():
         visibility=False,
     )
 
+    LABELS['malfunction_error_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        grid_pos=(5, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        visibility=False,
+    )
+
     LABELS['min_duration_label'] = Label(
         root=FRAMES['builder_para_frame'].frame,
         grid_pos=(6, 1),
@@ -1793,6 +2096,18 @@ def build_builder_para_frame():
         visibility=False,
     )
 
+    LABELS['min_error_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        grid_pos=(6, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        visibility=False,
+    )
+
     LABELS['max_duration_label'] = Label(
         root=FRAMES['builder_para_frame'].frame,
         grid_pos=(7, 1),
@@ -1818,6 +2133,18 @@ def build_builder_para_frame():
         background_color='#222222',
         example_color='#777777',
         border_width=0,
+        visibility=False,
+    )
+
+    LABELS['max_error_label'] = Label(
+        root=FRAMES['builder_para_frame'].frame,
+        grid_pos=(7, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(FONT_SCALE * BASE_FONT), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
         visibility=False,
     )
 
@@ -1857,7 +2184,7 @@ def build_builder_para_frame():
         tuple(range(9)), weight=1
     )
     FRAMES['builder_para_frame'].frame.columnconfigure(
-        tuple(range(3)), weight=1
+        tuple(range(4)), weight=1
     )
     FRAMES['builder_para_frame'].frame.grid_propagate(False)
 
@@ -1867,7 +2194,8 @@ def builder_para_to_track_grid():
     global BUILD_MODE, CURRENT_ARRAY, CURRENT_DF, DEFAULT_PARAMS, \
         USER_PARAMS, CURRENT_BACKUP_ARRAY, CURRENT_BACKUP_DF
 
-    save_builder_env_params()
+    if save_builder_env_params() == -1:
+        return
 
     if 'builder_para_frame' in FRAMES:
         FRAMES['builder_para_frame'].destroy_frame()
@@ -2616,6 +2944,9 @@ def builder_train_grid_to_env():
     global FRAMES, CANVASES, CURRENT_BACKUP_ARRAY, CURRENT_BACKUP_DF, \
         CURRENT_IMG
 
+    # TODO: error if trains is empty in train builder
+    # TODO: error if tracks is empty ???? in track builder
+
     tracks = CURRENT_ARRAY[0]
     x = [t[1] for t in CURRENT_DF['start_pos']]
     y = [t[0] for t in CURRENT_DF['start_pos']]
@@ -2771,6 +3102,18 @@ def switch_builder_to_main():
     create_main_menu()
 
 def save_builder_env_params():
+
+    def str_to_bool(s):
+        if isinstance(s, str):
+            s = s.lower()
+            if s == "true":
+                return True
+            elif s == "false":
+                return False
+        raise ValueError(f"Invalid boolean string: {s}")
+
+    err_count = 0
+
     for field in ENTRY_FIELDS:
         key = field.split('_')[0]
         if key not in DEFAULT_PARAMS:
@@ -2787,19 +3130,32 @@ def save_builder_env_params():
             elif data == '':
                 data = None
             elif key == 'grid' or key == 'remove':
-                data = data.lower() == 'true'
+                data = str_to_bool(data)
             elif key == 'speed':
                 data = ast.literal_eval(data)
             elif key == 'malfunction':
                 data = (int(data.split('/')[0]),int(data.split('/')[1]))
             else:
                 data = int(data)
+
+            LABELS[f'{key}_error_label'].hide_label()
         except Exception as e:
-            print(f"Input error for key '{key}': {str(e)}")
-            # TODO: display error message next tor Entry field using LABELS[key]
+            err = type(e)
+            LABELS[f'{key}_error_label'].label.config(text=ERR_DICT[key][err])
+            LABELS[f'{key}_error_label'].place_label()
+            if err not in ERR_DICT[key]:
+                print(e)
+                print(err)
+                print(data)
+            err_count += 1
 
         if type(data) is not str:
             USER_PARAMS[key] = data
+
+    if err_count:
+        return -1
+    else:
+        return 0
 
 def load_builder_env_params():
     global USER_PARAMS
@@ -3262,9 +3618,11 @@ def stub():
 
 # TODOS
 
-# TODO: ERROR Message displays with Labels using toggle_visibility and .config(text='xyz')
-#  - for all entry fields
-#  - any where else ?
 # TODO: loading symbols with Labels using toggle_visibility
+#  make loading labels  XXX_status_label next to the generate or build or run
+#  simulation buttons
+#  and use the status label to show errors like not being able to generate an
+#  environment or not getting the paths from the run sim button
+
 # TODO: show time table and gif functions in Results
 # TODO: add help buttons in random gen, builder and result menus
