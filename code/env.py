@@ -1,5 +1,4 @@
 import os
-import pandas as pd
 
 def save_env(tracks, trains, name="../data/running_tmp.lp"):
     """Saves the env as a .lp file.

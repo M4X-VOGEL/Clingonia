@@ -92,17 +92,12 @@ def get_action_params(clingo_answer):
     # Only consider Action Predicates
     actions = [s for s in clingo_answer.split() if "action" in s]
     # Trim Action Predicates
-    train_ids = []
     action_params = []
     for action in actions:
         # Remove redundant Characters
         params = action.replace("action(train(", "")
         params = params[:-1]
         params = params.replace("),", ",")
-        # Skip move to starting position
-        if params[0] not in train_ids:
-            train_ids.append(params[0])
-            continue
         # Save trimmed Version
         action_params.append(params)
     return action_params
@@ -124,4 +119,11 @@ def create_df(action_params):
         row[0], row[2] = int(row[0]), int(row[2])
         data.append(row)
     df_actions = pd.DataFrame(data, columns=["trainID", "action", "timestep"])
+    # Sort by ID and Timestep
+    df_actions = df_actions.sort_values(by=["trainID", "timestep"], ascending=[True, True])
+    # Skip move to start position
+    df_actions = df_actions.drop(
+        df_actions[df_actions['action'] == 'move_forward']
+        .groupby('trainID')['timestep'].idxmin()
+    )   
     return df_actions

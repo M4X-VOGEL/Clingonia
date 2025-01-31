@@ -83,10 +83,10 @@ def create_df_of_trains(tse_list):
         for l in tse_list:
             if type(l) == list:
                 if l[0] == 'start' and l[1] == id:
-                    x, y = l[2], l[3]
+                    x, y = l[3], l[2]
                     e_dep, dir = l[4], l[5]
                 elif l[0] == 'end' and l[1] == id:
-                    x_end, y_end = l[2], l[3]
+                    x_end, y_end = l[3], l[2]
                     l_arr = l[4]
         trains.loc[len(trains)] = [id, x, y, dir, x_end, y_end, e_dep, l_arr]
     return trains

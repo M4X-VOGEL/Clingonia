@@ -1,5 +1,5 @@
 import pandas as pd
-from code import actions
+import actions
 
 def position_df(tracks, trains, clingo_path, lp_files, answer_number):
     """Creates a DataFrame of the x-y-position and direction for the trains at each timestep.
@@ -8,7 +8,6 @@ def position_df(tracks, trains, clingo_path, lp_files, answer_number):
         [pd.DataFrame] IDs, Positions, Directions, Timesteps
     """
     df_actions = actions.clingo_to_df(clingo_path, lp_files, answer_number)
-    df_actions = df_actions.sort_values(by=["trainID", "timestep"], ascending=[True, True])
     df_pos = pd.DataFrame(columns=["trainID", "x", "y", "dir", "timestep"])
     # Train IDs
     train_ids = []
