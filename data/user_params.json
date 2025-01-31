@@ -2,8 +2,8 @@
     "rows": 3,
     "cols": 7,
     "agents": 2,
-    "cities": 4,
-    "seed": 879451,
+    "cities": 2,
+    "seed": 456456,
     "grid": true,
     "intercity": 2,
     "incity": 2,
@@ -19,5 +19,8 @@
     "max": 6,
     "clingo": "clingo",
     "answer": 1,
-    "lpFiles": []
+    "lpFiles": [
+        "G:/Praktikum/asp/flat.lp",
+        "G:/Praktikum/asp/trans.lp"
+    ]
 }

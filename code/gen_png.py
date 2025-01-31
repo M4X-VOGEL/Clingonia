@@ -94,6 +94,7 @@ def gen_env(env_params):
             print("1. Grid Size: try at least 40 rows and 40 cols.")
             print("2. Grid-Mode: set to True.")
             print("3. Cities: reduce amount of cities.")
+            return -1, -1
     return tracks, trains
 
 

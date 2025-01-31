@@ -14,6 +14,7 @@ from code.positions import position_df
 # Base style parameters
 screenwidth, screenheight = 1920, 1080
 base_font = 20
+error_scale = 0.75
 font_scale = 1
 
 # state trackers
@@ -275,9 +276,20 @@ def build_start_menu_frame():
         visibility=True,
     )
 
-    # TODO: Add status label
+    labels['start_load_status_label'] = Label(
+        root=frames['start_menu_frame'].frame,
+        grid_pos=(4, 1),
+        padding=(0, 0),
+        sticky='n',
+        text='',
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
+        foreground_color='#000000',
+        background_color='#000000',
+        visibility=True,
+    )
 
-    frames['start_menu_frame'].frame.rowconfigure(tuple(range(5)), weight=1)
+    frames['start_menu_frame'].frame.rowconfigure(tuple(range(4)), weight=2)
+    frames['start_menu_frame'].frame.rowconfigure(5, weight=1)
     frames['start_menu_frame'].frame.columnconfigure(tuple(range(3)), weight=1)
     frames['start_menu_frame'].frame.grid_propagate(False)
 
@@ -483,29 +495,11 @@ def build_main_menu():
         visibility=True,
     )
 
-    buttons['load_env_button'] = Button(
-        root=frames['main_menu_frame'].frame,
-        width=30,
-        height=2,
-        grid_pos=(4, 1),
-        padding=(0, 0),
-        sticky='n',
-        command=load_env_from_file,
-        text='Load Custom Environment',
-        font=('Arial', int(font_scale * base_font), 'bold'),
-        foreground_color='#000000',
-        background_color='#777777',
-        border_width=0,
-        visibility=True,
-    )
-
-    # TODO: Add status label
-
     buttons['save_env_button'] = Button(
         root=frames['main_menu_frame'].frame,
         width=30,
         height=2,
-        grid_pos=(5, 1),
+        grid_pos=(4, 1),
         padding=(0, 0),
         sticky='n',
         command=save_env_to_file,
@@ -517,11 +511,39 @@ def build_main_menu():
         visibility=True,
     )
 
+    buttons['load_env_button'] = Button(
+        root=frames['main_menu_frame'].frame,
+        width=30,
+        height=2,
+        grid_pos=(5, 1),
+        padding=(0, 0),
+        sticky='n',
+        command=load_env_from_file,
+        text='Load Custom Environment',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#000000',
+        background_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    labels['main_load_status_label'] = Label(
+        root=frames['main_menu_frame'].frame,
+        grid_pos=(6, 1),
+        padding=(0, 0),
+        sticky='n',
+        text='',
+        font=('Arial', int(font_scale * base_font  * error_scale), 'bold'),
+        foreground_color='#000000',
+        background_color='#000000',
+        visibility=True,
+    )
+
     buttons['run_sim_button'] = Button(
         root=frames['main_menu_frame'].frame,
         width=30,
         height=2,
-        grid_pos=(6, 1),
+        grid_pos=(7, 1),
         padding=(0, 0),
         sticky='n',
         command=switch_main_to_clingo_para,
@@ -533,7 +555,7 @@ def build_main_menu():
         visibility=True,
     )
 
-    frames['main_menu_frame'].frame.rowconfigure(tuple(range(7)), weight=1)
+    frames['main_menu_frame'].frame.rowconfigure(tuple(range(8)), weight=1)
     frames['main_menu_frame'].frame.columnconfigure(tuple(range(3)), weight=1)
     frames['main_menu_frame'].frame.grid_propagate(False)
 
@@ -679,7 +701,7 @@ def build_clingo_para_frame():
         sticky='nw',
         columnspan=2,
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -720,7 +742,7 @@ def build_clingo_para_frame():
         sticky='nw',
         columnspan=2,
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -773,13 +795,24 @@ def build_clingo_para_frame():
         visibility=True,
     )
 
-    # TODO: Add status label
+    labels['clingo_status_label'] = Label(
+        root=frames['clingo_para_frame'].frame,
+        grid_pos=(8, 2),
+        padding=(0, 0),
+        sticky='n',
+        columnspan=4,
+        text='',
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
+        foreground_color='#000000',
+        background_color='#000000',
+        visibility=True,
+    )
 
     frames['clingo_para_frame'].frame.rowconfigure(0, weight=1)
     frames['clingo_para_frame'].frame.columnconfigure(0, weight=1)
     frames['clingo_para_frame'].frame.columnconfigure(1, weight=1)
     frames['clingo_para_frame'].frame.rowconfigure(
-        tuple(range(1,8)), weight=2
+        tuple(range(1,9)), weight=2
     )
     frames['clingo_para_frame'].frame.columnconfigure(
         tuple(range(2,4)), weight=2
@@ -917,18 +950,53 @@ def switch_clingo_para_to_result():
     if save_clingo_params() == -1:
         return
 
-    if 'clingo_para_frame' in frames:
-        frames['clingo_para_frame'].destroy_frame()
-        del frames['clingo_para_frame']
-    if 'clingo_help_frame' in frames:
-        frames['clingo_help_frame'].destroy_frame()
-        del frames['clingo_help_frame']
-    if 'main_menu_env_viewer_frame' in frames:
-        frames['main_menu_env_viewer_frame'].destroy_frame()
-        del frames['main_menu_env_viewer_frame']
+    labels['clingo_status_label'].label.config(
+        text='...Simulating...',
+        fg='#00FF00',
+    )
+    frames['clingo_para_frame'].frame.update()
 
-    run_simulation()
-    create_result_menu()
+    sim_result = run_simulation()
+
+    if sim_result == 0:
+        if 'clingo_para_frame' in frames:
+            frames['clingo_para_frame'].destroy_frame()
+            del frames['clingo_para_frame']
+        if 'clingo_help_frame' in frames:
+            frames['clingo_help_frame'].destroy_frame()
+            del frames['clingo_help_frame']
+        if 'main_menu_env_viewer_frame' in frames:
+            frames['main_menu_env_viewer_frame'].destroy_frame()
+            del frames['main_menu_env_viewer_frame']
+
+        create_result_menu()
+    elif sim_result == -1:
+        labels['clingo_status_label'].label.config(
+            text='No .lp files given',
+            fg='#FF0000',
+        )
+        frames['clingo_para_frame'].frame.update()
+        return
+    elif sim_result == -2:
+        labels['clingo_status_label'].label.config(
+            text='Invalid clingo path and/or files\n'
+                 f'--> given clingo path: {user_params["clingo"]}\n'
+                 f'--> given .lp files: \n'
+                 f'{user_params["lpFiles"]}',
+            fg='#FF0000',
+            anchor='w',
+            justify='left',
+        )
+        frames['clingo_para_frame'].frame.update()
+        return
+    elif sim_result == -3:
+        labels['clingo_status_label'].label.config(
+            text=f'Clingo did not provide the requested Answer: '
+                 f'{user_params["answer"]}',
+            fg='#FF0000',
+        )
+        frames['clingo_para_frame'].frame.update()
+        return
 
 def reload_main_env_viewer():
     if 'main_menu_env_viewer_frame' in frames:
@@ -1117,7 +1185,7 @@ def build_random_gen_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -1157,7 +1225,7 @@ def build_random_gen_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -1197,7 +1265,7 @@ def build_random_gen_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -1237,7 +1305,7 @@ def build_random_gen_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -1277,7 +1345,7 @@ def build_random_gen_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -1317,7 +1385,7 @@ def build_random_gen_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -1357,7 +1425,7 @@ def build_random_gen_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -1397,7 +1465,7 @@ def build_random_gen_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -1437,7 +1505,7 @@ def build_random_gen_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -1477,7 +1545,7 @@ def build_random_gen_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -1518,7 +1586,7 @@ def build_random_gen_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -1558,7 +1626,7 @@ def build_random_gen_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -1598,7 +1666,7 @@ def build_random_gen_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -1633,6 +1701,18 @@ def build_random_gen_para_frame():
         foreground_color='#000000',
         background_color='#FF0000',
         border_width=0,
+        visibility=True,
+    )
+
+    labels['random_gen_status_label'] = Label(
+        root=frames['random_gen_para_frame'].frame,
+        grid_pos=(14, 4),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
+        foreground_color='#000000',
+        background_color='#000000',
         visibility=True,
     )
 
@@ -1692,7 +1772,27 @@ def random_gen_para_to_env():
     if save_random_gen_env_params() == -1:
         return
 
+    labels['random_gen_status_label'].label.config(
+        text='...Generating...',
+        fg='#00FF00',
+    )
+    frames['random_gen_para_frame'].frame.update()
+
     tracks, trains = gen_env(user_params)
+
+    if tracks == -1:
+        labels['random_gen_status_label'].label.config(
+            text='No environment generated. \n'
+                 'Suggestions: \n'
+                 '1. Grid Size: try at least 40 rows and 40 cols.\n'
+                 '2. Grid-Mode: set to True.\n'
+                 '3. Cities: reduce amount of cities.',
+            fg='#FF0000',
+            anchor="w",
+            justify="left",
+        )
+        frames['random_gen_para_frame'].frame.update()
+        return
 
     if len(trains):
         start_pos = list(zip(trains['x'], trains['y']))
@@ -2074,7 +2174,7 @@ def build_builder_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -2114,7 +2214,7 @@ def build_builder_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -2154,7 +2254,7 @@ def build_builder_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -2194,7 +2294,7 @@ def build_builder_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -2235,7 +2335,7 @@ def build_builder_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -2275,7 +2375,7 @@ def build_builder_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -2315,7 +2415,7 @@ def build_builder_para_frame():
         padding=(0, 0),
         sticky='nw',
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
@@ -2970,11 +3070,11 @@ def build_track_builder_menu_frame():
 
     buttons['train_builder_button'] = Button(
         root=frames['track_builder_menu_frame'].frame,
-        width=20,
+        width=10,
         height=1,
         grid_pos=(6, 2),
         padding=(0, 0),
-        columnspan=8,
+        columnspan=4,
         command=builder_track_to_train,
         text='Trains',
         font=('Arial', int(font_scale * base_font), 'bold'),
@@ -3199,11 +3299,11 @@ def build_train_builder_menu_frame():
 
     buttons['finish_building_button'] = Button(
         root=frames['train_builder_menu_frame'].frame,
-        width=20,
+        width=14,
         height=1,
         grid_pos=(3, 2),
         padding=(0, 0),
-        columnspan=6,
+        columnspan=3,
         command=builder_train_grid_to_env,
         text='Finish Building',
         font=('Arial', int(font_scale * base_font), 'bold'),
@@ -3213,7 +3313,18 @@ def build_train_builder_menu_frame():
         visibility=True,
     )
 
-    # TODO: Add status label
+    labels['builder_status_label'] = Label(
+        root=frames['train_builder_menu_frame'].frame,
+        grid_pos=(3, 6),
+        padding=(0, 0),
+        sticky='w',
+        columnspan=4,
+        text='',
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
+        foreground_color='#000000',
+        background_color='#000000',
+        visibility=True,
+    )
 
     frames['train_builder_menu_frame'].frame.rowconfigure(0, weight=1)
     frames['train_builder_menu_frame'].frame.columnconfigure(0, weight=1)
@@ -3290,8 +3401,19 @@ def toggle_builder_train_help():
 def builder_train_grid_to_env():
     global current_backup_array, current_backup_df, current_img
 
-    # TODO: error if trains is empty in train builder
-    # TODO: error if tracks is empty ???? in track builder
+    if len(current_df) == 0:
+        labels['builder_status_label'].label.config(
+            text='No Trains Placed',
+            fg='#FF0000',
+        )
+        frames['train_builder_menu_frame'].frame.update()
+        return
+    else:
+        labels['builder_status_label'].label.config(
+            text='...Building...',
+            fg='#00FF00',
+        )
+        frames['train_builder_menu_frame'].frame.update()
 
     tracks = current_array[0]
     x = [t[1] for t in current_df['start_pos']]
@@ -3884,6 +4006,19 @@ def load_env_from_file():
     if not file:
         return
 
+    if last_menu == 'start':
+        labels['start_load_status_label'].label.config(
+            text='...Loading...',
+            fg='#00FF00',
+        )
+        frames['start_menu_frame'].frame.update()
+    else:
+        labels['main_load_status_label'].label.config(
+            text='...Loading...',
+            fg='#00FF00',
+        )
+        frames['main_menu_frame'].frame.update()
+
     tracks, trains = lp_to_env(file)
 
     start_pos = list(zip(trains['y'], trains['x']))
@@ -3927,6 +4062,11 @@ def load_env_from_file():
     if last_menu == 'start':
         switch_start_to_main()
     else:
+        labels['main_load_status_label'].label.config(
+            text='',
+            fg='#000000',
+        )
+        frames['main_menu_frame'].frame.update()
         reload_main_env_viewer()
 
 def save_env_to_file():
@@ -3989,7 +4129,11 @@ def run_simulation():
         user_params['answer']
     )
 
+    if type(current_paths) == int:
+        return current_paths
+
     delete_tmp_lp()
+    return 0
 
 def exit_gui(event=None):
     save_user_data_to_file()
@@ -4006,11 +4150,5 @@ def stub():
 
 
 # TODOS
-
-# TODO: loading symbols with Labels using toggle_visibility
-#  make loading labels  XXX_status_label next to the generate or build or run
-#  simulation buttons
-#  and use the status label to show errors like not being able to generate an
-#  environment or not getting the paths from the run sim button
 
 # TODO: show time table and gif functions in Results
