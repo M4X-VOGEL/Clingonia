@@ -66,22 +66,22 @@ user_params = {
 
 # Parameter Dictionary for Error handling
 err_dict = {
-    'rows': {ValueError: 'has to be an integer > 0',},
-    'cols': {ValueError: 'has to be an integer > 0'},
-    'agents': {ValueError: 'has to be an integer > 0'},
-    'cities': {ValueError: 'has to be an integer > 0'},
-    'seed': {ValueError: 'has to be an integer > 0'},
-    'grid': {ValueError: 'has to be true or false'},
-    'intercity': {ValueError: 'has to be an integer > 0'},
-    'incity': {ValueError: 'has to be an integer > 0'},
-    'remove': {ValueError: 'has to be true or false'},
-    'speed': {ValueError: 'has to be a dictionary like: {integer > 0 : integer > 0, ...}',
-              SyntaxError: 'has to be a dictionary like: {integer > 0 : integer > 0, ...}'},
-    'malfunction': {ValueError: 'has to be a fraction like: integer / integer',
-                    IndexError: 'has to be a fraction like: integer / integer'},
-    'min': {ValueError: 'has to be an integer > 0'},
-    'max': {ValueError: 'has to be an integer > 0'},
-    'answer': {ValueError: 'has to be an integer > 0'},
+    'rows': {ValueError: 'needs int > 0',},
+    'cols': {ValueError: 'needs int > 0'},
+    'agents': {ValueError: 'needs int > 0'},
+    'cities': {ValueError: 'needs int > 0'},
+    'seed': {ValueError: 'needs int > 0'},
+    'grid': {ValueError: 'needs true or false'},
+    'intercity': {ValueError: 'needs int > 0'},
+    'incity': {ValueError: 'needs int > 0'},
+    'remove': {ValueError: 'needs true or false'},
+    'speed': {ValueError: 'needs dictionary: {int > 0 : int > 0, ...}',
+              SyntaxError: 'needs dictionary: {int > 0 : int > 0, ...}'},
+    'malfunction': {ValueError: 'needs fraction: int / int',
+                    IndexError: 'needs fraction: int / int'},
+    'min': {ValueError: 'needs int > 0'},
+    'max': {ValueError: 'needs int > 0'},
+    'answer': {ValueError: 'needs int > 0'},
     'clingo': {},
     'lpFiles': {},
 }
@@ -275,6 +275,8 @@ def build_start_menu_frame():
         visibility=True,
     )
 
+    # TODO: Add status label
+
     frames['start_menu_frame'].frame.rowconfigure(tuple(range(5)), weight=1)
     frames['start_menu_frame'].frame.columnconfigure(tuple(range(3)), weight=1)
     frames['start_menu_frame'].frame.grid_propagate(False)
@@ -293,7 +295,6 @@ def build_start_menu_help_frame():
     )
 
     with open("../help_texts/start_menu_help_text.txt", "r") as file:
-        # TODO: change help text
         help_displaytext = file.read()
 
     texts['start_menu_help_frame'] = Text(
@@ -498,6 +499,8 @@ def build_main_menu():
         visibility=True,
     )
 
+    # TODO: Add status label
+
     buttons['save_env_button'] = Button(
         root=frames['main_menu_frame'].frame,
         width=30,
@@ -522,7 +525,7 @@ def build_main_menu():
         padding=(0, 0),
         sticky='n',
         command=switch_main_to_clingo_para,
-        text='Run Simulation',
+        text='Next: Clingo Solver',
         font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#000000',
         background_color='#FF0000',
@@ -548,10 +551,9 @@ def build_main_menu_help_frame():
     )
 
     with open("../help_texts/main_menu_help_text.txt", "r") as file:
-        # TODO: change help text
         help_displaytext = file.read()
 
-    texts['main_menu_help_frame'] = Text(
+    texts['main_menu_help'] = Text(
         root=frames['main_menu_help_frame'].frame,
         width=frames['main_menu_help_frame'].width,
         height=frames['main_menu_help_frame'].height,
@@ -610,11 +612,27 @@ def build_clingo_para_frame():
         visibility=True
     )
 
-    buttons['back_button'] = Button(
+    buttons['help_button'] = Button(
         root=frames['clingo_para_frame'].frame,
         width=2,
         height=1,
         grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nw',
+        command=toggle_clingo_help,
+        text='?',
+        font=('Arial', 25, 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        border_width=0,
+        visibility=True,
+    )
+
+    buttons['back_button'] = Button(
+        root=frames['clingo_para_frame'].frame,
+        width=2,
+        height=1,
+        grid_pos=(0, 1),
         padding=(0, 0),
         sticky='nw',
         command=switch_clingo_para_to_main,
@@ -628,7 +646,7 @@ def build_clingo_para_frame():
 
     labels['clingo_label'] = Label(
         root=frames['clingo_para_frame'].frame,
-        grid_pos=(1, 1),
+        grid_pos=(1, 2),
         padding=(0, 0),
         sticky='nw',
         text='Clingo Path:',
@@ -642,7 +660,7 @@ def build_clingo_para_frame():
         root=frames['clingo_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(1, 2),
+        grid_pos=(1, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["clingo"]}',
@@ -656,7 +674,7 @@ def build_clingo_para_frame():
 
     labels['clingo_error_label'] = Label(
         root=frames['clingo_para_frame'].frame,
-        grid_pos=(2, 1),
+        grid_pos=(2, 2),
         padding=(0, 0),
         sticky='nw',
         columnspan=2,
@@ -669,7 +687,7 @@ def build_clingo_para_frame():
 
     labels['answer_label'] = Label(
         root=frames['clingo_para_frame'].frame,
-        grid_pos=(3, 1),
+        grid_pos=(3, 2),
         padding=(0, 0),
         sticky='nw',
         text='Answer to display:',
@@ -683,7 +701,7 @@ def build_clingo_para_frame():
         root=frames['clingo_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(3, 2),
+        grid_pos=(3, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["answer"]}',
@@ -697,7 +715,7 @@ def build_clingo_para_frame():
 
     labels['answer_error_label'] = Label(
         root=frames['clingo_para_frame'].frame,
-        grid_pos=(4, 1),
+        grid_pos=(4, 2),
         padding=(0, 0),
         sticky='nw',
         columnspan=2,
@@ -712,7 +730,7 @@ def build_clingo_para_frame():
         root=frames['clingo_para_frame'].frame,
         width=15,
         height=1,
-        grid_pos=(5, 1),
+        grid_pos=(5, 2),
         padding=(0, 0),
         sticky='n',
         columnspan=2,
@@ -727,7 +745,7 @@ def build_clingo_para_frame():
 
     labels['clingo_paths_label'] = Label(
         root=frames['clingo_para_frame'].frame,
-        grid_pos=(6, 1),
+        grid_pos=(6, 2),
         padding=(0, 0),
         sticky='n',
         columnspan=2,
@@ -742,7 +760,7 @@ def build_clingo_para_frame():
         root=frames['clingo_para_frame'].frame,
         width=30,
         height=2,
-        grid_pos=(7, 1),
+        grid_pos=(7, 2),
         padding=(0, 0),
         sticky='n',
         columnspan=2,
@@ -755,23 +773,72 @@ def build_clingo_para_frame():
         visibility=True,
     )
 
+    # TODO: Add status label
+
     frames['clingo_para_frame'].frame.rowconfigure(0, weight=1)
     frames['clingo_para_frame'].frame.columnconfigure(0, weight=1)
+    frames['clingo_para_frame'].frame.columnconfigure(1, weight=1)
     frames['clingo_para_frame'].frame.rowconfigure(
         tuple(range(1,8)), weight=2
     )
     frames['clingo_para_frame'].frame.columnconfigure(
-        tuple(range(1,3)), weight=2
+        tuple(range(2,4)), weight=2
     )
     frames['clingo_para_frame'].frame.grid_propagate(False)
 
     load_clingo_params()
+
+def build_clingo_help_frame():
+    frames['clingo_help_frame'] = Frame(
+        root=windows['flatland_window'].window,
+        width=screenwidth * 0.5,
+        height=screenheight,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nesw',
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    with open("../help_texts/clingo_help_text.txt", "r") as file:
+        help_displaytext = file.read()
+
+    texts['clingo_help'] = Text(
+        root=frames['clingo_help_frame'].frame,
+        width=frames['clingo_help_frame'].width,
+        height=frames['clingo_help_frame'].height,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nesw',
+        text=help_displaytext,
+        font=("Arial", int(font_scale * base_font)),
+        wrap='word',
+        foreground_color='#CCCCCC',
+        background_color='#000000',
+        border_width=0,
+        state='disabled',
+        visibility=True,
+    )
+
+    frames['clingo_help_frame'].frame.rowconfigure(0, weight=1)
+    frames['clingo_help_frame'].frame.columnconfigure(0, weight=1)
+    frames['clingo_help_frame'].frame.grid_propagate(False)
 
 def toggle_main_menu_help():
     if 'main_menu_help_frame' in frames:
         frames['main_menu_help_frame'].toggle_visibility()
     else:
         build_main_menu_help_frame()
+
+def toggle_clingo_help():
+    if 'clingo_help_frame' in frames:
+        frames['clingo_help_frame'].toggle_visibility()
+        frames['clingo_help_frame'].frame.rowconfigure(0, weight=1)
+        frames['clingo_help_frame'].frame.columnconfigure(0, weight=1)
+        frames['clingo_help_frame'].frame.grid_propagate(False)
+    else:
+        build_clingo_help_frame()
 
 def switch_main_to_random_gen():
     if 'main_menu_frame' in frames:
@@ -837,6 +904,9 @@ def switch_clingo_para_to_main():
     if 'clingo_para_frame' in frames:
         frames['clingo_para_frame'].destroy_frame()
         del frames['clingo_para_frame']
+    if 'clingo_help_frame' in frames:
+        frames['clingo_help_frame'].destroy_frame()
+        del frames['clingo_help_frame']
     if 'main_menu_env_viewer_frame' in frames:
         frames['main_menu_env_viewer_frame'].destroy_frame()
         del frames['main_menu_env_viewer_frame']
@@ -850,6 +920,9 @@ def switch_clingo_para_to_result():
     if 'clingo_para_frame' in frames:
         frames['clingo_para_frame'].destroy_frame()
         del frames['clingo_para_frame']
+    if 'clingo_help_frame' in frames:
+        frames['clingo_help_frame'].destroy_frame()
+        del frames['clingo_help_frame']
     if 'main_menu_env_viewer_frame' in frames:
         frames['main_menu_env_viewer_frame'].destroy_frame()
         del frames['main_menu_env_viewer_frame']
@@ -867,7 +940,7 @@ def reload_main_env_viewer():
 def load_lp_files():
     files = filedialog.askopenfilenames(
         title="Select LP Files",
-        initialdir='../data',
+        initialdir='../asp',
         defaultextension=".lp",
         filetypes=[("Clingo Files", "*.lp"), ("All Files", "*.*")],
     )
@@ -959,27 +1032,46 @@ def random_gen_para_to_main():
     if 'random_gen_para_frame' in frames:
         frames['random_gen_para_frame'].destroy_frame()
         del frames['random_gen_para_frame']
+    if 'random_gen_para_help_frame' in frames:
+        frames['random_gen_para_help_frame'].destroy_frame()
+        del frames['random_gen_para_help_frame']
 
     create_main_menu()
 
 def build_random_gen_para_frame():
     frames['random_gen_para_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth,
+        width=screenwidth * 0.7,
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
-        sticky='nes',
+        sticky='nesw',
         background_color='#000000',
         border_width=0,
         visibility=True
+    )
+
+    buttons['help_button'] = Button(
+        root=frames['random_gen_para_frame'].frame,
+        width=2,
+        height=1,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nw',
+        command=toggle_random_gen_para_help,
+        text='?',
+        font=('Arial', 25, 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        border_width=0,
+        visibility=True,
     )
 
     buttons['back_button'] = Button(
         root=frames['random_gen_para_frame'].frame,
         width=2,
         height=1,
-        grid_pos=(0, 0),
+        grid_pos=(0, 1),
         padding=(0, 0),
         sticky='nw',
         command=random_gen_change_to_start_or_main,
@@ -993,7 +1085,7 @@ def build_random_gen_para_frame():
 
     labels['rows_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(1, 1),
+        grid_pos=(1, 2),
         padding=(0, 0),
         sticky='nw',
         text='Environment rows:',
@@ -1007,7 +1099,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(1, 2),
+        grid_pos=(1, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["rows"]}',
@@ -1021,7 +1113,7 @@ def build_random_gen_para_frame():
 
     labels['rows_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(1, 3),
+        grid_pos=(1, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -1033,7 +1125,7 @@ def build_random_gen_para_frame():
 
     labels['cols_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(2, 1),
+        grid_pos=(2, 2),
         padding=(0, 0),
         sticky='nw',
         text='Environment columns:',
@@ -1047,7 +1139,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(2, 2),
+        grid_pos=(2, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["cols"]}',
@@ -1061,7 +1153,7 @@ def build_random_gen_para_frame():
 
     labels['cols_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(2, 3),
+        grid_pos=(2, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -1073,7 +1165,7 @@ def build_random_gen_para_frame():
 
     labels['agents_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(3, 1),
+        grid_pos=(3, 2),
         padding=(0, 0),
         sticky='nw',
         text='Number of agents:',
@@ -1087,7 +1179,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(3, 2),
+        grid_pos=(3, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["agents"]}',
@@ -1101,7 +1193,7 @@ def build_random_gen_para_frame():
 
     labels['agents_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(3, 3),
+        grid_pos=(3, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -1113,7 +1205,7 @@ def build_random_gen_para_frame():
 
     labels['cities_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(4, 1),
+        grid_pos=(4, 2),
         padding=(0, 0),
         sticky='nw',
         text='Max. number of cities:',
@@ -1127,7 +1219,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(4, 2),
+        grid_pos=(4, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["cities"]}',
@@ -1141,7 +1233,7 @@ def build_random_gen_para_frame():
 
     labels['cities_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(4, 3),
+        grid_pos=(4, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -1153,7 +1245,7 @@ def build_random_gen_para_frame():
 
     labels['seed_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(5, 1),
+        grid_pos=(5, 2),
         padding=(0, 0),
         sticky='nw',
         text='Seed:',
@@ -1167,7 +1259,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(5, 2),
+        grid_pos=(5, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["seed"]}',
@@ -1181,7 +1273,7 @@ def build_random_gen_para_frame():
 
     labels['seed_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(5, 3),
+        grid_pos=(5, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -1193,7 +1285,7 @@ def build_random_gen_para_frame():
 
     labels['grid_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(6, 1),
+        grid_pos=(6, 2),
         padding=(0, 0),
         sticky='nw',
         text='Use grid mode:',
@@ -1207,7 +1299,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(6, 2),
+        grid_pos=(6, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["grid"]}',
@@ -1221,7 +1313,7 @@ def build_random_gen_para_frame():
 
     labels['grid_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(6, 3),
+        grid_pos=(6, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -1233,7 +1325,7 @@ def build_random_gen_para_frame():
 
     labels['intercity_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(7, 1),
+        grid_pos=(7, 2),
         padding=(0, 0),
         sticky='nw',
         text='Max. number of rails between cities:',
@@ -1247,7 +1339,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(7, 2),
+        grid_pos=(7, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["intercity"]}',
@@ -1261,7 +1353,7 @@ def build_random_gen_para_frame():
 
     labels['intercity_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(7, 3),
+        grid_pos=(7, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -1273,7 +1365,7 @@ def build_random_gen_para_frame():
 
     labels['incity_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(8, 1),
+        grid_pos=(8, 2),
         padding=(0, 0),
         sticky='nw',
         text='Max. number of rail pairs in cities:',
@@ -1287,7 +1379,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(8, 2),
+        grid_pos=(8, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["incity"]}',
@@ -1301,7 +1393,7 @@ def build_random_gen_para_frame():
 
     labels['incity_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(8, 3),
+        grid_pos=(8, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -1313,7 +1405,7 @@ def build_random_gen_para_frame():
 
     labels['remove_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(9, 1),
+        grid_pos=(9, 2),
         padding=(0, 0),
         sticky='nw',
         text='Remove agents on arrival:',
@@ -1327,7 +1419,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(9, 2),
+        grid_pos=(9, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["remove"]}',
@@ -1341,7 +1433,7 @@ def build_random_gen_para_frame():
 
     labels['remove_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(9, 3),
+        grid_pos=(9, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -1353,7 +1445,7 @@ def build_random_gen_para_frame():
 
     labels['speed_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(10, 1),
+        grid_pos=(10, 2),
         padding=(0, 0),
         sticky='nw',
         text='Speed ratio map for trains:',
@@ -1367,7 +1459,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(10, 2),
+        grid_pos=(10, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["speed"]}',
@@ -1381,7 +1473,7 @@ def build_random_gen_para_frame():
 
     labels['speed_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(10, 3),
+        grid_pos=(10, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -1393,7 +1485,7 @@ def build_random_gen_para_frame():
 
     labels['malfunction_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(11, 1),
+        grid_pos=(11, 2),
         padding=(0, 0),
         sticky='nw',
         text='Malfunction rate:',
@@ -1407,7 +1499,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(11, 2),
+        grid_pos=(11, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["malfunction"][0]}/'
@@ -1422,7 +1514,7 @@ def build_random_gen_para_frame():
 
     labels['malfunction_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(11, 3),
+        grid_pos=(11, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -1434,7 +1526,7 @@ def build_random_gen_para_frame():
 
     labels['min_duration_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(12, 1),
+        grid_pos=(12, 2),
         padding=(0, 0),
         sticky='nw',
         text='Min. duration for malfunctions:',
@@ -1448,7 +1540,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(12, 2),
+        grid_pos=(12, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["min"]}',
@@ -1462,7 +1554,7 @@ def build_random_gen_para_frame():
 
     labels['min_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(12, 3),
+        grid_pos=(12, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -1474,7 +1566,7 @@ def build_random_gen_para_frame():
 
     labels['max_duration_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(13, 1),
+        grid_pos=(13, 2),
         padding=(0, 0),
         sticky='nw',
         text='Max. duration for malfunction:',
@@ -1488,7 +1580,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(13, 2),
+        grid_pos=(13, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["max"]}',
@@ -1502,7 +1594,7 @@ def build_random_gen_para_frame():
 
     labels['max_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(13, 3),
+        grid_pos=(13, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -1510,22 +1602,6 @@ def build_random_gen_para_frame():
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
-    )
-
-    buttons['generate_button'] = Button(
-        root=frames['random_gen_para_frame'].frame,
-        width=15,
-        height=1,
-        grid_pos=(14, 1),
-        padding=(0, 0),
-        sticky='nw',
-        command=random_gen_para_to_env,
-        text='Generate',
-        font=('Arial', int(font_scale * base_font), 'bold'),
-        foreground_color='#000000',
-        background_color='#FF0000',
-        border_width=0,
-        visibility=True,
     )
 
     buttons['advanced_options'] = Button(
@@ -1544,15 +1620,71 @@ def build_random_gen_para_frame():
         visibility=True,
     )
 
+    buttons['generate_button'] = Button(
+        root=frames['random_gen_para_frame'].frame,
+        width=9,
+        height=1,
+        grid_pos=(14, 3),
+        padding=(0, 0),
+        sticky='nw',
+        command=random_gen_para_to_env,
+        text='Generate',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#000000',
+        background_color='#FF0000',
+        border_width=0,
+        visibility=True,
+    )
+
+    frames['random_gen_para_frame'].frame.rowconfigure(0, weight=1)
+    frames['random_gen_para_frame'].frame.columnconfigure(0, weight=1)
+    frames['random_gen_para_frame'].frame.columnconfigure(1, weight=1)
     frames['random_gen_para_frame'].frame.rowconfigure(
-        tuple(range(15)), weight=1
+        tuple(range(1,15)), weight=2
     )
     frames['random_gen_para_frame'].frame.columnconfigure(
-        tuple(range(4)), weight=1
+        tuple(range(2,5)), weight=2
     )
     frames['random_gen_para_frame'].frame.grid_propagate(False)
 
     load_random_gen_env_params()
+
+def build_random_gen_para_help_frame():
+    frames['random_gen_para_help_frame'] = Frame(
+        root=windows['flatland_window'].window,
+        width=screenwidth * 0.3,
+        height=screenheight,
+        grid_pos=(0, 1),
+        padding=(0, 0),
+        sticky='nesw',
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    with open("../help_texts/random_gen_para_help_text.txt", "r") as file:
+        help_displaytext = file.read()
+
+    texts['random_gen_para_help'] = Text(
+        root=frames['random_gen_para_help_frame'].frame,
+        width=frames['random_gen_para_help_frame'].width,
+        height=frames['random_gen_para_help_frame'].height,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nes',
+        text=help_displaytext,
+        font=("Arial", int(font_scale * base_font)),
+        wrap='word',
+        foreground_color='#CCCCCC',
+        background_color='#000000',
+        border_width=0,
+        state='disabled',
+        visibility=True,
+    )
+
+    frames['random_gen_para_help_frame'].frame.rowconfigure(0, weight=1)
+    frames['random_gen_para_help_frame'].frame.columnconfigure(0, weight=1)
+    frames['random_gen_para_help_frame'].frame.grid_propagate(False)
 
 def random_gen_para_to_env():
     global current_img, current_df, current_array
@@ -1599,6 +1731,9 @@ def random_gen_para_to_env():
     if 'random_gen_para_frame' in frames:
         frames['random_gen_para_frame'].destroy_frame()
         del frames['random_gen_para_frame']
+    if 'random_gen_para_help_frame' in frames:
+        frames['random_gen_para_help_frame'].destroy_frame()
+        del frames['random_gen_para_help_frame']
 
     build_random_gen_env_viewer()
     build_random_gen_env_menu()
@@ -1731,6 +1866,15 @@ def random_gen_toggle_advanced_para_options():
     entry_fields['max_duration_entry'].toggle_visibility()
     return
 
+def toggle_random_gen_para_help():
+    if 'random_gen_para_help_frame' in frames:
+        frames['random_gen_para_help_frame'].toggle_visibility()
+        frames['random_gen_para_help_frame'].frame.rowconfigure(0, weight=1)
+        frames['random_gen_para_help_frame'].frame.columnconfigure(0, weight=1)
+        frames['random_gen_para_help_frame'].frame.grid_propagate(False)
+    else:
+        build_random_gen_para_help_frame()
+
 def switch_random_gen_to_main():
     if 'random_gen_env_viewer_frame' in frames:
         frames['random_gen_env_viewer_frame'].destroy_frame()
@@ -1845,27 +1989,46 @@ def builder_para_to_main():
     if 'builder_para_frame' in frames:
         frames['builder_para_frame'].destroy_frame()
         del frames['builder_para_frame']
+    if 'builder_para_help_frame' in frames:
+        frames['builder_para_help_frame'].destroy_frame()
+        del frames['builder_para_help_frame']
 
     create_main_menu()
 
 def build_builder_para_frame():
     frames['builder_para_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth,
+        width=screenwidth * 0.7,
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
-        sticky='nes',
+        sticky='nesw',
         background_color='#000000',
         border_width=0,
         visibility=True
+    )
+
+    buttons['help_button'] = Button(
+        root=frames['builder_para_frame'].frame,
+        width=2,
+        height=1,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nw',
+        command=toggle_builder_para_help,
+        text='?',
+        font=('Arial', 25, 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        border_width=0,
+        visibility=True,
     )
 
     buttons['back_button'] = Button(
         root=frames['builder_para_frame'].frame,
         width=2,
         height=1,
-        grid_pos=(0, 0),
+        grid_pos=(0, 1),
         padding=(0, 0),
         sticky='nw',
         command= builder_change_to_start_or_main,
@@ -1879,7 +2042,7 @@ def build_builder_para_frame():
 
     labels['rows_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(1, 1),
+        grid_pos=(1, 2),
         padding=(0, 0),
         sticky='nw',
         text='Environment rows:',
@@ -1893,7 +2056,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(1, 2),
+        grid_pos=(1, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["rows"]}',
@@ -1907,7 +2070,7 @@ def build_builder_para_frame():
 
     labels['rows_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(1, 3),
+        grid_pos=(1, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -1919,7 +2082,7 @@ def build_builder_para_frame():
 
     labels['cols_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(2, 1),
+        grid_pos=(2, 2),
         padding=(0, 0),
         sticky='nw',
         text='Environment columns:',
@@ -1933,7 +2096,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(2, 2),
+        grid_pos=(2, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["cols"]}',
@@ -1947,7 +2110,7 @@ def build_builder_para_frame():
 
     labels['cols_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(2, 3),
+        grid_pos=(2, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -1959,7 +2122,7 @@ def build_builder_para_frame():
 
     labels['remove_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(3, 1),
+        grid_pos=(3, 2),
         padding=(0, 0),
         sticky='nw',
         text='Remove agents on arrival:',
@@ -1973,7 +2136,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(3, 2),
+        grid_pos=(3, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["remove"]}',
@@ -1987,7 +2150,7 @@ def build_builder_para_frame():
 
     labels['remove_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(3, 3),
+        grid_pos=(3, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -1999,7 +2162,7 @@ def build_builder_para_frame():
 
     labels['speed_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(4, 1),
+        grid_pos=(4, 2),
         padding=(0, 0),
         sticky='nw',
         text='Speed ratio map for trains:',
@@ -2013,7 +2176,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(4, 2),
+        grid_pos=(4, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["speed"]}',
@@ -2027,7 +2190,7 @@ def build_builder_para_frame():
 
     labels['speed_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(4, 3),
+        grid_pos=(4, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -2039,7 +2202,7 @@ def build_builder_para_frame():
 
     labels['malfunction_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(5, 1),
+        grid_pos=(5, 2),
         padding=(0, 0),
         sticky='nw',
         text='Malfunction rate:',
@@ -2053,7 +2216,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(5, 2),
+        grid_pos=(5, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["malfunction"][0]}/'
@@ -2068,7 +2231,7 @@ def build_builder_para_frame():
 
     labels['malfunction_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(5, 3),
+        grid_pos=(5, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -2080,7 +2243,7 @@ def build_builder_para_frame():
 
     labels['min_duration_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(6, 1),
+        grid_pos=(6, 2),
         padding=(0, 0),
         sticky='nw',
         text='Min. duration for malfunctions:',
@@ -2094,7 +2257,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(6, 2),
+        grid_pos=(6, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["min"]}',
@@ -2108,7 +2271,7 @@ def build_builder_para_frame():
 
     labels['min_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(6, 3),
+        grid_pos=(6, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -2120,7 +2283,7 @@ def build_builder_para_frame():
 
     labels['max_duration_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(7, 1),
+        grid_pos=(7, 2),
         padding=(0, 0),
         sticky='nw',
         text='Max. duration for malfunction:',
@@ -2134,7 +2297,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(7, 2),
+        grid_pos=(7, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["max"]}',
@@ -2148,7 +2311,7 @@ def build_builder_para_frame():
 
     labels['max_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(7, 3),
+        grid_pos=(7, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -2156,22 +2319,6 @@ def build_builder_para_frame():
         foreground_color='#FF0000',
         background_color='#000000',
         visibility=False,
-    )
-
-    buttons['build_button'] = Button(
-        root=frames['builder_para_frame'].frame,
-        width=15,
-        height=1,
-        grid_pos=(8, 1),
-        padding=(0, 0),
-        sticky='nw',
-        command=builder_para_to_track_grid,
-        text='Build',
-        font=('Arial', int(font_scale * base_font), 'bold'),
-        foreground_color='#000000',
-        background_color='#FF0000',
-        border_width=0,
-        visibility=True,
     )
 
     buttons['advanced_options'] = Button(
@@ -2190,15 +2337,80 @@ def build_builder_para_frame():
         visibility=True,
     )
 
+    buttons['build_button'] = Button(
+        root=frames['builder_para_frame'].frame,
+        width=9,
+        height=1,
+        grid_pos=(8, 3),
+        padding=(0, 0),
+        sticky='nw',
+        command=builder_para_to_track_grid,
+        text='Build',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#000000',
+        background_color='#FF0000',
+        border_width=0,
+        visibility=True,
+    )
+
+    frames['builder_para_frame'].frame.rowconfigure(0, weight=1)
+    frames['builder_para_frame'].frame.columnconfigure(0, weight=1)
+    frames['builder_para_frame'].frame.columnconfigure(1, weight=1)
     frames['builder_para_frame'].frame.rowconfigure(
-        tuple(range(9)), weight=1
+        tuple(range(1,9)), weight=2
     )
     frames['builder_para_frame'].frame.columnconfigure(
-        tuple(range(4)), weight=1
+        tuple(range(2,5)), weight=2
     )
     frames['builder_para_frame'].frame.grid_propagate(False)
 
     load_builder_env_params()
+
+def build_builder_para_help_frame():
+    frames['builder_para_help_frame'] = Frame(
+        root=windows['flatland_window'].window,
+        width=screenwidth * 0.3,
+        height=screenheight,
+        grid_pos=(0, 1),
+        padding=(0, 0),
+        sticky='nesw',
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    with open("../help_texts/builder_para_help_text.txt", "r") as file:
+        help_displaytext = file.read()
+
+    texts['builder_para_help_text'] = Text(
+        root=frames['builder_para_help_frame'].frame,
+        width=frames['builder_para_help_frame'].width,
+        height=frames['builder_para_help_frame'].height,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nes',
+        text=help_displaytext,
+        font=("Arial", int(font_scale * base_font)),
+        wrap='word',
+        foreground_color='#CCCCCC',
+        background_color='#000000',
+        border_width=0,
+        state='disabled',
+        visibility=True,
+    )
+
+    frames['builder_para_help_frame'].frame.rowconfigure(0, weight=1)
+    frames['builder_para_help_frame'].frame.columnconfigure(0, weight=1)
+    frames['builder_para_help_frame'].frame.grid_propagate(False)
+
+def toggle_builder_para_help():
+    if 'builder_para_help_frame' in frames:
+        frames['builder_para_help_frame'].toggle_visibility()
+        frames['builder_para_help_frame'].frame.rowconfigure(0, weight=1)
+        frames['builder_para_help_frame'].frame.columnconfigure(0, weight=1)
+        frames['builder_para_help_frame'].frame.grid_propagate(False)
+    else:
+        build_builder_para_help_frame()
 
 def builder_para_to_track_grid():
     global current_array, current_df, current_backup_array, current_backup_df
@@ -2209,6 +2421,9 @@ def builder_para_to_track_grid():
     if 'builder_para_frame' in frames:
         frames['builder_para_frame'].destroy_frame()
         del frames['builder_para_frame']
+    if 'builder_para_help_frame' in frames:
+        frames['builder_para_help_frame'].destroy_frame()
+        del frames['builder_para_help_frame']
 
     if user_params['rows'] is not None:
         rows = user_params['rows']
@@ -2282,6 +2497,9 @@ def builder_track_grid_to_para():
     if 'builder_grid_frame' in frames:
         frames['builder_grid_frame'].destroy_frame()
         del frames['builder_grid_frame']
+    if 'builder_track_help_frame' in frames:
+        frames['builder_track_help_frame'].destroy_frame()
+        del frames['builder_track_help_frame']
 
     build_builder_para_frame()
 
@@ -2327,11 +2545,27 @@ def build_track_builder_menu_frame():
         visibility=True
     )
 
-    buttons['back_button'] = Button(
+    buttons['help_button'] = Button(
         root=frames['track_builder_menu_frame'].frame,
         width=2,
         height=1,
         grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nw',
+        command=toggle_builder_track_help,
+        text='?',
+        font=('Arial', 25, 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        border_width=0,
+        visibility=True,
+    )
+
+    buttons['back_button'] = Button(
+        root=frames['track_builder_menu_frame'].frame,
+        width=2,
+        height=1,
+        grid_pos=(0, 1),
         padding=(0, 0),
         sticky='nw',
         command= builder_track_grid_to_para,
@@ -2347,7 +2581,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(1, 1),
+        grid_pos=(1, 2),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(1025),
         image='../data/png/Gleis_horizontal.png',
@@ -2361,7 +2595,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(1, 2),
+        grid_pos=(1, 3),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(32800),
         image='../data/png/Gleis_vertikal.png',
@@ -2375,7 +2609,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(1, 5),
+        grid_pos=(1, 6),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(2064),
         image='../data/png/Gleis_kurve_oben_links.png',
@@ -2389,7 +2623,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(1, 6),
+        grid_pos=(1, 7),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(72),
         image='../data/png/Gleis_kurve_oben_rechts.png',
@@ -2403,7 +2637,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(1, 7),
+        grid_pos=(1, 8),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(16386),
         image='../data/png/Gleis_kurve_unten_rechts.png',
@@ -2417,7 +2651,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(1, 8),
+        grid_pos=(1, 9),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(4608),
         image='../data/png/Gleis_kurve_unten_links.png',
@@ -2431,7 +2665,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(2, 1),
+        grid_pos=(2, 2),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(3089),
         image='../data/png/Weiche_horizontal_oben_links.png',
@@ -2445,7 +2679,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(2, 2),
+        grid_pos=(2, 3),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(1097),
         image='../data/png/Weiche_horizontal_oben_rechts.png',
@@ -2459,7 +2693,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(2, 3),
+        grid_pos=(2, 4),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(17411),
         image='../data/png/Weiche_horizontal_unten_rechts.png',
@@ -2473,7 +2707,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(2, 4),
+        grid_pos=(2, 5),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(5633),
         image='../data/png/Weiche_horizontal_unten_links.png',
@@ -2487,7 +2721,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(2, 5),
+        grid_pos=(2, 6),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(34864),
         image='../data/png/Weiche_vertikal_oben_links.png',
@@ -2501,7 +2735,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(2, 6),
+        grid_pos=(2, 7),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(32872),
         image='../data/png/Weiche_vertikal_oben_rechts.png',
@@ -2515,7 +2749,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(2, 7),
+        grid_pos=(2, 8),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(49186),
         image='../data/png/Weiche_vertikal_unten_rechts.png',
@@ -2529,7 +2763,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(2, 8),
+        grid_pos=(2, 9),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(37408),
         image='../data/png/Weiche_vertikal_unten_links.png',
@@ -2543,7 +2777,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(3, 1),
+        grid_pos=(3, 2),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(33825),
         image='../data/png/Gleis_Diamond_Crossing.png',
@@ -2572,7 +2806,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(3, 6),
+        grid_pos=(3, 7),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(33897),
         image='../data/png/Weiche_Single_Slip.png',
@@ -2587,7 +2821,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(3, 7),
+        grid_pos=(3, 8),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(50211),
         image='../data/png/Weiche_Single_Slip.png',
@@ -2602,7 +2836,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(3, 8),
+        grid_pos=(3, 9),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(38433),
         image='../data/png/Weiche_Single_Slip.png',
@@ -2617,7 +2851,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(4, 1),
+        grid_pos=(4, 2),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(52275),
         image='../data/png/Weiche_Double_Slip.png',
@@ -2632,7 +2866,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(4, 2),
+        grid_pos=(4, 3),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(38505),
         image='../data/png/Weiche_Double_Slip.png',
@@ -2647,7 +2881,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(4, 5),
+        grid_pos=(4, 6),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(2136),
         image='../data/png/Weiche_Symetrical.png',
@@ -2662,7 +2896,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(4, 6),
+        grid_pos=(4, 7),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(16458),
         image='../data/png/Weiche_Symetrical.png',
@@ -2677,7 +2911,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(4, 7),
+        grid_pos=(4, 8),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(20994),
         image='../data/png/Weiche_Symetrical.png',
@@ -2692,7 +2926,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(4, 8),
+        grid_pos=(4, 9),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(6672),
         image='../data/png/Weiche_Symetrical.png',
@@ -2707,7 +2941,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(5, 1),
+        grid_pos=(5, 2),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(0),
         image='../data/png/eraser.png',
@@ -2722,7 +2956,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(5, 5),
+        grid_pos=(5, 6),
         padding=(0, 0),
         columnspan=2,
         command=lambda: open_reset_frame(frames['track_builder_menu_frame']),
@@ -2738,7 +2972,7 @@ def build_track_builder_menu_frame():
         root=frames['track_builder_menu_frame'].frame,
         width=20,
         height=1,
-        grid_pos=(6, 1),
+        grid_pos=(6, 2),
         padding=(0, 0),
         columnspan=8,
         command=builder_track_to_train,
@@ -2752,18 +2986,68 @@ def build_track_builder_menu_frame():
 
     frames['track_builder_menu_frame'].frame.rowconfigure(0, weight=1)
     frames['track_builder_menu_frame'].frame.columnconfigure(0, weight=1)
+    frames['track_builder_menu_frame'].frame.columnconfigure(1, weight=1)
     frames['track_builder_menu_frame'].frame.rowconfigure(
         tuple(range(1,7)), weight=2
     )
     frames['track_builder_menu_frame'].frame.columnconfigure(
-        tuple(range(1,9)), weight=2
+        tuple(range(2,10)), weight=2
     )
     frames['track_builder_menu_frame'].frame.grid_propagate(False)
+
+def build_builder_track_help_frame():
+    frames['builder_track_help_frame'] = Frame(
+        root=windows['flatland_window'].window,
+        width=screenwidth * 0.5,
+        height=screenheight,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nesw',
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    with open("../help_texts/builder_track_help_text.txt", "r") as file:
+        help_displaytext = file.read()
+
+    texts['builder_track_help_text'] = Text(
+        root=frames['builder_track_help_frame'].frame,
+        width=frames['builder_track_help_frame'].width,
+        height=frames['builder_track_help_frame'].height,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nes',
+        text=help_displaytext,
+        font=("Arial", int(font_scale * base_font)),
+        wrap='word',
+        foreground_color='#CCCCCC',
+        background_color='#000000',
+        border_width=0,
+        state='disabled',
+        visibility=True,
+    )
+
+    frames['builder_track_help_frame'].frame.rowconfigure(0, weight=1)
+    frames['builder_track_help_frame'].frame.columnconfigure(0, weight=1)
+    frames['builder_track_help_frame'].frame.grid_propagate(False)
+
+def toggle_builder_track_help():
+    if 'builder_track_help_frame' in frames:
+        frames['builder_track_help_frame'].toggle_visibility()
+        frames['builder_track_help_frame'].frame.rowconfigure(0, weight=1)
+        frames['builder_track_help_frame'].frame.columnconfigure(0, weight=1)
+        frames['builder_track_help_frame'].frame.grid_propagate(False)
+    else:
+        build_builder_track_help_frame()
 
 def builder_track_to_train():
     if 'track_builder_menu_frame' in frames:
         frames['track_builder_menu_frame'].destroy_frame()
         del frames['track_builder_menu_frame']
+    if 'builder_track_help_frame' in frames:
+        frames['builder_track_help_frame'].destroy_frame()
+        del frames['builder_track_help_frame']
 
     canvases['builder_grid_canvas'].current_selection = None
 
@@ -2773,6 +3057,9 @@ def builder_train_to_track():
     if 'train_builder_menu_frame' in frames:
         frames['train_builder_menu_frame'].destroy_frame()
         del frames['train_builder_menu_frame']
+    if 'builder_train_help_frame' in frames:
+        frames['builder_train_help_frame'].destroy_frame()
+        del frames['builder_train_help_frame']
 
     canvases['builder_grid_canvas'].current_selection = None
 
@@ -2791,11 +3078,27 @@ def build_train_builder_menu_frame():
         visibility=True
     )
 
-    buttons['back_button'] = Button(
+    buttons['help_button'] = Button(
         root=frames['train_builder_menu_frame'].frame,
         width=2,
         height=1,
         grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nw',
+        command=toggle_builder_train_help,
+        text='?',
+        font=('Arial', 25, 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        border_width=0,
+        visibility=True,
+    )
+
+    buttons['back_button'] = Button(
+        root=frames['train_builder_menu_frame'].frame,
+        width=2,
+        height=1,
+        grid_pos=(0, 1),
         padding=(0, 0),
         sticky='nw',
         command= builder_train_to_track,
@@ -2811,7 +3114,7 @@ def build_train_builder_menu_frame():
         root=frames['train_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(1, 1),
+        grid_pos=(1, 2),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(1),
         image='../data/png/Zug_Gleis_#0091ea.png',
@@ -2826,7 +3129,7 @@ def build_train_builder_menu_frame():
         root=frames['train_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(1, 2),
+        grid_pos=(1, 3),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(2),
         image='../data/png/Zug_Gleis_#0091ea.png',
@@ -2841,7 +3144,7 @@ def build_train_builder_menu_frame():
         root=frames['train_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(1, 3),
+        grid_pos=(1, 4),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(3),
         image='../data/png/Zug_Gleis_#0091ea.png',
@@ -2856,7 +3159,7 @@ def build_train_builder_menu_frame():
         root=frames['train_builder_menu_frame'].frame,
         width=int(font_scale * 80),
         height=int(font_scale * 80),
-        grid_pos=(1, 4),
+        grid_pos=(1, 5),
         padding=(0, 0),
         command=lambda: canvases['builder_grid_canvas'].select(4),
         image='../data/png/Zug_Gleis_#0091ea.png',
@@ -2871,7 +3174,7 @@ def build_train_builder_menu_frame():
         root=frames['train_builder_menu_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(1, 6),
+        grid_pos=(1, 7),
         padding=(0, 0),
         command=lambda: open_reset_frame(frames['train_builder_menu_frame']),
         text='RESET',
@@ -2886,7 +3189,7 @@ def build_train_builder_menu_frame():
         root=frames['train_builder_menu_frame'].frame,
         width=frames['train_builder_menu_frame'].width * 0.75,
         height=frames['train_builder_menu_frame'].height * 0.6,
-        grid_pos=(2, 1),
+        grid_pos=(2, 2),
         padding=(0, 0),
         columnspan=6,
         background_color='#000000',
@@ -2898,7 +3201,7 @@ def build_train_builder_menu_frame():
         root=frames['train_builder_menu_frame'].frame,
         width=20,
         height=1,
-        grid_pos=(3, 1),
+        grid_pos=(3, 2),
         padding=(0, 0),
         columnspan=6,
         command=builder_train_grid_to_env,
@@ -2910,14 +3213,16 @@ def build_train_builder_menu_frame():
         visibility=True,
     )
 
+    # TODO: Add status label
+
     frames['train_builder_menu_frame'].frame.rowconfigure(0, weight=1)
     frames['train_builder_menu_frame'].frame.columnconfigure(0, weight=1)
+    frames['train_builder_menu_frame'].frame.columnconfigure(1, weight=1)
     frames['train_builder_menu_frame'].frame.rowconfigure(1, weight=2)
     frames['train_builder_menu_frame'].frame.columnconfigure(
-        tuple(range(1,7)), weight=2
+        tuple(range(2,8)), weight=2
     )
-    frames['train_builder_menu_frame'].frame.rowconfigure(2, weight=2)
-    frames['train_builder_menu_frame'].frame.rowconfigure(3, weight=2)
+    frames['train_builder_menu_frame'].frame.rowconfigure((2, 3), weight=2)
     frames['train_builder_menu_frame'].frame.grid_propagate(False)
 
     canvases['train_config_list'] = TrainListCanvas(
@@ -2935,6 +3240,52 @@ def build_train_builder_menu_frame():
         font_scale=font_scale,
     )
     canvases['builder_grid_canvas'].train_list = canvases['train_config_list']
+
+def build_builder_train_help_frame():
+    frames['builder_train_help_frame'] = Frame(
+        root=windows['flatland_window'].window,
+        width=screenwidth * 0.5,
+        height=screenheight,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nesw',
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    with open("../help_texts/builder_train_help_text.txt", "r") as file:
+        help_displaytext = file.read()
+
+    texts['builder_train_help_text'] = Text(
+        root=frames['builder_train_help_frame'].frame,
+        width=frames['builder_train_help_frame'].width,
+        height=frames['builder_train_help_frame'].height,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nes',
+        text=help_displaytext,
+        font=("Arial", int(font_scale * base_font)),
+        wrap='word',
+        foreground_color='#CCCCCC',
+        background_color='#000000',
+        border_width=0,
+        state='disabled',
+        visibility=True,
+    )
+
+    frames['builder_train_help_frame'].frame.rowconfigure(0, weight=1)
+    frames['builder_train_help_frame'].frame.columnconfigure(0, weight=1)
+    frames['builder_train_help_frame'].frame.grid_propagate(False)
+
+def toggle_builder_train_help():
+    if 'builder_train_help_frame' in frames:
+        frames['builder_train_help_frame'].toggle_visibility()
+        frames['builder_train_help_frame'].frame.rowconfigure(0, weight=1)
+        frames['builder_train_help_frame'].frame.columnconfigure(0, weight=1)
+        frames['builder_train_help_frame'].frame.grid_propagate(False)
+    else:
+        build_builder_train_help_frame()
 
 def builder_train_grid_to_env():
     global current_backup_array, current_backup_df, current_img
@@ -2973,6 +3324,9 @@ def builder_train_grid_to_env():
     if 'builder_grid_frame' in frames:
         frames['builder_grid_frame'].destroy_frame()
         del frames['builder_grid_frame']
+    if 'builder_train_help_frame' in frames:
+        frames['builder_train_help_frame'].destroy_frame()
+        del frames['builder_train_help_frame']
 
     current_backup_array = current_array.copy()
     current_backup_df = current_df.copy()
@@ -3304,11 +3658,27 @@ def build_result_menu():
         visibility=True
     )
 
+    buttons['help_button'] = Button(
+        root=frames['result_menu_frame'].frame,
+        width=2,
+        height=1,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nw',
+        command=toggle_result_help,
+        text='?',
+        font=('Arial', 25, 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        border_width=0,
+        visibility=True,
+    )
+
     buttons['show_time_table_button'] = Button(
         root=frames['result_menu_frame'].frame,
         width=20,
         height=1,
-        grid_pos=(1, 0),
+        grid_pos=(1, 1),
         padding=(0, 0),
         command=stub,
         text='Show Time Table',
@@ -3323,7 +3693,7 @@ def build_result_menu():
         root=frames['result_menu_frame'].frame,
         width=20,
         height=1,
-        grid_pos=(2, 0),
+        grid_pos=(2, 1),
         padding=(0, 0),
         command=stub,
         text='Show GIF',
@@ -3338,7 +3708,7 @@ def build_result_menu():
         frames['result_menu_frame'].frame,
         width=frames['result_menu_frame'].width * 0.5,
         height=frames['result_menu_frame'].height * 0.25,
-        grid_pos=(4,0),
+        grid_pos=(4,1),
         padding=(0,0),
         background_color='#000000',
         border_width=0,
@@ -3349,7 +3719,7 @@ def build_result_menu():
         root=frames['result_menu_frame'].frame,
         width=20,
         height=1,
-        grid_pos=(5, 0),
+        grid_pos=(5, 1),
         padding=(0, 0),
         command=switch_result_to_main,
         text='Return To Main Menu',
@@ -3360,8 +3730,10 @@ def build_result_menu():
         visibility=True,
     )
 
-    frames['result_menu_frame'].frame.rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
+    frames['result_menu_frame'].frame.rowconfigure(0, weight=1)
     frames['result_menu_frame'].frame.columnconfigure(0, weight=1)
+    frames['result_menu_frame'].frame.rowconfigure((1, 2, 3, 4, 5), weight=2)
+    frames['result_menu_frame'].frame.columnconfigure(1, weight=2)
     frames['result_menu_frame'].frame.grid_propagate(False)
 
     canvases['path_list_canvas'] = PathListCanvas(
@@ -3382,7 +3754,7 @@ def build_result_menu():
         root=frames['result_menu_frame'].frame,
         width=20,
         height=1,
-        grid_pos=(3, 0),
+        grid_pos=(3, 1),
         padding=(0, 0),
         command=canvases['path_list_canvas'].toggle_all_paths,
         text='Toggle All Paths',
@@ -3393,6 +3765,52 @@ def build_result_menu():
         visibility=True,
     )
 
+def build_result_help_frame():
+    frames['result_help_frame'] = Frame(
+        root=windows['flatland_window'].window,
+        width=screenwidth * 0.5,
+        height=screenheight,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nesw',
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    with open("../help_texts/result_help_text.txt", "r") as file:
+        help_displaytext = file.read()
+
+    texts['result_help_text'] = Text(
+        root=frames['result_help_frame'].frame,
+        width=frames['result_help_frame'].width,
+        height=frames['result_help_frame'].height,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nes',
+        text=help_displaytext,
+        font=("Arial", int(font_scale * base_font)),
+        wrap='word',
+        foreground_color='#CCCCCC',
+        background_color='#000000',
+        border_width=0,
+        state='disabled',
+        visibility=True,
+    )
+
+    frames['result_help_frame'].frame.rowconfigure(0, weight=1)
+    frames['result_help_frame'].frame.columnconfigure(0, weight=1)
+    frames['result_help_frame'].frame.grid_propagate(False)
+
+def toggle_result_help():
+    if 'result_help_frame' in frames:
+        frames['result_help_frame'].toggle_visibility()
+        frames['result_help_frame'].frame.rowconfigure(0, weight=1)
+        frames['result_help_frame'].frame.columnconfigure(0, weight=1)
+        frames['result_help_frame'].frame.grid_propagate(False)
+    else:
+        build_result_help_frame()
+
 def switch_result_to_main():
     if 'result_viewer_frame' in frames:
         frames['result_viewer_frame'].destroy_frame()
@@ -3400,6 +3818,9 @@ def switch_result_to_main():
     if 'result_menu_frame' in frames:
         frames['result_menu_frame'].destroy_frame()
         del frames['result_menu_frame']
+    if 'result_help_frame' in frames:
+        frames['result_help_frame'].destroy_frame()
+        del frames['result_help_frame']
 
     create_main_menu()
 
@@ -3593,4 +4014,3 @@ def stub():
 #  environment or not getting the paths from the run sim button
 
 # TODO: show time table and gif functions in Results
-# TODO: add help buttons in random gen, builder and result menus
