@@ -1,0 +1,18 @@
+{
+    "rows": null,
+    "cols": null,
+    "agents": null,
+    "cities": null,
+    "seed": null,
+    "grid": null,
+    "intercity": null,
+    "incity": null,
+    "remove": null,
+    "speed": null,
+    "malfunction": null,
+    "min": null,
+    "max": null,
+    "clingo": null,
+    "answer": null,
+    "lpFiles": []
+}
