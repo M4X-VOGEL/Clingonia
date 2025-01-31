@@ -1,26 +1,18 @@
 {
-    "rows": 3,
-    "cols": 7,
-    "agents": 2,
-    "cities": 2,
-    "seed": 456456,
-    "grid": true,
-    "intercity": 2,
-    "incity": 2,
-    "remove": true,
-    "speed": {
-        "1": 1
-    },
-    "malfunction": [
-        0,
-        30
-    ],
-    "min": 2,
-    "max": 6,
-    "clingo": "clingo",
-    "answer": 1,
-    "lpFiles": [
-        "G:/Praktikum/asp/flat.lp",
-        "G:/Praktikum/asp/trans.lp"
-    ]
+    "rows": null,
+    "cols": null,
+    "agents": null,
+    "cities": null,
+    "seed": null,
+    "grid": null,
+    "intercity": null,
+    "incity": null,
+    "remove": null,
+    "speed": null,
+    "malfunction": null,
+    "min": null,
+    "max": null,
+    "clingo": null,
+    "answer": null,
+    "lpFiles": []
 }
