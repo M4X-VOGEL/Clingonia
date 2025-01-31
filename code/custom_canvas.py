@@ -1235,7 +1235,7 @@ class ResultCanvas:
                  offset_dict[row['cell_offset']][1]),
                 text=row['timestep'],
                 anchor="center",
-                font=("Courier", 15, 'bold'),
+                font=("Courier", int(15 * self.scale * 3), 'bold'),
                 fill='#000000',
                 tags="path_labels"
             )

@@ -98,8 +98,9 @@ current_df = pd.DataFrame(
 )
 current_backup_df = current_df.copy()
 
-# Environment image
+# Environment image and gif
 current_img = None
+current_gif = None
 
 # Train Paths Dataframe
 current_paths = pd.DataFrame()
@@ -965,7 +966,35 @@ def switch_clingo_para_to_result():
 
     sim_result = run_simulation()
 
-    if sim_result == 0:
+    if sim_result < 0:
+        if sim_result == -1:
+            labels['clingo_status_label'].label.config(
+                text='No .lp files given',
+                fg='#FF0000',
+            )
+            frames['clingo_para_frame'].frame.update()
+            return
+        elif sim_result == -2:
+            labels['clingo_status_label'].label.config(
+                text='Invalid clingo path and/or files\n'
+                     f'--> given clingo path: {user_params["clingo"]}\n'
+                     f'--> given .lp files: \n'
+                     f'{user_params["lpFiles"]}',
+                fg='#FF0000',
+                anchor='w',
+                justify='left',
+            )
+            frames['clingo_para_frame'].frame.update()
+            return
+        elif sim_result == -3:
+            labels['clingo_status_label'].label.config(
+                text=f'Clingo did not provide the requested Answer: '
+                     f'{user_params["answer"]}',
+                fg='#FF0000',
+            )
+            frames['clingo_para_frame'].frame.update()
+            return
+    else:
         if 'clingo_para_frame' in frames:
             frames['clingo_para_frame'].destroy_frame()
             del frames['clingo_para_frame']
@@ -976,34 +1005,9 @@ def switch_clingo_para_to_result():
             frames['main_menu_env_viewer_frame'].destroy_frame()
             del frames['main_menu_env_viewer_frame']
 
+        df_to_timetable_text()
+        create_gif()
         create_result_menu()
-    elif sim_result == -1:
-        labels['clingo_status_label'].label.config(
-            text='No .lp files given',
-            fg='#FF0000',
-        )
-        frames['clingo_para_frame'].frame.update()
-        return
-    elif sim_result == -2:
-        labels['clingo_status_label'].label.config(
-            text='Invalid clingo path and/or files\n'
-                 f'--> given clingo path: {user_params["clingo"]}\n'
-                 f'--> given .lp files: \n'
-                 f'{user_params["lpFiles"]}',
-            fg='#FF0000',
-            anchor='w',
-            justify='left',
-        )
-        frames['clingo_para_frame'].frame.update()
-        return
-    elif sim_result == -3:
-        labels['clingo_status_label'].label.config(
-            text=f'Clingo did not provide the requested Answer: '
-                 f'{user_params["answer"]}',
-            fg='#FF0000',
-        )
-        frames['clingo_para_frame'].frame.update()
-        return
 
 def reload_main_env_viewer():
     if 'main_menu_env_viewer_frame' in frames:
@@ -3817,8 +3821,8 @@ def build_result_menu():
         height=1,
         grid_pos=(1, 1),
         padding=(0, 0),
-        command=stub,
-        text='Show Time Table',
+        command=toggle_result_timetable,
+        text='Toggle Time Table',
         font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#000000',
         background_color='#777777',
@@ -3832,8 +3836,8 @@ def build_result_menu():
         height=1,
         grid_pos=(2, 1),
         padding=(0, 0),
-        command=stub,
-        text='Show GIF',
+        command=toggle_result_gif,
+        text='Toggle GIF',
         font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#000000',
         background_color='#777777',
@@ -3939,6 +3943,72 @@ def build_result_help_frame():
     frames['result_help_frame'].frame.columnconfigure(0, weight=1)
     frames['result_help_frame'].frame.grid_propagate(False)
 
+def build_result_timetable_frame():
+    frames['result_timetable_frame'] = Frame(
+        root=windows['flatland_window'].window,
+        width=screenwidth * 0.5,
+        height=screenheight,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nesw',
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    with open("data/current_df.txt", "r") as file:
+        displaytext = file.read()
+
+    texts['result_timetable_text'] = Text(
+        root=frames['result_timetable_frame'].frame,
+        width=frames['result_timetable_frame'].width,
+        height=frames['result_timetable_frame'].height,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nes',
+        text=displaytext,
+        font=('Courier', int(font_scale * base_font)),
+        wrap='word',
+        foreground_color='#CCCCCC',
+        background_color='#000000',
+        border_width=0,
+        state='disabled',
+        visibility=True,
+    )
+
+    frames['result_timetable_frame'].frame.rowconfigure(0, weight=1)
+    frames['result_timetable_frame'].frame.columnconfigure(0, weight=1)
+    frames['result_timetable_frame'].frame.grid_propagate(False)
+
+def build_result_gif_frame():
+    frames['result_gif_frame'] = Frame(
+        root=windows['flatland_window'].window,
+        width=screenwidth * 0.5,
+        height=screenheight,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nesw',
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    pictures['title_gif'] = GIF(
+        root=frames['result_gif_frame'].frame,
+        width=frames['result_gif_frame'].width * 0.99,
+        height=frames['result_gif_frame'].height * 0.4,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nesw',
+        gif=current_gif,
+        background_color='#000000',
+        visibility=True,
+    )
+
+    frames['result_gif_frame'].frame.rowconfigure(0, weight=1)
+    frames['result_gif_frame'].frame.columnconfigure(0, weight=1)
+    frames['result_gif_frame'].frame.grid_propagate(False)
+
 def toggle_result_help():
     if 'result_help_frame' in frames:
         frames['result_help_frame'].toggle_visibility()
@@ -3947,6 +4017,24 @@ def toggle_result_help():
         frames['result_help_frame'].frame.grid_propagate(False)
     else:
         build_result_help_frame()
+
+def toggle_result_timetable():
+    if 'result_timetable_frame' in frames:
+        frames['result_timetable_frame'].toggle_visibility()
+        frames['result_timetable_frame'].frame.rowconfigure(0, weight=1)
+        frames['result_timetable_frame'].frame.columnconfigure(0, weight=1)
+        frames['result_timetable_frame'].frame.grid_propagate(False)
+    else:
+        build_result_timetable_frame()
+
+def toggle_result_gif():
+    if 'result_gif_frame' in frames:
+        frames['result_gif_frame'].toggle_visibility()
+        frames['result_gif_frame'].frame.rowconfigure(0, weight=1)
+        frames['result_gif_frame'].frame.columnconfigure(0, weight=1)
+        frames['result_gif_frame'].frame.grid_propagate(False)
+    else:
+        build_result_gif_frame()
 
 def switch_result_to_main():
     if 'result_viewer_frame' in frames:
@@ -3958,6 +4046,12 @@ def switch_result_to_main():
     if 'result_help_frame' in frames:
         frames['result_help_frame'].destroy_frame()
         del frames['result_help_frame']
+    if 'result_timetable_frame' in frames:
+        frames['result_timetable_frame'].destroy_frame()
+        del frames['result_timetable_frame']
+    if 'result_gif_frame' in frames:
+        frames['result_gif_frame'].destroy_frame()
+        del frames['result_gif_frame']
 
     create_main_menu()
 
@@ -3966,6 +4060,42 @@ def switch_result_to_main():
 
 
 # functions
+
+def create_gif():
+    global current_gif
+
+    # TODO: Create gif and save in data folder
+    # TODO: Assign path to created gif to current gif like below
+
+    current_gif = 'data/png/title.gif'
+
+def df_to_timetable_text():
+    def format_row(index, row):
+        new_line = (f"| {index:>8} | {row['e_dep']:>8} | {row['a_dep']:>6} | "
+                    f"{row['l_arr']:>6} | {row['a_arr']:>6} |")
+        return new_line
+
+    # TODO: Check if this is the actual departure time
+    a_dep = current_paths.groupby("trainID")["timestep"].min().tolist()
+    a_arr = current_paths.groupby("trainID")["timestep"].max().tolist()
+
+    df = pd.DataFrame({
+        'e_dep': current_df['e_dep'],
+        'a_dep': a_dep,
+        'l_arr': current_df['l_arr'],
+        'a_arr': a_arr,
+    })
+
+    header = ("|          |      Departure    |     Arrival     |\n"
+              "| Train ID | Earliest | Actual | Latest | Actual |")
+    divider = "|----------|----------|--------|--------|--------|"
+
+    new_rows = [format_row(index, row) for index, row in df.iterrows()]
+
+    with open('data/current_df.txt', "w") as file:
+        file.write(header + "\n")
+        file.write(divider + "\n")
+        file.writelines(new_row + "\n" for new_row in new_rows)
 
 def current_df_to_env_text():
     def format_row(index, row):
@@ -4155,15 +4285,3 @@ def exit_gui(event=None):
     delete_tmp_png()
 
     windows['flatland_window'].close_window()
-
-
-# stubs
-
-def stub():
-    return
-
-
-
-# TODOS
-
-# TODO: show time table and gif functions in Results
