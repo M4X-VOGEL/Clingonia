@@ -1,6 +1,6 @@
 # user data
-./data/current_df.txt
-./data/user_params.json
+data/current_df.txt
+data/user_params.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
