@@ -368,6 +368,99 @@ class Picture:
         return image
 
 
+class GIF:
+    def __init__(
+            self,
+            root,
+            width: int,
+            height: int,
+            grid_pos: [int, int],
+            padding: [
+                [int, int], [[int, int],[int, int]],
+                [int, [int, int]], [[int, int], int]
+            ],
+            gif: str,
+            background_color: str,
+            visibility: bool,
+            sticky: str | None = None,
+            columnspan: int | None = None,
+    ):
+        self.root = root
+        self.width = width
+        self.height = height
+        self.grid_pos = grid_pos
+        self.padding = padding
+        self.sticky = sticky
+        self.columnspan = columnspan
+        self.background_color = background_color
+        self.visibility = visibility
+
+        self.frames, self.delay = self.get_gif(gif)
+        self.frame_index = 0
+
+        self.label = self.create_label()
+
+        if visibility:
+            self.place_label()
+            self.update_animation()
+
+    def create_label(self):
+        label = tk.Label(
+            self.root,
+            image=self.frames[0],
+            width=self.width, height=self.height,
+            bg=self.background_color
+        )
+        return label
+
+    def place_label(self):
+        self.label.grid(
+            row=self.grid_pos[0], column=self.grid_pos[1],
+            padx=self.padding[0], pady=self.padding[1],
+            sticky=self.sticky, columnspan=self.columnspan,
+        )
+        self.visibility = True
+
+    def hide_label(self):
+        self.label.grid_forget()
+        self.visibility = False
+
+    def toggle_visibility(self):
+        if self.visibility:
+            self.label.grid_forget()
+            self.visibility = False
+        else:
+            self.label.grid(
+                row=self.grid_pos[0], column=self.grid_pos[1],
+                padx=self.padding[0], pady=self.padding[1],
+                sticky=self.sticky, columnspan=self.columnspan,
+            )
+            self.visibility = True
+        return
+
+    def get_gif(self, gif_path):
+        gif = Image.open(gif_path)
+        frames = []
+        delay = gif.info.get("duration", 100)
+        try:
+            while True:
+                frame = gif.copy().resize(
+                    (int(self.width), int(self.height)),
+                    Image.Resampling.LANCZOS
+                )
+                frames.append(ImageTk.PhotoImage(frame))
+                gif.seek(len(frames))  # Move to the next frame
+        except EOFError:
+            pass
+        return frames, delay
+
+    def update_animation(self):
+        if self.frames:
+            self.label.config(image=self.frames[self.frame_index])
+            self.frame_index = (self.frame_index + 1) % len(self.frames)
+            self.label.after(self.delay, self.update_animation)
+
+
 class EntryField:
     def __init__(
             self,

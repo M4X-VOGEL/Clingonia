@@ -166,15 +166,14 @@ def build_title_frame():
         visibility=True,
     )
 
-    pictures['title_image'] = Picture(
+    pictures['title_gif'] = GIF(
         root=frames['title_frame'].frame,
-        width=frames['title_frame'].width * 0.5,
-        height=frames['title_frame'].width * 0.5,
-        grid_pos=(1,0),
+        width=frames['title_frame'].width * 0.8,
+        height=frames['title_frame'].height * 0.3,
+        grid_pos=(1, 0),
         padding=(0, 0),
-        sticky='nsew',
-        image='data/png/title_image.png',
-        foreground_color='#FFFFFF',
+        sticky='n',
+        gif='data/png/title.gif',
         background_color='#000000',
         visibility=True,
     )
