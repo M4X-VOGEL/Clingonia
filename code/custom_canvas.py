@@ -394,7 +394,7 @@ class BuildCanvas:
 
         if self.current_selection is not None:
             image, rotation = self.img_dict[self.current_selection]
-            image = f'../data/png/{image}.png'
+            image = f'data/png/{image}.png'
             image = Image.open(image).resize((30, 30)).rotate(rotation)
             self.current_selection_image = ImageTk.PhotoImage(image)
 
@@ -541,7 +541,7 @@ class BuildCanvas:
                     if value:
                         image, rotation = self.img_dict[value]
 
-                        image = f'../data/png/{image}.png'
+                        image = f'data/png/{image}.png'
                         image = Image.open(image).resize(
                             (int(adjusted_cell_size),
                              int(adjusted_cell_size))
@@ -647,7 +647,7 @@ class TrainListCanvas:
         self.config_dict = {}
         self.remove_dict = {}
 
-        self.station_img = Image.open('../data/png/Bahnhof_#d50000.png')
+        self.station_img = Image.open('data/png/Bahnhof_#d50000.png')
         self.station_img = self.station_img.resize(size=(60, 60))
         self.station_img = ImageTk.PhotoImage(self.station_img)
 
