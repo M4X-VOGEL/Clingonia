@@ -1565,13 +1565,44 @@ def build_random_gen_para_frame():
     load_random_gen_env_params()
 
 def random_gen_para_to_env():
-    global CURRENT_IMG
+    global CURRENT_IMG, CURRENT_DF, CURRENT_ARRAY
 
     if save_random_gen_env_params() == -1:
         return
 
-    gen_env(USER_PARAMS)
-    # TODO: CURRENT_ARRAY, CURRENT_DF = gen_env(USER_PARAMS)
+    tracks, trains = gen_env(USER_PARAMS)
+
+    if len(trains):
+        start_pos = list(zip(trains['x'], trains['y']))
+        end_pos = list(zip(trains['x_end'], trains['y_end']))
+
+        CURRENT_DF = pd.DataFrame({
+            'start_pos': start_pos,
+            'dir': trains['dir'],
+            'end_pos': end_pos,
+            'e_dep': trains['e_dep'],
+            'l_arr': trains['l_arr']
+        })
+    else:
+        CURRENT_DF = pd.DataFrame(
+            columns=['start_pos', 'dir', 'end_pos', 'e_dep', 'l_arr']
+        )
+
+    direction = {
+        'n': 1,
+        'e': 2,
+        's': 3,
+        'w': 4,
+    }
+
+    tracks = np.array(tracks)
+    CURRENT_ARRAY = np.zeros((3, *tracks.shape), dtype=int)
+    CURRENT_ARRAY[0] = tracks
+
+    for _, row in CURRENT_DF.iterrows():
+        CURRENT_ARRAY[1][row['start_pos']] = direction[row['dir']]
+        if row['end_pos'] != (-1, -1):
+            CURRENT_ARRAY[2][row['end_pos']] = 5
 
     CURRENT_IMG = '../data/running_tmp.png'
 
@@ -3486,16 +3517,21 @@ def load_env_from_file():
 
     tracks, trains = lp_to_env(file)
 
-    start_pos = list(zip(trains['x'], trains['y']))
-    end_pos = list(zip(trains['x_end'], trains['y_end']))
+    if len(trains):
+        start_pos = list(zip(trains['x'], trains['y']))
+        end_pos = list(zip(trains['x_end'], trains['y_end']))
 
-    CURRENT_DF = pd.DataFrame({
-        'start_pos': start_pos,
-        'dir': trains['dir'],
-        'end_pos': end_pos,
-        'e_dep': trains['e_dep'],
-        'l_arr': trains['l_arr']
-    })
+        CURRENT_DF = pd.DataFrame({
+            'start_pos': start_pos,
+            'dir': trains['dir'],
+            'end_pos': end_pos,
+            'e_dep': trains['e_dep'],
+            'l_arr': trains['l_arr']
+        })
+    else:
+        CURRENT_DF = pd.DataFrame(
+            columns=['start_pos', 'dir', 'end_pos', 'e_dep', 'l_arr']
+        )
 
     direction = {
         'n': 1,
