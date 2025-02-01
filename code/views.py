@@ -76,8 +76,8 @@ err_dict = {
     'intercity': {ValueError: 'needs int > 0'},
     'incity': {ValueError: 'needs int > 0'},
     'remove': {ValueError: 'needs true or false'},
-    'speed': {ValueError: 'needs dictionary: {int > 0 : int > 0, ...}',
-              SyntaxError: 'needs dictionary: {int > 0 : int > 0, ...}'},
+    'speed': {ValueError: 'needs dictionary: {float : float, ...}, 0 <= float <= 1',
+              SyntaxError: 'needs dictionary: {float : float, ...}, 0 <= float <= 1'},
     'malfunction': {ValueError: 'needs fraction: int / int',
                     IndexError: 'needs fraction: int / int'},
     'min': {ValueError: 'needs int > 0'},
@@ -1331,7 +1331,7 @@ def build_random_gen_para_frame():
         font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
-        visibility=False,
+        visibility=True,
     )
 
     entry_fields['seed_entry'] = EntryField(
@@ -1347,7 +1347,7 @@ def build_random_gen_para_frame():
         background_color='#222222',
         example_color='#777777',
         border_width=0,
-        visibility=False,
+        visibility=True,
     )
 
     labels['seed_error_label'] = Label(
@@ -1965,8 +1965,6 @@ def build_random_gen_env_menu():
     frames['random_gen_env_menu_frame'].frame.grid_propagate(False)
 
 def random_gen_toggle_advanced_para_options():
-    labels['seed_label'].toggle_visibility()
-    entry_fields['seed_entry'].toggle_visibility()
     labels['grid_label'].toggle_visibility()
     entry_fields['grid_entry'].toggle_visibility()
     labels['intercity_label'].toggle_visibility()
@@ -4127,7 +4125,7 @@ def load_user_data_from_file():
         data = json.load(file)
 
     if data['speed'] is not None:
-        data['speed'] = {int(k): v for k, v in data['speed'].items()}
+        data['speed'] = {float(k): float(v) for k, v in data['speed'].items()}
     if data['malfunction'] is not None:
         data['malfunction'] = (data['malfunction'][0], data['malfunction'][1])
 
