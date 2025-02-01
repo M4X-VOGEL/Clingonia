@@ -174,7 +174,7 @@ def build_title_frame():
         grid_pos=(1, 0),
         padding=(0, 0),
         sticky='n',
-        gif='data/png/title.gif',
+        gif='data/png/title_gif.gif',
         background_color='#000000',
         visibility=True,
     )
@@ -4067,7 +4067,7 @@ def create_gif():
     # TODO: Create gif and save in data folder
     # TODO: Assign path to created gif to current gif like below
 
-    current_gif = 'data/png/title.gif'
+    current_gif = 'data/current_gif.gif'
 
 def df_to_timetable_text():
     def format_row(index, row):

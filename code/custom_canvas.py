@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import seaborn as sns
+from matplotlib import colors as mcolors
 
 from code.custom_widgets import *
 
@@ -1227,6 +1229,30 @@ class ResultCanvas:
             8: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.75),
         }
 
+        unique_trains = self.show_df['trainID'].unique()
+        n = len(unique_trains)
+
+        # custom colors (if not long enough it gets repeated)
+        custom_colors = ['#a6cee3','#1f78b4','#b2df8a','#33a02c',
+                         '#fb9a99','#e31a1c','#fdbf6f','#ff7f00',
+                         '#cab2d6','#6a3d9a','#ffff99','#b15928']
+        custom_colors = (custom_colors * ((n // len(custom_colors)) + 1))
+
+        # get n colors from the color palette
+        # good palettes are tab20, dark or other qualitative palettes
+        # or use a custom palette by using palette=custom_colors
+        colors = sns.color_palette(
+            # palette=custom_colors,
+            palette='tab20',
+            n_colors=n
+        )
+
+        # convert colors to hex code
+        colors = [mcolors.to_hex(color) for color in colors]
+
+        # make dict with train id and corresponding color
+        train_colors = dict(zip(unique_trains, colors))
+
         for _, row in self.show_df.iterrows():
             self.canvas.create_text(
                 (self.x_offset + row['x'] * adjusted_cell_size +
@@ -1236,7 +1262,7 @@ class ResultCanvas:
                 text=row['timestep'],
                 anchor="center",
                 font=("Courier", int(15 * self.scale * 3), 'bold'),
-                fill='#000000',
+                fill=train_colors[row['trainID']],
                 tags="path_labels"
             )
 
