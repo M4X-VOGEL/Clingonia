@@ -1,145 +1,43 @@
-Click the ? again to hide this text
+            |-------------------|
+            |   Train Builder   |
+            |-------------------|
 
-This is a placeholder for the builder train help text
 
-bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla blab
 
-Welcome to the Help Center!
----------------------------
+You can close this help text by pressing the ?.
+You can go back to the parameter menu with the <.
+You can close the program by using 'ESC' on your keyboard.
 
-1. Navigation:
-   Use the menu bar at the top to access different features.
-   - Home: Go back to the main screen.
-   - Settings: Adjust application preferences.
-   - Help: Open this help window.
 
-2. Keyboard Shortcuts:
-   - Ctrl + S: Save your progress.
-   - Ctrl + Z: Undo the last action.
-   - Ctrl + Q: Quit the application.
+Grid
+----
+You can move the grid while pressing your right mouse button and moving the mouse.
+You can zoom with your mouse wheel.
+To place trains first click on the symbol then on the grid cells.
+To place stations see Train List below.
+To configure trains see Train List below.
+To remove trains see Train List below.
 
-3. Saving Your Work:
-   - Click the "Save" button in the toolbar.
-   - Ensure you select the correct folder to avoid losing data.
 
-4. Common Issues:
-   - If the app freezes, restart it and check the logs.
-   - For error messages, consult the FAQ section.
+Finish Building
+---------------
+This will save your environment and the trains and take you to a result screen where you can review it.
 
-5. Contact Support:
-   - Email: support@example.com
-   - Phone: 1-800-HELP-ME
 
-6. Frequently Asked Questions (FAQ):
-   - Q: How do I reset my password?
-     A: Go to Settings > Account > Reset Password.
-   - Q: Can I use the app offline?
-     A: Yes, but some features may be unavailable.
+Train List
+----------
+Config:
+    - place stations in the same way as trains.
+    - configure the earliest departure and latest arrival.
+Remove:
+    - this will delete the train.
 
-7. Updates and Features:
-   - Check for updates in Settings > About > Check for Updates.
-   - Stay tuned for upcoming features in our newsletters!
 
-8. Feedback:
-   - We value your input. Please share feedback via the "Feedback" option in the menu.
+Reset
+-----
+This resets the grid to the status it was when the track builder opened.
 
-1. The wind howled through the trees, carrying whispers of faraway places.
-2. A distant bird took flight, its wings slicing through the air with grace.
-3. In the valley below, a river meandered gently, sparkling in the midday sun.
-4. The forest seemed alive, each leaf trembling as the breeze passed by.
-5. Across the horizon, mountains stood like ancient guardians, silent and unmoving.
-6. Beneath the surface of the lake, fish darted in quicksilver flashes.
-7. The ground was soft with moss, a plush carpet welcoming every step.
-8. Shadows of creatures long gone danced across the stone walls.
-9. A path appeared through the dense underbrush, narrow and inviting.
-10. Far away, the faint sound of a waterfall echoed in the distance.
-11. The scent of pine needles filled the air, sharp and fresh.
-12. A deer paused at the water’s edge, its reflection rippling with each movement.
-13. The sky was a canvas of soft pastels, blending from purple to gold.
-14. The air was heavy with the promise of rain, yet the clouds held back.
-15. A butterfly flitted by, its delicate wings catching the light as it moved.
-16. Leaves rustled, though no wind blew; it was the whispers of the earth itself.
-17. Birds perched on branches, singing their songs into the twilight.
-18. The moon rose high, a silver coin in the sky, casting shadows upon the ground.
-19. A flicker of movement caught the eye—a small fox, sneaking through the undergrowth.
-20. The crackling of a distant fire reached the ears, a sign of human presence.
-21. The scent of damp earth filled the air as the forest exhaled after the rain.
-22. A rabbit darted between the bushes, its ears flicking in the silence.
-23. Time slowed in this peaceful place, the world outside forgotten for a while.
-24. The mountains seemed closer now, their peaks lost in a sea of clouds.
-25. A single star appeared in the sky, blinking into existence as the night deepened.
-26. The surface of the water was calm, reflecting the sky like a mirror.
-27. The breeze picked up again, rustling the leaves and carrying new smells.
-28. A flash of color—an orange bird, rare and vibrant—flew overhead.
-29. Beneath the surface of the lake, shadows moved like ghosts in the depths.
-30. The ground was scattered with stones, each one shaped by time and weather.
-31. In the distance, the sound of thunder rumbled softly, foretelling a storm.
-32. A hawk soared high above, its keen eyes scanning the earth below.
-33. The air was cool against the skin, a welcome relief after the heat of the day.
-34. A small flower bloomed, its petals reaching for the sun as it rose higher.
-35. The hum of bees filled the air as they moved from flower to flower.
-36. A squirrel darted up a tree, its tail twitching as it scampered to safety.
-37. The first raindrops began to fall, soft and light, tickling the earth.
-38. The scent of wet wood and fresh rain mixed together, filling the senses.
-39. A soft glow appeared on the horizon, the first sign of the approaching dawn.
-40. The sky slowly lightened, the stars fading one by one as the world awoke.
-41. A fox emerged from the shadows, its fur glistening with dew.
-42. The hills rolled gently, their slopes dotted with wildflowers and grass.
-43. A bird took flight, its wings beating a steady rhythm as it soared above.
-44. The morning fog curled in tendrils, wrapping around trees like a soft embrace.
-45. A distant mountain range appeared through the mist, majestic and towering.
-46. The world was painted in shades of grey, blue, and green, a peaceful sight.
-47. The river shimmered in the early morning light, its surface a silver sheen.
-48. A soft breeze stirred the branches, creating a melody of nature’s song.
-49. In the forest, the leaves crunched underfoot, announcing the arrival of autumn.
-50. A distant howl broke the silence, sending a shiver through the trees.
-51. The first light of day touched the peaks of the mountains, warming them.
-52. A wolf appeared at the edge of the clearing, its eyes glowing in the twilight.
-53. The earth seemed to pulse with life, every leaf, every stone, every creature alive.
-54. A crow flew overhead, its caw echoing in the still air.
-55. The forest floor was rich with life—mushrooms, ferns, and soft moss underfoot.
-56. A small creek trickled through the rocks, its water clear and cold.
-57. The stars overhead twinkled, their light distant but constant.
-58. The sky began to darken, the first hints of night creeping across the land.
-59. A pair of rabbits hopped by, unaware of the silent watcher in the distance.
-60. The scent of wood smoke lingered in the air, a reminder of distant camps.
-61. A soft rustling in the bushes announced the arrival of a deer.
-62. The quiet hum of the world was broken only by the occasional bird call.
-63. The leaves turned gold and red, signaling the arrival of fall.
-64. The forest was alive with the sounds of crickets, birds, and the wind.
-65. A gentle rustling echoed through the trees, the signal of something passing by.
-66. The moon bathed the world in silver light, casting long shadows on the ground.
-67. The faint scent of flowers hung in the air, mingling with the earth’s musk.
-68. The ground was damp with dew, a reminder of the coolness of the night.
-69. A lone tree stood at the clearing's edge, its branches stretching to the sky.
-70. The howl of wolves echoed across the valley, distant but haunting.
-71. The forest seemed to hold its breath, waiting for something unknown.
-72. The sun began to sink, painting the sky with shades of orange and pink.
-73. The breeze carried the scent of pine, sharp and refreshing.
-74. A bear wandered through the trees, its massive form nearly hidden in the shadows.
-75. The mountain peaks were shrouded in mist, their outlines barely visible.
-76. A squirrel chattered from the treetop, warning of an approaching danger.
-77. The stars began to emerge, dotting the sky like tiny diamonds.
-78. The night deepened, and the world grew quieter, as if in reverence.
-79. A small animal darted across the path, too quick to be seen clearly.
-80. The last light of day disappeared, leaving only the cool night air.
-81. The sound of footsteps on the forest floor was muffled by the thick carpet of leaves.
-82. A distant howl echoed through the valley, sending a chill down the spine.
-83. The forest seemed endless, a vast expanse of green stretching into the unknown.
-84. The moon rose higher, casting shadows on the ground that seemed to move.
-85. The wind carried the scent of rain, though the sky remained clear.
-86. A raccoon rummaged through the underbrush, its eyes gleaming in the dark.
-87. The night was peaceful, save for the occasional call of an owl.
-88. The air grew colder as the night wore on, the first frost creeping in.
-89. A fox slinked through the trees, its tail brushing the underbrush.
-90. The silence was profound, broken only by the rustle of leaves in the wind.
-91. A pair of owls hooted softly in the distance, their eyes gleaming in the moonlight.
-92. The forest seemed to sleep, lulled by the quiet rhythm of the earth.
-93. The stars were brilliant against the dark canvas of the sky.
-94. A shiver ran through the trees as the wind picked up, swirling through the branches.
-95. The sound of rushing water filled the air as the river swelled with rain.
-96. A lone wolf stood on a ridge, silhouetted against the rising moon.
-97. The air was crisp, the kind of cold that hints at the arrival of winter.
-98. The forest was still, as though the night had cast a spell over everything.
-99. The earth seemed to pulse with a quiet energy, ancient and timeless.
-100. The first light of dawn began to touch the land, waking the world from its slumber.
+
+Trains
+------
+This allows you to place trains by clicking a grid cell with you left mouse button.
