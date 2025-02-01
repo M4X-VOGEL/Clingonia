@@ -60,3 +60,9 @@ Where:
     - trackID is one of the id's defined by flatland.
     - you need exactly one start and end for each train
     - cells must fill a grid with size (columns,rows)
+
+
+Next: Clingo Solver
+-------------------
+This will take you to the settings for the clingo solver.
+Here you can also simulate your environment.
