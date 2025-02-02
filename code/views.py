@@ -976,10 +976,7 @@ def switch_clingo_para_to_result():
             return
         elif sim_result == -2:
             labels['clingo_status_label'].label.config(
-                text='Invalid clingo path and/or files\n'
-                     f'--> given clingo path: {user_params["clingo"]}\n'
-                     f'--> given .lp files: \n'
-                     f'{user_params["lpFiles"]}',
+                text='Invalid clingo path',
                 fg='#FF0000',
                 anchor='w',
                 justify='left',
@@ -987,6 +984,13 @@ def switch_clingo_para_to_result():
             frames['clingo_para_frame'].frame.update()
             return
         elif sim_result == -3:
+            labels['clingo_status_label'].label.config(
+                text=f'Clingo execution unsuccessful',
+                fg='#FF0000',
+            )
+            frames['clingo_para_frame'].frame.update()
+            return
+        elif sim_result == -4:
             labels['clingo_status_label'].label.config(
                 text=f'Clingo did not provide the requested Answer: '
                      f'{user_params["answer"]}',
