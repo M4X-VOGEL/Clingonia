@@ -25,8 +25,6 @@ def delete_tmp_lp():
             os.remove(path)
         except OSError as e:
             print(f"Fehler: Datei running_tmp.lp konnte nicht gelöscht werden:\n{e}")
-    else:
-        print("Fehler: Datei running_tmp.lp konnte nicht gefunden werden.")
 
 
 def delete_tmp_png():

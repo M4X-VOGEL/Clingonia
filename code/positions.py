@@ -8,6 +8,7 @@ def position_df(tracks, trains, clingo_path, lp_files, answer_number):
         [pd.DataFrame] IDs, Positions, Directions, Timesteps
     """
     df_actions = actions.clingo_to_df(clingo_path, lp_files, answer_number)
+    if type(df_actions) == int: return df_actions  # Error Handling
     df_pos = pd.DataFrame(columns=["trainID", "x", "y", "dir", "timestep"])
     # Train IDs
     train_ids = []

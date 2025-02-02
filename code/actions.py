@@ -1,5 +1,4 @@
 import subprocess
-import sys
 import pandas as pd
 
 def clingo_to_df(clingo_path="clingo", lp_files=[], answer_number=1):
@@ -13,10 +12,11 @@ def clingo_to_df(clingo_path="clingo", lp_files=[], answer_number=1):
     Returns:
         [pd.DataFrame]: Reduced output of the stated answer.
     """
-    # Check, if no .lp files were given
-    if not lp_files: print("Error: No .lp files given."); sys.exit()
+    if not lp_files: print("Error: No .lp files given."); return -1  # Error Handling
     output = run_clingo(clingo_path, lp_files, answer_number)
+    if output == -2: return -2  # Error Handling
     answer = get_clingo_answer(output, answer_number)
+    if answer == -3: return -3  # Error Handling
     params = get_action_params(answer)
     df_actions = create_df(params)
     return df_actions
@@ -47,7 +47,7 @@ def run_clingo(clingo_path, lp_files, answer_number):
             print("Error: Invalid clingo path and/or files:")
             print("--> given clingo path: '" + clingo_path + "'")
             print("--> given .lp files:", lp_files)
-            sys.exit()
+            return -2
     # Save Output as String
     output = result.stdout.strip()
     return output
@@ -77,7 +77,7 @@ def get_clingo_answer(clingo_output, answer_number):
         return answer
     except UnboundLocalError:
         print(f"Error: Clingo did not provide the requested Answer: {answer_number}.")
-        sys.exit()
+        return -3
 
 
 def get_action_params(clingo_answer):
