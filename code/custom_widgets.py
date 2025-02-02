@@ -1,5 +1,5 @@
 import tkinter as tk
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageDraw
 import warnings
 
 
@@ -395,6 +395,7 @@ class GIF:
         self.background_color = background_color
         self.visibility = visibility
 
+        self.corner_radius = 20
         self.frames, self.delay = self.get_gif(gif)
         self.frame_index = 0
 
@@ -448,11 +449,25 @@ class GIF:
                     (int(self.width), int(self.height)),
                     Image.Resampling.LANCZOS
                 )
+
+                frame = frame.convert("RGBA")
+                frame = self.round_corners(frame, self.corner_radius)
+
                 frames.append(ImageTk.PhotoImage(frame))
                 gif.seek(len(frames))  # Move to the next frame
         except EOFError:
             pass
         return frames, delay
+
+    @staticmethod
+    def round_corners(img, radius):
+        mask = Image.new("L", img.size, 0)
+        draw = ImageDraw.Draw(mask)
+
+        draw.rounded_rectangle((0, 0, img.width, img.height), radius=radius,
+                               fill=255)
+        img.putalpha(mask)
+        return img
 
     def update_animation(self):
         if self.frames:
