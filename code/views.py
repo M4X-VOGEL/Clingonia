@@ -1093,8 +1093,6 @@ def load_clingo_params():
 # random generation
 
 def random_gen_change_to_start_or_main():
-    save_random_gen_env_params()
-
     if last_menu == 'start':
         random_gen_para_to_start()
     else:
@@ -2080,8 +2078,6 @@ def load_random_gen_env_params():
 # builder
 
 def builder_change_to_start_or_main():
-    save_builder_env_params()
-
     if last_menu == 'start':
         builder_para_to_start()
     else:
@@ -4280,11 +4276,7 @@ def run_simulation():
 
 def exit_gui(event=None):
     save_user_data_to_file()
-    for file in ["data/running_tmp.lp", "data/running_tmp.png"]:
-        if os.path.isfile(file):
-            try:
-                os.remove(file)
-            except Exception as e:
-                print(f"Error: Could not delete {file}.\n {e}")
+    delete_tmp_lp()
+    delete_tmp_png()
 
     windows['flatland_window'].close_window()
