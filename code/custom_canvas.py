@@ -137,7 +137,7 @@ class EnvCanvas:
         self.text_label = None
 
     def draw_image(self):
-        self.cell_size = self.image.width / self.rows
+        self.cell_size = self.image.height / self.rows
         width = int(self.cols * self.cell_size * self.scale)
         height = int(self.rows * self.cell_size * self.scale)
         self.display_image = ImageTk.PhotoImage(
@@ -1116,7 +1116,7 @@ class ResultCanvas:
         self.text_label = None
 
     def draw_image(self):
-        self.cell_size = self.image.width / self.rows
+        self.cell_size = self.image.height / self.rows
         width = int(self.cols * self.cell_size * self.scale)
         height = int(self.rows * self.cell_size * self.scale)
         self.display_image = ImageTk.PhotoImage(
@@ -1219,14 +1219,14 @@ class ResultCanvas:
         # 0 is the center position 1 is on the left and then go clockwise
         offset_dict = {
             0: (adjusted_cell_size * 0.5, adjusted_cell_size * 0.5),
-            1: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.5),
-            2: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.25),
-            3: (adjusted_cell_size * 0.5, adjusted_cell_size * 0.25),
-            4: (adjusted_cell_size * 0.75, adjusted_cell_size * 0.25),
-            5: (adjusted_cell_size * 0.75, adjusted_cell_size * 0.5),
-            6: (adjusted_cell_size * 0.75, adjusted_cell_size * 0.75),
-            7: (adjusted_cell_size * 0.5, adjusted_cell_size * 0.75),
-            8: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.75),
+            1: (adjusted_cell_size * 0.2, adjusted_cell_size * 0.5),
+            2: (adjusted_cell_size * 0.2, adjusted_cell_size * 0.2),
+            3: (adjusted_cell_size * 0.5, adjusted_cell_size * 0.2),
+            4: (adjusted_cell_size * 0.8, adjusted_cell_size * 0.2),
+            5: (adjusted_cell_size * 0.8, adjusted_cell_size * 0.5),
+            6: (adjusted_cell_size * 0.8, adjusted_cell_size * 0.8),
+            7: (adjusted_cell_size * 0.5, adjusted_cell_size * 0.8),
+            8: (adjusted_cell_size * 0.2, adjusted_cell_size * 0.8),
         }
 
         unique_trains = self.show_df['trainID'].unique()
@@ -1243,7 +1243,7 @@ class ResultCanvas:
         # or use a custom palette by using palette=custom_colors
         colors = sns.color_palette(
             # palette=custom_colors,
-            palette='tab20',
+            palette='dark',
             n_colors=n
         )
 
@@ -1261,7 +1261,7 @@ class ResultCanvas:
                  offset_dict[row['cell_offset']][1]),
                 text=row['timestep'],
                 anchor="center",
-                font=("Courier", int(15 * self.scale * 3), 'bold'),
+                font=("Courier", int(14 * self.scale), 'bold'),
                 fill=train_colors[row['trainID']],
                 tags="path_labels"
             )
