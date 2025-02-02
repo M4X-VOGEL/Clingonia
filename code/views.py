@@ -4280,6 +4280,11 @@ def run_simulation():
 
 def exit_gui(event=None):
     save_user_data_to_file()
-    delete_tmp_png()
+    for file in ["data/running_tmp.lp", "data/running_tmp.png"]:
+        if os.path.isfile(file):
+            try:
+                os.remove(file)
+            except Exception as e:
+                print(f"Error: Could not delete {file}.\n {e}")
 
     windows['flatland_window'].close_window()
