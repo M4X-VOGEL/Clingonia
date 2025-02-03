@@ -161,7 +161,7 @@ def build_title_frame():
         padding=(0, 0),
         sticky='nsew',
         text='FLATLAND',
-        font=('Arial', int(font_scale * 80), 'bold'),
+        font=('Lucida Handwriting', int(font_scale * 80), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
         visibility=True,

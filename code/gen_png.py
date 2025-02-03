@@ -8,6 +8,7 @@ from flatland.envs.line_generators import sparse_line_generator
 from flatland.envs.malfunction_generators import MalfunctionParameters, ParamMalfunctionGen
 from flatland.utils.rendertools import RenderTool
 from flatland.envs.agent_utils import SpeedCounter
+from flatland.envs.observations import GlobalObsForRailEnv
 
 def create_env(env_params):
     """Creates environment based on parameters.
@@ -38,9 +39,12 @@ def create_env(env_params):
         max_num_cities=env_params['cities'],
         seed=used_seed,
         grid_mode=env_params['grid'],
-        max_rails_between_cities=env_params['intercity']
+        max_rails_between_cities=env_params['intercity'],
+        max_rail_pairs_in_city=env_params['incity'] 
     )
     line_gen = sparse_line_generator()
+
+    observation_builder = GlobalObsForRailEnv()
     
     # Environment
     env = RailEnv(
@@ -49,7 +53,9 @@ def create_env(env_params):
         rail_generator=rail_gen,
         line_generator=line_gen,
         number_of_agents=env_params['agents'],
-        malfunction_generator=malfunction_gen
+        obs_builder_object= observation_builder,
+        malfunction_generator=malfunction_gen,
+        remove_agents_at_target= env_params['remove']
     )
     env.reset()
     
