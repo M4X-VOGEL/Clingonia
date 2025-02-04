@@ -34,7 +34,7 @@ default_params = {
     'agents': 4,
     'cities': 4,
     'seed': 1,
-    'grid': False,
+    'grid': True,
     'intercity': 2,
     'incity': 2,
     'remove': True,
@@ -67,19 +67,38 @@ user_params = {
 
 # Parameter Dictionary for Error handling
 err_dict = {
-    'rows': {ValueError: 'needs int > 0',},
-    'cols': {ValueError: 'needs int > 0'},
-    'agents': {ValueError: 'needs int > 0'},
-    'cities': {ValueError: 'needs int > 0'},
-    'seed': {ValueError: 'needs int > 0'},
+    'rows': {
+        ValueError: 'needs int > 0',
+        'tooFewRows': 'needs at least 12 rows'
+    },
+    'cols': {
+        ValueError: 'needs int > 0',
+        'tooFewCols': 'needs at least 12 cols'
+    },
+    'agents': {
+        ValueError: 'needs int > 0',
+        'tooFewAgents': 'needs at least 1 agent'
+    },
+    'cities': {
+        ValueError: 'needs int > 0',
+        'tooFewCities': 'needs at least 2 cities'
+    },
+    'seed': {
+        ValueError: 'needs int > 0',
+        'tooBigSeed': 'seed is too big'
+    },
     'grid': {ValueError: 'needs true or false'},
     'intercity': {ValueError: 'needs int > 0'},
     'incity': {ValueError: 'needs int > 0'},
     'remove': {ValueError: 'needs true or false'},
-    'speed': {ValueError: 'needs dictionary: {float : float, ...}, 0 <= float <= 1',
-              SyntaxError: 'needs dictionary: {float : float, ...}, 0 <= float <= 1'},
-    'malfunction': {ValueError: 'needs fraction: int / int',
-                    IndexError: 'needs fraction: int / int'},
+    'speed': {
+        ValueError: 'needs dictionary: {float : float, ...}, 0 <= float <= 1',
+        SyntaxError: 'needs dictionary: {float : float, ...}, 0 <= float <= 1'
+    },
+    'malfunction': {
+        ValueError: 'needs fraction: int / int',
+        IndexError: 'needs fraction: int / int'
+    },
     'min': {ValueError: 'needs int > 0'},
     'max': {ValueError: 'needs int > 0'},
     'answer': {ValueError: 'needs int > 0'},
@@ -1799,6 +1818,7 @@ def random_gen_para_to_env():
             fg='#FF0000',
         )
         frames['random_gen_para_frame'].frame.update()
+        print(f'gen_env in random_gen_para_to_env returned a ValueError: {e}')
         return
 
     if tracks == -1:
@@ -2042,13 +2062,41 @@ def save_random_gen_env_params():
             labels[f'{key}_error_label'].hide_label()
         except Exception as e:
             err = type(e)
-            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
-            labels[f'{key}_error_label'].place_label()
+            err_count += 1
             if err not in err_dict[key]:
                 print(e)
                 print(err)
                 print(data)
+            else:
+                labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+                labels[f'{key}_error_label'].place_label()
+
+        # input constraints
+        if key=='cities' and data < 2:
             err_count += 1
+            err = 'tooFewCities'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        elif key=='agents' and data < 1:
+            err_count += 1
+            err = 'tooFewAgents'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        elif key=='seed' and data >= 2**32:
+            err_count += 1
+            err = 'tooBigSeed'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        elif key=='row' and data < 12:
+            err_count += 1
+            err = 'tooFewRows'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        elif key=='cols' and data < 12:
+            err_count += 1
+            err = 'tooFewCols'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
 
         if type(data) is not str:
             user_params[key] = data
@@ -4068,14 +4116,22 @@ def create_gif():
     current_gif = 'data/current_gif.gif'
 
 def df_to_timetable_text():
-    def format_row(index, row):
-        new_line = (f"| {index:>8} | {row['e_dep']:>8} | {row['a_dep']:>6} | "
-                    f"{row['l_arr']:>6} | {row['a_arr']:>6} |")
+    def format_row(idx, line):
+        new_line = (f"| {idx:>8} | {line['e_dep']:>8} | {line['a_dep']:>6} | "
+                    f"{line['l_arr']:>6} | {line['a_arr']:>6} |")
         return new_line
 
-    # TODO: Check if this is the actual departure time
-    a_dep = current_paths.groupby("trainID")["timestep"].min().tolist()
+    a_dep = (
+        current_paths.groupby("trainID")["timestep"]
+        .apply(lambda x: x.nsmallest(2).iloc[-1])
+        .tolist()
+    )
     a_arr = current_paths.groupby("trainID")["timestep"].max().tolist()
+
+    for index, row in current_df.iterrows():
+        if row['start_pos'] == row['end_pos']:
+            a_dep.insert(index, '--')
+            a_arr.insert(index, '--')
 
     df = pd.DataFrame({
         'e_dep': current_df['e_dep'],
