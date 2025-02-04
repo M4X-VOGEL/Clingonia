@@ -126,15 +126,23 @@ def save_png(env, path="data/running_tmp.png"):
     Args:
         env (RailEnv): Environment.
         path (str): Save location for the image.
+    
+    Returns:
+        [int] if no error then 0, else 1.
     """
     # Render image
-    renderer = RenderTool(env, gl="PILSVG")
-    renderer.reset()
-    renderer.render_env(
-        show=True,
-        show_observations=False,
-        show_predictions=False
-    )
+    try:
+        renderer = RenderTool(env, gl="PILSVG")
+        renderer.reset()
+        renderer.render_env(
+            show=True,
+            show_observations=False,
+            show_predictions=False
+        )
+    except OverflowError as e:
+        print("Error: Flatland failed to generate image.")
+        return -1
     # Save image
     renderer.gl.save_image(path)
     renderer.reset()
+    return 0

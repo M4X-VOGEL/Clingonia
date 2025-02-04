@@ -1823,11 +1823,8 @@ def random_gen_para_to_env():
 
     if tracks == -1:
         labels['random_gen_status_label'].label.config(
-            text='No environment generated. \n'
-                 'Suggestions: \n'
-                 '1. Grid Size: try at least 40 rows and 40 cols.\n'
-                 '2. Grid-Mode: set to True.\n'
-                 '3. Cities: reduce amount of cities.',
+            text='No environment generated.\n'
+                 'Please restart the program.',
             fg='#FF0000',
             anchor="w",
             justify="left",
@@ -3501,7 +3498,14 @@ def builder_train_grid_to_env():
 
     env = create_custom_env(tracks, trains, user_params)
     os.makedirs("data", exist_ok=True)
-    save_png(env, "data/running_tmp.png")
+    if save_png(env, "data/running_tmp.png") == -1:
+        labels['builder_status_label'].label.config(
+            text='Flatland failed to create image.\n'
+                 'Please restart the program.',
+            fg='#FF0000',
+        )
+        frames['start_menu_frame'].frame.update()
+        return
 
     current_img = 'data/running_tmp.png'
 
@@ -3943,7 +3947,7 @@ def build_result_menu():
         height=1,
         grid_pos=(3, 1),
         padding=(0, 0),
-        command=canvases['path_list_canvas'].toggle_all_paths,
+        command=toggle_all_paths,
         text='Toggle All Paths',
         font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#000000',
@@ -4055,7 +4059,30 @@ def build_result_gif_frame():
     frames['result_gif_frame'].frame.columnconfigure(0, weight=1)
     frames['result_gif_frame'].frame.grid_propagate(False)
 
+def toggle_all_paths():
+    if ('result_timetable_frame' in frames and
+            frames['result_timetable_frame'].visibility):
+        frames['result_timetable_frame'].toggle_visibility()
+        
+    if ('result_gif_frame' in frames and
+            frames['result_gif_frame'].visibility):
+        frames['result_gif_frame'].toggle_visibility()
+
+    if ('result_help_frame' in frames and
+            frames['result_help_frame'].visibility):
+        frames['result_help_frame'].toggle_visibility()
+        
+    canvases['path_list_canvas'].toggle_all_paths()
+
 def toggle_result_help():
+    if ('result_timetable_frame' in frames and 
+            frames['result_timetable_frame'].visibility):
+        frames['result_timetable_frame'].toggle_visibility()
+        
+    if ('result_gif_frame' in frames and 
+            frames['result_gif_frame'].visibility):
+        frames['result_gif_frame'].toggle_visibility()
+        
     if 'result_help_frame' in frames:
         frames['result_help_frame'].toggle_visibility()
         frames['result_help_frame'].frame.rowconfigure(0, weight=1)
@@ -4065,6 +4092,14 @@ def toggle_result_help():
         build_result_help_frame()
 
 def toggle_result_timetable():
+    if ('result_gif_frame' in frames and 
+            frames['result_gif_frame'].visibility):
+        frames['result_gif_frame'].toggle_visibility()
+        
+    if ('result_help_frame' in frames and 
+            frames['result_help_frame'].visibility):
+        frames['result_help_frame'].toggle_visibility()
+        
     if 'result_timetable_frame' in frames:
         frames['result_timetable_frame'].toggle_visibility()
         frames['result_timetable_frame'].frame.rowconfigure(0, weight=1)
@@ -4074,6 +4109,14 @@ def toggle_result_timetable():
         build_result_timetable_frame()
 
 def toggle_result_gif():
+    if ('result_timetable_frame' in frames and 
+            frames['result_timetable_frame'].visibility):
+        frames['result_timetable_frame'].toggle_visibility()
+        
+    if ('result_help_frame' in frames and 
+            frames['result_help_frame'].visibility):
+        frames['result_help_frame'].toggle_visibility()
+        
     if 'result_gif_frame' in frames:
         frames['result_gif_frame'].toggle_visibility()
         frames['result_gif_frame'].frame.rowconfigure(0, weight=1)
@@ -4257,16 +4300,19 @@ def load_env_from_file():
     if save_png(env, "data/running_tmp.png") == -1:
         if last_menu == 'start':
             labels['start_load_status_label'].label.config(
-                text='Flatland failed to create image, try again',
+                text='Flatland failed to create image.\n'
+                     'Please restart the program.',
                 fg='#FF0000',
             )
             frames['start_menu_frame'].frame.update()
         else:
             labels['main_load_status_label'].label.config(
-                text='Flatland failed to create image, try again',
+                text='Flatland failed to create image.\n'
+                     'Please restart the program.',
                 fg='#FF0000',
             )
             frames['main_menu_frame'].frame.update()
+        return
 
     current_img = 'data/running_tmp.png'
 

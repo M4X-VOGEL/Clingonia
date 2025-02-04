@@ -16,16 +16,19 @@ def clingo_to_df(clingo_path="clingo", lp_files=[], answer_number=1):
     if len(lp_files) < 2:
         print("Error: No .lp files given.")
         return -1  # if no lp files
+    print("Run Simulation: 10 %")  # Progress info
     if clingo_path != "clingo" and not os.path.isfile(f"{clingo_path}.exe"):
         return -2  # if invalid clingo path
     output = run_clingo(clingo_path, lp_files, answer_number)
     if output == -3:
         return -3  # if unsuccessful
+    print("Run Simulation: 50 %")  # Progress info
     answer = get_clingo_answer(output, answer_number)
     if answer == -4:
         return -4  # if invalid answer number
     params = get_action_params(answer)
     df_actions = create_df(params)
+    print("Run Simulation: 60 %")  # Progress info
     return df_actions
 
 
@@ -81,7 +84,10 @@ def get_clingo_answer(clingo_output, answer_number):
     try:
         return answer
     except UnboundLocalError:
-        print(f"Error: Clingo did not provide the requested Answer: {answer_number}.")
+        if answer_number == 1:
+            print(f"Error: UNSATISFIABLE.")
+        else:
+            print(f"Error: Clingo did not provide the requested Answer: {answer_number}.")
         return -4
 
 

@@ -1,30 +1,87 @@
 import pandas as pd
 from code import actions
+pd.set_option('display.max_rows', None)  # Anzeige aller DF-Zeilen
 
 def position_df(tracks, trains, clingo_path, lp_files, answer_number):
-    """Creates a DataFrame of the x-y-position and direction for the trains at each timestep.
+    """
+    Creates a DataFrame of the x-y-position and direction for the trains at each timestep.
     
     Returns:
         [pd.DataFrame] IDs, Positions, Directions, Timesteps
     """
     df_actions = actions.clingo_to_df(clingo_path, lp_files, answer_number)
     if type(df_actions) == int: return df_actions  # Error Handling
+    df_pos = build_df_pos(df_actions, trains, tracks)
+    print("Run Simulation: 90 %")  # Progress info
+    # Adjust actions, if end position is incorrect
+    df_actions, df_pos = adjust_actions_iterative(df_pos, trains, df_actions, tracks)
+    print("Run Simulation: 100 %")  # Progress info
+    return df_pos
+
+def build_df_pos(df_actions, trains, tracks):
+    """Creates position DF based on action DF.
+    """
     df_pos = pd.DataFrame(columns=["trainID", "x", "y", "dir", "timestep"])
-    # Train IDs
-    train_ids = []
+    train_ids = {}
+    # Calculate positions based on actions
     for _, row in df_actions.iterrows():
-        id = row['trainID']
+        train_id = row['trainID']
         action = row["action"]
         t = row["timestep"]
-        # Add start position when reaching new ID
-        if id not in train_ids:
-            x, y, dir = get_start_pos(id, trains)
-            df_pos.loc[len(df_pos)] = [id, x, y, dir, t-1]
-            train_ids.append(id)
-        # Following Positions
-        x, y, dir = next_pos(x, y, action, dir, tracks)
-        df_pos.loc[len(df_pos)] = [id, x, y, dir, t]
+        # Falls die trainID noch nicht verarbeitet wurde, setze die Startposition.
+        if train_id not in train_ids:
+            x, y, dir = get_start_pos(train_id, trains)
+            # Die Startposition wird als Zeitpunkt t-1 eingetragen.
+            df_pos.loc[len(df_pos)] = [train_id, x, y, dir, t-1]
+            train_ids[train_id] = (x, y, dir)
+        else:
+            # Verwende die zuletzt berechnete Position.
+            x, y, dir = train_ids[train_id]
+        # Berechne die nächste Position und speichere sie.
+        x_new, y_new, dir_new = next_pos(x, y, action, dir, tracks)
+        df_pos.loc[len(df_pos)] = [train_id, x_new, y_new, dir_new, t]
+        train_ids[train_id] = (x_new, y_new, dir_new)
     return df_pos
+
+def adjust_actions_iterative(df_pos, trains, df_actions, tracks):
+    """Adjusts the last position with the station position.
+    """
+    is_invalid = False
+    changed = True
+    while changed:
+        changed = False
+        for train in df_actions['trainID'].unique():
+            df_pos_train = df_pos[df_pos['trainID'] == train]
+            if df_pos_train.empty:
+                continue  # Jump to next ID
+            last_pos = df_pos_train.iloc[-1]
+            x_last, y_last = last_pos['x'], last_pos['y']
+            
+            # Get station position
+            train_row = trains[trains['id'] == train]
+            if train_row.empty:
+                continue
+            x_end = train_row['x_end'].iloc[0]
+            y_end = train_row['y_end'].iloc[0]
+            
+            # Remove unnecessary spawn action, but leave at least one action per trainID
+            if not (x_last == x_end and y_last == y_end):
+                idxs = df_actions[df_actions['trainID'] == train].index
+                if len(idxs) > 1:  # If it fails, then at least one action has to remain
+                    idx_to_drop = idxs[0]
+                    df_actions.drop(index=idx_to_drop, inplace=True)
+                    df_actions.reset_index(drop=True, inplace=True)
+                    changed = True
+                    # Break with change to rebuild df_pos
+                    break
+                else:
+                    is_invalid = True
+        # Rebuild df_pos if change happened
+        if changed:
+            df_pos = build_df_pos(df_actions, trains, tracks)
+    if is_invalid:
+        print("The actions produced by the lp-files are invalid/incomplete.")
+    return df_actions, df_pos
 
 
 def get_start_pos(train_id, trains):
@@ -42,14 +99,18 @@ def next_pos(x, y, action, dir, tracks):
     else:  # wait-action
         return x, y, dir
     return x_new, y_new, dir_new
-    
+
 
 def dir_change(x, y, action, dir, tracks):
-    # Tracks with dir-change
-    dir_tr = [4608,16386,72,2064,
-            20994,16458,2136,6672,
-            37408,17411,32872,3089,
-            49186,1097,34864,5633]
+    # Check, if x and y are valid coordinates
+    if y < 0 or y >= len(tracks) or x < 0 or x >= len(tracks[0]):
+        # Just keep moving forward. df_actions spawn moves reduction incoming.
+        return dir
+    # Tracks with directional change
+    dir_tr = [4608, 16386, 72, 2064,
+              20994, 16458, 2136, 6672,
+              37408, 17411, 32872, 3089,
+              49186, 1097, 34864, 5633]
     
     if action == "move_forward":
         track = tracks[y][x]
