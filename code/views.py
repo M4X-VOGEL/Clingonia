@@ -4254,7 +4254,19 @@ def load_env_from_file():
 
     env = create_custom_env(tracks, trains, user_params)
     os.makedirs("data", exist_ok=True)
-    save_png(env, "data/running_tmp.png")
+    if save_png(env, "data/running_tmp.png") == -1:
+        if last_menu == 'start':
+            labels['start_load_status_label'].label.config(
+                text='Flatland failed to create image, try again',
+                fg='#FF0000',
+            )
+            frames['start_menu_frame'].frame.update()
+        else:
+            labels['main_load_status_label'].label.config(
+                text='Flatland failed to create image, try again',
+                fg='#FF0000',
+            )
+            frames['main_menu_frame'].frame.update()
 
     current_img = 'data/running_tmp.png'
 
