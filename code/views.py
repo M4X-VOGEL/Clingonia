@@ -3504,7 +3504,7 @@ def builder_train_grid_to_env():
                  'Please restart the program.',
             fg='#FF0000',
         )
-        frames['start_menu_frame'].frame.update()
+        frames['train_builder_menu_frame'].frame.update()
         return
 
     current_img = 'data/running_tmp.png'
