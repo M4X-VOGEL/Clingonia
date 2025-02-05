@@ -88,7 +88,7 @@ def custom_sparse_line_generator(speed_ratio_map=None, seed=1):
                         agent_speeds=speeds)
             return line
         except Exception as e:
-            print("Custom agent generation failed:", e)
+            print("Agent generation failed:", e)
             # Use standard generator instead
             return base_line_gen.generate(rail, num_agents, hints, num_resets, np_random)
 
@@ -231,6 +231,7 @@ def gen_env(env_params):
     """
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning)
+        print("\nGenerating environment...")
         try:
             # Environment, Tracks, Trains
             env = create_env(env_params)
@@ -247,12 +248,9 @@ def gen_env(env_params):
             image_data = renderer.get_image()
             path = "data/running_tmp.png"
             plt.imsave(path, image_data)
-            print("\n✅ Success! Environment generated.")
+            print("✅ Environment generated.")
         except OverflowError as e:
-            print("\n❌ No environment generated. Suggestions:")
-            print("1. Grid Size: try at least 40 rows and 40 cols.")
-            print("2. Grid-Mode: set to True.")
-            print("3. Cities: reduce amount of cities.")
+            print("❌ Environment could not be generated.")
             return -1, -1
     return tracks, trains
 

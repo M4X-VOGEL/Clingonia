@@ -72,6 +72,7 @@ def create_custom_env(tracks, trains, params):
     Returns:
         [RailEnv]: Environment.
     """
+    print("\nBuilding environment...")
     # Custom map
     grid_map = GridTransitionMap(params['rows'], params['cols'])
     grid_map.grid = np.array(tracks, dtype=np.uint16)
@@ -116,8 +117,70 @@ def create_custom_env(tracks, trains, params):
         row_target = trains.loc[i, 'y_end']
         col_target = trains.loc[i, 'x_end']
         agent.target = (row_target, col_target)
-
     return env
+
+
+def initial_render_test():
+    """Renders 1x1 environment with track, agent and station to validate the launch.
+    
+    Returns:
+        [int] 0 if okay, else -1.
+    """
+    # Parameters
+    tracks = [[1025]]
+    params = {
+        'rows': 1,
+        'cols': 1,
+        'agents': 1,
+        'malfunction': (0.0,),
+        'min': 1,
+        'max': 1,
+        'remove': False,
+        'seed': 1,
+    }
+    # Transition map
+    grid_map = GridTransitionMap(params['rows'], params['cols'])
+    grid_map.grid = np.array(tracks, dtype=np.uint16)
+    rail_generator = rail_from_grid_transition_map(grid_map)
+    # Malfunction
+    malfunction_params = MalfunctionParameters(
+        malfunction_rate=0.0,
+        min_duration=params['min'],
+        max_duration=params['max']
+    )
+    malfunction_generator = ParamMalfunctionGen(malfunction_params)
+    # Environment
+    env = RailEnv(
+        width=params['cols'],
+        height=params['rows'],
+        rail_generator=rail_generator,
+        line_generator=dummy_line_generator,
+        number_of_agents=params['agents'],
+        malfunction_generator=malfunction_generator,
+        remove_agents_at_target=params['remove'],
+        obs_builder_object=DummyObservationBuilder(),
+        random_seed=params['seed']
+    )
+    env.reset()
+    # Agent and station
+    agent = env.agents[0]
+    agent.initial_position = (0, 0)
+    agent.position = (0, 0)
+    agent.direction = DIR_MAP['e']
+    agent.initial_direction = agent.direction
+    agent.target = (0, 0)
+    # Test rendering
+    try:
+        renderer = RenderTool(env, gl="PILSVG")
+        renderer.reset()
+        renderer.render_env(
+            show=True,
+            show_observations=False,
+            show_predictions=False
+        )
+    except OverflowError:
+        return -1
+    return 0
 
 
 def save_png(env, path="data/running_tmp.png"):
@@ -130,6 +193,7 @@ def save_png(env, path="data/running_tmp.png"):
     Returns:
         [int] if no error then 0, else 1.
     """
+    print("Rendering image...")
     # Render image
     try:
         renderer = RenderTool(env, gl="PILSVG")
@@ -140,9 +204,10 @@ def save_png(env, path="data/running_tmp.png"):
             show_predictions=False
         )
     except OverflowError as e:
-        print("Error: Flatland failed to generate image.")
+        print("❌ Image could not be generated.")
         return -1
     # Save image
     renderer.gl.save_image(path)
     renderer.reset()
+    print("✅ Build done.")
     return 0

@@ -3,7 +3,7 @@ import ast
 import json
 from tkinter import filedialog
 
-from code.build_png import create_custom_env, save_png
+from code.build_png import create_custom_env, initial_render_test, save_png
 from code.custom_canvas import *
 from code.env import save_env, delete_tmp_lp, delete_tmp_png
 from code.gen_png import gen_env
@@ -160,6 +160,13 @@ def create_start_menu():
 
     build_title_frame()
     build_start_menu_frame()
+    # Test rendering
+    initial_test_res = initial_render_test()
+    if initial_test_res == 0:
+        print("Info: Launch was successful.")
+    else:
+        print("❌ Warning: Launch abnormal. Restart program.")
+        exit()
 
 def build_title_frame():
     frames['title_frame'] = Frame(
@@ -1004,12 +1011,19 @@ def switch_clingo_para_to_result():
             return
         elif sim_result == -3:
             labels['clingo_status_label'].label.config(
-                text=f'Clingo execution unsuccessful',
+                text=f'Clingo returned an error',
                 fg='#FF0000',
             )
             frames['clingo_para_frame'].frame.update()
             return
         elif sim_result == -4:
+            labels['clingo_status_label'].label.config(
+                text=f'Clingo returns UNSATISFIABLE',
+                fg='#FF0000',
+            )
+            frames['clingo_para_frame'].frame.update()
+            return
+        elif sim_result == -5:
             labels['clingo_status_label'].label.config(
                 text=f'Clingo did not provide the requested Answer: '
                      f'{user_params["answer"]}',

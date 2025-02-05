@@ -67,8 +67,6 @@ The `Action` variable must be one of the following:
 - `move_right`
 - `wait`
 
-⚠️ **Important**: The solver of our program currently expects that the first `action(ID,move_forward,T)` of every agent is just the spawn move. After the first move_forward, the agent is on the `(X,Y)`-coordinate determined by the `start(ID,(X,Y),Dep,Dir).`. The spawn move can happen before the earliest departure `Dep`.
-
 Once an encoding or set of encodings has been developed that produces valid paths in the form of the appropriate `action(...)` output, developers can initialize the program.
 
 <br>

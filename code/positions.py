@@ -12,10 +12,10 @@ def position_df(tracks, trains, clingo_path, lp_files, answer_number):
     df_actions = actions.clingo_to_df(clingo_path, lp_files, answer_number)
     if type(df_actions) == int: return df_actions  # Error Handling
     df_pos = build_df_pos(df_actions, trains, tracks)
-    print("Run Simulation: 90 %")  # Progress info
+    print("Valdidating actions...")  # Progress info
     # Adjust actions, if end position is incorrect
     df_actions, df_pos = adjust_actions_iterative(df_pos, trains, df_actions, tracks)
-    print("Run Simulation: 100 %")  # Progress info
+    print("Run Simulation: DONE")  # Progress info
     return df_pos
 
 def build_df_pos(df_actions, trains, tracks):
@@ -80,7 +80,12 @@ def adjust_actions_iterative(df_pos, trains, df_actions, tracks):
         if changed:
             df_pos = build_df_pos(df_actions, trains, tracks)
     if is_invalid:
-        print("The actions produced by the lp-files are invalid/incomplete.")
+        print("❌ Warning:\n"
+              "The actions produced by the lp-files are invalid/incomplete.\n"
+              "The afflicted agents will only move once."
+        )    # Progress info
+    else:
+        print("✅ Valdidation done.")  # Progress info
     return df_actions, df_pos
 
 
