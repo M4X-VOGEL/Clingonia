@@ -4180,15 +4180,15 @@ def df_to_timetable_text():
 
     a_dep = (
         current_paths.groupby("trainID")["timestep"]
-        .apply(lambda x: x.nsmallest(2).iloc[-1])
+        .apply(lambda x: x.iloc[0] if len(x) == 1 else x.nsmallest(2).iloc[-1])
         .tolist()
     )
     a_arr = current_paths.groupby("trainID")["timestep"].max().tolist()
 
     for index, row in current_df.iterrows():
         if row['start_pos'] == row['end_pos']:
-            a_dep.insert(index, '--')
-            a_arr.insert(index, '--')
+            a_dep[index] = '--'
+            a_arr[index] = '--'
 
     df = pd.DataFrame({
         'e_dep': current_df['e_dep'],

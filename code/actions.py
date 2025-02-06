@@ -13,22 +13,22 @@ def clingo_to_df(clingo_path="clingo", lp_files=[], answer_number=1):
     Returns:
         [pd.DataFrame]: Reduced output of the stated answer.
     """
-    print("\nRun Simulation: START")  # Progress info
+    print("\nRun Simulation: START")
     if len(lp_files) < 2:
-        print("Error: No .lp files given.")
-        return -1  # if no lp files
-    print("Running Clingo...")  # Progress info
+        print("❌ Error: No .lp files given.")
+        return -1  # no lp files
+    print("Running Clingo...")
     if clingo_path != "clingo" and not os.path.isfile(f"{clingo_path}.exe"):
-        return -2  # if invalid clingo path
+        return -2  # invalid clingo path
     output = run_clingo(clingo_path, lp_files, answer_number)
     if output == -3:
-        return -3  # if unsuccessful
+        return -3  # clingo error
     answer = get_clingo_answer(output, answer_number)
-    if answer == -4:
-        return -4  # if invalid answer number
+    if answer == -4 or answer == -5:
+        return answer  # invalid answer number
     params = get_action_params(answer)
     df_actions = create_df(params)
-    print("✅ Clingo done.")  # Progress info
+    print("✅ Clingo done.")
     return df_actions
 
 
@@ -85,10 +85,9 @@ def get_clingo_answer(clingo_output, answer_number):
         return answer
     except UnboundLocalError:
         if answer_number == 1:
-            print(f"Error: Clingo returns UNSATISFIABLE")
+            print(f"❌ Clingo returns UNSATISFIABLE")
             return -4
-        else:
-            print(f"Error: Clingo did not provide the requested Answer: {answer_number}.")
+        print(f"❌ Clingo did not provide the requested Answer: {answer_number}.")
         return -5
 
 

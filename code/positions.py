@@ -1,4 +1,5 @@
 import pandas as pd
+import winsound
 from code import actions
 pd.set_option('display.max_rows', None)  # Anzeige aller DF-Zeilen
 
@@ -12,10 +13,15 @@ def position_df(tracks, trains, clingo_path, lp_files, answer_number):
     df_actions = actions.clingo_to_df(clingo_path, lp_files, answer_number)
     if type(df_actions) == int: return df_actions  # Error Handling
     df_pos = build_df_pos(df_actions, trains, tracks)
-    print("Valdidating actions...")  # Progress info
+    print("Valdidating actions...")
     # Adjust actions, if end position is incorrect
-    df_actions, df_pos = adjust_actions_iterative(df_pos, trains, df_actions, tracks)
-    print("Run Simulation: DONE")  # Progress info
+    df_actions, df_pos = adjust_actions(df_pos, trains, df_actions, tracks)
+    # Make sure that every train has a position
+    df_pos = ensure_train_spawns(df_pos, trains)
+    print("Run Simulation: DONE")
+    # Audio Feedback
+    winsound.Beep(600, 200)
+    winsound.Beep(800, 250)
     return df_pos
 
 def build_df_pos(df_actions, trains, tracks):
@@ -28,25 +34,24 @@ def build_df_pos(df_actions, trains, tracks):
         train_id = row['trainID']
         action = row["action"]
         t = row["timestep"]
-        # Falls die trainID noch nicht verarbeitet wurde, setze die Startposition.
+        # Set start position
         if train_id not in train_ids:
             x, y, dir = get_start_pos(train_id, trains)
-            # Die Startposition wird als Zeitpunkt t-1 eingetragen.
+            # Set start at timestep t-1
             df_pos.loc[len(df_pos)] = [train_id, x, y, dir, t-1]
             train_ids[train_id] = (x, y, dir)
         else:
-            # Verwende die zuletzt berechnete Position.
+            # Use last position for next positions
             x, y, dir = train_ids[train_id]
-        # Berechne die nächste Position und speichere sie.
+        # Calculate next positions
         x_new, y_new, dir_new = next_pos(x, y, action, dir, tracks)
         df_pos.loc[len(df_pos)] = [train_id, x_new, y_new, dir_new, t]
         train_ids[train_id] = (x_new, y_new, dir_new)
     return df_pos
 
-def adjust_actions_iterative(df_pos, trains, df_actions, tracks):
+def adjust_actions(df_pos, trains, df_actions, tracks):
     """Adjusts the last position with the station position.
     """
-    is_invalid = False
     changed = True
     while changed:
         changed = False
@@ -64,29 +69,66 @@ def adjust_actions_iterative(df_pos, trains, df_actions, tracks):
             x_end = train_row['x_end'].iloc[0]
             y_end = train_row['y_end'].iloc[0]
             
-            # Remove unnecessary spawn action, but leave at least one action per trainID
+            # Remove unnecessary spawn actions or
+            # remove every action, if actions do not reach the target
             if not (x_last == x_end and y_last == y_end):
                 idxs = df_actions[df_actions['trainID'] == train].index
-                if len(idxs) > 1:  # If it fails, then at least one action has to remain
-                    idx_to_drop = idxs[0]
-                    df_actions.drop(index=idx_to_drop, inplace=True)
-                    df_actions.reset_index(drop=True, inplace=True)
-                    changed = True
-                    # Break with change to rebuild df_pos
-                    break
-                else:
-                    is_invalid = True
+                idx_to_drop = idxs[0]
+                df_actions.drop(index=idx_to_drop, inplace=True)
+                df_actions.reset_index(drop=True, inplace=True)
+                changed = True
+                # Break with change to rebuild df_pos
+                break
         # Rebuild df_pos if change happened
         if changed:
             df_pos = build_df_pos(df_actions, trains, tracks)
-    if is_invalid:
-        print("❌ Warning:\n"
-              "The actions produced by the lp-files are invalid/incomplete.\n"
-              "The afflicted agents will only move once."
-        )    # Progress info
-    else:
-        print("✅ Valdidation done.")  # Progress info
     return df_actions, df_pos
+
+
+def ensure_train_spawns(df_pos, trains):
+    is_incomplete = False
+    # Get missing trainIDs in df_pos
+    missing_trains = set(trains["id"]) - set(df_pos["trainID"])
+    for train_id in missing_trains:
+        is_incomplete = True
+        # Get info of missing train
+        train_row = trains.loc[trains["id"] == train_id].iloc[0]
+        x_val = train_row["x"]
+        y_val = train_row["y"]
+        dir_val = train_row["dir"]
+        e_dep = train_row["e_dep"]
+        l_arr = train_row["l_arr"]
+        # Determine earliest spawn time
+        earliest_spawn = e_dep-1 if e_dep > 0 else e_dep
+        # Spawn at earliest spawntime possible
+        for spawn_time in range(earliest_spawn, l_arr+1):
+            # Check if cell is already occupied
+            conflict = df_pos[(df_pos["timestep"] == spawn_time) & (df_pos["x"] == x_val) & (df_pos["y"] == y_val)]
+            if conflict.empty:
+                # If cell is vacant, create new row
+                new_row = {
+                    "trainID": train_id,
+                    "x": x_val,
+                    "y": y_val,
+                    "dir": dir_val,
+                    "timestep": spawn_time
+                }
+                # Add new row to df_pos
+                df_pos = pd.concat([df_pos, pd.DataFrame([new_row])], ignore_index=True)
+                break
+            else:
+                # If cell is already occupied
+                spawn_time += 1
+    # Sort df_pos
+    df_pos = df_pos.sort_values(by=["trainID", "timestep"]).reset_index(drop=True)
+    if is_incomplete:
+        print("❌ Valdiation done with warning:\n"
+              "The actions produced by the lp-files might be invalid/incomplete.\n"
+              "The afflicted agents will only spawn on the earliest possible timestep."
+        )
+    else:
+        print("✅ Valdidation done.")
+    return df_pos
 
 
 def get_start_pos(train_id, trains):

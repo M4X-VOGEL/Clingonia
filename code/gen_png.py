@@ -135,8 +135,8 @@ def create_env(env_params):
     random.seed(used_seed)
     
     # Malfunction
-    _, mf_max = env_params['malfunction']
-    malfunction_rate = (1.0 / mf_max) if mf_max != 0 else 0.0
+    mf1, mf2 = env_params['malfunction']
+    malfunction_rate = (mf1/mf2) if mf2 != 0 else 0.0
     malfunction_params = MalfunctionParameters(
         malfunction_rate=malfunction_rate,
         min_duration=env_params['min'],
@@ -185,27 +185,20 @@ def create_env(env_params):
         agent_speed = float(env_params['speed'].get(idx, 1.0))
         agent.speed_counter = SpeedCounter(speed=agent_speed)
     
-    # Validation that the agent direction matches with the track
+    # Validate that initial agent direction matches with track
     for agent in env.agents:
         if agent.position is not None:
             row, col = agent.position
-            transitions = env.rail.get_full_transitions(row, col)
-            # Get allowed direction of the cell
-            if isinstance(transitions, np.ndarray):
-                allowed_dirs = [d for d in range(4) if np.any(transitions[d])]
-            elif isinstance(transitions, (int, np.integer)):
-                allowed_dirs = [d for d in range(4) if ((transitions >> d) & 1) == 1]
+            # Track
+            track = int(env.rail.get_full_transitions(row, col))
+            # Get allowed direction of track
+            allowed_dirs = get_allowed_dirs(track)
+            # Set direction
+            if allowed_dirs:
+                if agent.direction not in allowed_dirs:
+                    agent.direction = allowed_dirs[random.randint(0, len(allowed_dirs)-1)]
+            # No allowed directions: get city orientation
             else:
-                allowed_dirs = []
-            # Straight tracks
-            if sorted(allowed_dirs) == [0, 2]:
-                if agent.direction not in [0, 2]:
-                    agent.direction = 0
-            elif sorted(allowed_dirs) == [1, 3]:
-                if agent.direction not in [1, 3]:
-                    agent.direction = 1
-            # Stationary cell with no transitions
-            if not allowed_dirs:
                 pos = (row, col)
                 for city_idx, stations in enumerate(LAST_HINTS.get('train_stations', [])):
                     # Get station coordinates
@@ -217,6 +210,40 @@ def create_env(env_params):
                             agent.direction = desired_dir
                         break
     return env
+
+
+def get_allowed_dirs(track):
+    # No track
+    if track == 0: return []
+    # List for allowed directions
+    allowed_dirs = []
+    # All tracks
+    tracks_to_n = [32800, 4608, 16386, 37408,
+                   17411, 32872, 49186, 34864,
+                   5633, 33825, 38433, 50211,
+                   33897, 35889, 38505, 52275,
+                   20994, 16458, 6672]
+    tracks_to_e = [1025, 4608, 2064, 37408,
+                   17411, 3089, 1097, 34864,
+                   5633, 33825, 38433, 50211,
+                   33897, 35889, 38505, 52275,
+                   20994, 2136, 6672]
+    tracks_to_s = [32800, 72, 2064, 37408,
+                   32872, 3089, 49186, 1097,
+                   34864, 33825, 38433, 50211,
+                   33897, 35889, 38505, 52275,
+                   16458, 2136, 6672]
+    tracks_to_w = [1025, 16386, 72, 17411,
+                   32872, 3089, 49186, 1097,
+                   5633, 33825, 38433, 50211,
+                   33897, 35889, 38505, 52275,
+                   20994, 16458, 2136]
+    # Fill allowed directions
+    if track in tracks_to_n: allowed_dirs.append(0)
+    if track in tracks_to_e: allowed_dirs.append(1)
+    if track in tracks_to_s: allowed_dirs.append(2)
+    if track in tracks_to_w: allowed_dirs.append(3)
+    return allowed_dirs
 
 
 def gen_env(env_params):
