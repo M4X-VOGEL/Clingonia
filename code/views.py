@@ -89,8 +89,14 @@ err_dict = {
         'tooBigSeed': 'seed is too big'
     },
     'grid': {ValueError: 'needs true or false'},
-    'intercity': {ValueError: 'needs int > 0'},
-    'incity': {ValueError: 'needs int > 0'},
+    'intercity': {
+        ValueError: 'needs int > 0',
+        'tooFewRails': 'needs at least 1 rail between cities'
+    },
+    'incity': {
+        ValueError: 'needs int > 0',
+        'tooFewRails': 'needs at least 1 rail pair in the cities'
+    },
     'remove': {ValueError: 'needs true or false'},
     'speed': {
         ValueError: 'needs dictionary: {float : float, ...}, 0 <= float <= 1',
@@ -2176,6 +2182,16 @@ def save_random_gen_env_params():
         elif key=='seed' and data >= 2**32:
             err_count += 1
             err = 'tooBigSeed'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        elif key=='intercity' and data < 1:
+            err_count += 1
+            err = 'tooFewRails'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        elif key=='incity' and data < 1:
+            err_count += 1
+            err = 'tooFewRails'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
 
