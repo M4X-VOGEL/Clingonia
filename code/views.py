@@ -65,7 +65,7 @@ user_params = {
     'lpFiles': [],
 }
 
-# Parameter Dictionary for Error handling
+# Parameter Dictionaries for Error handling
 err_dict = {
     'rows': {
         ValueError: 'needs int > 0',
@@ -104,6 +104,14 @@ err_dict = {
     'answer': {ValueError: 'needs int > 0'},
     'clingo': {},
     'lpFiles': {},
+}
+clingo_err_dict = {
+    -1: ('#FF0000', 'No .lp files given'),
+    -2: ('#FF0000', 'Invalid clingo path'),
+    -3: ('#FF0000', 'Clingo returned an error'),
+    -4: ('#FF0000', 'Clingo returns UNSATISFIABLE'),
+    -5: ('#FF0000', f'Clingo did not provide the requested Answer: '
+                    f'{user_params["answer"]}'),
 }
 
 
@@ -992,45 +1000,13 @@ def switch_clingo_para_to_result():
 
     sim_result = run_simulation()
 
-    if sim_result < 0:
-        if sim_result == -1:
-            labels['clingo_status_label'].label.config(
-                text='No .lp files given',
-                fg='#FF0000',
-            )
-            frames['clingo_para_frame'].frame.update()
-            return
-        elif sim_result == -2:
-            labels['clingo_status_label'].label.config(
-                text='Invalid clingo path',
-                fg='#FF0000',
-                anchor='w',
-                justify='left',
-            )
-            frames['clingo_para_frame'].frame.update()
-            return
-        elif sim_result == -3:
-            labels['clingo_status_label'].label.config(
-                text=f'Clingo returned an error',
-                fg='#FF0000',
-            )
-            frames['clingo_para_frame'].frame.update()
-            return
-        elif sim_result == -4:
-            labels['clingo_status_label'].label.config(
-                text=f'Clingo returns UNSATISFIABLE',
-                fg='#FF0000',
-            )
-            frames['clingo_para_frame'].frame.update()
-            return
-        elif sim_result == -5:
-            labels['clingo_status_label'].label.config(
-                text=f'Clingo did not provide the requested Answer: '
-                     f'{user_params["answer"]}',
-                fg='#FF0000',
-            )
-            frames['clingo_para_frame'].frame.update()
-            return
+    if sim_result:
+        labels['clingo_status_label'].label.config(
+            fg=clingo_err_dict[sim_result][0],
+            text=clingo_err_dict[sim_result][1]
+        )
+        frames['clingo_para_frame'].frame.update()
+        return
     else:
         if 'clingo_para_frame' in frames:
             frames['clingo_para_frame'].destroy_frame()
