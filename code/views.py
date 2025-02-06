@@ -64,16 +64,17 @@ user_params = {
     'clingo': None,
     'lpFiles': [],
 }
+user_params_backup = user_params.copy()
 
 # Parameter Dictionaries for Error handling
 err_dict = {
     'rows': {
         ValueError: 'needs int > 0',
-        'tooFewRows': 'needs at least 12 rows'
+        'tooFewRows': 'needs at least 10 rows'
     },
     'cols': {
         ValueError: 'needs int > 0',
-        'tooFewCols': 'needs at least 12 cols'
+        'tooFewCols': 'needs at least 10 cols'
     },
     'agents': {
         ValueError: 'needs int > 0',
@@ -88,8 +89,14 @@ err_dict = {
         'tooBigSeed': 'seed is too big'
     },
     'grid': {ValueError: 'needs true or false'},
-    'intercity': {ValueError: 'needs int > 0'},
-    'incity': {ValueError: 'needs int > 0'},
+    'intercity': {
+        ValueError: 'needs int > 0',
+        'tooFewRails': 'needs at least 1 rail between cities'
+    },
+    'incity': {
+        ValueError: 'needs int > 0',
+        'tooFewRails': 'needs at least 1 rail pair in the cities'
+    },
     'remove': {ValueError: 'needs true or false'},
     'speed': {
         ValueError: 'needs dictionary: {float : float, ...}, 0 <= float <= 1',
@@ -921,7 +928,11 @@ def switch_main_to_random_gen():
     build_random_gen_para_frame()
 
 def switch_main_to_builder():
-    global build_mode
+    global build_mode, user_params_backup, current_backup_array, current_backup_df
+
+    user_params_backup = user_params.copy()
+    current_backup_array = current_array.copy()
+    current_backup_df = current_df.copy()
 
     build_mode = 'build'
 
@@ -938,7 +949,11 @@ def switch_main_to_builder():
     build_builder_para_frame()
 
 def switch_main_to_modify():
-    global build_mode
+    global build_mode, user_params_backup, current_backup_array, current_backup_df
+
+    user_params_backup = user_params.copy()
+    current_backup_array = current_array.copy()
+    current_backup_df = current_df.copy()
 
     build_mode = 'modify'
 
@@ -2144,9 +2159,14 @@ def save_random_gen_env_params():
                 labels[f'{key}_error_label'].place_label()
 
         # input constraints
-        if key=='cities' and data < 2:
+        if key=='rows' and data < 10:
             err_count += 1
-            err = 'tooFewCities'
+            err = 'tooFewRows'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        elif key=='cols' and data < 10:
+            err_count += 1
+            err = 'tooFewCols'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
         elif key=='agents' and data < 1:
@@ -2154,19 +2174,24 @@ def save_random_gen_env_params():
             err = 'tooFewAgents'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
+        elif key=='cities' and data < 2:
+            err_count += 1
+            err = 'tooFewCities'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
         elif key=='seed' and data >= 2**32:
             err_count += 1
             err = 'tooBigSeed'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
-        elif key=='row' and data < 12:
+        elif key=='intercity' and data < 1:
             err_count += 1
-            err = 'tooFewRows'
+            err = 'tooFewRails'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
-        elif key=='cols' and data < 12:
+        elif key=='incity' and data < 1:
             err_count += 1
-            err = 'tooFewCols'
+            err = 'tooFewRails'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
 
@@ -2202,10 +2227,80 @@ def load_random_gen_env_params():
 # builder
 
 def builder_change_to_start_or_main():
+    global user_params, current_array, current_df
+
+    user_params = user_params_backup.copy()
+    current_array = current_backup_array.copy()
+    current_df = current_backup_df.copy()
+
     if last_menu == 'start':
         builder_para_to_start()
     else:
         builder_para_to_main()
+
+def open_builder_discard_changes_frame():
+    frames['builder_discard_changes_frame'] = Frame(
+        root=windows['flatland_window'].window,
+        width=screenwidth,
+        height=screenheight,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        columnspan=2,
+        sticky='nesw',
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    labels['discard_changes_label'] = Label(
+        root=frames['builder_discard_changes_frame'].frame,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        columnspan=2,
+        sticky='nesw',
+        text='DISCARD CHANGES?',
+        font=('Arial', int(font_scale * 30), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    buttons['yes_discard_changes_button'] = Button(
+        root=frames['builder_discard_changes_frame'].frame,
+        width=4,
+        height=1,
+        grid_pos=(1, 0),
+        padding=(0, 0),
+        sticky='n',
+        command=builder_change_to_start_or_main,
+        text='YES',
+        font=('Arial', int(font_scale * base_font)),
+        foreground_color='#000000',
+        background_color='#FF0000',
+        border_width=0,
+        visibility=True,
+    )
+
+    buttons['no_discard_changes_button'] = Button(
+        root=frames['builder_discard_changes_frame'].frame,
+        width=4,
+        height=1,
+        grid_pos=(1, 1),
+        padding=(0, 0),
+        sticky='n',
+        command=frames['builder_discard_changes_frame'].destroy_frame,
+        text='NO',
+        font=('Arial', int(font_scale * base_font)),
+        foreground_color='#000000',
+        background_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    frames['builder_discard_changes_frame'].frame.rowconfigure(0, weight=2)
+    frames['builder_discard_changes_frame'].frame.rowconfigure(1, weight=1)
+    frames['builder_discard_changes_frame'].frame.columnconfigure((0, 1), weight=1)
+    frames['builder_discard_changes_frame'].frame.grid_propagate(False)
 
 def builder_para_to_start():
     global build_mode
@@ -2268,7 +2363,7 @@ def build_builder_para_frame():
         grid_pos=(0, 1),
         padding=(0, 0),
         sticky='nw',
-        command= builder_change_to_start_or_main,
+        command=open_builder_discard_changes_frame,
         text='<',
         font=('Arial', 25, 'bold'),
         foreground_color='#FF0000',
@@ -2582,7 +2677,7 @@ def build_builder_para_frame():
         padding=(0, 0),
         sticky='nw',
         command=builder_para_to_track_grid,
-        text='Build',
+        text='Build' if build_mode == 'build' else 'Modify',
         font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#000000',
         background_color='#FF0000',
@@ -2650,7 +2745,7 @@ def toggle_builder_para_help():
         build_builder_para_help_frame()
 
 def builder_para_to_track_grid():
-    global current_array, current_df, current_backup_array, current_backup_df
+    global current_array, current_df
 
     if save_builder_env_params() == -1:
         return
@@ -2720,9 +2815,6 @@ def builder_para_to_track_grid():
                     if (row['end_pos'][0] > rows - 1 or
                             row['end_pos'][1] > cols - 1):
                         current_df.at[index, 'end_pos'] = (-1, -1)
-
-    current_backup_array = current_array.copy()
-    current_backup_df = current_df.copy()
 
     build_track_builder_menu_frame()
     build_builder_grid_frame()
@@ -3442,7 +3534,7 @@ def build_train_builder_menu_frame():
         padding=(0, 0),
         columnspan=3,
         command=builder_train_grid_to_env,
-        text='Finish Building',
+        text='Finish Building' if build_mode == 'build' else 'Finish Modifying',
         font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#000000',
         background_color='#FF0000',
