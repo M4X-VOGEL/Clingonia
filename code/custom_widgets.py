@@ -684,3 +684,89 @@ class Text:
             )
             self.visibility = True
         return
+
+
+class ToggleSwitch(tk.Canvas):
+    def __init__(
+            self,
+            root: tk.Frame,
+            width: int,
+            height: int,
+            on_color: str,
+            off_color: str,
+            handle_color: str,
+            background_color: str,
+            command: callable
+    ):
+
+        self.root = root
+        self.width = width
+        self.height = height
+        self.on_color = on_color
+        self.off_color = off_color
+        self.handle_color = handle_color  #
+        self.background_color = background_color
+        self.command = command
+        self.state = False
+
+        super().__init__(
+            self.root,
+            width=self.width, height=self.height,
+            bg=self.background_color, highlightthickness=0
+        )
+
+        self.draw_switch()
+        self.bind("<Button-1>", self.toggle)
+
+    def draw_switch(self):
+        self.delete("all")
+
+        bg = self.on_color if self.state else self.off_color
+
+        self.create_oval(
+            2,
+            2,
+            self.height - 2,
+            self.height - 2,
+            fill=bg,
+            outline=bg
+        )
+        self.create_oval(
+            self.width - self.height + 2,
+            2,
+            self.width - 2,
+            self.height - 2,
+            fill=bg,
+            outline=bg
+        )
+        self.create_rectangle(
+            self.height / 2,
+            2,
+            self.width - self.height / 2,
+            self.height - 2,
+            fill=bg,
+            outline=bg
+        )
+
+        if self.state:
+            handle_x = self.width - self.height + 2
+        else:
+            handle_x = 2
+
+        self.create_oval(
+            handle_x,
+            2,
+            handle_x + self.height - 4,
+            self.height - 2,
+            fill=self.handle_color,
+            outline=self.handle_color
+        )
+
+    def toggle(self, event=None):
+        self.state = not self.state
+        self.draw_switch()
+        self.command()
+
+    def set_state(self, state):
+        self.state = state
+        self.draw_switch()
