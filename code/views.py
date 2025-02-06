@@ -64,6 +64,7 @@ user_params = {
     'clingo': None,
     'lpFiles': [],
 }
+user_params_backup = user_params.copy()
 
 # Parameter Dictionaries for Error handling
 err_dict = {
@@ -921,7 +922,9 @@ def switch_main_to_random_gen():
     build_random_gen_para_frame()
 
 def switch_main_to_builder():
-    global build_mode
+    global build_mode, user_params_backup
+
+    user_params_backup = user_params.copy()
 
     build_mode = 'build'
 
@@ -938,7 +941,9 @@ def switch_main_to_builder():
     build_builder_para_frame()
 
 def switch_main_to_modify():
-    global build_mode
+    global build_mode, user_params_backup
+
+    user_params_backup = user_params.copy()
 
     build_mode = 'modify'
 
@@ -2202,6 +2207,10 @@ def load_random_gen_env_params():
 # builder
 
 def builder_change_to_start_or_main():
+    global user_params
+
+    user_params = user_params_backup.copy()
+
     if last_menu == 'start':
         builder_para_to_start()
     else:
