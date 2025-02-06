@@ -922,9 +922,11 @@ def switch_main_to_random_gen():
     build_random_gen_para_frame()
 
 def switch_main_to_builder():
-    global build_mode, user_params_backup
+    global build_mode, user_params_backup, current_backup_array, current_backup_df
 
     user_params_backup = user_params.copy()
+    current_backup_array = current_array.copy()
+    current_backup_df = current_df.copy()
 
     build_mode = 'build'
 
@@ -941,9 +943,11 @@ def switch_main_to_builder():
     build_builder_para_frame()
 
 def switch_main_to_modify():
-    global build_mode, user_params_backup
+    global build_mode, user_params_backup, current_backup_array, current_backup_df
 
     user_params_backup = user_params.copy()
+    current_backup_array = current_array.copy()
+    current_backup_df = current_df.copy()
 
     build_mode = 'modify'
 
@@ -2207,14 +2211,80 @@ def load_random_gen_env_params():
 # builder
 
 def builder_change_to_start_or_main():
-    global user_params
+    global user_params, current_array, current_df
 
     user_params = user_params_backup.copy()
+    current_array = current_backup_array.copy()
+    current_df = current_backup_df.copy()
 
     if last_menu == 'start':
         builder_para_to_start()
     else:
         builder_para_to_main()
+
+def open_builder_discard_changes_frame():
+    frames['builder_discard_changes_frame'] = Frame(
+        root=windows['flatland_window'].window,
+        width=screenwidth,
+        height=screenheight,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        columnspan=2,
+        sticky='nesw',
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    labels['discard_changes_label'] = Label(
+        root=frames['builder_discard_changes_frame'].frame,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        columnspan=2,
+        sticky='nesw',
+        text='DISCARD CHANGES?',
+        font=('Arial', int(font_scale * 30), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    buttons['yes_discard_changes_button'] = Button(
+        root=frames['builder_discard_changes_frame'].frame,
+        width=4,
+        height=1,
+        grid_pos=(1, 0),
+        padding=(0, 0),
+        sticky='n',
+        command=builder_change_to_start_or_main,
+        text='YES',
+        font=('Arial', int(font_scale * base_font)),
+        foreground_color='#000000',
+        background_color='#FF0000',
+        border_width=0,
+        visibility=True,
+    )
+
+    buttons['no_discard_changes_button'] = Button(
+        root=frames['builder_discard_changes_frame'].frame,
+        width=4,
+        height=1,
+        grid_pos=(1, 1),
+        padding=(0, 0),
+        sticky='n',
+        command=frames['builder_discard_changes_frame'].destroy_frame,
+        text='NO',
+        font=('Arial', int(font_scale * base_font)),
+        foreground_color='#000000',
+        background_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    frames['builder_discard_changes_frame'].frame.rowconfigure(0, weight=2)
+    frames['builder_discard_changes_frame'].frame.rowconfigure(1, weight=1)
+    frames['builder_discard_changes_frame'].frame.columnconfigure((0, 1), weight=1)
+    frames['builder_discard_changes_frame'].frame.grid_propagate(False)
 
 def builder_para_to_start():
     global build_mode
@@ -2277,7 +2347,7 @@ def build_builder_para_frame():
         grid_pos=(0, 1),
         padding=(0, 0),
         sticky='nw',
-        command= builder_change_to_start_or_main,
+        command=open_builder_discard_changes_frame,
         text='<',
         font=('Arial', 25, 'bold'),
         foreground_color='#FF0000',
@@ -2659,7 +2729,7 @@ def toggle_builder_para_help():
         build_builder_para_help_frame()
 
 def builder_para_to_track_grid():
-    global current_array, current_df, current_backup_array, current_backup_df
+    global current_array, current_df
 
     if save_builder_env_params() == -1:
         return
@@ -2729,9 +2799,6 @@ def builder_para_to_track_grid():
                     if (row['end_pos'][0] > rows - 1 or
                             row['end_pos'][1] > cols - 1):
                         current_df.at[index, 'end_pos'] = (-1, -1)
-
-    current_backup_array = current_array.copy()
-    current_backup_df = current_df.copy()
 
     build_track_builder_menu_frame()
     build_builder_grid_frame()
