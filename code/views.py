@@ -1153,11 +1153,11 @@ def open_exit_confirmation_frame(event=None):
     labels['exit_label'] = Label(
         root=frames['exit_confirmation_frame'].frame,
         grid_pos=(0, 0),
-        padding=(0, 0),
+        padding=(0, 80),
         columnspan=2,
-        sticky='nesw',
+        sticky='s',
         text='EXIT FLATLAND?',
-        font=('Arial', int(font_scale * 30), 'bold'),
+        font=('Arial', int(font_scale * 50), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
         visibility=True,
@@ -1165,14 +1165,14 @@ def open_exit_confirmation_frame(event=None):
 
     buttons['yes_exit_button'] = Button(
         root=frames['exit_confirmation_frame'].frame,
-        width=4,
-        height=1,
+        width=15,
+        height=3,
         grid_pos=(1, 0),
-        padding=(0, 0),
-        sticky='n',
+        padding=(50, 0),
+        sticky='ne',
         command=exit_gui,
         text='YES',
-        font=('Arial', int(font_scale * base_font)),
+        font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#000000',
         background_color='#FF0000',
         border_width=0,
@@ -1181,22 +1181,22 @@ def open_exit_confirmation_frame(event=None):
 
     buttons['no_exit_button'] = Button(
         root=frames['exit_confirmation_frame'].frame,
-        width=4,
-        height=1,
+        width=15,
+        height=3,
         grid_pos=(1, 1),
-        padding=(0, 0),
-        sticky='n',
+        padding=(50, 0),
+        sticky='nw',
         command=close_exit_confirmation_frame,
         text='NO',
-        font=('Arial', int(font_scale * base_font)),
+        font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
         visibility=True,
     )
 
-    frames['exit_confirmation_frame'].frame.rowconfigure(0, weight=2)
-    frames['exit_confirmation_frame'].frame.rowconfigure(1, weight=1)
+    frames['exit_confirmation_frame'].frame.rowconfigure(0, weight=1)
+    frames['exit_confirmation_frame'].frame.rowconfigure(1, weight=2)
     frames['exit_confirmation_frame'].frame.columnconfigure((0, 1), weight=1)
     frames['exit_confirmation_frame'].frame.grid_propagate(False)
 
@@ -2306,11 +2306,11 @@ def open_builder_discard_changes_frame():
     labels['discard_changes_label'] = Label(
         root=frames['builder_discard_changes_frame'].frame,
         grid_pos=(0, 0),
-        padding=(0, 0),
+        padding=(0, 80),
         columnspan=2,
-        sticky='nesw',
+        sticky='s',
         text='DISCARD CHANGES?',
-        font=('Arial', int(font_scale * 30), 'bold'),
+        font=('Arial', int(font_scale * 50), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
         visibility=True,
@@ -2318,14 +2318,14 @@ def open_builder_discard_changes_frame():
 
     buttons['yes_discard_changes_button'] = Button(
         root=frames['builder_discard_changes_frame'].frame,
-        width=4,
-        height=1,
+        width=15,
+        height=3,
         grid_pos=(1, 0),
-        padding=(0, 0),
-        sticky='n',
+        padding=(50, 0),
+        sticky='ne',
         command=builder_change_to_start_or_main,
         text='YES',
-        font=('Arial', int(font_scale * base_font)),
+        font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#000000',
         background_color='#FF0000',
         border_width=0,
@@ -2334,22 +2334,22 @@ def open_builder_discard_changes_frame():
 
     buttons['no_discard_changes_button'] = Button(
         root=frames['builder_discard_changes_frame'].frame,
-        width=4,
-        height=1,
+        width=15,
+        height=3,
         grid_pos=(1, 1),
-        padding=(0, 0),
-        sticky='n',
+        padding=(50, 0),
+        sticky='nw',
         command=frames['builder_discard_changes_frame'].destroy_frame,
         text='NO',
-        font=('Arial', int(font_scale * base_font)),
+        font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
         visibility=True,
     )
 
-    frames['builder_discard_changes_frame'].frame.rowconfigure(0, weight=2)
-    frames['builder_discard_changes_frame'].frame.rowconfigure(1, weight=1)
+    frames['builder_discard_changes_frame'].frame.rowconfigure(0, weight=1)
+    frames['builder_discard_changes_frame'].frame.rowconfigure(1, weight=2)
     frames['builder_discard_changes_frame'].frame.columnconfigure((0, 1), weight=1)
     frames['builder_discard_changes_frame'].frame.grid_propagate(False)
 
@@ -4005,11 +4005,11 @@ def open_reset_frame(parent_frame):
     labels['reset_label'] = Label(
         root=frames['reset_frame'].frame,
         grid_pos=(0, 0),
-        padding=(0, 0),
+        padding=(0, 60),
         columnspan=2,
-        sticky='nesw',
+        sticky='s',
         text='RESET GRID?',
-        font=('Arial', int(font_scale * 30), 'bold'),
+        font=('Arial', int(font_scale * 40), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
         visibility=True,
@@ -4017,14 +4017,14 @@ def open_reset_frame(parent_frame):
 
     buttons['yes_reset_button'] = Button(
         root=frames['reset_frame'].frame,
-        width=4,
-        height=1,
+        width=12,
+        height=2,
         grid_pos=(1, 0),
-        padding=(0, 0),
-        sticky='n',
+        padding=(40, 0),
+        sticky='ne',
         command=reset_builder_grid,
         text='YES',
-        font=('Arial', int(font_scale * base_font)),
+        font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#000000',
         background_color='#FF0000',
         border_width=0,
@@ -4033,14 +4033,14 @@ def open_reset_frame(parent_frame):
 
     buttons['no_reset_button'] = Button(
         root=frames['reset_frame'].frame,
-        width=4,
-        height=1,
+        width=12,
+        height=2,
         grid_pos=(1, 1),
-        padding=(0, 0),
-        sticky='n',
+        padding=(40, 0),
+        sticky='nw',
         command=frames['reset_frame'].destroy_frame,
         text='NO',
-        font=('Arial', int(font_scale * base_font)),
+        font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#000000',
         background_color='#777777',
         border_width=0,
@@ -4048,7 +4048,7 @@ def open_reset_frame(parent_frame):
     )
 
     frames['reset_frame'].frame.rowconfigure(0, weight=2)
-    frames['reset_frame'].frame.rowconfigure(1, weight=1)
+    frames['reset_frame'].frame.rowconfigure(1, weight=3)
     frames['reset_frame'].frame.columnconfigure((0, 1), weight=1)
     frames['reset_frame'].frame.grid_propagate(False)
 

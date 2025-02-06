@@ -1,6 +1,6 @@
 import pandas as pd
 import winsound
-from code import actions
+from code import clingo_actions
 pd.set_option('display.max_rows', None)  # Anzeige aller DF-Zeilen
 
 def position_df(tracks, trains, clingo_path, lp_files, answer_number):
@@ -10,7 +10,7 @@ def position_df(tracks, trains, clingo_path, lp_files, answer_number):
     Returns:
         [pd.DataFrame] IDs, Positions, Directions, Timesteps
     """
-    df_actions = actions.clingo_to_df(clingo_path, lp_files, answer_number)
+    df_actions = clingo_actions.clingo_to_df(clingo_path, lp_files, answer_number)
     if type(df_actions) == int: return df_actions  # Error Handling
     df_pos = build_df_pos(df_actions, trains, tracks)
     print("Valdidating actions...")
