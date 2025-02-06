@@ -1195,8 +1195,8 @@ def open_exit_confirmation_frame(event=None):
         visibility=True,
     )
 
-    frames['exit_confirmation_frame'].frame.rowconfigure(0, weight=1)
-    frames['exit_confirmation_frame'].frame.rowconfigure(1, weight=2)
+    frames['exit_confirmation_frame'].frame.rowconfigure(0, weight=2)
+    frames['exit_confirmation_frame'].frame.rowconfigure(1, weight=3)
     frames['exit_confirmation_frame'].frame.columnconfigure((0, 1), weight=1)
     frames['exit_confirmation_frame'].frame.grid_propagate(False)
 
@@ -2348,8 +2348,8 @@ def open_builder_discard_changes_frame():
         visibility=True,
     )
 
-    frames['builder_discard_changes_frame'].frame.rowconfigure(0, weight=1)
-    frames['builder_discard_changes_frame'].frame.rowconfigure(1, weight=2)
+    frames['builder_discard_changes_frame'].frame.rowconfigure(0, weight=2)
+    frames['builder_discard_changes_frame'].frame.rowconfigure(1, weight=3)
     frames['builder_discard_changes_frame'].frame.columnconfigure((0, 1), weight=1)
     frames['builder_discard_changes_frame'].frame.grid_propagate(False)
 
