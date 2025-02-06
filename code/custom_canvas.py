@@ -1344,12 +1344,11 @@ class PathListCanvas:
             )
             label.pack(side='left', padx=0)
 
-            self.show_button_dict[idx] = tk.Button(
+            self.show_button_dict[idx] = ToggleSwitch(
                 frame,
-                width=7,height=1,
-                font=('Arial', int(self.font_scale * self.base_font)),
-                fg='#000000', bg='#008800',
-                text='show',
+                width=60, height=25,
+                on_color='#A1DD70', off_color='#C96868',
+                handle_color='#FFFFFF', background_color='#000000',
                 command=lambda index=idx: self.toggle_path(index)
             )
             self.show_button_dict[idx].pack(side='left', padx=10)
@@ -1373,15 +1372,17 @@ class PathListCanvas:
         if len(self.show_list) == 0:
             return
 
+        self.current_all = all(self.show_list)
+
         if self.current_all:
             for i in self.show_button_dict:
                 self.show_list = [False] * len(self.show_list)
-                self.show_button_dict[i].config(bg='#008800', text='show')
+                self.show_button_dict[i].set_state(False)
             self.current_all = False
         else:
             for i in self.show_button_dict:
                 self.show_list = [True] * len(self.show_list)
-                self.show_button_dict[i].config(bg='#880000', text='hide')
+                self.show_button_dict[i].set_state(True)
             self.current_all = True
 
         self.grid.show_list = self.show_list
@@ -1389,10 +1390,8 @@ class PathListCanvas:
 
     def toggle_path(self, index):
         if self.show_list[index]:
-            self.show_button_dict[index].config(bg='#008800', text='show')
             self.show_list[index] = False
         else:
-            self.show_button_dict[index].config(bg='#880000', text='hide')
             self.show_list[index] = True
 
         self.grid.show_list = self.show_list
