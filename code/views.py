@@ -69,11 +69,11 @@ user_params = {
 err_dict = {
     'rows': {
         ValueError: 'needs int > 0',
-        'tooFewRows': 'needs at least 12 rows'
+        'tooFewRows': 'needs at least 10 rows'
     },
     'cols': {
         ValueError: 'needs int > 0',
-        'tooFewCols': 'needs at least 12 cols'
+        'tooFewCols': 'needs at least 10 cols'
     },
     'agents': {
         ValueError: 'needs int > 0',
@@ -2144,9 +2144,14 @@ def save_random_gen_env_params():
                 labels[f'{key}_error_label'].place_label()
 
         # input constraints
-        if key=='cities' and data < 2:
+        if key=='rows' and data < 10:
             err_count += 1
-            err = 'tooFewCities'
+            err = 'tooFewRows'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        elif key=='cols' and data < 10:
+            err_count += 1
+            err = 'tooFewCols'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
         elif key=='agents' and data < 1:
@@ -2154,19 +2159,14 @@ def save_random_gen_env_params():
             err = 'tooFewAgents'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
+        elif key=='cities' and data < 2:
+            err_count += 1
+            err = 'tooFewCities'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
         elif key=='seed' and data >= 2**32:
             err_count += 1
             err = 'tooBigSeed'
-            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
-            labels[f'{key}_error_label'].place_label()
-        elif key=='row' and data < 12:
-            err_count += 1
-            err = 'tooFewRows'
-            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
-            labels[f'{key}_error_label'].place_label()
-        elif key=='cols' and data < 12:
-            err_count += 1
-            err = 'tooFewCols'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
 
