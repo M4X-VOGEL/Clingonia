@@ -2796,7 +2796,7 @@ def toggle_builder_para_help():
         build_builder_para_help_frame()
 
 def builder_para_to_track_grid():
-    global current_array, current_df
+    global current_array, current_df, current_backup_array, current_backup_df
 
     if save_builder_env_params() == -1:
         return
@@ -2866,6 +2866,9 @@ def builder_para_to_track_grid():
                     if (row['end_pos'][0] > rows - 1 or
                             row['end_pos'][1] > cols - 1):
                         current_df.at[index, 'end_pos'] = (-1, -1)
+
+    current_backup_array = current_array.copy()
+    current_backup_df = current_df.copy()
 
     build_track_builder_menu_frame()
     build_builder_grid_frame()
