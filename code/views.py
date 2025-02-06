@@ -141,7 +141,7 @@ def build_flatland_window():
         background_color='#000000',
         title='Flatland'
     )
-    windows['flatland_window'].window.bind('<Escape>', exit_gui)
+    windows['flatland_window'].window.bind('<Escape>', open_exit_confirmation_frame)
 
     screenwidth = windows['flatland_window'].window.winfo_screenwidth()
     screenheight = windows['flatland_window'].window.winfo_screenheight()
@@ -245,7 +245,7 @@ def build_start_menu_frame():
         grid_pos=(0, 2),
         padding=(0, 0),
         sticky='ne',
-        command=exit_gui,
+        command=open_exit_confirmation_frame,
         text='X',
         font=('Arial', 25, 'bold'),
         foreground_color='#FF0000',
@@ -464,7 +464,7 @@ def build_main_menu():
         grid_pos=(0, 2),
         padding=(0, 0),
         sticky='ne',
-        command=exit_gui,
+        command=open_exit_confirmation_frame,
         text='X',
         font=('Arial', 25, 'bold'),
         foreground_color='#FF0000',
@@ -1122,6 +1122,91 @@ def load_clingo_params():
     if user_params['lpFiles'] is not None:
         displaytext = "\n".join(user_params["lpFiles"])
         labels['clingo_paths_label'].label.config(text=displaytext)
+
+
+
+
+
+# exit confirmation
+
+def open_exit_confirmation_frame(event=None):
+    if 'exit_confirmation_frame' in frames:
+        return
+
+    frames['exit_confirmation_frame'] = Frame(
+        root=windows['flatland_window'].window,
+        width=screenwidth,
+        height=screenheight,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        columnspan=2,
+        sticky='nesw',
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    labels['exit_label'] = Label(
+        root=frames['exit_confirmation_frame'].frame,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        columnspan=2,
+        sticky='nesw',
+        text='EXIT FLATLAND?',
+        font=('Arial', int(font_scale * 30), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    buttons['yes_exit_button'] = Button(
+        root=frames['exit_confirmation_frame'].frame,
+        width=4,
+        height=1,
+        grid_pos=(1, 0),
+        padding=(0, 0),
+        sticky='n',
+        command=exit_gui,
+        text='YES',
+        font=('Arial', int(font_scale * base_font)),
+        foreground_color='#000000',
+        background_color='#FF0000',
+        border_width=0,
+        visibility=True,
+    )
+
+    buttons['no_exit_button'] = Button(
+        root=frames['exit_confirmation_frame'].frame,
+        width=4,
+        height=1,
+        grid_pos=(1, 1),
+        padding=(0, 0),
+        sticky='n',
+        command=close_exit_confirmation_frame,
+        text='NO',
+        font=('Arial', int(font_scale * base_font)),
+        foreground_color='#000000',
+        background_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    frames['exit_confirmation_frame'].frame.rowconfigure(0, weight=2)
+    frames['exit_confirmation_frame'].frame.rowconfigure(1, weight=1)
+    frames['exit_confirmation_frame'].frame.columnconfigure((0, 1), weight=1)
+    frames['exit_confirmation_frame'].frame.grid_propagate(False)
+
+def exit_gui():
+    save_user_data_to_file()
+    delete_tmp_lp()
+    delete_tmp_png()
+
+    windows['flatland_window'].close_window()
+
+def close_exit_confirmation_frame():
+    if 'exit_confirmation_frame' in frames:
+        frames['exit_confirmation_frame'].destroy_frame()
+        del frames['exit_confirmation_frame']
 
 
 
@@ -4405,10 +4490,3 @@ def run_simulation():
 
     delete_tmp_lp()
     return 0
-
-def exit_gui(event=None):
-    save_user_data_to_file()
-    delete_tmp_lp()
-    delete_tmp_png()
-
-    windows['flatland_window'].close_window()
