@@ -1336,22 +1336,24 @@ class PathListCanvas:
             frame = tk.Frame(self.scroll_frame, bg='#000000')
             frame.pack(fill='x', pady=5)
 
+            self.show_button_dict[idx] = ToggleSwitch(
+                frame,
+                width=70, height=30,
+                on_color='#00FF00', off_color='#FF0000',
+                handle_color='#FFFFFF', background_color='#000000',
+                command=lambda index=idx: self.toggle_path(index)
+            )
+            self.show_button_dict[idx].pack(side='left', padx=0)
+
             label = tk.Label(
                 frame,
                 width=20, font=('Arial', int(self.font_scale * self.base_font)),
                 fg='#FFFFFF', bg='#000000',
                 text=f'Train {idx}: {row["start_pos"]}, {row["dir"]}',
+                anchor='w',
             )
-            label.pack(side='left', padx=0)
+            label.pack(side='left', padx=10)
 
-            self.show_button_dict[idx] = ToggleSwitch(
-                frame,
-                width=60, height=25,
-                on_color='#A1DD70', off_color='#C96868',
-                handle_color='#FFFFFF', background_color='#000000',
-                command=lambda index=idx: self.toggle_path(index)
-            )
-            self.show_button_dict[idx].pack(side='left', padx=10)
 
     def on_frame_configure(self, event):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
