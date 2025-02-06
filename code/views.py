@@ -38,7 +38,7 @@ default_params = {
     'intercity': 2,
     'incity': 2,
     'remove': True,
-    'speed': {1 : 1},
+    'speed': {1.0 : 1.0},
     'malfunction': (0, 30),
     'min': 2,
     'max': 6,
@@ -85,8 +85,9 @@ err_dict = {
         'tooFewCities': 'needs at least 2 cities'
     },
     'seed': {
-        ValueError: 'needs int > 0',
-        'tooBigSeed': 'seed is too big'
+        ValueError: 'needs int >= 0',
+        'tooBigSeed': 'seed is too big',
+        'negativeValue': 'needs Seed >= 0',
     },
     'grid': {ValueError: 'needs true or false'},
     'intercity': {
@@ -99,15 +100,26 @@ err_dict = {
     },
     'remove': {ValueError: 'needs true or false'},
     'speed': {
-        ValueError: 'needs dictionary: {float : float, ...}, 0 <= float <= 1',
-        SyntaxError: 'needs dictionary: {float : float, ...}, 0 <= float <= 1'
+        ValueError: 'needs dictionary: float: float,... , 0 <= float <= 1',
+        SyntaxError: 'needs dictionary: float: float,... , 0 <= float <= 1',
+        'negativeValue': 'needs dictionary float: float,... , 0 <= float <= 1',
+        'tooBigSpeed': 'needs dictionary float: float,... , 0 <= float <= 1',
     },
     'malfunction': {
-        ValueError: 'needs fraction: int / int',
-        IndexError: 'needs fraction: int / int'
+        ValueError: 'needs fraction: int / int, 0 <= fraction <= 1',
+        IndexError: 'INDEXneeds fraction: int / int, 0 <= fraction <= 1',
+        'divByZero': 'divisor cannot be 0',
+        'negativeValue': 'needs fraction: int / int, 0 <= fraction <= 1',
+        'tooBigMalfunction': 'needs fraction: int / int, 0 <= fraction <= 1',
     },
-    'min': {ValueError: 'needs int > 0'},
-    'max': {ValueError: 'needs int > 0'},
+    'min': {
+        ValueError: 'needs int > 0',
+        'negativeValue': 'needs int > 0',
+    },
+    'max': {
+        ValueError: 'needs int > 0',
+        'negativeValue': 'needs int > 0',
+    },
     'answer': {ValueError: 'needs int > 0'},
     'clingo': {},
     'lpFiles': {},
@@ -1652,7 +1664,7 @@ def build_random_gen_para_frame():
         grid_pos=(10, 3),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {default_params["speed"]}',
+        text=f'e.g. {str(default_params["speed"]).strip("{}")}',
         font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -1966,16 +1978,6 @@ def random_gen_para_to_env():
     build_random_gen_env_viewer()
     build_random_gen_env_menu()
 
-def random_gen_env_to_para():
-    if 'random_gen_env_viewer_frame' in frames:
-        frames['random_gen_env_viewer_frame'].destroy_frame()
-        del frames['random_gen_env_viewer_frame']
-    if 'random_gen_env_menu_frame' in frames:
-        frames['random_gen_env_menu_frame'].destroy_frame()
-        del frames['random_gen_env_menu_frame']
-
-    build_random_gen_para_frame()
-
 def build_random_gen_env_viewer():
     frames['random_gen_env_viewer_frame'] = Frame(
         root=windows['flatland_window'].window,
@@ -2015,27 +2017,11 @@ def build_random_gen_env_menu():
         visibility=True
     )
 
-    buttons['back_button'] = Button(
-        root=frames['random_gen_env_menu_frame'].frame,
-        width=2,
-        height=1,
-        grid_pos=(0, 0),
-        padding=(0, 0),
-        sticky='nw',
-        command=random_gen_env_to_para,
-        text='<',
-        font=('Arial', 25, 'bold'),
-        foreground_color='#FF0000',
-        background_color='#000000',
-        border_width=0,
-        visibility=True,
-    )
-
     buttons['return_to_menu_button'] = Button(
         root=frames['random_gen_env_menu_frame'].frame,
         width=20,
         height=1,
-        grid_pos=(2, 0),
+        grid_pos=(1, 0),
         padding=(0, 0),
         sticky='n',
         command=switch_random_gen_to_main,
@@ -2055,7 +2041,7 @@ def build_random_gen_env_menu():
         root=frames['random_gen_env_menu_frame'].frame,
         width=frames['random_gen_env_menu_frame'].width,
         height=frames['random_gen_env_menu_frame'].height * 0.75,
-        grid_pos=(1, 0),
+        grid_pos=(0, 0),
         padding=(0, 0),
         sticky='nesw',
         text=displaytext,
@@ -2068,8 +2054,8 @@ def build_random_gen_env_menu():
         visibility=True,
     )
 
-    frames['random_gen_env_menu_frame'].frame.rowconfigure((0, 2), weight=1)
-    frames['random_gen_env_menu_frame'].frame.rowconfigure(1, weight=15)
+    frames['random_gen_env_menu_frame'].frame.rowconfigure(0, weight=15)
+    frames['random_gen_env_menu_frame'].frame.rowconfigure(1, weight=1)
     frames['random_gen_env_menu_frame'].frame.columnconfigure(0, weight=1)
     frames['random_gen_env_menu_frame'].frame.grid_propagate(False)
 
@@ -2140,6 +2126,7 @@ def save_random_gen_env_params():
             elif key == 'grid' or key == 'remove':
                 data = str_to_bool(data)
             elif key == 'speed':
+                data = '{' + data + '}'
                 data = ast.literal_eval(data)
             elif key == 'malfunction':
                 data = (int(data.split('/')[0]),int(data.split('/')[1]))
@@ -2150,13 +2137,15 @@ def save_random_gen_env_params():
         except Exception as e:
             err = type(e)
             err_count += 1
-            if err not in err_dict[key]:
+            if err in err_dict[key]:
+                labels[f'{key}_error_label'].label.config(
+                    text=err_dict[key][err])
+                labels[f'{key}_error_label'].place_label()
+            else:
                 print(e)
                 print(err)
                 print(data)
-            else:
-                labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
-                labels[f'{key}_error_label'].place_label()
+            continue
 
         # input constraints
         if key=='rows' and data < 10:
@@ -2184,6 +2173,11 @@ def save_random_gen_env_params():
             err = 'tooBigSeed'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
+        elif key=='seed' and data < 0:
+            err_count += 1
+            err = 'negativeValue'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
         elif key=='intercity' and data < 1:
             err_count += 1
             err = 'tooFewRails'
@@ -2194,6 +2188,47 @@ def save_random_gen_env_params():
             err = 'tooFewRails'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
+        elif key=='malfunction' and data[1] == 0:
+            err_count += 1
+            err = 'divByZero'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        elif key=='malfunction' and data[0]/data[1] < 0:
+            err_count += 1
+            err = 'negativeValue'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        elif key=='malfunction' and data[0]/data[1] > 1:
+            err_count += 1
+            err = 'tooBigMalfunction'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        elif key=='min' and data <= 0:
+            err_count += 1
+            err = 'negativeValue'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        elif key=='max' and data <= 0:
+            err_count += 1
+            err = 'negativeValue'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+
+
+        if key=='speed':
+            for k, v in data.items():
+                if k < 0 or v < 0:
+                    err_count += 1
+                    err = 'negativeValue'
+                    labels[f'{key}_error_label'].label.config(
+                        text=err_dict[key][err])
+                    labels[f'{key}_error_label'].place_label()
+                if k > 1 or v > 1:
+                    err_count += 1
+                    err = 'tooBigSpeed'
+                    labels[f'{key}_error_label'].label.config(
+                        text=err_dict[key][err])
+                    labels[f'{key}_error_label'].place_label()
 
         if type(data) is not str:
             user_params[key] = data
@@ -2212,6 +2247,11 @@ def load_random_gen_env_params():
             continue
         elif user_params[key] is None:
             continue
+        elif key == 'speed':
+            string = ''
+            for k, v in user_params['speed'].items():
+                string = string + f'{k}: {v}, '
+            entry_fields[field].insert_string(string[:-2])
         elif key == 'malfunction':
             entry_fields[field].insert_string(
                 f'{user_params["malfunction"][0]}/'
@@ -2511,7 +2551,7 @@ def build_builder_para_frame():
         grid_pos=(4, 3),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {default_params["speed"]}',
+        text=f'e.g. {str(default_params["speed"]).strip("{}")}',
         font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#222222',
@@ -3834,6 +3874,7 @@ def save_builder_env_params():
             elif key == 'grid' or key == 'remove':
                 data = str_to_bool(data)
             elif key == 'speed':
+                data = '{' + data + '}'
                 data = ast.literal_eval(data)
             elif key == 'malfunction':
                 data = (int(data.split('/')[0]),int(data.split('/')[1]))
@@ -3843,13 +3884,58 @@ def save_builder_env_params():
             labels[f'{key}_error_label'].hide_label()
         except Exception as e:
             err = type(e)
-            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
-            labels[f'{key}_error_label'].place_label()
-            if err not in err_dict[key]:
+            err_count += 1
+            if err in err_dict[key]:
+                labels[f'{key}_error_label'].label.config(
+                    text=err_dict[key][err])
+                labels[f'{key}_error_label'].place_label()
+            else:
                 print(e)
                 print(err)
                 print(data)
+            continue
+
+        # input constraints
+        if key=='malfunction' and data[1] == 0:
             err_count += 1
+            err = 'divByZero'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        elif key=='malfunction' and data[0]/data[1] < 0:
+            err_count += 1
+            err = 'negativeValue'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        elif key=='malfunction' and data[0]/data[1] > 1:
+            err_count += 1
+            err = 'tooBigMalfunction'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        elif key=='min' and data <= 0:
+            err_count += 1
+            err = 'negativeValue'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        elif key=='max' and data <= 0:
+            err_count += 1
+            err = 'negativeValue'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+
+        if key=='speed':
+            for k, v in data.items():
+                if k < 0 or v < 0:
+                    err_count += 1
+                    err = 'negativeValue'
+                    labels[f'{key}_error_label'].label.config(
+                        text=err_dict[key][err])
+                    labels[f'{key}_error_label'].place_label()
+                if k > 1 or v > 1:
+                    err_count += 1
+                    err = 'tooBigSpeed'
+                    labels[f'{key}_error_label'].label.config(
+                        text=err_dict[key][err])
+                    labels[f'{key}_error_label'].place_label()
 
         if type(data) is not str:
             user_params[key] = data
@@ -3869,6 +3955,11 @@ def load_builder_env_params():
             continue
         elif user_params[key] is None:
             continue
+        elif key == 'speed':
+            string = ''
+            for k, v in user_params['speed'].items():
+                string = string + f'{k}: {v}, '
+            entry_fields[field].insert_string(string[:-2])
         elif key == 'malfunction':
             entry_fields[field].insert_string(
                 f'{user_params["malfunction"][0]}/'
@@ -4407,7 +4498,7 @@ def load_env_from_file():
 
     file = filedialog.askopenfilename(
         title="Select LP Environment File",
-        initialdir='environments',
+        initialdir='env',
         defaultextension=".lp",
         filetypes=[("Clingo Files", "*.lp"), ("All Files", "*.*")],
     )
@@ -4496,7 +4587,7 @@ def load_env_from_file():
 def save_env_to_file():
     file = filedialog.asksaveasfilename(
         title="Select LP Environment File",
-        initialdir='environments',
+        initialdir='env',
         defaultextension=".lp",
         filetypes=[("Clingo Files", "*.lp"), ("All Files", "*.*")],
     )
