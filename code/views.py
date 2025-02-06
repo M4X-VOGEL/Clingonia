@@ -104,10 +104,11 @@ err_dict = {
         SyntaxError: 'needs dictionary: float: float,... , 0 <= float <= 1',
         'negativeValue': 'needs dictionary float: float,... , 0 <= float <= 1',
         'tooBigSpeed': 'needs dictionary float: float,... , 0 <= float <= 1',
+        'notFloat': 'needs dictionary float: float,... , 0 <= float <= 1',
     },
     'malfunction': {
         ValueError: 'needs fraction: int / int, 0 <= fraction <= 1',
-        IndexError: 'INDEXneeds fraction: int / int, 0 <= fraction <= 1',
+        IndexError: 'needs fraction: int / int, 0 <= fraction <= 1',
         'divByZero': 'divisor cannot be 0',
         'negativeValue': 'needs fraction: int / int, 0 <= fraction <= 1',
         'tooBigMalfunction': 'needs fraction: int / int, 0 <= fraction <= 1',
@@ -2101,9 +2102,9 @@ def save_random_gen_env_params():
     def str_to_bool(s):
         if isinstance(s, str):
             s = s.lower()
-            if s == "true":
+            if s == "true" or s == 'tru' or s == 'yes' or s == 'y':
                 return True
-            elif s == "false":
+            elif s == "false" or s == 'no' or s == 'n':
                 return False
         raise ValueError(f"Invalid boolean string: {s}")
 
@@ -2126,9 +2127,13 @@ def save_random_gen_env_params():
             elif key == 'grid' or key == 'remove':
                 data = str_to_bool(data)
             elif key == 'speed':
+                if ":" not in data:
+                    raise ValueError
                 data = '{' + data + '}'
                 data = ast.literal_eval(data)
             elif key == 'malfunction':
+                if data.count("/") > 1:
+                    raise ValueError
                 data = (int(data.split('/')[0]),int(data.split('/')[1]))
             else:
                 data = int(data)
@@ -2217,6 +2222,12 @@ def save_random_gen_env_params():
 
         if key=='speed':
             for k, v in data.items():
+                if not isinstance(k, float) or not isinstance(v, float):
+                    err_count += 1
+                    err = 'notFloat'
+                    labels[f'{key}_error_label'].label.config(
+                        text=err_dict[key][err])
+                    labels[f'{key}_error_label'].place_label()
                 if k < 0 or v < 0:
                     err_count += 1
                     err = 'negativeValue'
@@ -3848,9 +3859,9 @@ def save_builder_env_params():
     def str_to_bool(s):
         if isinstance(s, str):
             s = s.lower()
-            if s == "true":
+            if s == "true" or s == 'tru' or s == 'yes' or s == 'y':
                 return True
-            elif s == "false":
+            elif s == "false" or s == 'no' or s == 'n':
                 return False
         raise ValueError(f"Invalid boolean string: {s}")
 
@@ -3874,9 +3885,13 @@ def save_builder_env_params():
             elif key == 'grid' or key == 'remove':
                 data = str_to_bool(data)
             elif key == 'speed':
+                if ":" not in data:
+                    raise ValueError
                 data = '{' + data + '}'
                 data = ast.literal_eval(data)
             elif key == 'malfunction':
+                if data.count("/") > 1:
+                    raise ValueError
                 data = (int(data.split('/')[0]),int(data.split('/')[1]))
             else:
                 data = int(data)
@@ -3924,6 +3939,12 @@ def save_builder_env_params():
 
         if key=='speed':
             for k, v in data.items():
+                if not isinstance(k, float) or not isinstance(v, float):
+                    err_count += 1
+                    err = 'notFloat'
+                    labels[f'{key}_error_label'].label.config(
+                        text=err_dict[key][err])
+                    labels[f'{key}_error_label'].place_label()
                 if k < 0 or v < 0:
                     err_count += 1
                     err = 'negativeValue'
@@ -4476,7 +4497,7 @@ def save_user_data_to_file():
         json.dump(user_params, file, indent=4)
 
 def load_user_data_from_file():
-    global user_params
+    global user_params, user_params_backup
 
     with open('data/user_params.json', 'r') as file:
         data = json.load(file)
@@ -4487,6 +4508,7 @@ def load_user_data_from_file():
         data['malfunction'] = (data['malfunction'][0], data['malfunction'][1])
 
     user_params = data
+    user_params_backup = data
 
     # use default if no user parameters given
     for key in user_params:
