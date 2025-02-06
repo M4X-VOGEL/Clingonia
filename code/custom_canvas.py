@@ -39,8 +39,8 @@ class EnvCanvas:
         self.rows = rows
         self.cols = cols
         self.pan_start = (0, 0)
-        self.x_offset = 50
-        self.y_offset = 50
+        self.x_offset = 0
+        self.y_offset = 0
         self.cell_size = 50
         self.scale = 1.0
         self.text_label = None
@@ -51,7 +51,7 @@ class EnvCanvas:
         self.canvas.bind("<Leave>", self.remove_mouse_symbols)
         self.canvas.bind("<Motion>", self.draw_mouse_symbols)
 
-        self.draw_image()
+        self.root.after(10, self.draw_image)
 
     def create_canvas(self):
         canvas = tk.Canvas(
@@ -145,6 +145,9 @@ class EnvCanvas:
         )
 
         if self.canvas_image is None:
+            self.x_offset = (self.canvas.winfo_width() - width) // 2
+            self.y_offset = (self.canvas.winfo_height() - height) // 2
+
             self.canvas_image = self.canvas.create_image(
                 self.x_offset,
                 self.y_offset,
@@ -278,7 +281,7 @@ class BuildCanvas:
             'w': 4,
         }
 
-        self.draw_images()
+        self.root.after(10, self.calculate_initial_pos)
 
 
 
@@ -615,6 +618,26 @@ class BuildCanvas:
 
                 self.train_data.drop(columns=['count'], inplace=True)
                 self.train_data.drop(columns=['cell_offset'], inplace=True)
+
+    def calculate_initial_pos(self):
+        if max(self.rows, self.cols) > 30:
+            self.x_offset = 0
+            self.y_offset = 0
+            self.draw_images()
+        elif self.rows > self.cols:
+            self.cell_size = self.canvas.winfo_height() / self.rows
+            width = self.cell_size * self.cols
+            height = self.cell_size * self.rows
+            self.x_offset = (self.canvas.winfo_width() - width) // 2
+            self.y_offset = (self.canvas.winfo_height() - height) // 2
+            self.draw_images()
+        else:
+            self.cell_size = self.canvas.winfo_width() / self.cols
+            width = self.cell_size * self.cols
+            height = self.cell_size * self.rows
+            self.x_offset = (self.canvas.winfo_width() - width) // 2
+            self.y_offset = (self.canvas.winfo_height() - height) // 2
+            self.draw_images()
 
 
 class TrainListCanvas:
@@ -1010,8 +1033,8 @@ class ResultCanvas:
         self.rows = rows
         self.cols = cols
         self.pan_start = (0, 0)
-        self.x_offset = 50
-        self.y_offset = 50
+        self.x_offset = 0
+        self.y_offset = 0
         self.cell_size = 50
         self.scale = 1.0
         self.text_label = None
@@ -1022,7 +1045,7 @@ class ResultCanvas:
         self.canvas.bind("<Leave>", self.remove_mouse_symbols)
         self.canvas.bind("<Motion>", self.draw_mouse_symbols)
 
-        self.draw_image()
+        self.root.after(10, self.draw_image)
 
         self.paths_df = paths_df
         self.show_df = pd.DataFrame(
@@ -1124,6 +1147,9 @@ class ResultCanvas:
         )
 
         if self.canvas_image is None:
+            self.x_offset = (self.canvas.winfo_width() - width) // 2
+            self.y_offset = (self.canvas.winfo_height() - height) // 2
+
             self.canvas_image = self.canvas.create_image(
                 self.x_offset,
                 self.y_offset,
