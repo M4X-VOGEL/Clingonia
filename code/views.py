@@ -125,13 +125,19 @@ err_dict = {
     'clingo': {},
     'lpFiles': {},
 }
+loading_err_dict = {
+    -1: 'No environment .lp file found',
+    -2: 'A cell predicate is faulty',
+    -3: 'A train predicate is faulty',
+    -4: 'A start predicate is faulty',
+    -5: 'A end predicate is faulty',
+}
 clingo_err_dict = {
-    -1: ('#FF0000', 'No .lp files given'),
-    -2: ('#FF0000', 'Invalid clingo path'),
-    -3: ('#FF0000', 'Clingo returned an error'),
-    -4: ('#FF0000', 'Clingo returns UNSATISFIABLE'),
-    -5: ('#FF0000', f'Clingo did not provide the requested Answer: '
-                    f'{user_params["answer"]}'),
+    -1: 'No .lp files given',
+    -2: 'Invalid clingo path',
+    -3: 'Clingo returned an error',
+    -4: 'Clingo returns UNSATISFIABLE',
+    -5: f'Clingo did not provide the requested Answer: {user_params["answer"]}',
 }
 
 
@@ -1030,8 +1036,8 @@ def switch_clingo_para_to_result():
 
     if sim_result:
         labels['clingo_status_label'].label.config(
-            fg=clingo_err_dict[sim_result][0],
-            text=clingo_err_dict[sim_result][1]
+            text=clingo_err_dict[sim_result],
+            fg='#FF0000',
         )
         frames['clingo_para_frame'].frame.update()
         return
@@ -4545,6 +4551,22 @@ def load_env_from_file():
         frames['main_menu_frame'].frame.update()
 
     tracks, trains = lp_to_env(file)
+
+    if isinstance(tracks, int) or isinstance(trains, int):
+        key = tracks if isinstance(tracks, int) else trains
+        if last_menu == 'start':
+            labels['start_load_status_label'].label.config(
+                text=loading_err_dict[key],
+                fg='#FF0000',
+            )
+            frames['start_menu_frame'].frame.update()
+        else:
+            labels['main_load_status_label'].label.config(
+                text=loading_err_dict[key],
+                fg='#FF0000',
+            )
+            frames['main_menu_frame'].frame.update()
+        return
 
     start_pos = list(zip(trains['y'], trains['x']))
     end_pos = list(zip(trains['y_end'], trains['x_end']))
