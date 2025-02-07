@@ -73,7 +73,6 @@ def create_custom_env(tracks, trains, params):
     Returns:
         [RailEnv]: Environment.
     """
-    print("\nBuilding environment...")
     # Custom map
     grid_map = GridTransitionMap(params['rows'], params['cols'])
     grid_map.grid = np.array(tracks, dtype=np.uint16)
@@ -184,7 +183,7 @@ def initial_render_test():
     return 0
 
 
-def save_png(env, path="data/running_tmp.png", res_input = 0):
+def save_png(env, path="data/running_tmp.png", low_quality_mode=False):
     """Renders and saves the PNG-image.
     
     Args:
@@ -197,7 +196,7 @@ def save_png(env, path="data/running_tmp.png", res_input = 0):
     print("Rendering image...")
     # Render image
     try:
-        screen_res = calc_resolution(res_input, env)
+        screen_res = calc_resolution(low_quality_mode, env)
         renderer = RenderTool(env, gl="PILSVG", screen_height=screen_res, screen_width=screen_res)
         renderer.reset()
         renderer.render_env(

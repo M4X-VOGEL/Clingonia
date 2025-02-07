@@ -6,10 +6,11 @@ from tkinter import filedialog
 
 from code.build_png import create_custom_env, initial_render_test, save_png
 from code.custom_canvas import *
-from code.env import save_env, delete_tmp_lp, delete_tmp_png
+from code.env import save_env, delete_tmp_lp, delete_tmp_png, delete_tmp_gif, delete_tmp_frames
 from code.gen_png import gen_env
 from code.lp_to_env import lp_to_env
 from code.positions import position_df
+from code.build_gif import build_gif
 
 
 # Base style parameters
@@ -554,7 +555,7 @@ def build_main_menu():
         padding=(0, 0),
         sticky='n',
         command=switch_main_to_modify,
-        text='Modify Existing Environment',
+        text='Modify Environment',
         font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#000000',
         background_color='#777777',
@@ -570,7 +571,7 @@ def build_main_menu():
         padding=(0, 0),
         sticky='n',
         command=save_env_to_file,
-        text='Save Custom Environment',
+        text='Save Environment',
         font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#000000',
         background_color='#777777',
@@ -580,13 +581,13 @@ def build_main_menu():
 
     labels['saveImage_label'] = Label(
         root=frames['main_menu_frame'].frame,
-        grid_pos=(5, 1),
-        padding=(12, 0),
-        sticky='nw',
-        text='Save Image:',
-        font=('Arial', int(font_scale * base_font), 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000',
+        grid_pos=(4, 1),
+        padding=(52, 12, 0, 0),
+        sticky='ne',
+        text='Image',
+        font=('Arial', int(font_scale * base_font), 'normal'),
+        foreground_color='#000000',
+        background_color='#777777',
         visibility=True,
     )
 
@@ -594,21 +595,21 @@ def build_main_menu():
         root=frames['main_menu_frame'].frame,
         width=70, height=30,
         on_color='#00FF00', off_color='#FF0000',
-        handle_color='#FFFFFF', background_color='#000000',
+        handle_color='#FFFFFF', background_color='#777777',
         command=change_save_image_status,
     )
-    buttons['saveImage_button'].grid(row=5, column=1, pady=4, sticky="n")
+    buttons['saveImage_button'].grid(row=4, column=1, pady=(60,0), padx=68, sticky="ne")
     buttons['saveImage_button'].set_state(user_params['saveImage'])
 
     buttons['load_env_button'] = Button(
         root=frames['main_menu_frame'].frame,
         width=30,
         height=2,
-        grid_pos=(6, 1),
+        grid_pos=(5, 1),
         padding=(0, 0),
         sticky='n',
         command=load_env_from_file,
-        text='Load Custom Environment',
+        text='Load Environment',
         font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#000000',
         background_color='#777777',
@@ -618,7 +619,7 @@ def build_main_menu():
 
     labels['main_load_status_label'] = Label(
         root=frames['main_menu_frame'].frame,
-        grid_pos=(7, 1),
+        grid_pos=(6, 1),
         padding=(0, 0),
         sticky='n',
         text='',
@@ -863,7 +864,7 @@ def build_clingo_para_frame():
         sticky='n',
         columnspan=2,
         text='',
-        font=('Arial', int(font_scale * base_font), 'bold'),
+        font=('Arial', int(font_scale * (base_font*0.75)), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
         visibility=True,
@@ -1242,6 +1243,8 @@ def exit_gui():
     save_user_data_to_file()
     delete_tmp_lp()
     delete_tmp_png()
+    delete_tmp_gif()
+    delete_tmp_frames()
 
     windows['flatland_window'].close_window()
 
@@ -1862,7 +1865,7 @@ def build_random_gen_para_frame():
         grid_pos=(14, 2),
         padding=(0, 0),
         sticky='nw',
-        text='Use low quality for image generation:',
+        text='Low quality mode:',
         font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
@@ -1986,7 +1989,7 @@ def random_gen_para_to_env():
     frames['random_gen_para_frame'].frame.update()
 
     try:
-        tracks, trains = gen_env(user_params)
+        tracks, trains = gen_env(user_params, user_params['lowQuality'])
     except ValueError as e:
         labels['random_gen_status_label'].label.config(
             text='Cannot fit more than one city in this map',
@@ -2803,7 +2806,7 @@ def build_builder_para_frame():
         grid_pos=(8, 2),
         padding=(0, 0),
         sticky='nw',
-        text='Use low quality for image generation:',
+        text='Low quality mode:',
         font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
@@ -3822,27 +3825,14 @@ def builder_train_grid_to_env():
         frames['train_builder_menu_frame'].frame.update()
 
     tracks = current_array[0]
-    x = [t[1] for t in current_df['start_pos']]
-    y = [t[0] for t in current_df['start_pos']]
-    x_end = [t[1] for t in current_df['end_pos']]
-    y_end = [t[0] for t in current_df['end_pos']]
-
-    trains = pd.DataFrame({
-        'id': current_df.index,
-        'x': x,
-        'y': y,
-        'dir': current_df['dir'],
-        "x_end": x_end,
-        "y_end": y_end,
-        "e_dep": current_df['e_dep'],
-        "l_arr": current_df['l_arr']
-    })
+    trains = get_trains()
 
     user_params['agents'] = len(trains)
-
+    
+    print("\nBuilding environment...")
     env = create_custom_env(tracks, trains, user_params)
     os.makedirs("data", exist_ok=True)
-    if save_png(env, "data/running_tmp.png") == -1:
+    if save_png(env, "data/running_tmp.png", user_params["lowQuality"]) == -1:
         labels['builder_status_label'].label.config(
             text='Flatland failed to create image.\n'
                  'Please restart the program.',
@@ -4576,10 +4566,10 @@ def change_save_image_status():
 def create_gif():
     global current_gif
 
-    # TODO: Create gif and save in data folder
-    # TODO: Assign path to created gif to current gif like below
-
-    current_gif = 'data/current_gif.gif'
+    tracks = current_array[0]
+    trains = get_trains()
+    current_gif = 'data/running_tmp.gif'
+    build_gif(tracks, trains, current_paths, user_params, current_gif)
 
 def df_to_timetable_text():
     def format_row(idx, line):
@@ -4735,6 +4725,7 @@ def load_env_from_file():
     user_params['cols'] = tracks.shape[1]
     user_params['agents'] = len(trains)
 
+    print("\nBuilding environment...")
     env = create_custom_env(tracks, trains, user_params)
     os.makedirs("data", exist_ok=True)
     if save_png(env, "data/running_tmp.png") == -1:
@@ -4778,21 +4769,7 @@ def save_env_to_file():
         return
 
     tracks = current_array[0]
-    x = [t[1] for t in current_df['start_pos']]
-    y = [t[0] for t in current_df['start_pos']]
-    x_end = [t[1] for t in current_df['end_pos']]
-    y_end = [t[0] for t in current_df['end_pos']]
-
-    trains = pd.DataFrame({
-        'id': current_df.index,
-        'x': x,
-        'y': y,
-        'dir': current_df['dir'],
-        "x_end": x_end,
-        "y_end": y_end,
-        "e_dep": current_df['e_dep'],
-        "l_arr": current_df['l_arr']
-    })
+    trains = get_trains()
 
     save_env(tracks, trains, name=file)
     if user_params['saveImage']:
@@ -4802,6 +4779,29 @@ def run_simulation():
     global current_paths
 
     tracks = current_array[0]
+    trains = get_trains()
+
+    save_env(tracks, trains)
+
+    current_paths = calc_paths(tracks, trains)
+
+    if isinstance(current_paths, int):
+        return current_paths
+
+    delete_tmp_lp()
+    return 0
+
+def calc_paths(tracks, trains):
+    df_pos = position_df(
+        tracks,
+        trains,
+        user_params['clingo'],
+        user_params['lpFiles'] + ['data/running_tmp.lp'],
+        user_params['answer']
+    )
+    return df_pos
+
+def get_trains():
     x = [t[1] for t in current_df['start_pos']]
     y = [t[0] for t in current_df['start_pos']]
     x_end = [t[1] for t in current_df['end_pos']]
@@ -4817,19 +4817,4 @@ def run_simulation():
         "e_dep": current_df['e_dep'],
         "l_arr": current_df['l_arr']
     })
-
-    save_env(tracks, trains)
-
-    current_paths = position_df(
-        tracks,
-        trains,
-        user_params['clingo'],
-        user_params['lpFiles'] + ['data/running_tmp.lp'],
-        user_params['answer']
-    )
-
-    if type(current_paths) == int:
-        return current_paths
-
-    delete_tmp_lp()
-    return 0
+    return trains

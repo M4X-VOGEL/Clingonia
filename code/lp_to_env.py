@@ -37,9 +37,11 @@ def prep_tracks_and_trains(path):
                 if not pred:
                     continue
                 if pred.startswith("cell"):
-                    add_cell(df_tracks, pred)
+                    rc = add_cell(df_tracks, pred)
+                    if rc != 0: return rc, rc  # Error
                 else:  # train / start / end
-                    fill_tse(tse_list, pred)
+                    rc = fill_tse(tse_list, pred)
+                    if rc != 0: return rc, rc  # Error
     df_tracks = df_tracks.sort_values(by=['y', 'x'], ascending=[True, True])
     return df_tracks, tse_list
 
@@ -57,6 +59,7 @@ def add_cell(df_tracks, pred):
     except ValueError:
         return -2  # Report invalid cells
     df_tracks.loc[len(df_tracks)] = [x, y, track]
+    return 0
 
 
 def fill_tse(tse_list, pred):
@@ -101,6 +104,7 @@ def fill_tse(tse_list, pred):
         except ValueError:
             return -5  # Report invalid end
         tse_list.append(["end", id, x_end, y_end, l_arr])
+    return 0
 
 
 def create_list_of_tracks(df_tracks):

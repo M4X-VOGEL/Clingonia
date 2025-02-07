@@ -1,8 +1,8 @@
-        |------------------------------------------|
-        |   Welcome to the ASP GUI for Flatland!   |
-        |------------------------------------------|
+                |---------------------------|
+                |   Welcome to Clingonia!   |
+                |---------------------------|
 
-
+Clingonia provides a GUI for creating, modifying and solving Flatland environments in Clingo with the Answer Set Programming Language.
 
 You can close this help text by pressing the ?.
 You can close the program by pressing the X or using 'ESC' on your keyboard.

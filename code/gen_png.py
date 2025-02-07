@@ -246,12 +246,12 @@ def get_allowed_dirs(track):
     return allowed_dirs
 
 
-def gen_env(env_params, res_input=0):
+def gen_env(env_params, low_quality_mode=False):
     """Creates environment and corresponding png.
     
     Args:
         env_params (dict): Parameters for environment.
-        res_input (int): Image resolution level from 1 to 3.
+        low_quality_mode (bool): Low image resolution setting.
     
     Returns:
         [list]: tracks
@@ -270,7 +270,7 @@ def gen_env(env_params, res_input=0):
                 np_random = np.random.RandomState(seed=env_params['seed'])
                 trains = extract_trains_from_hints(LAST_HINTS, env_params['agents'], np_random)
             # Render
-            screen_res = calc_resolution(res_input, tracks)
+            screen_res = calc_resolution(low_quality_mode, tracks)
             renderer = RenderTool(env, screen_height=screen_res, screen_width=screen_res)
             renderer.render_env(show=False)
             # Save image
@@ -324,14 +324,17 @@ def extract_trains(env):
     return trains_df
 
 
-def calc_resolution(res_input, env):
+def calc_resolution(low_quality_mode, env):
     if isinstance(env, list):  # tracks list
         env_dim_max = max(len(env), len(env[0]))
     else:  # RailEnv object
         env_dim_max = max(env.height, env.width)
-    if res_input == 1: screen_res *= 9  # Low
+    screen_res = env_dim_max  # Base value
+    if low_quality_mode:  # Low
+        if env_dim_max > 1000: screen_res = 4000
+        elif env_dim_max > 160: screen_res *= 4
+        else: screen_res *= 9
     else:  # Automatic
-        screen_res = env_dim_max  # Base value
         if env_dim_max > 1000: screen_res = 9000
         elif env_dim_max > 160: screen_res *= 9
         elif env_dim_max > 120: screen_res *= 12

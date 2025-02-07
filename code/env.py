@@ -1,4 +1,5 @@
 import os
+import shutil
 
 def save_env(tracks, trains, name="data/running_tmp.lp"):
     """Saves the env as a .lp file.
@@ -37,6 +38,29 @@ def delete_tmp_png():
             os.remove(path)
         except OSError as e:
             print(f"Error: running_tmp.png could not be deleted:\n{e}")
+
+
+def delete_tmp_gif():
+    """Deletes the temporary image of the env.  
+    """
+    ensure_directory("data")
+    path = "data/running_tmp.gif"
+    if os.path.isfile(path):
+        try:
+            os.remove(path)
+        except OSError as e:
+            print(f"Error: running_tmp.gif could not be deleted:\n{e}")
+
+
+def delete_tmp_frames():
+    """Löscht den Ordner 'tmp_frames' samt Inhalt.
+    """
+    path = "data/tmp_frames"
+    if os.path.isdir(path):
+        try:
+            shutil.rmtree(path)
+        except OSError as e:
+            print(f"Error: tmp_frames folder could not be deleted:\n{e}")
 
 
 def ensure_directory(d):
