@@ -1364,7 +1364,6 @@ class PathListCanvas:
             )
             label.pack(side='left', padx=10)
 
-
     def on_frame_configure(self, event):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
