@@ -1,6 +1,7 @@
 import os
 import ast
 import json
+import shutil
 from tkinter import filedialog
 
 from code.build_png import create_custom_env, initial_render_test, save_png
@@ -42,6 +43,8 @@ default_params = {
     'malfunction': (0, 30),
     'min': 2,
     'max': 6,
+    'lowQuality': False,
+    'saveImage': False,
     'answer': 1,
     'clingo': 'clingo',
     'lpFiles': []
@@ -60,6 +63,8 @@ user_params = {
     'malfunction': None,
     'min': None,
     'max': None,
+    'lowQuality': False,
+    'saveImage': False,
     'answer': None,
     'clingo': None,
     'lpFiles': [],
@@ -175,7 +180,7 @@ def build_flatland_window():
         height=None,
         fullscreen=True,
         background_color='#000000',
-        title='Flatland'
+        title='Clingonia'
     )
     windows['flatland_window'].window.bind('<Escape>', open_exit_confirmation_frame)
 
@@ -222,7 +227,7 @@ def build_title_frame():
         grid_pos=(0, 0),
         padding=(0, 0),
         sticky='nsew',
-        text='FLATLAND',
+        text='CLINGONIA',
         font=('Lucida Handwriting', int(font_scale * 80), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
@@ -573,11 +578,33 @@ def build_main_menu():
         visibility=True,
     )
 
+    labels['saveImage_label'] = Label(
+        root=frames['main_menu_frame'].frame,
+        grid_pos=(5, 1),
+        padding=(12, 0),
+        sticky='nw',
+        text='Save Image:',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    buttons['saveImage_button'] = ToggleSwitch(
+        root=frames['main_menu_frame'].frame,
+        width=70, height=30,
+        on_color='#00FF00', off_color='#FF0000',
+        handle_color='#FFFFFF', background_color='#000000',
+        command=change_save_image_status,
+    )
+    buttons['saveImage_button'].grid(row=5, column=1, pady=4, sticky="n")
+    buttons['saveImage_button'].set_state(user_params['saveImage'])
+
     buttons['load_env_button'] = Button(
         root=frames['main_menu_frame'].frame,
         width=30,
         height=2,
-        grid_pos=(5, 1),
+        grid_pos=(6, 1),
         padding=(0, 0),
         sticky='n',
         command=load_env_from_file,
@@ -591,7 +618,7 @@ def build_main_menu():
 
     labels['main_load_status_label'] = Label(
         root=frames['main_menu_frame'].frame,
-        grid_pos=(6, 1),
+        grid_pos=(7, 1),
         padding=(0, 0),
         sticky='n',
         text='',
@@ -605,7 +632,7 @@ def build_main_menu():
         root=frames['main_menu_frame'].frame,
         width=30,
         height=2,
-        grid_pos=(7, 1),
+        grid_pos=(8, 1),
         padding=(0, 0),
         sticky='n',
         command=switch_main_to_clingo_para,
@@ -617,8 +644,10 @@ def build_main_menu():
         visibility=True,
     )
 
-    frames['main_menu_frame'].frame.rowconfigure(tuple(range(8)), weight=1)
-    frames['main_menu_frame'].frame.columnconfigure(tuple(range(3)), weight=1)
+    frames['main_menu_frame'].frame.rowconfigure(tuple(range(9)), weight=1)
+    frames['main_menu_frame'].frame.columnconfigure(0, weight=5)
+    frames['main_menu_frame'].frame.columnconfigure(1, weight=1)
+    frames['main_menu_frame'].frame.columnconfigure(2, weight=5)
     frames['main_menu_frame'].frame.grid_propagate(False)
 
 def build_main_menu_help_frame():
@@ -1057,7 +1086,6 @@ def switch_clingo_para_to_result():
             del frames['main_menu_env_viewer_frame']
 
         df_to_timetable_text()
-        create_gif()
         create_result_menu()
 
 def reload_main_env_viewer():
@@ -1166,7 +1194,7 @@ def open_exit_confirmation_frame(event=None):
         padding=(0, 80),
         columnspan=2,
         sticky='s',
-        text='EXIT FLATLAND?',
+        text='EXIT CLINGONIA?',
         font=('Arial', int(font_scale * 50), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
@@ -1258,7 +1286,7 @@ def build_random_gen_para_frame():
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
-        sticky='nesw',
+        sticky='nsw',
         background_color='#000000',
         border_width=0,
         visibility=True
@@ -1293,6 +1321,18 @@ def build_random_gen_para_frame():
         foreground_color='#FF0000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
+    )
+
+    labels['spacing_err_label'] = Label(
+        root=frames['random_gen_para_frame'].frame,
+        grid_pos=(0, 4),
+        padding=(0, 0),
+        sticky='nw',
+        text='needs dictionary float: float,... , 0 <= float <= 1',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#000000',
+        background_color='#000000',
         visibility=True,
     )
 
@@ -1817,11 +1857,32 @@ def build_random_gen_para_frame():
         visibility=False,
     )
 
+    labels['lowQuality_label'] = Label(
+        root=frames['random_gen_para_frame'].frame,
+        grid_pos=(14, 2),
+        padding=(0, 0),
+        sticky='nw',
+        text='Use low quality for image generation:',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    buttons['lowQuality_button'] = ToggleSwitch(
+        root=frames['random_gen_para_frame'].frame,
+        width=70, height=30,
+        on_color='#00FF00', off_color='#FF0000',
+        handle_color='#FFFFFF', background_color='#000000',
+        command=change_low_quality_status,
+    )
+    buttons['lowQuality_button'].set_state(user_params['lowQuality'])
+
     buttons['advanced_options'] = Button(
         root=frames['random_gen_para_frame'].frame,
         width=15,
         height=1,
-        grid_pos=(14, 2),
+        grid_pos=(15, 2),
         padding=(0, 0),
         sticky='nw',
         command=random_gen_toggle_advanced_para_options,
@@ -1837,7 +1898,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=9,
         height=1,
-        grid_pos=(14, 3),
+        grid_pos=(15, 3),
         padding=(0, 0),
         sticky='nw',
         command=random_gen_para_to_env,
@@ -1851,7 +1912,7 @@ def build_random_gen_para_frame():
 
     labels['random_gen_status_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(14, 4),
+        grid_pos=(15, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -1862,14 +1923,15 @@ def build_random_gen_para_frame():
     )
 
     frames['random_gen_para_frame'].frame.rowconfigure(0, weight=1)
+    frames['random_gen_para_frame'].frame.rowconfigure(
+        tuple(range(1,16)), weight=2
+    )
     frames['random_gen_para_frame'].frame.columnconfigure(0, weight=1)
     frames['random_gen_para_frame'].frame.columnconfigure(1, weight=1)
-    frames['random_gen_para_frame'].frame.rowconfigure(
-        tuple(range(1,15)), weight=2
-    )
-    frames['random_gen_para_frame'].frame.columnconfigure(
-        tuple(range(2,5)), weight=2
-    )
+    frames['random_gen_para_frame'].frame.columnconfigure(2, weight=2)
+    frames['random_gen_para_frame'].frame.columnconfigure(3, weight=2)
+    frames['random_gen_para_frame'].frame.columnconfigure(4, weight=2)
+
     frames['random_gen_para_frame'].frame.grid_propagate(False)
 
     load_random_gen_env_params()
@@ -2087,6 +2149,11 @@ def random_gen_toggle_advanced_para_options():
     entry_fields['min_duration_entry'].toggle_visibility()
     labels['max_duration_label'].toggle_visibility()
     entry_fields['max_duration_entry'].toggle_visibility()
+    labels['lowQuality_label'].toggle_visibility()
+    if buttons['lowQuality_button'].winfo_ismapped():
+        buttons['lowQuality_button'].grid_forget()
+    else:
+        buttons['lowQuality_button'].grid(row=14, column=3, sticky='n')
     return
 
 def toggle_random_gen_para_help():
@@ -2400,7 +2467,7 @@ def build_builder_para_frame():
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
-        sticky='nesw',
+        sticky='nsw',
         background_color='#000000',
         border_width=0,
         visibility=True
@@ -2435,6 +2502,18 @@ def build_builder_para_frame():
         foreground_color='#FF0000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
+    )
+
+    labels['spacing_err_label'] = Label(
+        root=frames['builder_para_frame'].frame,
+        grid_pos=(0, 4),
+        padding=(0, 0),
+        sticky='nw',
+        text='needs dictionary float: float,... , 0 <= float <= 1',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#000000',
+        background_color='#000000',
         visibility=True,
     )
 
@@ -2719,11 +2798,32 @@ def build_builder_para_frame():
         visibility=False,
     )
 
+    labels['lowQuality_label'] = Label(
+        root=frames['builder_para_frame'].frame,
+        grid_pos=(8, 2),
+        padding=(0, 0),
+        sticky='nw',
+        text='Use low quality for image generation:',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    buttons['lowQuality_button'] = ToggleSwitch(
+        root=frames['builder_para_frame'].frame,
+        width=70, height=30,
+        on_color='#00FF00', off_color='#FF0000',
+        handle_color='#FFFFFF', background_color='#000000',
+        command=change_low_quality_status,
+    )
+    buttons['lowQuality_button'].set_state(user_params['lowQuality'])
+
     buttons['advanced_options'] = Button(
         root=frames['builder_para_frame'].frame,
         width=15,
         height=1,
-        grid_pos=(8, 2),
+        grid_pos=(9, 2),
         padding=(0, 0),
         sticky='nw',
         command=builder_toggle_advanced_para_options,
@@ -2739,7 +2839,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=9,
         height=1,
-        grid_pos=(8, 3),
+        grid_pos=(9, 3),
         padding=(0, 0),
         sticky='nw',
         command=builder_para_to_track_grid,
@@ -2752,14 +2852,14 @@ def build_builder_para_frame():
     )
 
     frames['builder_para_frame'].frame.rowconfigure(0, weight=1)
+    frames['builder_para_frame'].frame.rowconfigure(
+        tuple(range(1,10)), weight=2
+    )
     frames['builder_para_frame'].frame.columnconfigure(0, weight=1)
     frames['builder_para_frame'].frame.columnconfigure(1, weight=1)
-    frames['builder_para_frame'].frame.rowconfigure(
-        tuple(range(1,9)), weight=2
-    )
-    frames['builder_para_frame'].frame.columnconfigure(
-        tuple(range(2,5)), weight=2
-    )
+    frames['builder_para_frame'].frame.columnconfigure(2, weight=2)
+    frames['builder_para_frame'].frame.columnconfigure(3, weight=2)
+    frames['builder_para_frame'].frame.columnconfigure(4, weight=2)
     frames['builder_para_frame'].frame.grid_propagate(False)
 
     load_builder_env_params()
@@ -3867,6 +3967,11 @@ def builder_toggle_advanced_para_options():
     entry_fields['min_duration_entry'].toggle_visibility()
     labels['max_duration_label'].toggle_visibility()
     entry_fields['max_duration_entry'].toggle_visibility()
+    labels['lowQuality_label'].toggle_visibility()
+    if buttons['lowQuality_button'].winfo_ismapped():
+        buttons['lowQuality_button'].grid_forget()
+    else:
+        buttons['lowQuality_button'].grid(row=8, column=3, sticky='n')
     return
 
 def switch_builder_to_main():
@@ -4434,6 +4539,7 @@ def toggle_result_gif():
         frames['result_gif_frame'].frame.columnconfigure(0, weight=1)
         frames['result_gif_frame'].frame.grid_propagate(False)
     else:
+        create_gif()
         build_result_gif_frame()
 
 def switch_result_to_main():
@@ -4460,6 +4566,12 @@ def switch_result_to_main():
 
 
 # functions
+
+def change_low_quality_status():
+    user_params['lowQuality'] = not user_params['lowQuality']
+
+def change_save_image_status():
+    user_params['saveImage'] = not user_params['saveImage']
 
 def create_gif():
     global current_gif
@@ -4683,6 +4795,8 @@ def save_env_to_file():
     })
 
     save_env(tracks, trains, name=file)
+    if user_params['saveImage']:
+        shutil.copy2(current_img, file.removesuffix('.lp') +'.png')
 
 def run_simulation():
     global current_paths

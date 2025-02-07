@@ -1271,7 +1271,7 @@ class ResultCanvas:
                  offset_dict[row['cell_offset']][1]),
                 text=row['timestep'],
                 anchor="center",
-                font=("Courier", int(20 * (adjusted_cell_size/100)), 'bold'),
+                font=("Arial", int(20 * (adjusted_cell_size/100)), 'bold'),
                 fill=train_colors[row['trainID']],
                 tags="path_labels"
             )
@@ -1363,7 +1363,6 @@ class PathListCanvas:
                 anchor='w',
             )
             label.pack(side='left', padx=10)
-
 
     def on_frame_configure(self, event):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
