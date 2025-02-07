@@ -1,6 +1,7 @@
 import os
 import ast
 import json
+import shutil
 from tkinter import filedialog
 
 from code.build_png import create_custom_env, initial_render_test, save_png
@@ -577,11 +578,33 @@ def build_main_menu():
         visibility=True,
     )
 
+    labels['saveImage_label'] = Label(
+        root=frames['main_menu_frame'].frame,
+        grid_pos=(5, 1),
+        padding=(12, 0),
+        sticky='nw',
+        text='Save Image:',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    buttons['saveImage_button'] = ToggleSwitch(
+        root=frames['main_menu_frame'].frame,
+        width=70, height=30,
+        on_color='#00FF00', off_color='#FF0000',
+        handle_color='#FFFFFF', background_color='#000000',
+        command=change_save_image_status,
+    )
+    buttons['saveImage_button'].grid(row=5, column=1, pady=4, sticky="n")
+    buttons['saveImage_button'].set_state(user_params['saveImage'])
+
     buttons['load_env_button'] = Button(
         root=frames['main_menu_frame'].frame,
         width=30,
         height=2,
-        grid_pos=(5, 1),
+        grid_pos=(6, 1),
         padding=(0, 0),
         sticky='n',
         command=load_env_from_file,
@@ -595,7 +618,7 @@ def build_main_menu():
 
     labels['main_load_status_label'] = Label(
         root=frames['main_menu_frame'].frame,
-        grid_pos=(6, 1),
+        grid_pos=(7, 1),
         padding=(0, 0),
         sticky='n',
         text='',
@@ -609,7 +632,7 @@ def build_main_menu():
         root=frames['main_menu_frame'].frame,
         width=30,
         height=2,
-        grid_pos=(7, 1),
+        grid_pos=(8, 1),
         padding=(0, 0),
         sticky='n',
         command=switch_main_to_clingo_para,
@@ -621,8 +644,10 @@ def build_main_menu():
         visibility=True,
     )
 
-    frames['main_menu_frame'].frame.rowconfigure(tuple(range(8)), weight=1)
-    frames['main_menu_frame'].frame.columnconfigure(tuple(range(3)), weight=1)
+    frames['main_menu_frame'].frame.rowconfigure(tuple(range(9)), weight=1)
+    frames['main_menu_frame'].frame.columnconfigure(0, weight=5)
+    frames['main_menu_frame'].frame.columnconfigure(1, weight=1)
+    frames['main_menu_frame'].frame.columnconfigure(2, weight=5)
     frames['main_menu_frame'].frame.grid_propagate(False)
 
 def build_main_menu_help_frame():
@@ -4770,6 +4795,8 @@ def save_env_to_file():
     })
 
     save_env(tracks, trains, name=file)
+    if user_params['saveImage']:
+        shutil.copy2(current_img, file.removesuffix('.lp') +'.png')
 
 def run_simulation():
     global current_paths
