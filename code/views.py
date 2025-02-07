@@ -125,25 +125,33 @@ err_dict = {
     'clingo': {},
     'lpFiles': {},
 }
+loading_err_dict = {
+    -1: 'No environment .lp file found',
+    -2: 'A cell predicate is faulty',
+    -3: 'A train predicate is faulty',
+    -4: 'A start predicate is faulty',
+    -5: 'A end predicate is faulty',
+}
 clingo_err_dict = {
-    -1: ('#FF0000', 'No .lp files given'),
-    -2: ('#FF0000', 'Invalid clingo path'),
-    -3: ('#FF0000', 'Clingo returned an error'),
-    -4: ('#FF0000', 'Clingo returns UNSATISFIABLE'),
-    -5: ('#FF0000', f'Clingo did not provide the requested Answer: '
-                    f'{user_params["answer"]}'),
+    -1: 'No .lp files given',
+    -2: 'Invalid clingo path',
+    -3: 'Clingo returned an error',
+    -4: 'Clingo returns UNSATISFIABLE',
+    -5: f'Clingo did not provide the requested Answer: {user_params["answer"]}',
 }
 
 
 # Environment Arrays
 current_array = np.zeros((3, 40, 40), dtype=int)
-current_backup_array = current_array.copy()
+current_builder_backup_array = current_array.copy()
+current_modify_backup_array = current_array.copy()
 
 # Trains Dataframe
 current_df = pd.DataFrame(
     columns=['start_pos', 'dir', 'end_pos', 'e_dep', 'l_arr']
 )
-current_backup_df = current_df.copy()
+current_builder_backup_df = current_df.copy()
+current_modify_backup_df = current_df.copy()
 
 # Environment image and gif
 current_img = None
@@ -941,11 +949,12 @@ def switch_main_to_random_gen():
     build_random_gen_para_frame()
 
 def switch_main_to_builder():
-    global build_mode, user_params_backup, current_backup_array, current_backup_df
+    global build_mode, user_params_backup, \
+        current_builder_backup_array, current_builder_backup_df
 
     user_params_backup = user_params.copy()
-    current_backup_array = current_array.copy()
-    current_backup_df = current_df.copy()
+    current_builder_backup_array = current_array.copy()
+    current_builder_backup_df = current_df.copy()
 
     build_mode = 'build'
 
@@ -962,11 +971,12 @@ def switch_main_to_builder():
     build_builder_para_frame()
 
 def switch_main_to_modify():
-    global build_mode, user_params_backup, current_backup_array, current_backup_df
+    global build_mode, user_params_backup, \
+        current_modify_backup_array, current_modify_backup_df
 
     user_params_backup = user_params.copy()
-    current_backup_array = current_array.copy()
-    current_backup_df = current_df.copy()
+    current_modify_backup_array = current_array.copy()
+    current_modify_backup_df = current_df.copy()
 
     build_mode = 'modify'
 
@@ -1030,8 +1040,8 @@ def switch_clingo_para_to_result():
 
     if sim_result:
         labels['clingo_status_label'].label.config(
-            fg=clingo_err_dict[sim_result][0],
-            text=clingo_err_dict[sim_result][1]
+            text=clingo_err_dict[sim_result],
+            fg='#FF0000',
         )
         frames['clingo_para_frame'].frame.update()
         return
@@ -1772,7 +1782,7 @@ def build_random_gen_para_frame():
         grid_pos=(13, 2),
         padding=(0, 0),
         sticky='nw',
-        text='Max. duration for malfunction:',
+        text='Max. duration for malfunctions:',
         font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
@@ -2281,8 +2291,13 @@ def builder_change_to_start_or_main():
     global user_params, current_array, current_df
 
     user_params = user_params_backup.copy()
-    current_array = current_backup_array.copy()
-    current_df = current_backup_df.copy()
+
+    # if build_mode == 'build':
+    #     current_array = current_builder_backup_array.copy()
+    #     current_df = current_builder_backup_df.copy()
+    # else:
+    current_array = current_modify_backup_array.copy()
+    current_df = current_modify_backup_df.copy()
 
     if last_menu == 'start':
         builder_para_to_start()
@@ -2669,7 +2684,7 @@ def build_builder_para_frame():
         grid_pos=(7, 2),
         padding=(0, 0),
         sticky='nw',
-        text='Max. duration for malfunction:',
+        text='Max. duration for malfunctions:',
         font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
@@ -2796,10 +2811,16 @@ def toggle_builder_para_help():
         build_builder_para_help_frame()
 
 def builder_para_to_track_grid():
-    global current_array, current_df, current_backup_array, current_backup_df
+    global current_array, current_df, \
+        current_builder_backup_array, current_builder_backup_df, \
+        current_modify_backup_array, current_modify_backup_df
 
     if save_builder_env_params() == -1:
         return
+
+    if build_mode == 'modify':
+        current_modify_backup_array = current_array.copy()
+        current_modify_backup_df = current_df.copy()
 
     if 'builder_para_frame' in frames:
         frames['builder_para_frame'].destroy_frame()
@@ -2867,8 +2888,9 @@ def builder_para_to_track_grid():
                             row['end_pos'][1] > cols - 1):
                         current_df.at[index, 'end_pos'] = (-1, -1)
 
-    current_backup_array = current_array.copy()
-    current_backup_df = current_df.copy()
+    if build_mode == 'build':
+        current_builder_backup_array = current_array.copy()
+        current_builder_backup_df = current_df.copy()
 
     build_track_builder_menu_frame()
     build_builder_grid_frame()
@@ -3682,7 +3704,8 @@ def toggle_builder_train_help():
         build_builder_train_help_frame()
 
 def builder_train_grid_to_env():
-    global current_backup_array, current_backup_df, current_img
+    global current_img, current_builder_backup_array, current_builder_backup_df, \
+        current_modify_backup_array, current_modify_backup_df
 
     if len(current_df) == 0:
         labels['builder_status_label'].label.config(
@@ -3740,8 +3763,10 @@ def builder_train_grid_to_env():
         frames['builder_train_help_frame'].destroy_frame()
         del frames['builder_train_help_frame']
 
-    current_backup_array = current_array.copy()
-    current_backup_df = current_df.copy()
+    current_builder_backup_array = current_array.copy()
+    current_builder_backup_df = current_df.copy()
+    current_modify_backup_array = current_array.copy()
+    current_modify_backup_df = current_df.copy()
 
     build_builder_env_viewer()
     build_builder_env_menu()
@@ -4058,8 +4083,12 @@ def open_reset_frame(parent_frame):
 def reset_builder_grid():
     global current_array, current_df
 
-    current_array = current_backup_array.copy()
-    current_df = current_backup_df.copy()
+    if build_mode == 'build':
+        current_array = current_builder_backup_array.copy()
+        current_df = current_builder_backup_df.copy()
+    else:
+        current_array = current_modify_backup_array.copy()
+        current_df = current_modify_backup_df.copy()
 
     if 'track_builder_menu_frame' in frames:
         frames['track_builder_menu_frame'].destroy_frame()
@@ -4545,6 +4574,22 @@ def load_env_from_file():
         frames['main_menu_frame'].frame.update()
 
     tracks, trains = lp_to_env(file)
+
+    if isinstance(tracks, int) or isinstance(trains, int):
+        key = tracks if isinstance(tracks, int) else trains
+        if last_menu == 'start':
+            labels['start_load_status_label'].label.config(
+                text=loading_err_dict[key],
+                fg='#FF0000',
+            )
+            frames['start_menu_frame'].frame.update()
+        else:
+            labels['main_load_status_label'].label.config(
+                text=loading_err_dict[key],
+                fg='#FF0000',
+            )
+            frames['main_menu_frame'].frame.update()
+        return
 
     start_pos = list(zip(trains['y'], trains['x']))
     end_pos = list(zip(trains['y_end'], trains['x_end']))
