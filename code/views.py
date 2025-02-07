@@ -1258,7 +1258,7 @@ def build_random_gen_para_frame():
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
-        sticky='nesw',
+        sticky='nsw',
         background_color='#000000',
         border_width=0,
         visibility=True
@@ -1293,6 +1293,18 @@ def build_random_gen_para_frame():
         foreground_color='#FF0000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
+    )
+
+    labels['spacing_err_label'] = Label(
+        root=frames['random_gen_para_frame'].frame,
+        grid_pos=(0, 4),
+        padding=(0, 0),
+        sticky='nw',
+        text='needs dictionary float: float,... , 0 <= float <= 1',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#000000',
+        background_color='#000000',
         visibility=True,
     )
 
@@ -1862,14 +1874,15 @@ def build_random_gen_para_frame():
     )
 
     frames['random_gen_para_frame'].frame.rowconfigure(0, weight=1)
-    frames['random_gen_para_frame'].frame.columnconfigure(0, weight=1)
-    frames['random_gen_para_frame'].frame.columnconfigure(1, weight=1)
     frames['random_gen_para_frame'].frame.rowconfigure(
         tuple(range(1,15)), weight=2
     )
-    frames['random_gen_para_frame'].frame.columnconfigure(
-        tuple(range(2,5)), weight=2
-    )
+    frames['random_gen_para_frame'].frame.columnconfigure(0, weight=1)
+    frames['random_gen_para_frame'].frame.columnconfigure(1, weight=1)
+    frames['random_gen_para_frame'].frame.columnconfigure(2, weight=2)
+    frames['random_gen_para_frame'].frame.columnconfigure(3, weight=2)
+    frames['random_gen_para_frame'].frame.columnconfigure(4, weight=2)
+
     frames['random_gen_para_frame'].frame.grid_propagate(False)
 
     load_random_gen_env_params()
@@ -2400,7 +2413,7 @@ def build_builder_para_frame():
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
-        sticky='nesw',
+        sticky='nsw',
         background_color='#000000',
         border_width=0,
         visibility=True
@@ -2435,6 +2448,18 @@ def build_builder_para_frame():
         foreground_color='#FF0000',
         background_color='#000000',
         border_width=0,
+        visibility=True,
+    )
+
+    labels['spacing_err_label'] = Label(
+        root=frames['builder_para_frame'].frame,
+        grid_pos=(0, 4),
+        padding=(0, 0),
+        sticky='nw',
+        text='needs dictionary float: float,... , 0 <= float <= 1',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#000000',
+        background_color='#000000',
         visibility=True,
     )
 
@@ -2752,14 +2777,14 @@ def build_builder_para_frame():
     )
 
     frames['builder_para_frame'].frame.rowconfigure(0, weight=1)
-    frames['builder_para_frame'].frame.columnconfigure(0, weight=1)
-    frames['builder_para_frame'].frame.columnconfigure(1, weight=1)
     frames['builder_para_frame'].frame.rowconfigure(
         tuple(range(1,9)), weight=2
     )
-    frames['builder_para_frame'].frame.columnconfigure(
-        tuple(range(2,5)), weight=2
-    )
+    frames['builder_para_frame'].frame.columnconfigure(0, weight=1)
+    frames['builder_para_frame'].frame.columnconfigure(1, weight=1)
+    frames['builder_para_frame'].frame.columnconfigure(2, weight=2)
+    frames['builder_para_frame'].frame.columnconfigure(3, weight=2)
+    frames['builder_para_frame'].frame.columnconfigure(4, weight=2)
     frames['builder_para_frame'].frame.grid_propagate(False)
 
     load_builder_env_params()
