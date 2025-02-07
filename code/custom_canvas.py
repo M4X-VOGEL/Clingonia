@@ -673,7 +673,7 @@ class TrainListCanvas:
         self.remove_dict = {}
 
         self.station_img = Image.open('data/png/Bahnhof_#d50000.png')
-        self.station_img = self.station_img.resize(size=(60, 60))
+        self.station_img = self.station_img.resize(size=(100, 100))
         self.station_img = ImageTk.PhotoImage(self.station_img)
 
         self.canvas = self.create_canvas()
@@ -915,14 +915,14 @@ class TrainListCanvas:
 
         place_station = tk.Button(
             config_frame,
-            width=45, height=45,
+            width=100, height=100,
             command=lambda: self.grid.select(5),
             image=self.station_img,
             foreground='#000000', background='#000000', bd=0
         )
         place_station.place(
-            x=self.outer_frame.winfo_width() * 0.41,
-            y=self.outer_frame.winfo_height() * 0.59
+            x=self.outer_frame.winfo_width() * 0.39,
+            y=self.outer_frame.winfo_height() * 0.56
         )
         if self.train_data.loc[index, 'end_pos'][0] != -1:
             row, col = self.train_data.loc[index, 'end_pos']
@@ -945,7 +945,7 @@ class TrainListCanvas:
         )
         save.place(
             x=self.outer_frame.winfo_width() * 0.4,
-            y=self.outer_frame.winfo_height() * 0.65
+            y=self.outer_frame.winfo_height() * 0.68
         )
 
     def save_ed_la(
