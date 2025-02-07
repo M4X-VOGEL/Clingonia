@@ -175,7 +175,7 @@ def build_flatland_window():
         height=None,
         fullscreen=True,
         background_color='#000000',
-        title='Flatland'
+        title='Clingonia'
     )
     windows['flatland_window'].window.bind('<Escape>', open_exit_confirmation_frame)
 
@@ -222,7 +222,7 @@ def build_title_frame():
         grid_pos=(0, 0),
         padding=(0, 0),
         sticky='nsew',
-        text='FLATLAND',
+        text='CLINGONIA',
         font=('Lucida Handwriting', int(font_scale * 80), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
@@ -1166,7 +1166,7 @@ def open_exit_confirmation_frame(event=None):
         padding=(0, 80),
         columnspan=2,
         sticky='s',
-        text='EXIT FLATLAND?',
+        text='EXIT CLINGONIA?',
         font=('Arial', int(font_scale * 50), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
