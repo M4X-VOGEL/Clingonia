@@ -1,4 +1,5 @@
 import numpy as np
+from code.gen_png import calc_resolution
 from flatland.envs.rail_env import RailEnv
 from flatland.envs.rail_generators import rail_from_grid_transition_map
 from flatland.envs.malfunction_generators import MalfunctionParameters, ParamMalfunctionGen
@@ -183,7 +184,7 @@ def initial_render_test():
     return 0
 
 
-def save_png(env, path="data/running_tmp.png"):
+def save_png(env, path="data/running_tmp.png", res_input = 0):
     """Renders and saves the PNG-image.
     
     Args:
@@ -196,7 +197,8 @@ def save_png(env, path="data/running_tmp.png"):
     print("Rendering image...")
     # Render image
     try:
-        renderer = RenderTool(env, gl="PILSVG")
+        screen_res = calc_resolution(res_input, env)
+        renderer = RenderTool(env, gl="PILSVG", screen_height=screen_res, screen_width=screen_res)
         renderer.reset()
         renderer.render_env(
             show=True,

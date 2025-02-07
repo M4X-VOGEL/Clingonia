@@ -1,6 +1,7 @@
 import pandas as pd
-import winsound
-from code import clingo_actions
+import platform
+import subprocess
+from code.clingo_actions import clingo_to_df
 pd.set_option('display.max_rows', None)  # Anzeige aller DF-Zeilen
 
 def position_df(tracks, trains, clingo_path, lp_files, answer_number):
@@ -10,18 +11,19 @@ def position_df(tracks, trains, clingo_path, lp_files, answer_number):
     Returns:
         [pd.DataFrame] IDs, Positions, Directions, Timesteps
     """
-    df_actions = clingo_actions.clingo_to_df(clingo_path, lp_files, answer_number)
-    if type(df_actions) == int: return df_actions  # Error Handling
+    # Actions into DF
+    df_actions = clingo_to_df(clingo_path, lp_files, answer_number)
+    if isinstance(df_actions, int): return df_actions  # Error Handling
+    # Actions to positions
     df_pos = build_df_pos(df_actions, trains, tracks)
-    print("Valdidating actions...")
     # Adjust actions, if end position is incorrect
+    print("Valdidating actions...")
     df_actions, df_pos = adjust_actions(df_pos, trains, df_actions, tracks)
     # Make sure that every train has a position
     df_pos = ensure_train_spawns(df_pos, trains)
     print("Run Simulation: DONE")
     # Audio Feedback
-    winsound.Beep(600, 200)
-    winsound.Beep(800, 250)
+    beep_feedback()
     return df_pos
 
 def build_df_pos(df_actions, trains, tracks):
@@ -122,13 +124,25 @@ def ensure_train_spawns(df_pos, trains):
     # Sort df_pos
     df_pos = df_pos.sort_values(by=["trainID", "timestep"]).reset_index(drop=True)
     if is_incomplete:
-        print("❌ Valdiation done with warning:\n"
+        print("❌ Validiation done with warning:\n"
               "The actions produced by the lp-files might be invalid/incomplete.\n"
               "The afflicted agents will only spawn on the earliest possible timestep."
         )
     else:
         print("✅ Valdidation done.")
     return df_pos
+
+
+def beep_feedback():
+    system = platform.system()
+    if system == "Windows":
+        import winsound
+        winsound.Beep(600, 200)
+        winsound.Beep(800, 250)
+    elif system == "Darwin":  # macOS (system sound)
+        subprocess.run(["afplay", "/System/Library/Sounds/Glass.aiff"])
+    else:  # Linux and other
+        print('\a')
 
 
 def get_start_pos(train_id, trains):

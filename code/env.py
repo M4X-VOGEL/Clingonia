@@ -24,7 +24,7 @@ def delete_tmp_lp():
         try:
             os.remove(path)
         except OSError as e:
-            print(f"Fehler: Datei running_tmp.lp konnte nicht gelöscht werden:\n{e}")
+            print(f"Error: running_tmp.lp could not be deleted:\n{e}")
 
 
 def delete_tmp_png():
@@ -36,7 +36,7 @@ def delete_tmp_png():
         try:
             os.remove(path)
         except OSError as e:
-            print(f"Fehler: Datei running_tmp.png konnte nicht gelöscht werden:\n{e}")
+            print(f"Error: running_tmp.png could not be deleted:\n{e}")
 
 
 def ensure_directory(d):

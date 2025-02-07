@@ -1,4 +1,5 @@
 import os
+import time
 import subprocess
 import pandas as pd
 
@@ -43,12 +44,17 @@ def run_clingo(clingo_path, lp_files, answer_number):
     Returns:
         [str]: Clingo output with its answers.
     """
-    # Run Clingo
+    # Run Clingo (with timer)
+    timer_start = time.perf_counter()
     result = subprocess.run(
         [clingo_path] + lp_files + [str(answer_number)],
         capture_output=True,
         text=True
     )
+    timer_end = time.perf_counter()
+    # Timer result
+    execution_time = timer_end - timer_start
+    print(f"🕓 Clingo ran for {execution_time:.2f}s.")
     # Error Handling
     if result.returncode != 0:
         error_message = result.stderr.strip()

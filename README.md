@@ -18,6 +18,12 @@ Flatland is a [railway scheduling challenge](https://flatland.aicrowd.com/intro.
 
 <br>
 
+## ⚙️ Please note:
+
+⚠️ This software is currently optimized for Windows platforms; however, it already runs on macOS to a limited extent, with full support scheduled for a future release.
+
+<br>
+
 ## 🌱 Getting started: Flatland and Clingo
 
 ### 📜 Prerequisites
@@ -71,9 +77,7 @@ Once an encoding or set of encodings has been developed that produces valid path
 
 <br>
 
-### ⚙️ Custom environment encodings
-
-If you have your own `lp` encoding of an environment and want use it, make sure each line contains not more than one predicate. ⚠️
+### 🗺️ Custom environment encodings
 
 Valid predicates are:
 - `train(ID).`
