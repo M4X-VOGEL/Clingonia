@@ -1086,7 +1086,6 @@ def switch_clingo_para_to_result():
             del frames['main_menu_env_viewer_frame']
 
         df_to_timetable_text()
-        create_gif()
         create_result_menu()
 
 def reload_main_env_viewer():
@@ -4540,6 +4539,7 @@ def toggle_result_gif():
         frames['result_gif_frame'].frame.columnconfigure(0, weight=1)
         frames['result_gif_frame'].frame.grid_propagate(False)
     else:
+        create_gif()
         build_result_gif_frame()
 
 def switch_result_to_main():
