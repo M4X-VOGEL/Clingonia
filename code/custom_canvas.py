@@ -512,10 +512,6 @@ class BuildCanvas:
         self.draw_id_labels()
 
     def draw_id_labels(self):
-        self.draw_train_id_labels()
-        self.draw_station_id_labels()
-
-    def draw_train_id_labels(self):
         adjusted_cell_size = self.cell_size * self.scale
         offset_dict = {
             0: (adjusted_cell_size * 0.5, adjusted_cell_size * 0.5),
@@ -529,72 +525,55 @@ class BuildCanvas:
             8: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.75),
         }
 
-        self.train_data['count'] = (
-            self.train_data.groupby('start_pos')['start_pos']
-            .transform('count')
-        )
-        self.train_data['cell_offset'] = (
-                self.train_data.groupby('start_pos')
-                .cumcount()
-                .where(self.train_data['count'] > 1, 0) % 9
-        )
+        used = {}
+
+        def assign_offset(pos):
+            if pos not in used:
+                used[pos] = {i: 0 for i in range(9)}
+
+            available_offsets = [i for i in range(9) if i not in used[pos]]
+
+            if available_offsets:
+                chosen = available_offsets[0]
+            else:
+                chosen = min(used[pos], key=used[pos].get)
+
+            used[pos][chosen] += 1
+            return chosen
 
         for index, row in self.train_data.iterrows():
+            train_pos = row['start_pos']
+            train_offset = assign_offset(train_pos)
+
             self.canvas.create_text(
-                (self.x_offset + offset_dict[row['cell_offset']][0] +
-                 row['start_pos'][1] * adjusted_cell_size),
-                (self.y_offset + offset_dict[row['cell_offset']][1] +
-                 row['start_pos'][0] * adjusted_cell_size),
+                (self.x_offset + offset_dict[train_offset][0] + train_pos[
+                    1] * adjusted_cell_size),
+                (self.y_offset + offset_dict[train_offset][1] + train_pos[
+                    0] * adjusted_cell_size),
                 text=str(index),
                 anchor="center",
-                font=("Courier", int(20 * (adjusted_cell_size/100)), 'bold'),
-                fill='#000000',
+                font=("Courier", int(20 * (adjusted_cell_size / 100)), 'bold'),
+                fill='#0FF000',
                 tags="id_labels"
             )
 
-        self.train_data.drop(columns=['count'], inplace=True)
-        self.train_data.drop(columns=['cell_offset'], inplace=True)
+            station_pos = row['end_pos']
 
-    def draw_station_id_labels(self):
-        adjusted_cell_size = self.cell_size * self.scale
-        offset_dict = {
-            0: (adjusted_cell_size * 0.5, adjusted_cell_size * 0.5),
-            1: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.5),
-            2: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.25),
-            3: (adjusted_cell_size * 0.5, adjusted_cell_size * 0.25),
-            4: (adjusted_cell_size * 0.75, adjusted_cell_size * 0.25),
-            5: (adjusted_cell_size * 0.75, adjusted_cell_size * 0.5),
-            6: (adjusted_cell_size * 0.75, adjusted_cell_size * 0.75),
-            7: (adjusted_cell_size * 0.5, adjusted_cell_size * 0.75),
-            8: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.75),
-        }
+            if station_pos != (-1, -1):
+                station_offset = assign_offset(station_pos)
 
-        self.train_data['count'] = (
-            self.train_data.groupby('end_pos')['end_pos']
-            .transform('count')
-        )
-        self.train_data['cell_offset'] = (
-                self.train_data.groupby('end_pos')
-                .cumcount()
-                .where(self.train_data['count'] > 1, 0) % 9
-        )
-
-        for index, row in self.train_data.iterrows():
-            if row['end_pos'] != (-1, -1):
                 self.canvas.create_text(
-                    (self.x_offset + offset_dict[row['cell_offset']][0] +
-                     row['end_pos'][1] * adjusted_cell_size),
-                    (self.y_offset + offset_dict[row['cell_offset']][1] +
-                     row['end_pos'][0] * adjusted_cell_size),
+                    (self.x_offset + offset_dict[station_offset][0] +
+                     station_pos[1] * adjusted_cell_size),
+                    (self.y_offset + offset_dict[station_offset][1] +
+                     station_pos[0] * adjusted_cell_size),
                     text=str(index),
                     anchor="center",
-                    font=("Courier", int(20 * (adjusted_cell_size/100)), 'bold'),
-                    fill='#000000',
+                    font=(
+                    "Courier", int(20 * (adjusted_cell_size / 100)), 'bold'),
+                    fill='#000FF0',
                     tags="id_labels"
                 )
-
-        self.train_data.drop(columns=['count'], inplace=True)
-        self.train_data.drop(columns=['cell_offset'], inplace=True)
 
     def draw_mouse_symbols(self, event):
         adjusted_x = (event.x - self.x_offset) / self.scale
