@@ -4,6 +4,8 @@ import seaborn as sns
 from matplotlib import colors as mcolors
 import platform
 
+from sentry_sdk import start_span
+
 from code.custom_widgets import *
 
 
@@ -247,8 +249,6 @@ class BuildCanvas:
         self.canvas = self.create_canvas()
         self.place_canvas()
 
-        self.img_dict = self.set_img_dict()
-
         # populate canvas
         self.pan_start = (0, 0)
         self.x_offset = 0
@@ -266,8 +266,13 @@ class BuildCanvas:
         self.canvas.bind("<Leave>", self.remove_mouse_symbols)
         self.canvas.bind("<Motion>", self.draw_mouse_symbols)
 
+        self.image_refs = {}
+        self.canvas_images = {}
+        self.image_cache = {}
+        self.image_dict = self.set_img_dict()
+        self.load_images()
+
         self.current_selection = None
-        self.image_refs = []
         self.array = array
         self.rows, self.cols = array[0].shape
         self.train_data = train_data
@@ -287,8 +292,6 @@ class BuildCanvas:
 
         self.root.after(10, self.calculate_initial_pos)
 
-
-
     def create_canvas(self):
         canvas = tk.Canvas(
             self.root,
@@ -301,130 +304,76 @@ class BuildCanvas:
     def place_canvas(self):#
         self.canvas.place(x=self.x, y=self.y)
 
-    @staticmethod
-    def set_img_dict():
-        dictionary = {
-            0: ('eraser', 0),
-            1: ('Zug_Gleis_#0091ea', 0),
-            2: ('Zug_Gleis_#0091ea', 270),
-            3: ('Zug_Gleis_#0091ea', 180),
-            4: ('Zug_Gleis_#0091ea', 90),
-            5: ('Bahnhof_#d50000', 0),
-            32800: ('Gleis_vertikal', 0),
-            1025: ('Gleis_horizontal', 0),
-            2064: ('Gleis_kurve_oben_links', 0),
-            72: ('Gleis_kurve_oben_rechts', 0),
-            16386: ('Gleis_kurve_unten_rechts', 0),
-            4608: ('Gleis_kurve_unten_links', 0),
-            3089: ('Weiche_horizontal_oben_links', 0),
-            1097: ('Weiche_horizontal_oben_rechts', 0),
-            17411: ('Weiche_horizontal_unten_rechts', 0),
-            5633: ('Weiche_horizontal_unten_links', 0),
-            34864: ('Weiche_vertikal_oben_links', 0),
-            32872: ('Weiche_vertikal_oben_rechts', 0),
-            49186: ('Weiche_vertikal_unten_rechts', 0),
-            37408: ('Weiche_vertikal_unten_links', 0),
-            33825: ('Gleis_Diamond_Crossing', 0),
-            35889: ('Weiche_Single_Slip', 270),
-            33897: ('Weiche_Single_Slip', 180),
-            50211: ('Weiche_Single_Slip', 90),
-            38433: ('Weiche_Single_Slip', 0),
-            52275: ('Weiche_Double_Slip', 90),
-            38505: ('Weiche_Double_Slip', 0),
-            2136: ('Weiche_Symetrical', 180),
-            16458: ('Weiche_Symetrical', 90),
-            20994: ('Weiche_Symetrical', 0),
-            6672: ('Weiche_Symetrical', 270),
-        }
-        return dictionary
+    def select(self, selection):
+        self.current_selection = selection
 
-    def zoom(self, event):
-        scale_factor = 1.1 if event.delta > 0 else 0.9
-        new_scale = self.scale * scale_factor
+    def calculate_initial_pos(self):
+        if max(self.rows, self.cols) > 30:
+            self.x_offset = 0
+            self.y_offset = 0
+            self.draw_grid()
+            self.draw_images()
+        elif self.rows > self.cols:
+            self.cell_size = self.canvas.winfo_height() / self.rows
+            width = self.cell_size * self.cols
+            height = self.cell_size * self.rows
+            self.x_offset = (self.canvas.winfo_width() - width) // 2
+            self.y_offset = (self.canvas.winfo_height() - height) // 2
+            self.draw_grid()
+            self.draw_images()
+        else:
+            self.cell_size = self.canvas.winfo_width() / self.cols
+            width = self.cell_size * self.cols
+            height = self.cell_size * self.rows
+            self.x_offset = (self.canvas.winfo_width() - width) // 2
+            self.y_offset = (self.canvas.winfo_height() - height) // 2
+            self.draw_grid()
+            self.draw_images()
 
-        # Prevent too much zoom
-        new_scale  = max(0.1, min(new_scale, 10))
-
-        # Calculate the point in the grid where the mouse is
-        grid_mouse_x = (event.x - self.x_offset) / self.scale
-        grid_mouse_y = (event.y - self.y_offset) / self.scale
-
-        # Update offsets to keep the grid under the mouse stable
-        self.x_offset -= (grid_mouse_x * new_scale - grid_mouse_x * self.scale)
-        self.y_offset -= (grid_mouse_y * new_scale - grid_mouse_y * self.scale)
-
-        # Apply the new scale
-        self.scale = new_scale
-
-        self.draw_images()
-
-    def start_pan(self, event):
-        self.pan_start = (event.x, event.y)
-
-    def pan(self, event):
-        dx = event.x - self.pan_start[0]
-        dy = event.y - self.pan_start[1]
-
-        self.x_offset += dx
-        self.y_offset += dy
-        self.pan_start = (event.x, event.y)
-
-        self.draw_images()
-
-    def draw_mouse_symbols(self, event):
+    def modify_array(self, event):
         adjusted_x = (event.x - self.x_offset) / self.scale
         adjusted_y = (event.y - self.y_offset) / self.scale
-        grid_width = self.cols * self.cell_size
-        grid_height = self.rows * self.cell_size
-
-        if not (0 <= adjusted_x < grid_width and 0 <= adjusted_y < grid_height):
-            self.canvas.delete(self.text_label)
-            self.canvas.delete(self.mouse_image)
-            self.text_label = None
-            self.mouse_image = None
+        row = int(adjusted_y / self.cell_size)
+        col = int(adjusted_x / self.cell_size)
+        if row < 0 or row >= self.rows or col < 0 or col >= self.cols:
             return
-
-        row = int(adjusted_y / self.cell_size )
-        col = int(adjusted_x / self.cell_size )
-        coords_text = f"[{row}, {col}]"
-
-        if self.text_label is None:
-            self.text_label = self.canvas.create_text(
-                event.x + 10,
-                event.y + 10,
-                text=coords_text,
-                font=("Arial", 20),
-                fill="#FFFFFF",
-                anchor="nw"
-            )
-        else:
-            self.canvas.itemconfig(self.text_label, text=coords_text)
-            self.canvas.coords(self.text_label, event.x + 10, event.y + 10)
-
-        if self.current_selection is not None:
-            image, rotation = self.img_dict[self.current_selection]
-            image = f'data/png/{image}.png'
-            image = Image.open(image).resize((30, 30)).rotate(rotation)
-            self.current_selection_image = ImageTk.PhotoImage(image)
-
-            if self.mouse_image is None:
-                self.mouse_image = self.canvas.create_image(
-                    event.x + 10,
-                    event.y - 20,
-                    image=self.current_selection_image,
-                    anchor="nw"
-                )
+        if self.current_selection:
+            # place object
+            if self.current_selection in [1,2,3,4,5]:
+                # place train or station
+                if self.current_selection == 5:
+                    # station
+                    self.array[2] = np.zeros(self.array[2].shape)
+                    self.train_data.at[self.train_index, 'end_pos'] = (row, col)
+                    for r,c in self.train_data['end_pos']:
+                        if r != -1:
+                            self.array[2][r, c] = 5
+                else:
+                    # train
+                    self.array[1] = np.zeros(self.array[1].shape)
+                    data = {
+                        'start_pos': (row, col),
+                        'dir': self.dir[self.current_selection],
+                        'end_pos': (-1, -1),
+                        'e_dep': -1,
+                        'l_arr': -1,
+                    }
+                    self.train_data.loc[len(self.train_data)] = data
+                    for _,r in self.train_data.iterrows():
+                            self.array[1][r['start_pos']] = self.dir[r['dir']]
+                    if self.train_list:
+                        self.train_list.update_labels()
+                self.update_image_storage()
+                self.draw_trains()
             else:
-                self.canvas.itemconfig(
-                    self.mouse_image,
-                    image=self.current_selection_image
-                )
-                self.canvas.coords(self.mouse_image, event.x + 10, event.y - 20)
-
-    def remove_mouse_symbols(self, event):
-        """Clear the coordinates label when the mouse leaves the canvas."""
-        self.canvas.delete(self.text_label)
-        self.text_label = None
+                # place track
+                self.array[0][row, col] = self.current_selection
+                self.update_image_storage()
+                self.put_img_on_canvas(self.current_selection, 0, row, col)
+        elif self.current_selection == 0:
+            # erase track
+            self.array[0][row, col] = 0
+            self.update_image_storage()
 
     def draw_grid(self):
         self.canvas.delete("grid_line")
@@ -482,55 +431,92 @@ class BuildCanvas:
                 tags="grid_label"
             )
 
-    def select(self, selection):
-        self.current_selection = selection
-
-    def modify_array(self, event):
-        adjusted_x = (event.x - self.x_offset) / self.scale
-        adjusted_y = (event.y - self.y_offset) / self.scale
-        row = int(adjusted_y / self.cell_size)
-        col = int(adjusted_x / self.cell_size)
-        if self.current_selection:
-            # place object
-            if self.current_selection in [1,2,3,4,5]:
-                # place train or station
-                if self.current_selection == 5:
-                    # station
-                    self.array[2] = np.zeros(self.array[2].shape)
-                    self.train_data.at[self.train_index, 'end_pos'] = (row, col)
-                    for r,c in self.train_data['end_pos']:
-                        if r != -1:
-                            self.array[2][r, c] = 5
-                else:
-                    # train
-                    self.array[1] = np.zeros(self.array[1].shape)
-                    data = {
-                        'start_pos': (row, col),
-                        'dir': self.dir[self.current_selection],
-                        'end_pos': (-1, -1),
-                        'e_dep': -1,
-                        'l_arr': -1,
-                    }
-                    self.train_data.loc[len(self.train_data)] = data
-                    for _,r in self.train_data.iterrows():
-                            self.array[1][r['start_pos']] = self.dir[r['dir']]
-                    if self.train_list:
-                        self.train_list.update_labels()
-            else:
-                # place track
-                self.array[0][row, col] = self.current_selection
-        elif self.current_selection == 0:
-            # erase track
-            self.array[0][row, col] = 0
-        self.draw_images()
-
     def draw_images(self):
-        self.draw_grid()
-        self.canvas.delete("grid_image")
-        self.canvas.delete("id_labels")
+        self.update_image_storage()
+        self.draw_tracks()
+        self.draw_trains()
 
+    def put_img_on_canvas(self, value, layer, row, col):
         adjusted_cell_size = self.cell_size * self.scale
 
+        image = self.image_cache[value].resize(
+            (int(adjusted_cell_size), int(adjusted_cell_size))
+        )
+        image = ImageTk.PhotoImage(image)
+
+        x = self.x_offset + col * adjusted_cell_size
+        y = self.y_offset + row * adjusted_cell_size
+
+        if (layer, row, col) in self.canvas_images:
+            if self.image_refs.get((layer, row, col)) != image:
+                self.image_refs[(layer, row, col)] = image  # Update reference
+            self.canvas.itemconfig(
+                self.canvas_images[(layer, row, col)], image=image
+            )
+            self.canvas.coords(self.canvas_images[(layer, row, col)], x, y)
+        else:
+            canvas_img = self.canvas.create_image(
+                x, y, anchor='nw',image=image,
+                tags='track_image' if layer == 0 else 'train_station_image'
+            )
+            self.canvas_images[(layer, row, col)] = canvas_img
+            self.image_refs[(layer, row, col)] = image
+
+    def update_image_storage(self):
+        starts = set(self.train_data['start_pos'])
+        ends = set(self.train_data['end_pos'])
+
+        self.canvas_images = {
+            (layer, row, col): v
+            for (layer, row, col), v in self.canvas_images.items()
+            if (layer == 0 and self.array[0][row, col] != 0) or
+               (layer == 1 and (row, col) in starts) or
+               (layer == 2 and (row, col) in ends)
+        }
+
+        self.image_refs = {
+            (layer, row, col): v
+            for (layer, row, col), v in self.image_refs.items()
+            if (layer == 0 and self.array[0][row, col] != 0) or
+               (layer == 1 and (row, col) in starts) or
+               (layer == 2 and (row, col) in ends)
+        }
+
+    def draw_tracks(self):
+        for row in range(self.rows):
+            for col in range(self.cols):
+                value = self.array[0][row, col]
+                if value == 0:
+                    continue
+                else:
+                    self.put_img_on_canvas(value, 0, row, col)
+
+    def draw_trains(self):
+        for _, row in self.train_data.iterrows():
+            self.put_img_on_canvas(
+                value=self.dir[row['dir']],
+                layer=1,
+                row=row['start_pos'][0],
+                col=row['start_pos'][1]
+            )
+
+            if row['end_pos'] != (-1, -1):
+                self.put_img_on_canvas(
+                    5,
+                    2,
+                    row=row['end_pos'][0],
+                    col=row['end_pos'][1]
+                )
+
+        self.canvas.delete('id_labels')
+        self.draw_id_labels()
+
+    def draw_id_labels(self):
+        self.draw_train_id_labels()
+        self.draw_station_id_labels()
+
+    def draw_train_id_labels(self):
+        adjusted_cell_size = self.cell_size * self.scale
         offset_dict = {
             0: (adjusted_cell_size * 0.5, adjusted_cell_size * 0.5),
             1: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.5),
@@ -543,105 +529,209 @@ class BuildCanvas:
             8: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.75),
         }
 
-        for i in range(3):
-            for row in range(self.rows):
-                for col in range(self.cols):
-                    value = self.array[i][row, col]
-                    if value:
-                        image, rotation = self.img_dict[value]
+        self.train_data['count'] = (
+            self.train_data.groupby('start_pos')['start_pos']
+            .transform('count')
+        )
+        self.train_data['cell_offset'] = (
+                self.train_data.groupby('start_pos')
+                .cumcount()
+                .where(self.train_data['count'] > 1, 0) % 9
+        )
 
-                        image = f'data/png/{image}.png'
-                        image = Image.open(image).resize(
-                            (int(adjusted_cell_size),
-                             int(adjusted_cell_size))
-                        ).rotate(rotation)
-                        image = ImageTk.PhotoImage(image)
+        for index, row in self.train_data.iterrows():
+            self.canvas.create_text(
+                (self.x_offset + offset_dict[row['cell_offset']][0] +
+                 row['start_pos'][1] * adjusted_cell_size),
+                (self.y_offset + offset_dict[row['cell_offset']][1] +
+                 row['start_pos'][0] * adjusted_cell_size),
+                text=str(index),
+                anchor="center",
+                font=("Courier", int(20 * (adjusted_cell_size/100)), 'bold'),
+                fill='#000000',
+                tags="id_labels"
+            )
 
-                        self.image_refs.append(image)
+        self.train_data.drop(columns=['count'], inplace=True)
+        self.train_data.drop(columns=['cell_offset'], inplace=True)
 
-                        x1 = self.x_offset + col * adjusted_cell_size
-                        y1 = self.y_offset + row * adjusted_cell_size
-                        self.canvas.create_image(
-                            x1, y1, anchor="nw", image=image,
-                            tags="grid_image"
-                        )
+    def draw_station_id_labels(self):
+        adjusted_cell_size = self.cell_size * self.scale
+        offset_dict = {
+            0: (adjusted_cell_size * 0.5, adjusted_cell_size * 0.5),
+            1: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.5),
+            2: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.25),
+            3: (adjusted_cell_size * 0.5, adjusted_cell_size * 0.25),
+            4: (adjusted_cell_size * 0.75, adjusted_cell_size * 0.25),
+            5: (adjusted_cell_size * 0.75, adjusted_cell_size * 0.5),
+            6: (adjusted_cell_size * 0.75, adjusted_cell_size * 0.75),
+            7: (adjusted_cell_size * 0.5, adjusted_cell_size * 0.75),
+            8: (adjusted_cell_size * 0.25, adjusted_cell_size * 0.75),
+        }
 
-            # draw id on trains
-            if i == 1:
-                self.train_data['count'] = (
-                    self.train_data.groupby('start_pos')['end_pos']
-                    .transform('count')
+        self.train_data['count'] = (
+            self.train_data.groupby('end_pos')['end_pos']
+            .transform('count')
+        )
+        self.train_data['cell_offset'] = (
+                self.train_data.groupby('end_pos')
+                .cumcount()
+                .where(self.train_data['count'] > 1, 0) % 9
+        )
+
+        for index, row in self.train_data.iterrows():
+            if row['end_pos'] != (-1, -1):
+                self.canvas.create_text(
+                    (self.x_offset + offset_dict[row['cell_offset']][0] +
+                     row['end_pos'][1] * adjusted_cell_size),
+                    (self.y_offset + offset_dict[row['cell_offset']][1] +
+                     row['end_pos'][0] * adjusted_cell_size),
+                    text=str(index),
+                    anchor="center",
+                    font=("Courier", int(20 * (adjusted_cell_size/100)), 'bold'),
+                    fill='#000000',
+                    tags="id_labels"
                 )
-                self.train_data['cell_offset'] = (
-                        self.train_data.groupby('start_pos')
-                        .cumcount()
-                        .where(self.train_data['count'] > 1,0) % 9
-                )
 
-                for index, row in self.train_data.iterrows():
-                    self.canvas.create_text(
-                        (self.x_offset + offset_dict[row['cell_offset']][0] +
-                         row['start_pos'][1] * adjusted_cell_size),
-                        (self.y_offset + offset_dict[row['cell_offset']][1] +
-                        row['start_pos'][0] * adjusted_cell_size),
-                        text=str(index),
-                        anchor="center",
-                        font=("Courier", 15, 'bold'),
-                        fill='#000000',
-                        tags="id_labels"
-                    )
+        self.train_data.drop(columns=['count'], inplace=True)
+        self.train_data.drop(columns=['cell_offset'], inplace=True)
 
-                self.train_data.drop(columns=['count'], inplace=True)
-                self.train_data.drop(columns=['cell_offset'], inplace=True)
+    def draw_mouse_symbols(self, event):
+        adjusted_x = (event.x - self.x_offset) / self.scale
+        adjusted_y = (event.y - self.y_offset) / self.scale
+        grid_width = self.cols * self.cell_size
+        grid_height = self.rows * self.cell_size
 
-            # draw id on station
-            if i == 2:
-                self.train_data['count'] = (
-                    self.train_data.groupby('end_pos')['end_pos']
-                    .transform('count')
-                )
-                self.train_data['cell_offset'] = (
-                        self.train_data.groupby('end_pos')
-                        .cumcount()
-                        .where(self.train_data['count'] > 1,0) % 9
-                )
+        if not (0 <= adjusted_x < grid_width and 0 <= adjusted_y < grid_height):
+            self.canvas.delete(self.text_label)
+            self.canvas.delete(self.mouse_image)
+            self.text_label = None
+            self.mouse_image = None
+            return
 
-                for index, row in self.train_data.iterrows():
-                    if row['end_pos'] != (-1, -1):
-                        self.canvas.create_text(
-                            (self.x_offset + offset_dict[row['cell_offset']][0] +
-                             row['end_pos'][1] * adjusted_cell_size),
-                            (self.y_offset + offset_dict[row['cell_offset']][1] +
-                            row['end_pos'][0] * adjusted_cell_size),
-                            text=str(index),
-                            anchor="center",
-                            font=("Courier", 15, 'bold'),
-                            fill='#000000',
-                            tags="id_labels"
-                        )
+        row = int(adjusted_y / self.cell_size )
+        col = int(adjusted_x / self.cell_size )
+        coords_text = f"[{row}, {col}]"
 
-                self.train_data.drop(columns=['count'], inplace=True)
-                self.train_data.drop(columns=['cell_offset'], inplace=True)
-
-    def calculate_initial_pos(self):
-        if max(self.rows, self.cols) > 30:
-            self.x_offset = 0
-            self.y_offset = 0
-            self.draw_images()
-        elif self.rows > self.cols:
-            self.cell_size = self.canvas.winfo_height() / self.rows
-            width = self.cell_size * self.cols
-            height = self.cell_size * self.rows
-            self.x_offset = (self.canvas.winfo_width() - width) // 2
-            self.y_offset = (self.canvas.winfo_height() - height) // 2
-            self.draw_images()
+        if self.text_label is None:
+            self.text_label = self.canvas.create_text(
+                event.x + 10,
+                event.y + 10,
+                text=coords_text,
+                font=("Arial", 20),
+                fill="#FFFFFF",
+                anchor="nw"
+            )
         else:
-            self.cell_size = self.canvas.winfo_width() / self.cols
-            width = self.cell_size * self.cols
-            height = self.cell_size * self.rows
-            self.x_offset = (self.canvas.winfo_width() - width) // 2
-            self.y_offset = (self.canvas.winfo_height() - height) // 2
-            self.draw_images()
+            self.canvas.itemconfig(self.text_label, text=coords_text)
+            self.canvas.coords(self.text_label, event.x + 10, event.y + 10)
+
+        if self.current_selection is not None:
+            image = self.image_cache[self.current_selection].resize((30, 30))
+            self.current_selection_image = ImageTk.PhotoImage(image)
+
+            if self.mouse_image is None:
+                self.mouse_image = self.canvas.create_image(
+                    event.x + 10,
+                    event.y - 20,
+                    image=self.current_selection_image,
+                    anchor="nw"
+                )
+            else:
+                self.canvas.itemconfig(
+                    self.mouse_image,
+                    image=self.current_selection_image
+                )
+                self.canvas.coords(self.mouse_image, event.x + 10, event.y - 20)
+
+    def remove_mouse_symbols(self, event):
+        """Clear the coordinates label when the mouse leaves the canvas."""
+        self.canvas.delete(self.text_label)
+        self.text_label = None
+
+    @staticmethod
+    def set_img_dict():
+        dictionary = {
+            0: ('eraser', 0),
+            1: ('Zug_Gleis_#0091ea', 0),
+            2: ('Zug_Gleis_#0091ea', 270),
+            3: ('Zug_Gleis_#0091ea', 180),
+            4: ('Zug_Gleis_#0091ea', 90),
+            5: ('Bahnhof_#d50000', 0),
+            32800: ('Gleis_vertikal', 0),
+            1025: ('Gleis_horizontal', 0),
+            2064: ('Gleis_kurve_oben_links', 0),
+            72: ('Gleis_kurve_oben_rechts', 0),
+            16386: ('Gleis_kurve_unten_rechts', 0),
+            4608: ('Gleis_kurve_unten_links', 0),
+            3089: ('Weiche_horizontal_oben_links', 0),
+            1097: ('Weiche_horizontal_oben_rechts', 0),
+            17411: ('Weiche_horizontal_unten_rechts', 0),
+            5633: ('Weiche_horizontal_unten_links', 0),
+            34864: ('Weiche_vertikal_oben_links', 0),
+            32872: ('Weiche_vertikal_oben_rechts', 0),
+            49186: ('Weiche_vertikal_unten_rechts', 0),
+            37408: ('Weiche_vertikal_unten_links', 0),
+            33825: ('Gleis_Diamond_Crossing', 0),
+            35889: ('Weiche_Single_Slip', 270),
+            33897: ('Weiche_Single_Slip', 180),
+            50211: ('Weiche_Single_Slip', 90),
+            38433: ('Weiche_Single_Slip', 0),
+            52275: ('Weiche_Double_Slip', 90),
+            38505: ('Weiche_Double_Slip', 0),
+            2136: ('Weiche_Symetrical', 180),
+            16458: ('Weiche_Symetrical', 90),
+            20994: ('Weiche_Symetrical', 0),
+            6672: ('Weiche_Symetrical', 270),
+        }
+        return dictionary
+
+    def load_images(self):
+        for key, (filename, rotation) in self.image_dict.items():
+            try:
+                image = Image.open(f'data/png/{filename}.png')
+                rotated_image = image.rotate(rotation)
+                self.image_cache[key] = rotated_image
+            except FileNotFoundError:
+                print(f"Warning: Image {filename}.png not found.")
+                self.image_cache[key] = None
+
+    def zoom(self, event):
+        scale_factor = 1.1 if event.delta > 0 else 0.9
+        new_scale = self.scale * scale_factor
+
+        # Prevent too much zoom
+        new_scale  = max(0.1, min(new_scale, 10))
+
+        # Calculate the point in the grid where the mouse is
+        grid_mouse_x = (event.x - self.x_offset) / self.scale
+        grid_mouse_y = (event.y - self.y_offset) / self.scale
+
+        # Update offsets to keep the grid under the mouse stable
+        self.x_offset -= (grid_mouse_x * new_scale - grid_mouse_x * self.scale)
+        self.y_offset -= (grid_mouse_y * new_scale - grid_mouse_y * self.scale)
+
+        # Apply the new scale
+        self.scale = new_scale
+        self.draw_grid()
+        self.draw_images()
+
+    def start_pan(self, event):
+        self.pan_start = (event.x, event.y)
+
+    def pan(self, event):
+        dx = event.x - self.pan_start[0]
+        dy = event.y - self.pan_start[1]
+
+        self.x_offset += dx
+        self.y_offset += dy
+        self.pan_start = (event.x, event.y)
+
+        self.canvas.move("track_image", dx, dy)
+        self.canvas.move("train_station_image", dx, dy)
+        self.canvas.move("grid_line", dx, dy)
+        self.canvas.move("grid_label", dx, dy)
+        self.canvas.move("id_labels", dx, dy)
 
 
 class TrainListCanvas:
@@ -815,7 +905,8 @@ class TrainListCanvas:
         self.train_data.drop(index, inplace=True)
         self.train_data.reset_index(drop=True, inplace=True)
         self.update_labels()
-        self.grid.draw_images()
+        self.grid.update_image_storage()
+        self.grid.draw_trains()
         return
 
     def open_train_config_frame(self, index):
@@ -942,7 +1033,8 @@ class TrainListCanvas:
         if self.train_data.loc[index, 'end_pos'][0] != -1:
             row, col = self.train_data.loc[index, 'end_pos']
             self.grid.array[2][row, col] = 5
-            self.grid.draw_images()
+            self.grid.update_image_storage()
+            self.grid.draw_trains()
 
         save = tk.Button(
             config_frame,
@@ -1010,7 +1102,8 @@ class TrainListCanvas:
         self.train_data.loc[index, 'l_arr'] = la
         self.grid.current_selection = None
         self.grid.train_index = None
-        self.grid.draw_images()
+        self.grid.update_image_storage()
+        self.grid.draw_trains()
         config_frame.destroy()
 
 
