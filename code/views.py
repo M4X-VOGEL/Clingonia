@@ -2,6 +2,7 @@ import os
 import ast
 import json
 import shutil
+import platform
 from tkinter import filedialog
 
 from code.build_png import create_custom_env, initial_render_test, save_png
@@ -12,6 +13,9 @@ from code.lp_to_env import lp_to_env
 from code.positions import position_df
 from code.build_gif import build_gif
 
+
+# Platform: 
+sys_platform = platform.system()
 
 # Base style parameters
 screenwidth, screenheight = 1920, 1080
@@ -223,17 +227,12 @@ def build_title_frame():
         visibility=True
     )
 
-    labels['title_label'] = Label(
-        root=frames['title_frame'].frame,
-        grid_pos=(0, 0),
-        padding=(0, 0),
-        sticky='nsew',
-        text='CLINGONIA',
-        font=('Lucida Handwriting', int(font_scale * 80), 'bold'),
-        foreground_color='#FFFFFF',
-        background_color='#000000',
-        visibility=True,
-    )
+    if sys_platform == "Windows":
+        title_frame_label('Lucida Handwriting', 80)
+    elif sys_platform == "Darwin":  # macOS
+        title_frame_label('Big Caslon', 100)
+    else:  # Linux and other
+        title_frame_label('Arial')
 
     pictures['title_gif'] = GIF(
         root=frames['title_frame'].frame,
@@ -250,6 +249,20 @@ def build_title_frame():
     frames['title_frame'].frame.rowconfigure((0, 1), weight=1)
     frames['title_frame'].frame.columnconfigure(0, weight=1)
     frames['title_frame'].frame.grid_propagate(False)
+
+def title_frame_label(font, scale_fac):
+    # Necessary for macOS
+    labels['title_label'] = Label(
+        root=frames['title_frame'].frame,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nsew',
+        text='CLINGONIA',
+        font=(font, int(font_scale * scale_fac), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
 
 def build_start_menu_frame():
     frames['start_menu_frame'] = Frame(
@@ -578,28 +591,48 @@ def build_main_menu():
         border_width=0,
         visibility=True,
     )
-
-    labels['saveImage_label'] = Label(
-        root=frames['main_menu_frame'].frame,
-        grid_pos=(4, 1),
-        padding=(52, 12, 0, 0),
-        sticky='ne',
-        text='Image',
-        font=('Arial', int(font_scale * base_font), 'normal'),
-        foreground_color='#000000',
-        background_color='#777777',
-        visibility=True,
-    )
-
-    buttons['saveImage_button'] = ToggleSwitch(
-        root=frames['main_menu_frame'].frame,
-        width=70, height=30,
-        on_color='#00FF00', off_color='#FF0000',
-        handle_color='#FFFFFF', background_color='#777777',
-        command=change_save_image_status,
-    )
-    buttons['saveImage_button'].grid(row=4, column=1, pady=(60,0), padx=68, sticky="ne")
-    buttons['saveImage_button'].set_state(user_params['saveImage'])
+    if sys_platform == "Darwin":  # macOS
+        labels['saveImage_label'] = Label(
+            root=frames['main_menu_frame'].frame,
+            grid_pos=(4, 1),
+            padding=(28, 2, 0, 0),
+            sticky='ne',
+            text='Image',
+            font=('Arial', int(font_scale * base_font), 'normal'),
+            foreground_color='#000000',
+            background_color='#EEEEEE',
+            visibility=True,
+        )
+        buttons['saveImage_button'] = ToggleSwitch(
+            root=frames['main_menu_frame'].frame,
+            width=30, height=16,
+            on_color='#00FF00', off_color='#FF0000',
+            handle_color='#777777', background_color='#EEEEEE',
+            command=change_save_image_status,
+        )
+        buttons['saveImage_button'].grid(row=4, column=1, pady=(25,0), padx=40, sticky="ne")
+        buttons['saveImage_button'].set_state(user_params['saveImage'])
+    else:  # Windows, Linux and other
+        labels['saveImage_label'] = Label(
+            root=frames['main_menu_frame'].frame,
+            grid_pos=(4, 1),
+            padding=(52, 12, 0, 0),
+            sticky='ne',
+            text='Image',
+            font=('Arial', int(font_scale * base_font), 'normal'),
+            foreground_color='#000000',
+            background_color='#777777',
+            visibility=True,
+        )
+        buttons['saveImage_button'] = ToggleSwitch(
+            root=frames['main_menu_frame'].frame,
+            width=70, height=30,
+            on_color='#00FF00', off_color='#FF0000',
+            handle_color='#FFFFFF', background_color='#777777',
+            command=change_save_image_status,
+        )
+        buttons['saveImage_button'].grid(row=4, column=1, pady=(60,0), padx=68, sticky="ne")
+        buttons['saveImage_button'].set_state(user_params['saveImage'])
 
     buttons['load_env_button'] = Button(
         root=frames['main_menu_frame'].frame,

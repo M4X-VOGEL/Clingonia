@@ -2,9 +2,13 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import colors as mcolors
+import platform
 
 from code.custom_widgets import *
 
+
+# Platform: 
+sys_platform = platform.system()
 
 class EnvCanvas:
     def __init__(
@@ -726,15 +730,26 @@ class TrainListCanvas:
             )
             label.pack(side='left', padx=0)
 
-            self.config_dict[idx] = tk.Button(
-                frame,
-                width=8,height=1,
-                font=('Arial', int(self.font_scale * self.base_font)),
-                fg='#FFFFFF', bg='#333333',
-                text='configure',
-                command=lambda index=idx: self.open_train_config_frame(index)
-            )
-            self.config_dict[idx].pack(side='left', padx=15)
+            if sys_platform == "Darwin":  # macOS
+                self.config_dict[idx] = tk.Button(
+                    frame,
+                    width=8,height=1,
+                    font=('Arial', int(self.font_scale * self.base_font)),
+                    fg='#000000', bg='#333333',
+                    text='configure',
+                    command=lambda index=idx: self.open_train_config_frame(index)
+                )
+                self.config_dict[idx].pack(side='left', padx=15)
+            else:  # Window, Linux and other
+                self.config_dict[idx] = tk.Button(
+                    frame,
+                    width=8,height=1,
+                    font=('Arial', int(self.font_scale * self.base_font)),
+                    fg='#FFFFFF', bg='#333333',
+                    text='configure',
+                    command=lambda index=idx: self.open_train_config_frame(index)
+                )
+                self.config_dict[idx].pack(side='left', padx=15)
 
             self.remove_dict[idx] = tk.Button(
                 frame,

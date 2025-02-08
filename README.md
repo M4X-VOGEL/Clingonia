@@ -1,9 +1,9 @@
-# MadMotion: Flatland-ASP-GUI (Early Access)
+# Clingonia by MadMotion (Early Access)
 
 ![Flatland animation](https://i.imgur.com/9cNtWjs.gif)
 
 ## 🚆 Flatland
-Flatland is a [railway scheduling challenge](https://flatland.aicrowd.com/intro.html) hosted by AICrowd to address the problem of multi-agent pathfinding for trains in large railway networks. This repository provides a GUI-based program to generate, build, modify, load, and save environments, run simulations, and review results.
+Flatland is a [railway scheduling challenge](https://flatland.aicrowd.com/intro.html) hosted by AICrowd to address the problem of multi-agent pathfinding for trains in large railway networks. This repository provides the GUI-based software "Clingonia" to generate, build, modify, load, and save environments, run simulations, and review results.
 
 <br>
 
@@ -20,7 +20,7 @@ Flatland is a [railway scheduling challenge](https://flatland.aicrowd.com/intro.
 
 ## ⚙️ Please note:
 
-⚠️ This software is currently optimized for Windows platforms; however, it already runs on macOS to a limited extent, with full support scheduled for a future release.
+⚠️ This software is optimized for Windows platforms; however, it runs on macOS.
 
 <br>
 
@@ -42,6 +42,12 @@ pip install flatland-rl
 📦 To have access to clingo, install the required package:
 ```
 conda install -c potassco clingo
+```
+
+📦 Make sure that you also have installed the following required packages:
+```
+pip show pillow
+pip show imageio
 ```
 
 <br>
@@ -106,3 +112,11 @@ This will launch the program.
 ### 🛠️ Troubleshooting
 
 If you encounter unexpected issues, it may be due to any number of reasons. This is still an early version and we are hard at work at MadMotion to get our program to the next level. Feel free to report any issues to us so we can address them promptly.
+
+<br>
+
+### ⚠️ Known issues
+
+- The software will crash while building your own environment as soon as you place too many tracks and trains. Suggestion: Keep it small for now (max. 12x12).
+- The displaying of the `GIF` may be distorted. 
+- You cannot set the parameters after loading a custom environement into the program, yet.

@@ -134,12 +134,12 @@ def ensure_train_spawns(df_pos, trains):
 
 
 def beep_feedback():
-    system = platform.system()
-    if system == "Windows":
+    sys_platform = platform.system()
+    if sys_platform == "Windows":
         import winsound
         winsound.Beep(600, 200)
         winsound.Beep(800, 250)
-    elif system == "Darwin":  # macOS (system sound)
+    elif sys_platform == "Darwin":  # macOS (system sound)
         subprocess.run(["afplay", "/System/Library/Sounds/Glass.aiff"])
     else:  # Linux and other
         print('\a')
