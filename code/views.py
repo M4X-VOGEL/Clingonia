@@ -2,7 +2,6 @@ import os
 import ast
 import json
 import shutil
-import platform
 from tkinter import filedialog
 
 from code.build_png import create_custom_env, initial_render_test, save_png
@@ -232,7 +231,7 @@ def build_title_frame():
     elif sys_platform == "Darwin":  # macOS
         title_frame_label('Big Caslon', 100)
     else:  # Linux and other
-        title_frame_label('Arial')
+        title_frame_label('Arial', 80)
 
     pictures['title_gif'] = GIF(
         root=frames['title_frame'].frame,
@@ -4482,10 +4481,10 @@ def build_result_gif_frame():
         visibility=True
     )
 
-    pictures['title_gif'] = GIF(
+    pictures['result_gif'] = GIF(
         root=frames['result_gif_frame'].frame,
-        width=frames['result_gif_frame'].width * 0.99,
-        height=frames['result_gif_frame'].height * 0.4,
+        width=frames['result_gif_frame'].width ,
+        height=frames['result_gif_frame'].height,
         grid_pos=(0, 0),
         padding=(0, 0),
         sticky='nesw',
