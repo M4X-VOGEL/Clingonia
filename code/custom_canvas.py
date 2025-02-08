@@ -1,10 +1,6 @@
 import numpy as np
 import pandas as pd
-import seaborn as sns
-from matplotlib import colors as mcolors
 import platform
-
-from sentry_sdk import start_span
 
 from code.custom_widgets import *
 
