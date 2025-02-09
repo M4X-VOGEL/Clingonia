@@ -443,16 +443,20 @@ class GIF:
         gif = Image.open(gif_path)
         frames = []
         delay = gif.info.get("duration", 100)
+
+        original_width, original_height = gif.size
+        scale = min(self.width / original_width, self.height / original_height)
+        new_width = int(original_width * scale)
+        new_height = int(original_height * scale)
+
         try:
             while True:
-                frame = gif.copy().resize(
-                    (int(self.width), int(self.height)),
+                frame = gif.copy().convert("RGBA")
+                frame = frame.resize(
+                    (new_width, new_height),
                     Image.Resampling.LANCZOS
                 )
-
-                frame = frame.convert("RGBA")
                 frame = self.round_corners(frame, self.corner_radius)
-
                 frames.append(ImageTk.PhotoImage(frame))
                 gif.seek(len(frames))  # Move to the next frame
         except EOFError:

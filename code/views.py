@@ -2,7 +2,6 @@ import os
 import ast
 import json
 import shutil
-import platform
 from tkinter import filedialog
 
 from code.build_png import create_custom_env, initial_render_test, save_png
@@ -52,7 +51,9 @@ default_params = {
     'saveImage': False,
     'answer': 1,
     'clingo': 'clingo',
-    'lpFiles': []
+    'lpFiles': [],
+    'lowQualityGIF': False,
+    'frameRate': 2.0,
 }
 user_params = {
     'rows': None,
@@ -73,6 +74,8 @@ user_params = {
     'answer': None,
     'clingo': None,
     'lpFiles': [],
+    'lowQualityGIF': False,
+    'frameRate': None,
 }
 user_params_backup = user_params.copy()
 
@@ -134,6 +137,11 @@ err_dict = {
     'answer': {ValueError: 'needs int > 0'},
     'clingo': {},
     'lpFiles': {},
+    'frameRate': {
+        ValueError: 'needs 0 < num <= 60',
+        'negativeFrameRate': 'needs 0 < num <= 60',
+        'tooBigFrameRate': 'needs 0 < num <= 60',
+    }
 }
 loading_err_dict = {
     -1: 'No environment .lp file found',
@@ -232,7 +240,7 @@ def build_title_frame():
     elif sys_platform == "Darwin":  # macOS
         title_frame_label('Big Caslon', 100)
     else:  # Linux and other
-        title_frame_label('Arial')
+        title_frame_label('Arial', 80)
 
     pictures['title_gif'] = GIF(
         root=frames['title_frame'].frame,
@@ -534,7 +542,7 @@ def build_main_menu():
         height=2,
         grid_pos=(1, 1),
         padding=(0, 0),
-        sticky='n',
+        sticky='new',
         command=switch_main_to_random_gen,
         text='Generate Random Environment',
         font=('Arial', int(font_scale * base_font), 'bold'),
@@ -550,7 +558,7 @@ def build_main_menu():
         height=2,
         grid_pos=(2, 1),
         padding=(0, 0),
-        sticky='n',
+        sticky='new',
         command=switch_main_to_builder,
         text='Build New Environment',
         font=('Arial', int(font_scale * base_font), 'bold'),
@@ -566,7 +574,7 @@ def build_main_menu():
         height=2,
         grid_pos=(3, 1),
         padding=(0, 0),
-        sticky='n',
+        sticky='new',
         command=switch_main_to_modify,
         text='Modify Environment',
         font=('Arial', int(font_scale * base_font), 'bold'),
@@ -582,7 +590,7 @@ def build_main_menu():
         height=2,
         grid_pos=(4, 1),
         padding=(0, 0),
-        sticky='n',
+        sticky='new',
         command=save_env_to_file,
         text='Save Environment',
         font=('Arial', int(font_scale * base_font), 'bold'),
@@ -591,6 +599,7 @@ def build_main_menu():
         border_width=0,
         visibility=True,
     )
+
     if sys_platform == "Darwin":  # macOS
         labels['saveImage_label'] = Label(
             root=frames['main_menu_frame'].frame,
@@ -613,11 +622,23 @@ def build_main_menu():
         buttons['saveImage_button'].grid(row=4, column=1, pady=(25,0), padx=40, sticky="ne")
         buttons['saveImage_button'].set_state(user_params['saveImage'])
     else:  # Windows, Linux and other
-        labels['saveImage_label'] = Label(
+        frames['save_button_frame'] = Frame(
             root=frames['main_menu_frame'].frame,
+            width=10,
+            height=10,
             grid_pos=(4, 1),
-            padding=(52, 12, 0, 0),
+            padding=(0, 0),
             sticky='ne',
+            background_color='#777777',
+            border_width=0,
+            visibility=True
+        )
+
+        labels['saveImage_label'] = Label(
+            root=frames['save_button_frame'].frame,
+            grid_pos=(0, 0),
+            padding=((0, 10), (5, 0)),
+            sticky='n',
             text='Image',
             font=('Arial', int(font_scale * base_font), 'normal'),
             foreground_color='#000000',
@@ -625,13 +646,15 @@ def build_main_menu():
             visibility=True,
         )
         buttons['saveImage_button'] = ToggleSwitch(
-            root=frames['main_menu_frame'].frame,
+            root=frames['save_button_frame'].frame,
             width=70, height=30,
             on_color='#00FF00', off_color='#FF0000',
             handle_color='#FFFFFF', background_color='#777777',
             command=change_save_image_status,
         )
-        buttons['saveImage_button'].grid(row=4, column=1, pady=(60,0), padx=68, sticky="ne")
+        buttons['saveImage_button'].grid(
+            row=0, column=0, padx=(0, 10), pady=(45, 0), sticky="n"
+        )
         buttons['saveImage_button'].set_state(user_params['saveImage'])
 
     buttons['load_env_button'] = Button(
@@ -640,7 +663,7 @@ def build_main_menu():
         height=2,
         grid_pos=(5, 1),
         padding=(0, 0),
-        sticky='n',
+        sticky='new',
         command=load_env_from_file,
         text='Load Environment',
         font=('Arial', int(font_scale * base_font), 'bold'),
@@ -668,7 +691,7 @@ def build_main_menu():
         height=2,
         grid_pos=(8, 1),
         padding=(0, 0),
-        sticky='n',
+        sticky='new',
         command=switch_main_to_clingo_para,
         text='Next: Clingo Solver',
         font=('Arial', int(font_scale * base_font), 'bold'),
@@ -2227,7 +2250,7 @@ def save_random_gen_env_params():
         key = field.split('_')[0]
         if key not in default_params:
             continue
-        elif key in ['answer', 'clingo', 'lpFiles']:
+        elif key in ['answer', 'clingo', 'lpFiles', 'frameRate']:
             continue
 
         data = entry_fields[field].entry_field.get()
@@ -2367,7 +2390,7 @@ def load_random_gen_env_params():
         key = field.split('_')[0]
         if key not in default_params:
             continue
-        elif key in ['answer', 'clingo', 'lpFiles']:
+        elif key in ['answer', 'clingo', 'lpFiles', 'frameRate']:
             continue
         elif user_params[key] is None:
             continue
@@ -4028,7 +4051,7 @@ def save_builder_env_params():
         if key not in default_params:
             continue
         if key in ['answer', 'clingo', 'lpFiles', 'agents', 'cities', 'seed',
-                   'grid', 'intercity', 'incity']:
+                   'grid', 'intercity', 'incity', 'frameRate']:
             continue
 
         data = entry_fields[field].entry_field.get()
@@ -4128,7 +4151,7 @@ def load_builder_env_params():
         if key not in default_params:
             continue
         elif key in ['answer', 'clingo', 'lpFiles', 'agents', 'cities', 'seed',
-                     'grid', 'intercity', 'incity']:
+                     'grid', 'intercity', 'incity', 'frameRate']:
             continue
         elif user_params[key] is None:
             continue
@@ -4304,12 +4327,25 @@ def build_result_menu():
         visibility=True,
     )
 
+    labels['spacing_err_label'] = Label(
+        root=frames['result_menu_frame'].frame,
+        grid_pos=(0, 2),
+        padding=(0, 0),
+        sticky='nw',
+        text='needs 0 < num <= 60',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#000000',
+        background_color='#000000',
+        visibility=True,
+    )
+
     buttons['show_time_table_button'] = Button(
         root=frames['result_menu_frame'].frame,
-        width=20,
+        width=25,
         height=1,
         grid_pos=(1, 1),
         padding=(0, 0),
+        sticky='nwe',
         command=toggle_result_timetable,
         text='Toggle Time Table',
         font=('Arial', int(font_scale * base_font), 'bold'),
@@ -4321,12 +4357,112 @@ def build_result_menu():
 
     buttons['show_gif_button'] = Button(
         root=frames['result_menu_frame'].frame,
-        width=20,
+        width=25,
         height=1,
         grid_pos=(2, 1),
         padding=(0, 0),
+        sticky='nwe',
         command=toggle_result_gif,
         text='Toggle GIF',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#000000',
+        background_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    labels['gif_status_label'] = Label(
+        root=frames['result_menu_frame'].frame,
+        grid_pos=(2, 2),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#000000',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    labels['frameRate_label'] = Label(
+        root=frames['result_menu_frame'].frame,
+        grid_pos=(3, 1),
+        padding=(0, 0),
+        sticky='nw',
+        text='Gif Timesteps/sec:',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    entry_fields['frameRate_entry'] = EntryField(
+        root=frames['result_menu_frame'].frame,
+        width=10,
+        height=1,
+        grid_pos=(3, 1),
+        padding=((0, 0), 0),
+        sticky='ne',
+        text=f'e.g. {default_params["frameRate"]}',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+    if user_params['frameRate'] % 1:
+        entry_fields['frameRate_entry'].insert_string(
+            str(user_params['frameRate'])
+        )
+    else:
+        entry_fields['frameRate_entry'].insert_string(
+            str(int(user_params['frameRate']))
+        )
+
+
+    labels['frameRate_error_label'] = Label(
+        root=frames['result_menu_frame'].frame,
+        grid_pos=(3, 2),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
+        foreground_color='#FF0000',
+        background_color='#000000',
+        visibility=False,
+    )
+
+    labels['lowQuality_label'] = Label(
+        root=frames['result_menu_frame'].frame,
+        grid_pos=(4, 1),
+        padding=(0, 0),
+        sticky='nw',
+        text='Low quality GIF:',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    buttons['lowQuality_button'] = ToggleSwitch(
+        root=frames['result_menu_frame'].frame,
+        width=70, height=30,
+        on_color='#00FF00', off_color='#FF0000',
+        handle_color='#FFFFFF', background_color='#000000',
+        command=change_low_quality_gif_status,
+    )
+    buttons['lowQuality_button'].grid(row=4, column=1, sticky='ne')
+    buttons['lowQuality_button'].set_state(user_params['lowQualityGIF'])
+
+    buttons['toggle_all_paths_button'] = Button(
+        root=frames['result_menu_frame'].frame,
+        width=25,
+        height=1,
+        grid_pos=(5, 1),
+        padding=(0, 0),
+        sticky='we',
+        command=toggle_all_paths,
+        text='Toggle All Paths',
         font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#000000',
         background_color='#777777',
@@ -4338,8 +4474,9 @@ def build_result_menu():
         frames['result_menu_frame'].frame,
         width=frames['result_menu_frame'].width * 0.5,
         height=frames['result_menu_frame'].height * 0.25,
-        grid_pos=(4,1),
+        grid_pos=(6,1),
         padding=(0,0),
+        sticky='nwe',
         background_color='#000000',
         border_width=0,
         visibility=True,
@@ -4347,10 +4484,11 @@ def build_result_menu():
 
     buttons['return_to_menu_button'] = Button(
         root=frames['result_menu_frame'].frame,
-        width=20,
+        width=25,
         height=1,
-        grid_pos=(5, 1),
+        grid_pos=(7, 1),
         padding=(0, 0),
+        sticky='nwe',
         command=switch_result_to_main,
         text='Return To Main Menu',
         font=('Arial', int(font_scale * base_font), 'bold'),
@@ -4362,8 +4500,10 @@ def build_result_menu():
 
     frames['result_menu_frame'].frame.rowconfigure(0, weight=1)
     frames['result_menu_frame'].frame.columnconfigure(0, weight=1)
-    frames['result_menu_frame'].frame.rowconfigure((1, 2, 3, 4, 5), weight=2)
+    frames['result_menu_frame'].frame.rowconfigure((1, 5, 6, 7), weight=2)
+    frames['result_menu_frame'].frame.rowconfigure((2, 3, 4),weight=1)
     frames['result_menu_frame'].frame.columnconfigure(1, weight=2)
+    frames['result_menu_frame'].frame.columnconfigure(2, weight=5)
     frames['result_menu_frame'].frame.grid_propagate(False)
 
     canvases['path_list_canvas'] = PathListCanvas(
@@ -4378,21 +4518,6 @@ def build_result_menu():
         grid=canvases['result_viewer_canvas'],
         base_font=base_font,
         font_scale=font_scale,
-    )
-
-    buttons['toggle_all_paths_button'] = Button(
-        root=frames['result_menu_frame'].frame,
-        width=20,
-        height=1,
-        grid_pos=(3, 1),
-        padding=(0, 0),
-        command=toggle_all_paths,
-        text='Toggle All Paths',
-        font=('Arial', int(font_scale * base_font), 'bold'),
-        foreground_color='#000000',
-        background_color='#777777',
-        border_width=0,
-        visibility=True,
     )
 
 def build_result_help_frame():
@@ -4482,10 +4607,10 @@ def build_result_gif_frame():
         visibility=True
     )
 
-    pictures['title_gif'] = GIF(
+    pictures['result_gif'] = GIF(
         root=frames['result_gif_frame'].frame,
-        width=frames['result_gif_frame'].width * 0.99,
-        height=frames['result_gif_frame'].height * 0.4,
+        width=frames['result_gif_frame'].width ,
+        height=frames['result_gif_frame'].height,
         grid_pos=(0, 0),
         padding=(0, 0),
         sticky='nesw',
@@ -4548,6 +4673,72 @@ def toggle_result_timetable():
         build_result_timetable_frame()
 
 def toggle_result_gif():
+    labels['gif_status_label'].label.config(
+        text='...Rendering GIF...',
+        fg='#00FF00',
+    )
+    frames['result_menu_frame'].frame.update()
+
+    err_count = 0
+
+    for field in entry_fields:
+        key = field.split('_')[0]
+        if key not in default_params:
+            continue
+        elif key != 'frameRate':
+            continue
+
+        data = entry_fields[field].entry_field.get()
+
+        try:
+            if data.startswith('e.g.'):
+                data = None
+            elif data == '':
+                data = None
+            else:
+                data = float(data)
+
+            labels[f'{key}_error_label'].hide_label()
+        except Exception as e:
+            err = type(e)
+            err_count += 1
+            if err in err_dict[key]:
+                labels[f'{key}_error_label'].label.config(
+                    text=err_dict[key][err])
+                labels[f'{key}_error_label'].place_label()
+            else:
+                print(e)
+                print(err)
+                print(data)
+            continue
+
+        # input constraints
+        if key=='frameRate' and data <= 0:
+            err_count += 1
+            err = 'negativeFrameRate'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        if key=='frameRate' and data > 60:
+            err_count += 1
+            err = 'tooBigFrameRate'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+
+        if type(data) is not str:
+            user_params[key] = data
+
+
+    if err_count:
+        labels['gif_status_label'].label.config(
+            text='',
+            fg='#00FF00',
+        )
+        frames['result_menu_frame'].frame.update()
+        return -1
+    else:
+        labels['frameRate_error_label'].hide_label()
+        frames['result_menu_frame'].frame.update()
+
     if ('result_timetable_frame' in frames and 
             frames['result_timetable_frame'].visibility):
         frames['result_timetable_frame'].toggle_visibility()
@@ -4564,6 +4755,12 @@ def toggle_result_gif():
     else:
         create_gif()
         build_result_gif_frame()
+
+    labels['gif_status_label'].label.config(
+        text='',
+        fg='#00FF00',
+    )
+    frames['result_menu_frame'].frame.update()
 
 def switch_result_to_main():
     if 'result_viewer_frame' in frames:
@@ -4592,6 +4789,9 @@ def switch_result_to_main():
 
 def change_low_quality_status():
     user_params['lowQuality'] = not user_params['lowQuality']
+
+def change_low_quality_gif_status():
+    user_params['lowQualityGIF'] = not user_params['lowQualityGIF']
 
 def change_save_image_status():
     user_params['saveImage'] = not user_params['saveImage']
