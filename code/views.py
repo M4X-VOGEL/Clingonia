@@ -149,6 +149,10 @@ loading_err_dict = {
     -3: 'A train predicate is faulty',
     -4: 'A start predicate is faulty',
     -5: 'A end predicate is faulty',
+    -6: 'A direction in a start predicate is faulty',
+    -7: 'A train has no start and/or end predicate',
+    -8: 'A train starts or ends on an invalid cell',
+    -9: 'A train has a latest arrival earlier than its earliest departure',
 }
 clingo_err_dict = {
     -1: 'No .lp files given',
@@ -4911,17 +4915,16 @@ def load_env_from_file():
 
     tracks, trains = lp_to_env(file)
 
-    if isinstance(tracks, int) or isinstance(trains, int):
-        key = tracks if isinstance(tracks, int) else trains
+    if isinstance(tracks, int):
         if last_menu == 'start':
             labels['start_load_status_label'].label.config(
-                text=loading_err_dict[key],
+                text=loading_err_dict[tracks],
                 fg='#FF0000',
             )
             frames['start_menu_frame'].frame.update()
         else:
             labels['main_load_status_label'].label.config(
-                text=loading_err_dict[key],
+                text=loading_err_dict[tracks],
                 fg='#FF0000',
             )
             frames['main_menu_frame'].frame.update()
