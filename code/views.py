@@ -1187,8 +1187,12 @@ def save_clingo_params():
         try:
             if data.startswith('e.g.'):
                 data = None
+                user_params[key] = data
+                continue
             elif data == '':
                 data = None
+                user_params[key] = data
+                continue
             elif key == 'clingo':
                 data = data
             else:
@@ -2265,8 +2269,12 @@ def save_random_gen_env_params():
         try:
             if data.startswith('e.g.'):
                 data = None
+                user_params[key] = data
+                continue
             elif data == '':
                 data = None
+                user_params[key] = data
+                continue
             elif key == 'grid' or key == 'remove':
                 data = str_to_bool(data)
             elif key == 'speed':
@@ -4067,8 +4075,12 @@ def save_builder_env_params():
         try:
             if data.startswith('e.g.'):
                 data = None
+                user_params[key] = data
+                continue
             elif data == '':
                 data = None
+                user_params[key] = data
+                continue
             elif key == 'grid' or key == 'remove':
                 data = str_to_bool(data)
             elif key == 'speed':
@@ -4701,8 +4713,12 @@ def toggle_result_gif():
         try:
             if data.startswith('e.g.'):
                 data = None
+                user_params[key] = data
+                continue
             elif data == '':
                 data = None
+                user_params[key] = data
+                continue
             else:
                 data = float(data)
 
