@@ -6,7 +6,7 @@ from code.build_png import create_custom_env
 
 DIR_MAP = {'n': 0, 'e': 1, 's': 2, 'w': 3}
 
-def build_gif(tracks, trains, df_pos, env_params, output_gif='data/running_tmp.gif', low_quality_mode=1):
+def build_gif(tracks, trains, df_pos, env_params, output_gif='data/running_tmp.gif', low_quality_mode=False):
     """Creates the gif of the environment with a frame for every timestep.
     
     Args:
@@ -15,12 +15,13 @@ def build_gif(tracks, trains, df_pos, env_params, output_gif='data/running_tmp.g
         df_pos (pd.DataFrame): train positions.
         env_params (dict): user input parameters.
         output_gif (str): path for gif.
-        low_quality_mode (int): 0 for auto resolution; 1 for low resolution.
+        low_quality_mode (int): False for auto resolution; True for low resolution.
     """
     print("\nRendering animation...")
     env = create_custom_env(tracks, trains, env_params)
     # Get max timesteps to determine gif length
     max_timestep = int(df_pos['timestep'].max())
+    print(f"{max_timestep+1} Timesteps to render.\nProgress:", end=" ")
     # Directory for gif frames
     tmp_dir = "data/tmp_frames"
     os.makedirs(tmp_dir, exist_ok=True)
@@ -32,6 +33,7 @@ def build_gif(tracks, trains, df_pos, env_params, output_gif='data/running_tmp.g
     
     # For each timestep
     for t in range(0, max_timestep + 1):
+        print(f"{t}", end=" ", flush=True)
         # For each agent
         for i, agent in enumerate(env.agents):
             if i in groups:
@@ -51,11 +53,11 @@ def build_gif(tracks, trains, df_pos, env_params, output_gif='data/running_tmp.g
                 agent.direction = DIR_MAP[row['dir']]
         
         # Render
-        screen_res = calc_gif_resolution(0, env)
+        screen_res = calc_gif_resolution(low_quality_mode, env)
         renderer = RenderTool(env, gl="PILSVG", screen_height=screen_res, screen_width=screen_res)
         renderer.reset()
         renderer.render_env(show=False, show_observations=False, show_predictions=False)
-        
+
         # Save tmp frames
         frame_filename = os.path.join(tmp_dir, f"frame_{t:04d}.png")
         renderer.gl.save_image(frame_filename)
@@ -68,7 +70,7 @@ def build_gif(tracks, trains, df_pos, env_params, output_gif='data/running_tmp.g
     
     # Combine frames to one GIF
     imageio.mimsave(output_gif, images, format='GIF', loop=0, duration=500)
-    print(f"✅ Animation done.")
+    print(f"\n✅ Animation done.")
 
 
 def calc_gif_resolution(low_quality_mode, env):
@@ -77,15 +79,16 @@ def calc_gif_resolution(low_quality_mode, env):
     else:  # RailEnv object
         env_dim_max = max(env.height, env.width)
     screen_res = env_dim_max  # Base value
-    if low_quality_mode == 1:  # Low
-        if env_dim_max > 1000: pass
+    if low_quality_mode:  # Low
+        if env_dim_max > 1000: screen_res = 2000
         elif env_dim_max > 500: screen_res *= 2
-        else: screen_res *= 9
+        elif env_dim_max > 10: screen_res *= 9
+        else: screen_res *= 18
     else:  # Automatic
         if env_dim_max > 350: screen_res = 3000
         elif env_dim_max > 50: screen_res *= 9
         elif env_dim_max > 10: screen_res *= 18
-        else: screen_res *= 30
+        else: screen_res *= 100
     return screen_res
 
 

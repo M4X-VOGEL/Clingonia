@@ -117,6 +117,5 @@ If you encounter unexpected issues, it may be due to any number of reasons. This
 
 ### ⚠️ Known issues
 
-- The software will crash while building your own environment as soon as you place too many tracks and trains. Suggestion: Keep it small for now (max. 12x12).
 - The displaying of the `GIF` may be distorted. 
 - You cannot set the parameters after loading a custom environement into the program, yet.
