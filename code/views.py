@@ -542,7 +542,7 @@ def build_main_menu():
         height=2,
         grid_pos=(1, 1),
         padding=(0, 0),
-        sticky='n',
+        sticky='new',
         command=switch_main_to_random_gen,
         text='Generate Random Environment',
         font=('Arial', int(font_scale * base_font), 'bold'),
@@ -558,7 +558,7 @@ def build_main_menu():
         height=2,
         grid_pos=(2, 1),
         padding=(0, 0),
-        sticky='n',
+        sticky='new',
         command=switch_main_to_builder,
         text='Build New Environment',
         font=('Arial', int(font_scale * base_font), 'bold'),
@@ -574,7 +574,7 @@ def build_main_menu():
         height=2,
         grid_pos=(3, 1),
         padding=(0, 0),
-        sticky='n',
+        sticky='new',
         command=switch_main_to_modify,
         text='Modify Environment',
         font=('Arial', int(font_scale * base_font), 'bold'),
@@ -590,7 +590,7 @@ def build_main_menu():
         height=2,
         grid_pos=(4, 1),
         padding=(0, 0),
-        sticky='n',
+        sticky='new',
         command=save_env_to_file,
         text='Save Environment',
         font=('Arial', int(font_scale * base_font), 'bold'),
@@ -599,6 +599,7 @@ def build_main_menu():
         border_width=0,
         visibility=True,
     )
+
     if sys_platform == "Darwin":  # macOS
         labels['saveImage_label'] = Label(
             root=frames['main_menu_frame'].frame,
@@ -621,11 +622,23 @@ def build_main_menu():
         buttons['saveImage_button'].grid(row=4, column=1, pady=(25,0), padx=40, sticky="ne")
         buttons['saveImage_button'].set_state(user_params['saveImage'])
     else:  # Windows, Linux and other
-        labels['saveImage_label'] = Label(
+        frames['save_button_frame'] = Frame(
             root=frames['main_menu_frame'].frame,
+            width=10,
+            height=10,
             grid_pos=(4, 1),
-            padding=(52, 12, 0, 0),
+            padding=(0, 0),
             sticky='ne',
+            background_color='#777777',
+            border_width=0,
+            visibility=True
+        )
+
+        labels['saveImage_label'] = Label(
+            root=frames['save_button_frame'].frame,
+            grid_pos=(0, 0),
+            padding=((0, 10), (5, 0)),
+            sticky='n',
             text='Image',
             font=('Arial', int(font_scale * base_font), 'normal'),
             foreground_color='#000000',
@@ -633,13 +646,15 @@ def build_main_menu():
             visibility=True,
         )
         buttons['saveImage_button'] = ToggleSwitch(
-            root=frames['main_menu_frame'].frame,
+            root=frames['save_button_frame'].frame,
             width=70, height=30,
             on_color='#00FF00', off_color='#FF0000',
             handle_color='#FFFFFF', background_color='#777777',
             command=change_save_image_status,
         )
-        buttons['saveImage_button'].grid(row=4, column=1, pady=(60,0), padx=68, sticky="ne")
+        buttons['saveImage_button'].grid(
+            row=0, column=0, padx=(0, 10), pady=(45, 0), sticky="n"
+        )
         buttons['saveImage_button'].set_state(user_params['saveImage'])
 
     buttons['load_env_button'] = Button(
@@ -648,7 +663,7 @@ def build_main_menu():
         height=2,
         grid_pos=(5, 1),
         padding=(0, 0),
-        sticky='n',
+        sticky='new',
         command=load_env_from_file,
         text='Load Environment',
         font=('Arial', int(font_scale * base_font), 'bold'),
@@ -676,7 +691,7 @@ def build_main_menu():
         height=2,
         grid_pos=(8, 1),
         padding=(0, 0),
-        sticky='n',
+        sticky='new',
         command=switch_main_to_clingo_para,
         text='Next: Clingo Solver',
         font=('Arial', int(font_scale * base_font), 'bold'),
