@@ -117,5 +117,6 @@ If you encounter unexpected issues, it may be due to any number of reasons. This
 
 ### ⚠️ Known issues
 
-- The displaying of the `GIF` may be distorted. 
-- You cannot set the parameters after loading a custom environement into the program, yet.
+- Some image resolutions may be bad.
+- Low Performance when zooming up close to environments.
+- On macOS, the text inputs do not show when loading the page. Try to click a button, like "Advance Options". They should show after clicking that button.

@@ -6,7 +6,7 @@ from code.build_png import create_custom_env
 
 DIR_MAP = {'n': 0, 'e': 1, 's': 2, 'w': 3}
 
-def build_gif(tracks, trains, df_pos, env_params, output_gif='data/running_tmp.gif', low_quality_mode=False):
+def build_gif(tracks, trains, df_pos, env_params, output_gif='data/running_tmp.gif', fps=2, low_quality_mode=False):
     """Creates the gif of the environment with a frame for every timestep.
     
     Args:
@@ -15,6 +15,7 @@ def build_gif(tracks, trains, df_pos, env_params, output_gif='data/running_tmp.g
         df_pos (pd.DataFrame): train positions.
         env_params (dict): user input parameters.
         output_gif (str): path for gif.
+        fps (float): timesteps per second.
         low_quality_mode (int): False for auto resolution; True for low resolution.
     """
     print("\nRendering animation...")
@@ -69,7 +70,8 @@ def build_gif(tracks, trains, df_pos, env_params, output_gif='data/running_tmp.g
         images.append(imageio.imread(frame_filename))
     
     # Combine frames to one GIF
-    imageio.mimsave(output_gif, images, format='GIF', loop=0, duration=500)
+    ms_per_timestep = int(1000/fps)
+    imageio.mimsave(output_gif, images, format='GIF', loop=0, duration=ms_per_timestep)
     print(f"\n✅ Animation done.")
 
 

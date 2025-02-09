@@ -6,9 +6,9 @@ from tkinter import filedialog
 
 from code.build_png import create_custom_env, initial_render_test, save_png
 from code.custom_canvas import *
-from code.env import save_env, delete_tmp_lp, delete_tmp_png, delete_tmp_gif, delete_tmp_frames
+from code.files import save_env, delete_tmp_lp, delete_tmp_png, delete_tmp_gif, delete_tmp_frames
 from code.gen_png import gen_env
-from code.lp_to_env import lp_to_env
+from code.load_env import load_env
 from code.positions import position_df
 from code.build_gif import build_gif
 
@@ -4826,7 +4826,9 @@ def create_gif():
     tracks = current_array[0]
     trains = get_trains()
     current_gif = 'data/running_tmp.gif'
-    build_gif(tracks, trains, current_paths, user_params, current_gif)
+    fps = user_params['frameRate']
+    low_q = user_params['lowQualityGIF']
+    build_gif(tracks, trains, current_paths, user_params, current_gif, fps, low_q)
 
 def df_to_timetable_text():
     def format_row(idx, line):
@@ -4935,7 +4937,7 @@ def load_env_from_file():
         )
         frames['main_menu_frame'].frame.update()
 
-    tracks, trains = lp_to_env(file)
+    tracks, trains = load_env(file)
 
     if isinstance(tracks, int):
         if last_menu == 'start':
