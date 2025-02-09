@@ -4845,6 +4845,9 @@ def df_to_timetable_text():
         if row['start_pos'] == row['end_pos']:
             a_dep[index] = '--'
             a_arr[index] = '--'
+        if row['start_pos'] != row['end_pos'] and a_dep[index] == a_arr[index]:
+            a_dep[index] = 'ActErr'
+            a_arr[index] = 'ActErr'
 
     df = pd.DataFrame({
         'e_dep': current_df['e_dep'],
