@@ -3534,13 +3534,14 @@ def build_track_builder_menu_frame():
 
     buttons['train_builder_button'] = Button(
         root=frames['track_builder_menu_frame'].frame,
-        width=10,
+        width=20,
         height=1,
         grid_pos=(6, 2),
         padding=(0, 0),
         columnspan=4,
+        sticky='w',
         command=builder_track_to_train,
-        text='Trains',
+        text='Next: Trains',
         font=('Arial', int(font_scale * base_font), 'bold'),
         foreground_color='#000000',
         background_color='#777777',
