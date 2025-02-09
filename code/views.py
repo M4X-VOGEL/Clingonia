@@ -159,7 +159,7 @@ clingo_err_dict = {
     -2: 'Invalid clingo path',
     -3: 'Clingo returned an error',
     -4: 'Clingo returns UNSATISFIABLE',
-    -5: f'Clingo did not provide the requested Answer: {user_params["answer"]}',
+    -5: f'Clingo did not provide the requested Answer: ',
 }
 
 
@@ -1129,6 +1129,9 @@ def switch_clingo_para_to_result():
     sim_result = run_simulation()
 
     if sim_result:
+        if sim_result == -5:
+            clingo_err_dict[sim_result] = (clingo_err_dict[sim_result] +
+                                           f'{user_params["answer"]}')
         labels['clingo_status_label'].label.config(
             text=clingo_err_dict[sim_result],
             fg='#FF0000',

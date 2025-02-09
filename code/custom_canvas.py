@@ -53,7 +53,7 @@ class EnvCanvas:
         self.canvas.bind("<Leave>", self.remove_mouse_symbols)
         self.canvas.bind("<Motion>", self.draw_mouse_symbols)
 
-        self.root.after(10, self.draw_image)
+        self.root.after(10, self.initial_zoom)
 
     def create_canvas(self):
         canvas = tk.Canvas(
@@ -139,7 +139,6 @@ class EnvCanvas:
         self.text_label = None
 
     def draw_image(self):
-        self.cell_size = self.image.height / self.rows
         width = int(self.cols * self.cell_size * self.scale)
         height = int(self.rows * self.cell_size * self.scale)
         self.display_image = ImageTk.PhotoImage(
@@ -219,6 +218,18 @@ class EnvCanvas:
                 fill='#FFFFFF',
                 tags="grid_label"
             )
+
+    def initial_zoom(self):
+        image_aspect = self.image.width / self.image.height
+        canvas_aspect = self.canvas.winfo_width() / self.canvas.winfo_height()
+
+        if image_aspect > canvas_aspect:
+            scale = self.canvas.winfo_width() / self.image.width
+        else:
+            scale = self.canvas.winfo_height() / self.image.height
+
+        self.cell_size = (self.image.height * scale) / self.rows
+        self.draw_image()
 
 
 class BuildCanvas:
@@ -1128,7 +1139,7 @@ class ResultCanvas:
         self.canvas.bind("<Leave>", self.remove_mouse_symbols)
         self.canvas.bind("<Motion>", self.draw_mouse_symbols)
 
-        self.root.after(10, self.draw_image)
+        self.root.after(10, self.initial_zoom)
 
         self.paths_df = paths_df
         self.show_df = pd.DataFrame(
@@ -1222,7 +1233,6 @@ class ResultCanvas:
         self.text_label = None
 
     def draw_image(self):
-        self.cell_size = self.image.height / self.rows
         width = int(self.cols * self.cell_size * self.scale)
         height = int(self.rows * self.cell_size * self.scale)
         self.display_image = ImageTk.PhotoImage(
@@ -1358,6 +1368,18 @@ class ResultCanvas:
                 fill=train_colors[row['trainID']],
                 tags="path_labels"
             )
+
+    def initial_zoom(self):
+        image_aspect = self.image.width / self.image.height
+        canvas_aspect = self.canvas.winfo_width() / self.canvas.winfo_height()
+
+        if image_aspect > canvas_aspect:
+            scale = self.canvas.winfo_width() / self.image.width
+        else:
+            scale = self.canvas.winfo_height() / self.image.height
+
+        self.cell_size = (self.image.height * scale) / self.rows
+        self.draw_image()
 
 
 class PathListCanvas:
