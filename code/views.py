@@ -426,6 +426,9 @@ def build_start_menu_help_frame():
 def toggle_start_menu_help():
     if 'start_menu_help_frame' in frames:
         frames['start_menu_help_frame'].toggle_visibility()
+        frames['start_menu_help_frame'].frame.rowconfigure(0, weight=1)
+        frames['start_menu_help_frame'].frame.columnconfigure(0, weight=1)
+        frames['start_menu_help_frame'].frame.grid_propagate(False)
     else:
         build_start_menu_help_frame()
 
@@ -480,6 +483,7 @@ def switch_start_to_main():
         del frames['start_menu_env_viewer_frame']
 
     create_main_menu()
+    build_main_menu_load_info_frame()
 
 
 
@@ -710,6 +714,88 @@ def build_main_menu():
     frames['main_menu_frame'].frame.columnconfigure(1, weight=1)
     frames['main_menu_frame'].frame.columnconfigure(2, weight=5)
     frames['main_menu_frame'].frame.grid_propagate(False)
+
+def build_main_menu_load_info_frame():
+    get_load_info()
+
+    frames['main_menu_load_info_frame'] = Frame(
+        root=windows['flatland_window'].window,
+        width=screenwidth * 0.5,
+        height=screenheight,
+        grid_pos=(0, 1),
+        padding=(0, 0),
+        sticky='nesw',
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    with open("data/info_text.txt", "r") as file:
+        displaytext = file.read()
+
+    texts['main_menu_load_info'] = Text(
+        root=frames['main_menu_load_info_frame'].frame,
+        width=frames['main_menu_load_info_frame'].width,
+        height=frames['main_menu_load_info_frame'].height,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nesw',
+        columnspan=2,
+        text=displaytext,
+        font=("Courier", int(font_scale * 15)),
+        wrap='word',
+        foreground_color='#CCCCCC',
+        background_color='#000000',
+        border_width=0,
+        state='disabled',
+        visibility=True,
+    )
+
+    buttons['ok_info_button'] = Button(
+        root=frames['main_menu_load_info_frame'].frame,
+        width=30,
+        height=2,
+        grid_pos=(1, 0),
+        padding=(0, 0),
+        command=close_load_info,
+        text='Confirm',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#000000',
+        background_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    frames['main_menu_load_info_frame'].frame.rowconfigure(0, weight=2)
+    frames['main_menu_load_info_frame'].frame.rowconfigure(1, weight=1)
+    frames['main_menu_load_info_frame'].frame.columnconfigure((0,1), weight=1)
+    frames['main_menu_load_info_frame'].frame.grid_propagate(False)
+
+def get_load_info():
+    def format_row(index, row):
+        new_line = (f"| {index:>8} | {str(row['start_pos']):>14} "
+                    f"| {row['dir']:^3} | {str(row['end_pos']):>14} "
+                    f"| {row['e_dep']:>7} | {row['l_arr']:>7} |")
+        return new_line
+
+    table_header = ("| Train ID | Start Position | Dir |   "
+                    "End Position |   E Dep |   L Arr |")
+    table_divider = ("|----------|----------------|-----|"
+                     "----------------|---------|---------|")
+
+    new_rows = [format_row(index, row) for index, row in current_df.iterrows()]
+
+    with open('data/info_text.txt', "w") as file:
+        file.write(table_divider + '\n')
+        file.write(table_header + '\n')
+        file.write(table_divider + '\n')
+        file.writelines(row + '\n' for row in new_rows)
+        file.write(table_divider + '\n')
+
+def close_load_info():
+    if 'main_menu_load_info_frame' in frames:
+        frames['main_menu_load_info_frame'].destroy_frame()
+        del frames['main_menu_load_info_frame']
 
 def build_main_menu_help_frame():
     frames['main_menu_help_frame'] = Frame(
@@ -1013,6 +1099,9 @@ def build_clingo_help_frame():
 def toggle_main_menu_help():
     if 'main_menu_help_frame' in frames:
         frames['main_menu_help_frame'].toggle_visibility()
+        frames['main_menu_help_frame'].frame.rowconfigure(0, weight=1)
+        frames['main_menu_help_frame'].frame.columnconfigure(0, weight=1)
+        frames['main_menu_help_frame'].frame.grid_propagate(False)
     else:
         build_main_menu_help_frame()
 
@@ -1079,6 +1168,9 @@ def switch_main_to_modify():
     if 'main_menu_env_viewer_frame' in frames:
         frames['main_menu_env_viewer_frame'].destroy_frame()
         del frames['main_menu_env_viewer_frame']
+    if 'main_menu_load_info_frame' in frames:
+        frames['main_menu_load_info_frame'].destroy_frame()
+        del frames['main_menu_load_info_frame']
 
     build_builder_para_frame()
 
@@ -2180,8 +2272,8 @@ def build_random_gen_env_menu():
         visibility=True,
     )
 
-    current_df_to_env_text()
-    with open("data/current_df.txt", "r") as file:
+    current_df_to_env_text(mode='gen')
+    with open("data/info_text.txt", "r") as file:
         displaytext = file.read()
 
     texts['random_gen_env_trains'] = Text(
@@ -2433,9 +2525,12 @@ def load_random_gen_env_params():
 # builder
 
 def builder_change_to_start_or_main():
-    global user_params, current_array, current_df
+    global build_mode, user_params, current_array, current_df
 
     user_params = user_params_backup.copy()
+
+    if build_mode == 'change_params':
+        build_mode = 'build'
 
     # if build_mode == 'build':
     #     current_array = current_builder_backup_array.copy()
@@ -2989,7 +3084,7 @@ def toggle_builder_para_help():
         build_builder_para_help_frame()
 
 def builder_para_to_track_grid():
-    global current_array, current_df, \
+    global build_mode, current_array, current_df, \
         current_builder_backup_array, current_builder_backup_df, \
         current_modify_backup_array, current_modify_backup_df
 
@@ -3070,10 +3165,15 @@ def builder_para_to_track_grid():
         current_builder_backup_array = current_array.copy()
         current_builder_backup_df = current_df.copy()
 
+    if build_mode == 'change_params':
+        build_mode = 'build'
+
     build_track_builder_menu_frame()
     build_builder_grid_frame()
 
 def builder_track_grid_to_para():
+    global build_mode
+
     if 'track_builder_menu_frame' in frames:
         frames['track_builder_menu_frame'].destroy_frame()
         del frames['track_builder_menu_frame']
@@ -3083,6 +3183,9 @@ def builder_track_grid_to_para():
     if 'builder_track_help_frame' in frames:
         frames['builder_track_help_frame'].destroy_frame()
         del frames['builder_track_help_frame']
+
+    if build_mode == 'build':
+        build_mode = 'change_params'
 
     build_builder_para_frame()
 
@@ -3772,7 +3875,7 @@ def build_train_builder_menu_frame():
     frames['train_config_list_canvas_frame'] = Frame(
         root=frames['train_builder_menu_frame'].frame,
         width=frames['train_builder_menu_frame'].width * 0.75,
-        height=frames['train_builder_menu_frame'].height * 0.6,
+        height=frames['train_builder_menu_frame'].height * 0.52,
         grid_pos=(2, 2),
         padding=(0, 0),
         columnspan=6,
@@ -3781,11 +3884,40 @@ def build_train_builder_menu_frame():
         visibility=True,
     )
 
-    buttons['finish_building_button'] = Button(
+    buttons['configAll_button'] = Button(
         root=frames['train_builder_menu_frame'].frame,
         width=20,
         height=1,
         grid_pos=(3, 2),
+        padding=(0, 0),
+        columnspan=3,
+        command=open_train_all_config_frame,
+        text='Config All Trains',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#000000',
+        background_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    labels['configAll_status_label'] = Label(
+        root=frames['train_builder_menu_frame'].frame,
+        grid_pos=(3, 6),
+        padding=(0, 0),
+        sticky='w',
+        columnspan=4,
+        text='',
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
+        foreground_color='#000000',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    buttons['finish_building_button'] = Button(
+        root=frames['train_builder_menu_frame'].frame,
+        width=20,
+        height=1,
+        grid_pos=(4, 2),
         padding=(0, 0),
         columnspan=3,
         command=builder_train_grid_to_env,
@@ -3799,7 +3931,7 @@ def build_train_builder_menu_frame():
 
     labels['builder_status_label'] = Label(
         root=frames['train_builder_menu_frame'].frame,
-        grid_pos=(3, 6),
+        grid_pos=(4, 6),
         padding=(0, 0),
         sticky='w',
         columnspan=4,
@@ -3817,7 +3949,7 @@ def build_train_builder_menu_frame():
     frames['train_builder_menu_frame'].frame.columnconfigure(
         tuple(range(2,8)), weight=2
     )
-    frames['train_builder_menu_frame'].frame.rowconfigure((2, 3), weight=2)
+    frames['train_builder_menu_frame'].frame.rowconfigure((2, 3, 4), weight=2)
     frames['train_builder_menu_frame'].frame.grid_propagate(False)
 
     canvases['train_config_list'] = TrainListCanvas(
@@ -3835,6 +3967,198 @@ def build_train_builder_menu_frame():
         font_scale=font_scale,
     )
     canvases['builder_grid_canvas'].train_list = canvases['train_config_list']
+
+def open_train_all_config_frame():
+    if len(current_df):
+        labels['configAll_status_label'].hide_label()
+        canvases['builder_grid_canvas'].current_selection = None
+    else:
+        labels['configAll_status_label'].label.config(
+            text='No Trains Placed',
+            fg='#FF0000',
+        )
+        labels['configAll_status_label'].place_label()
+        return
+
+    frames['train_all_config_frame'] = Frame(
+        root=windows['flatland_window'].window,
+        width=screenwidth * 0.5,
+        height=screenheight,
+        grid_pos=(0, 1),
+        padding=(0, 0),
+        sticky='nesw',
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    labels['all_config_label'] = Label(
+        root=frames['train_all_config_frame'].frame,
+        grid_pos=(0,0),
+        padding=(100,(200,100)),
+        columnspan=2,
+        sticky='s',
+        text=f'Configure All Trains',
+        font=('Arial', int(font_scale * base_font * 2), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    labels['eDep_label'] = Label(
+        root=frames['train_all_config_frame'].frame,
+        grid_pos=(1,0),
+        padding=(0,0),
+        sticky='s',
+        text=f'Earliest Departure All Trains:',
+        font=('Arial', int(font_scale * base_font)),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    entry_fields['all_eDep_entry'] = EntryField(
+        root=frames['train_all_config_frame'].frame,
+        width=10,
+        height=1,
+        grid_pos=(1, 1),
+        padding=(0, 0),
+        sticky='s',
+        text=f'e.g. 1',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    labels['eDep_error_label'] = Label(
+        root=frames['train_all_config_frame'].frame,
+        grid_pos=(1,2),
+        padding=(0,0),
+        sticky='s',
+        text='',
+        font=('Arial', int(font_scale * base_font * error_scale)),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+
+    labels['lArr_label'] = Label(
+        root=frames['train_all_config_frame'].frame,
+        grid_pos=(2,0),
+        padding=(0,20),
+        sticky='s',
+        text=f'Latest Arrival All Trains:',
+        font=('Arial', int(font_scale * base_font)),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    entry_fields['all_lArr_entry'] = EntryField(
+        root=frames['train_all_config_frame'].frame,
+        width=10,
+        height=1,
+        grid_pos=(2, 1),
+        padding=(0, 20),
+        sticky='s',
+        text=f'e.g. 200',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    labels['lArr_error_label'] = Label(
+        root=frames['train_all_config_frame'].frame,
+        grid_pos=(2,2),
+        padding=(0,20),
+        sticky='s',
+        text='',
+        font=('Arial', int(font_scale * base_font * error_scale)),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    buttons['save_all_config_button'] = Button(
+        root=frames['train_all_config_frame'].frame,
+        width=20,
+        height=1,
+        grid_pos=(3, 0),
+        padding=(0, 40),
+        sticky='s',
+        columnspan=2,
+        command=save_train_all_config,
+        text='Save',
+        font=('Arial', int(font_scale * base_font)),
+        foreground_color='#000000',
+        background_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    frames['train_builder_menu_frame'].frame.rowconfigure((0,1,2,3), weight=1)
+    frames['train_builder_menu_frame'].frame.columnconfigure((0,1,2), weight=1)
+    frames['train_builder_menu_frame'].frame.grid_propagate(False)
+
+def save_train_all_config():
+    global current_df
+
+    ed = entry_fields['all_eDep_entry'].entry_field.get()
+    la = entry_fields['all_lArr_entry'].entry_field.get()
+
+    err_count = 0
+
+    try:
+        if ed.startswith('e.g.') or ed == '' or ed is None:
+            ed = None
+        else:
+            ed = int(ed)
+            labels['eDep_error_label'].hide_label()
+    except ValueError:
+        labels['eDep_error_label'].label.config(
+            text='needs int > 0',
+            fg='#FF0000',
+        )
+        labels[f'eDep_error_label'].place_label()
+        err_count += 1
+
+    try:
+        if la.startswith('e.g.') or la == '' or la is None:
+            la = None
+        else:
+            la = int(la)
+            labels['lArr_error_label'].hide_label()
+    except ValueError:
+        labels['lArr_error_label'].label.config(
+            text='needs int > 0',
+            fg='#FF0000',
+        )
+        labels[f'lArr_error_label'].place_label()
+        err_count += 1
+
+    if err_count:
+        return
+
+    if ed is not None:
+        current_df['e_dep'] = [ed] * len(current_df['e_dep'])
+
+    if la is not None:
+        current_df['l_arr'] = [la] * len(current_df['l_arr'])
+
+    if 'all_eDep_entry' in entry_fields:
+        del entry_fields['all_eDep_entry']
+    if 'all_lArr_entry' in entry_fields:
+        del entry_fields['all_lArr_entry']
+    if 'train_all_config_frame' in frames:
+        frames['train_all_config_frame'].destroy_frame()
+        del frames['train_all_config_frame']
 
 def build_builder_train_help_frame():
     frames['builder_train_help_frame'] = Frame(
@@ -3996,8 +4320,8 @@ def build_builder_env_menu():
         visibility=True,
     )
 
-    current_df_to_env_text()
-    with open("data/current_df.txt", "r") as file:
+    current_df_to_env_text(mode='build')
+    with open("data/info_text.txt", "r") as file:
         displaytext = file.read()
 
     texts['builder_env_trains'] = Text(
@@ -4212,7 +4536,7 @@ def open_reset_frame(parent_frame):
         columnspan=2,
         sticky='s',
         text='RESET GRID?',
-        font=('Arial', int(font_scale * 40), 'bold'),
+        font=('Arial', int(font_scale * base_font * 2), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
         visibility=True,
@@ -4594,7 +4918,7 @@ def build_result_timetable_frame():
         visibility=True
     )
 
-    with open("data/current_df.txt", "r") as file:
+    with open("data/info_text.txt", "r") as file:
         displaytext = file.read()
 
     texts['result_timetable_text'] = Text(
@@ -4868,29 +5192,61 @@ def df_to_timetable_text():
 
     new_rows = [format_row(index, row) for index, row in df.iterrows()]
 
-    with open('data/current_df.txt', "w") as file:
+    with open('data/info_text.txt', "w") as file:
         file.write(header + "\n")
         file.write(divider + "\n")
         file.writelines(new_row + "\n" for new_row in new_rows)
 
-def current_df_to_env_text():
+def current_df_to_env_text(mode):
     def format_row(index, row):
         new_line = (f"| {index:>8} | {str(row['start_pos']):>14} "
                     f"| {row['dir']:^3} | {str(row['end_pos']):>14} "
                     f"| {row['e_dep']:>7} | {row['l_arr']:>7} |")
         return new_line
 
-    header = ("| Train ID | Start Position | Dir |   "
-              "End Position |   E Dep |   L Arr |")
-    divider = ("|----------|----------------|-----|"
-               "----------------|---------|---------|")
+    param_header = '| Parameters |'
+    param_divider = '|------------|'
+
+    gen_param_text = [
+        f'|-Environment Seed: {user_params["seed"]}',
+        f'|-Grid Mode: {user_params["grid"]}',
+        f'|-Remove agents on arrival: {user_params["remove"]}',
+        f'|-Speeds of Trains: {user_params["speed"]}',
+        f'|-Malfunction rate: '
+        f'{user_params["malfunction"][0]}/{user_params["malfunction"][1]}',
+        f'|-Minimum Duration of Malfunctions: {user_params["min"]}',
+        f'|-Maximum Duration of Malfunctions: {user_params["max"]}',
+    ]
+    build_param_text = [
+        f'|-Remove agents on arrival: {user_params["remove"]}',
+        f'|-Speeds of Trains: {user_params["speed"]}',
+        f'|-Malfunction rate: '
+        f'{user_params["malfunction"][0]}/{user_params["malfunction"][1]}',
+        f'|-Minimum Duration of Malfunctions: {user_params["min"]}',
+        f'|-Maximum Duration of Malfunctions: {user_params["max"]}',
+    ]
+
+    spacing = '|\n|'
+
+    table_header = ("| Train ID | Start Position | Dir |   "
+                    "End Position |   E Dep |   L Arr |")
+    table_divider = ("|----------|----------------|-----|"
+                     "----------------|---------|---------|")
 
     new_rows = [format_row(index, row) for index, row in current_df.iterrows()]
 
-    with open('data/current_df.txt', "w") as file:
-        file.write(header + "\n")
-        file.write(divider + "\n")
-        file.writelines(new_row + "\n" for new_row in new_rows)
+    with open('data/info_text.txt', "w") as file:
+        file.write(param_divider + '\n')
+        file.write(param_header + '\n')
+        file.write(param_divider + '\n')
+        for row in gen_param_text if mode == 'gen' else build_param_text:
+            file.write(row + '\n')
+        file.write(spacing + '\n')
+        file.write(table_divider + '\n')
+        file.write(table_header + '\n')
+        file.write(table_divider + '\n')
+        file.writelines(row + '\n' for row in new_rows)
+        file.write(table_divider + '\n')
 
 def save_user_data_to_file():
     with open('data/user_params.json', 'w') as file:
@@ -5021,6 +5377,7 @@ def load_env_from_file():
         )
         frames['main_menu_frame'].frame.update()
         reload_main_env_viewer()
+        build_main_menu_load_info_frame()
 
 def save_env_to_file():
     file = filedialog.asksaveasfilename(

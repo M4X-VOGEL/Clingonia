@@ -1,5 +1,5 @@
 # user data
-data/current_df.txt
+data/info_text.txt
 data/user_params.json
 
 # Byte-compiled / optimized / DLL files
