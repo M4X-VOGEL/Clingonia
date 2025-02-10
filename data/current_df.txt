@@ -1,2 +1,0 @@
-| Train ID | Start Position | Dir |   End Position |   E Dep |   L Arr |
-|----------|----------------|-----|----------------|---------|---------|
