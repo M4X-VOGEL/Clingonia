@@ -487,10 +487,7 @@ class ZoomableGIF:
             width: int,
             height: int,
             grid_pos: [int, int],
-            padding: [
-                [int, int], [[int, int],[int, int]],
-                [int, [int, int]], [[int, int], int]
-            ],
+            padding: [int, int],
             gif: str,
             background_color: str,
             visibility: bool,
@@ -510,7 +507,7 @@ class ZoomableGIF:
         self.canvas = self.create_canvas()
         self.gif = Image.open(gif)
 
-        self.pan_start = (0, 0)
+        self.pan_start_coord = (0, 0)
         self.scale = 1.0
         self.offset_x = 0
         self.offset_y = 0
@@ -520,22 +517,22 @@ class ZoomableGIF:
 
         self.cached_frames = {}
         self.frames = []
-
+        self.durations = []
+        # Load frames with their duration
         for frame in ImageSequence.Iterator(self.gif):
             self.frames.append(frame.convert("RGBA"))
+            self.durations.append(frame.info.get("duration", 100))
+        self.orig_size = self.frames[0].size
+        # Ensure the gif will not run when quitting the program
+        self.gif.close()
         self.current_frame_index = 0
-
-        self.image = self.canvas.create_image(
-            self.offset_x, self.offset_y,
-            anchor="nw"
-        )
-
+        self.image = self.canvas.create_image(self.offset_x, self.offset_y, anchor="nw")
         self.canvas.bind("<MouseWheel>", self.zoom)
         self.canvas.bind("<Button-4>", self.zoom)
         self.canvas.bind("<Button-5>", self.zoom)
-        self.canvas.bind("<ButtonPress-3>", self.pan_start)
+        self.canvas.bind("<ButtonPress-3>", self.pan_start_event)
         self.canvas.bind("<B3-Motion>", self.pan)
-
+        self.animate_id = None
         if visibility:
             self.place_canvas()
             self.calculate_initial_pos()
@@ -552,9 +549,12 @@ class ZoomableGIF:
 
     def place_canvas(self):
         self.canvas.grid(
-            row=self.grid_pos[0], column=self.grid_pos[1],
-            padx=self.padding[0], pady=self.padding[1],
-            sticky=self.sticky, columnspan=self.columnspan,
+            row=self.grid_pos[0],
+            column=self.grid_pos[1],
+            padx=self.padding[0],
+            pady=self.padding[1],
+            sticky=self.sticky,
+            columnspan=self.columnspan,
         )
         self.visibility = True
 
@@ -563,17 +563,11 @@ class ZoomableGIF:
 
         if key not in self.cached_frames:
             resized_frames = []
-            if self.zooming:
-                resample_method = Image.Resampling.NEAREST
-            else:
-                resample_method = Image.Resampling.LANCZOS
+            resample_method = Image.Resampling.NEAREST if self.zooming else Image.Resampling.LANCZOS
             for frame in self.frames:
                 new_width = int(frame.width * self.scale)
                 new_height = int(frame.height * self.scale)
-                resized_frame = frame.resize(
-                    (new_width, new_height),
-                    resample=resample_method
-                )
+                resized_frame = frame.resize((new_width, new_height), resample=resample_method)
                 resized_frames.append(ImageTk.PhotoImage(resized_frame))
             self.cached_frames[key] = resized_frames
 
@@ -582,48 +576,45 @@ class ZoomableGIF:
         self.canvas.coords(self.image, self.offset_x, self.offset_y)
 
     def animate(self):
-        self.current_frame_index = (
-                (self.current_frame_index + 1) % len(self.frames)
-        )
+        self.current_frame_index = (self.current_frame_index + 1) % len(self.frames)
         self.update_image()
-        self.root.after(100, self.animate)
+        # Delay to ensure correct durations
+        delay = self.durations[self.current_frame_index]
+        self.animate_id = self.root.after(delay, self.animate)
 
     def calculate_initial_pos(self):
         self.root.update_idletasks()
-
-        width, height = self.gif.size
-        scale_x = self.canvas.winfo_width() / width
-        scale_y = self.canvas.winfo_height() / height
+        orig_width, orig_height = self.orig_size
+        scale_x = self.canvas.winfo_width() / orig_width
+        scale_y = self.canvas.winfo_height() / orig_height
         self.scale = min(scale_x, scale_y)
-
-        new_width = int(width * self.scale)
-        new_height = int(height * self.scale)
-
+        new_width = int(orig_width * self.scale)
+        new_height = int(orig_height * self.scale)
         self.offset_x = (self.canvas.winfo_width() - new_width) // 2
         self.offset_y = (self.canvas.winfo_height() - new_height) // 2
-
+        
         self.update_image()
         self.animate()
 
     def zoom(self, event):
         scale_factor = 1.1 if event.delta > 0 else 0.9
         new_scale = self.scale * scale_factor
-
+        
         new_scale = max(0.1, min(new_scale, 10))
-
+        
         mouse_x = (event.x - self.offset_x) / self.scale
         mouse_y = (event.y - self.offset_y) / self.scale
-
+        
         self.offset_x -= (mouse_x * new_scale - mouse_x * self.scale)
         self.offset_y -= (mouse_y * new_scale - mouse_y * self.scale)
-
+        
         self.scale = new_scale
-
+        
         self.zooming = True
         if self.zoom_end is not None:
             self.root.after_cancel(self.zoom_end)
         self.zoom_end = self.root.after(200, self.end_zoom)
-
+        
         self.update_image()
 
     def end_zoom(self):
@@ -631,19 +622,25 @@ class ZoomableGIF:
         self.zoom_end = None
         self.update_image()
 
-    def pan_start(self, event):
-        self.pan_start = (event.x, event.y)
+    def pan_start_event(self, event):
+        self.pan_start_coord = (event.x, event.y)
 
     def pan(self, event):
-        dx = event.x - self.pan_start[0]
-        dy = event.y - self.pan_start[1]
-
+        dx = event.x - self.pan_start_coord[0]
+        dy = event.y - self.pan_start_coord[1]
         self.offset_x += dx
         self.offset_y += dy
-
-        self.pan_start = (event.x, event.y)
-
+        self.pan_start_coord = (event.x, event.y)
         self.update_image()
+
+    def stop(self):
+        """Beendet die Animation und bricht alle geplanten after-Aufrufe ab."""
+        if self.zoom_end is not None:
+            self.root.after_cancel(self.zoom_end)
+            self.zoom_end = None
+        if self.animate_id is not None:
+            self.root.after_cancel(self.animate_id)
+            self.animate_id = None
 
 
 class EntryField:
