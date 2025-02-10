@@ -3778,7 +3778,7 @@ def build_train_builder_menu_frame():
     frames['train_config_list_canvas_frame'] = Frame(
         root=frames['train_builder_menu_frame'].frame,
         width=frames['train_builder_menu_frame'].width * 0.75,
-        height=frames['train_builder_menu_frame'].height * 0.6,
+        height=frames['train_builder_menu_frame'].height * 0.52,
         grid_pos=(2, 2),
         padding=(0, 0),
         columnspan=6,
@@ -3787,11 +3787,40 @@ def build_train_builder_menu_frame():
         visibility=True,
     )
 
-    buttons['finish_building_button'] = Button(
+    buttons['configAll_button'] = Button(
         root=frames['train_builder_menu_frame'].frame,
         width=20,
         height=1,
         grid_pos=(3, 2),
+        padding=(0, 0),
+        columnspan=3,
+        command=open_train_all_config_frame,
+        text='Config All Trains',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#000000',
+        background_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    labels['configAll_status_label'] = Label(
+        root=frames['train_builder_menu_frame'].frame,
+        grid_pos=(3, 6),
+        padding=(0, 0),
+        sticky='w',
+        columnspan=4,
+        text='',
+        font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
+        foreground_color='#000000',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    buttons['finish_building_button'] = Button(
+        root=frames['train_builder_menu_frame'].frame,
+        width=20,
+        height=1,
+        grid_pos=(4, 2),
         padding=(0, 0),
         columnspan=3,
         command=builder_train_grid_to_env,
@@ -3805,7 +3834,7 @@ def build_train_builder_menu_frame():
 
     labels['builder_status_label'] = Label(
         root=frames['train_builder_menu_frame'].frame,
-        grid_pos=(3, 6),
+        grid_pos=(4, 6),
         padding=(0, 0),
         sticky='w',
         columnspan=4,
@@ -3823,7 +3852,7 @@ def build_train_builder_menu_frame():
     frames['train_builder_menu_frame'].frame.columnconfigure(
         tuple(range(2,8)), weight=2
     )
-    frames['train_builder_menu_frame'].frame.rowconfigure((2, 3), weight=2)
+    frames['train_builder_menu_frame'].frame.rowconfigure((2, 3, 4), weight=2)
     frames['train_builder_menu_frame'].frame.grid_propagate(False)
 
     canvases['train_config_list'] = TrainListCanvas(
@@ -3841,6 +3870,195 @@ def build_train_builder_menu_frame():
         font_scale=font_scale,
     )
     canvases['builder_grid_canvas'].train_list = canvases['train_config_list']
+
+def open_train_all_config_frame():
+    if len(current_df):
+        labels['configAll_status_label'].hide_label()
+        canvases['builder_grid_canvas'].current_selection = None
+    else:
+        labels['configAll_status_label'].label.config(
+            text='No Trains Placed',
+            fg='#FF0000',
+        )
+        labels['configAll_status_label'].place_label()
+        return
+
+    frames['train_all_config_frame'] = Frame(
+        root=windows['flatland_window'].window,
+        width=screenwidth * 0.5,
+        height=screenheight,
+        grid_pos=(0, 1),
+        padding=(0, 0),
+        sticky='nesw',
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    labels['all_config_label'] = Label(
+        root=frames['train_all_config_frame'].frame,
+        grid_pos=(0,0),
+        padding=(100,(200,100)),
+        columnspan=2,
+        sticky='s',
+        text=f'Configure All Trains',
+        font=('Arial', int(font_scale * base_font * 2), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    labels['eDep_label'] = Label(
+        root=frames['train_all_config_frame'].frame,
+        grid_pos=(1,0),
+        padding=(0,0),
+        sticky='s',
+        text=f'Earliest Departure All Trains:',
+        font=('Arial', int(font_scale * base_font)),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    entry_fields['all_eDep_entry'] = EntryField(
+        root=frames['train_all_config_frame'].frame,
+        width=10,
+        height=1,
+        grid_pos=(1, 1),
+        padding=(0, 0),
+        sticky='s',
+        text=f'e.g. 1',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    labels['eDep_error_label'] = Label(
+        root=frames['train_all_config_frame'].frame,
+        grid_pos=(1,2),
+        padding=(0,0),
+        sticky='s',
+        text='',
+        font=('Arial', int(font_scale * base_font * error_scale)),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+
+    labels['lArr_label'] = Label(
+        root=frames['train_all_config_frame'].frame,
+        grid_pos=(2,0),
+        padding=(0,20),
+        sticky='s',
+        text=f'Latest Arrival All Trains:',
+        font=('Arial', int(font_scale * base_font)),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    entry_fields['all_lArr_entry'] = EntryField(
+        root=frames['train_all_config_frame'].frame,
+        width=10,
+        height=1,
+        grid_pos=(2, 1),
+        padding=(0, 20),
+        sticky='s',
+        text=f'e.g. 200',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#FFFFFF',
+        background_color='#222222',
+        example_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    labels['lArr_error_label'] = Label(
+        root=frames['train_all_config_frame'].frame,
+        grid_pos=(2,2),
+        padding=(0,20),
+        sticky='s',
+        text='',
+        font=('Arial', int(font_scale * base_font * error_scale)),
+        foreground_color='#FFFFFF',
+        background_color='#000000',
+        visibility=True,
+    )
+
+    buttons['save_all_config_button'] = Button(
+        root=frames['train_all_config_frame'].frame,
+        width=20,
+        height=1,
+        grid_pos=(3, 0),
+        padding=(0, 40),
+        sticky='s',
+        columnspan=2,
+        command=save_train_all_config,
+        text='Save',
+        font=('Arial', int(font_scale * base_font)),
+        foreground_color='#000000',
+        background_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    frames['train_builder_menu_frame'].frame.rowconfigure((0,1,2,3), weight=1)
+    frames['train_builder_menu_frame'].frame.columnconfigure((0,1,2), weight=1)
+    frames['train_builder_menu_frame'].frame.grid_propagate(False)
+
+def save_train_all_config():
+    global current_df
+
+    ed = entry_fields['all_eDep_entry'].entry_field.get()
+    la = entry_fields['all_lArr_entry'].entry_field.get()
+
+    err_count = 0
+
+    try:
+        if ed.startswith('e.g.') or ed == '' or ed is None:
+            ed = None
+        else:
+            ed = int(ed)
+            labels['eDep_error_label'].hide_label()
+    except ValueError:
+        labels['eDep_error_label'].label.config(
+            text='needs int > 0',
+            fg='#FF0000',
+        )
+        labels[f'eDep_error_label'].place_label()
+        err_count += 1
+
+    try:
+        if la.startswith('e.g.') or la == '' or la is None:
+            la = None
+        else:
+            la = int(la)
+            labels['lArr_error_label'].hide_label()
+    except ValueError:
+        labels['lArr_error_label'].label.config(
+            text='needs int > 0',
+            fg='#FF0000',
+        )
+        labels[f'lArr_error_label'].place_label()
+        err_count += 1
+
+    if err_count:
+        return
+
+    if ed is not None:
+        current_df['e_dep'] = [ed] * len(current_df['e_dep'])
+
+    if la is not None:
+        current_df['l_arr'] = [la] * len(current_df['l_arr'])
+
+    del entry_fields['all_eDep_entry']
+    del entry_fields['all_lArr_entry']
+    frames['train_all_config_frame'].destroy_frame()
+    del frames['train_all_config_frame']
 
 def build_builder_train_help_frame():
     frames['builder_train_help_frame'] = Frame(
@@ -4218,7 +4436,7 @@ def open_reset_frame(parent_frame):
         columnspan=2,
         sticky='s',
         text='RESET GRID?',
-        font=('Arial', int(font_scale * 40), 'bold'),
+        font=('Arial', int(font_scale * base_font * 2), 'bold'),
         foreground_color='#FFFFFF',
         background_color='#000000',
         visibility=True,
