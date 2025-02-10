@@ -1008,7 +1008,7 @@ def build_clingo_para_frame():
         root=frames['clingo_para_frame'].frame,
         grid_pos=(6, 2),
         padding=(0, 0),
-        sticky='n',
+        sticky='w',
         columnspan=2,
         text='',
         font=('Arial', int(font_scale * (base_font*0.75)), 'bold'),
@@ -1038,8 +1038,6 @@ def build_clingo_para_frame():
         root=frames['clingo_para_frame'].frame,
         grid_pos=(8, 2),
         padding=(0, 0),
-        sticky='n',
-        columnspan=4,
         text='',
         font=('Arial', int(font_scale * base_font * error_scale), 'bold'),
         foreground_color='#000000',
@@ -4956,7 +4954,7 @@ def build_result_gif_frame():
         visibility=True
     )
 
-    pictures['result_gif'] = GIF(
+    pictures['result_gif'] = ZoomableGIF(
         root=frames['result_gif_frame'].frame,
         width=frames['result_gif_frame'].width ,
         height=frames['result_gif_frame'].height * 0.9,
