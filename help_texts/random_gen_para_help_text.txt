@@ -4,11 +4,6 @@
 
 
 
-You can close this help text by pressing the ?.
-You can go back to the menu with the <.
-You can close the program by using 'ESC' on your keyboard.
-
-
 Generate
 --------
 This will generate a random environment with the current parameter settings
@@ -17,9 +12,11 @@ NOTE:
 If you want to generate a different environment with the other parameters being the same change the seed.
 
 
+
 Advanced Option
 ---------------
 This shows more parameters for experienced users.
+
 
 
 Parameter Information
@@ -78,3 +75,12 @@ Determines the minimum length of a malfunction in time steps.
 
 Max Duration:
 Determines the maximum length of a malfunction in time steps.
+
+
+
+Don't Derail Now!
+----------------
+However, when you've enjoyed the ride,
+it's time to pull the brakes.
+At any time, you may exit the program
+by pressing the ESC key.

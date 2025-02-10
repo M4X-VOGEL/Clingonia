@@ -82,15 +82,24 @@ def calc_gif_resolution(low_quality_mode, env):
         env_dim_max = max(env.height, env.width)
     screen_res = env_dim_max  # Base value
     if low_quality_mode:  # Low
-        if env_dim_max > 1000: screen_res = 2000
-        elif env_dim_max > 500: screen_res *= 2
-        elif env_dim_max > 10: screen_res *= 9
-        else: screen_res *= 18
-    else:  # Automatic
-        if env_dim_max > 350: screen_res = 3000
+        if env_dim_max > 1000: screen_res = 6000
+        elif env_dim_max > 100: screen_res *= 6
         elif env_dim_max > 50: screen_res *= 9
-        elif env_dim_max > 10: screen_res *= 18
-        else: screen_res *= 100
+        elif env_dim_max > 20: screen_res *= 12
+        elif env_dim_max > 10: screen_res *= 24
+        elif env_dim_max > 3: screen_res *= 40
+        else: screen_res *= 150
+    else:  # Automatic
+        if env_dim_max > 1200: screen_res = 8000
+        elif env_dim_max > 800: screen_res *= 6
+        elif env_dim_max > 160: screen_res *= 9
+        elif env_dim_max > 100: screen_res *= 12
+        elif env_dim_max > 80: screen_res *= 18
+        elif env_dim_max > 50: screen_res *= 20
+        elif env_dim_max > 20: screen_res *= 50
+        elif env_dim_max > 10: screen_res *= 100
+        elif env_dim_max > 3: screen_res *= 200
+        else: screen_res *= 300
     return screen_res
 
 

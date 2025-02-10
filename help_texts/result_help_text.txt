@@ -4,13 +4,11 @@
 
 
 
-You can close this help text by pressing the ?.
-You can close the program by using 'ESC' on your keyboard.
-
-
 Toggle Time Table
 -----------------
 This will show a table with the train IDs their earliest departure and latest arrival setting and when they actually departed and arrived.
+If ActErr appears, it signifies that Clingo's suggested actions failed to guide the train to its intended destination. Consequently, only a spawn move will be executed for that train.
+
 
 
 Toggle Gif
@@ -18,11 +16,22 @@ Toggle Gif
 This will display an animated gif of the train movements.
 
 
+
 Toggle All Paths
 -----------------
 This will show or hide all train paths
 
 
+
 Show/Hide
 ---------
 Here you can show or hide specific train paths
+
+
+
+Don't Derail Now!
+----------------
+However, when you've enjoyed the ride,
+it's time to pull the brakes.
+At any time, you may exit the program
+by pressing the ESC key.

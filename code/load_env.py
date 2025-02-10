@@ -38,12 +38,16 @@ def prep_tracks_and_trains(path):
             predicates = line.strip().split('.')
             for pred in predicates:
                 pred = pred.strip()
-                if not pred:
-                    continue
-                if pred.startswith("cell"):
+                # Empty line
+                if not pred: continue
+                # Comment
+                elif "%" in pred: break
+                # cell
+                elif pred.startswith("cell"):
                     rc = add_cell(df_tracks, pred)
                     if rc != 0: return rc, rc  # Error -2
-                else:  # train / start / end
+                # train, start, end
+                else:
                     rc = fill_tse(tse_list, pred)
                     if rc != 0: return rc, rc  # Error -3,-4,-5
     df_tracks = df_tracks.sort_values(by=['y', 'x'], ascending=[True, True])

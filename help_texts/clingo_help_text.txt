@@ -4,14 +4,10 @@
 
 
 
-You can close this help text by pressing the ?.
-You can go back to the menu with the <.
-You can close the program by using 'ESC' on your keyboard.
-
-
 Run Simulation
 -----
 Run clingo on your current environment with the specified .lp files and look for the given answer.
+
 
 
 Select LP Files
@@ -19,6 +15,7 @@ Select LP Files
 This will ask you to select all the .lp files that contain your clingo implementation.
 You have to add all files at the same time, so you should put them into the same folder.
 You can use the asp folder we provide for this.
+
 
 
 Parameter Information
@@ -30,3 +27,12 @@ If you have it installed in this project it should just be "clingo".
 
 Answer:
 The number of the answer you want to display as a result.
+
+
+
+Don't Derail Now!
+----------------
+However, when you've enjoyed the ride,
+it's time to pull the brakes.
+At any time, you may exit the program
+by pressing the ESC key.

@@ -2,45 +2,68 @@
                 |   Welcome to Clingonia!   |
                 |---------------------------|
 
-Clingonia provides a GUI for creating, modifying and solving Flatland environments in Clingo with the Answer Set Programming Language.
 
-You can close this help text by pressing the ?.
-You can close the program by pressing the X or using 'ESC' on your keyboard.
+
+Introduction
+------------
+Experience next-generation Flatland environment management:
+
+Effortlessly generate, build, modify, save, and solve environments using Clingo powered by the Answer Set Programming Language.
+
+Additionally, visualize your solutions as a numbered path, detailed timetable, or animated GIF for clear, actionable insights.
+
+
+
+Get Started
+-----------
+Begin by generating a Flatland environment based on your parameters, building a custom setup via our build menu, or importing an existing LP file with the environment ASP code into Clingonia.
+
+
 
 Generate Random Environment
 ---------------------------
-Here you can get a random environment.
-This will include a track network and a list of trains.
+Set parameters to create a complete, seed-based Flatland environment.
 
-You can adjust the settings of generation like how big you want the environment or how many trains you want on it.
+Define dimensions, the number of trains and cities, rail system details, and train behaviors.
+
+After generation, you will receive a detailed overview.
+
 
 
 Build New Environment
 ---------------------
-Here you can build your own environment.
-you can place the tracks and trains however you want.
+First, define your grid size and specify train behavior. Then, enter the Railway Creation Lab: Simply select and place rails onto the grid.
+
+Once your rail network is complete, you can add trains with their corresponding stations and details like Earliest Departure and Latest Arrival.
+
+Finally, feast your eyes on a detailed overview of your masterpiece!
 
 
-Load Custom Environment
------------------------
-Here you can load a previously saved environment.
-Just click the button and select any .lp file that contains a flatland environment.
 
-NOTE:
+Load Environment
+----------------
+Select an LP file from your computer that contains the ASP code for an environment.
 
-If the file was not saved by this program, ensure your file only contains:
+The program then scans the file for explicit predicates:
 
-    - train(ID).
-    - start(ID,(column,row),earliest departure, direction).
-    - end(ID,(column,row),latest arrival).
-    - cell((column,row),trackID).
+- train(ID).
+- start(ID, (row, column), earliest_departure, direction).
+- end(ID, (row, column), latest_arrival).
+- cell((row, column), track).
 
-Where:
+Each predicate must adhere to these conditions:
 
-    - ID is an integer > 0.
-    - column and row are integers > 0.
-    - earliest departure is an integer > or = 0.
-    - latest arrival is an integer > 0.
-    - trackID is one of the id's defined by flatland.
-    - you need exactly one start and end for each train
-    - cells must fill a grid with size (columns,rows)
+ID: integer >= 0
+row and column: integers >= 0
+earliest_departure and latest_arrival: integers > 0
+direction: one of n, e, s, or w
+track: a Flatland-defined integer representing a specific rail
+
+
+
+Don't Derail Now!
+----------------
+However, when you've enjoyed the ride,
+it's time to pull the brakes.
+At any time, you may exit the program
+by pressing the ESC key.

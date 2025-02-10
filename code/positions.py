@@ -100,27 +100,15 @@ def ensure_train_spawns(df_pos, trains):
         dir_val = train_row["dir"]
         e_dep = train_row["e_dep"]
         l_arr = train_row["l_arr"]
-        # Determine earliest spawn time
-        earliest_spawn = e_dep-1 if e_dep > 0 else e_dep
-        # Spawn at earliest spawntime possible
-        for spawn_time in range(earliest_spawn, l_arr+1):
-            # Check if cell is already occupied
-            conflict = df_pos[(df_pos["timestep"] == spawn_time) & (df_pos["x"] == x_val) & (df_pos["y"] == y_val)]
-            if conflict.empty:
-                # If cell is vacant, create new row
-                new_row = {
-                    "trainID": train_id,
-                    "x": x_val,
-                    "y": y_val,
-                    "dir": dir_val,
-                    "timestep": spawn_time
-                }
-                # Add new row to df_pos
-                df_pos = pd.concat([df_pos, pd.DataFrame([new_row])], ignore_index=True)
-                break
-            else:
-                # If cell is already occupied
-                spawn_time += 1
+        new_row = {
+            "trainID": train_id,
+            "x": x_val,
+            "y": y_val,
+            "dir": dir_val,
+            "timestep": 0
+        }
+        # Add new row to df_pos
+        df_pos = pd.concat([df_pos, pd.DataFrame([new_row])], ignore_index=True)
     # Sort df_pos
     df_pos = df_pos.sort_values(by=["trainID", "timestep"]).reset_index(drop=True)
     if is_incomplete:

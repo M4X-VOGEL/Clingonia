@@ -4,11 +4,6 @@
 
 
 
-You can close this help text by pressing the ?.
-You can go back to the parameter menu with the <.
-You can close the program by using 'ESC' on your keyboard.
-
-
 Grid
 ----
 You can move the grid while pressing your right mouse button and moving the mouse.
@@ -16,9 +11,11 @@ You can zoom with your mouse wheel.
 To place something or remove first click on the symbol then on the grid cells.
 
 
+
 Trains
 ------
 This will take you to the train builder where you can place trains and stations.
+
 
 
 Reset
@@ -26,11 +23,22 @@ Reset
 This resets the grid to the status it was when this menu opened.
 
 
+
 Tracks
 ------
 This allows you to place tracks by clicking a grid cell with you left mouse button.
 
 
+
 Eraser
 ------
 This allows you to remove placed tracks by clicking the grid cell with you left mouse button.
+
+
+
+Don't Derail Now!
+----------------
+However, when you've enjoyed the ride,
+it's time to pull the brakes.
+At any time, you may exit the program
+by pressing the ESC key.

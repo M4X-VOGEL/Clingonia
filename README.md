@@ -2,8 +2,12 @@
 
 ![Flatland animation](https://i.imgur.com/9cNtWjs.gif)
 
-## 🚆 Flatland
-Flatland is a [railway scheduling challenge](https://flatland.aicrowd.com/intro.html) hosted by AICrowd to address the problem of multi-agent pathfinding for trains in large railway networks. This repository provides the GUI-based software "Clingonia" to generate, build, modify, load, and save environments, run simulations, and review results.
+## 🌹 Introduction
+Experience next-generation Flatland environment management with our cutting-edge software "Clingonia".
+
+Effortlessly generate, build, modify, save, and solve environments using Clingo powered by the Answer Set Programming Language.
+
+Additionally, visualize your solutions as a numbered path, detailed timetable, or animated GIF for clear, actionable insights.
 
 <br>
 
@@ -13,7 +17,7 @@ Flatland is a [railway scheduling challenge](https://flatland.aicrowd.com/intro.
 - 📁 `code` contains python source codes.
 - 📁 `data` contains images and saved parameters.
 - 📁 `help_texts` provide information inside the program.
-- 📝 `main.py` is the only python file YOU have to care about. Its execution starts the program.
+- 📝 `main.py` is pretty much the only file YOU have to care about. Its execution starts the program.
 - 📝 `README.md` is what you are reading right now.
 
 <br>
@@ -25,6 +29,11 @@ Flatland is a [railway scheduling challenge](https://flatland.aicrowd.com/intro.
 <br>
 
 ## 🌱 Getting started: Flatland and Clingo
+
+### 🚆 Flatland
+Flatland is a [railway scheduling challenge](https://flatland.aicrowd.com/intro.html) hosted by AICrowd to address the problem of multi-agent pathfinding for trains in large railway networks.
+
+<br>
 
 ### 📜 Prerequisites
 
@@ -39,12 +48,12 @@ conda activate flatland
 pip install flatland-rl
 ```
 
-📦 To have access to clingo, install the required package:
+📦 To have access to clingo, install the required clingo package:
 ```
 conda install -c potassco clingo
 ```
 
-📦 Make sure that you also have installed the following required packages:
+📦 Additionally, ensure that the following required packages are installed:
 ```
 pip show pillow
 pip show imageio
@@ -61,7 +70,7 @@ git clone git@github.com:M4X-VOGEL/Flatland-ASP-GUI.git
 
 <br>
 
-# 🏛️ Our Program
+# 🏛️ Using Clingonia
 
 ### 🐣 Initial development
 
@@ -94,7 +103,6 @@ Valid predicates are:
 Keep in mind:
 - `row=X`
 - `col=Y`
-- There are no spaces inbetween the variables.
 
 <br>
 
@@ -117,6 +125,8 @@ If you encounter unexpected issues, it may be due to any number of reasons. This
 
 ### ⚠️ Known issues
 
-- Some image resolutions may be bad.
-- Low Performance when zooming up close to environments.
-- On macOS, the text inputs do not show when loading the page. Try to click a button, like "Advance Options". They should show after clicking that button.
+- Users may experience decreased responsiveness when zooming in closely on environments.
+- Build mode: Avoid using the back button to return to the parameter settings, as this may cause loss of progress. Instead, modify the parameters after completing your build.
+- Our example `ASP` code for solving environments is provided for reference and simple environments. It is not flawless. We recommend using your own implementation for optimal results.
+- A `GIF` can only be generated once per simulation. To produce a new `GIF`, please restart the simulation.
+- On macOS, text input fields might not appear immediately upon loading the page. Interacting with a control, such as clicking "Advanced Options," should reveal them.

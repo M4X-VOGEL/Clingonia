@@ -331,19 +331,27 @@ def calc_resolution(low_quality_mode, env):
         env_dim_max = max(env.height, env.width)
     screen_res = env_dim_max  # Base value
     if low_quality_mode:  # Low
-        if env_dim_max > 1000: screen_res = 4000
-        elif env_dim_max > 160: screen_res *= 4
-        else: screen_res *= 9
+        if env_dim_max > 1000: screen_res = 6000
+        elif env_dim_max > 600: screen_res *= 6
+        elif env_dim_max > 160: screen_res *= 9
+        elif env_dim_max > 100: screen_res *= 12
+        elif env_dim_max > 50: screen_res *= 18
+        elif env_dim_max > 20: screen_res *= 30
+        elif env_dim_max > 10: screen_res *= 50
+        elif env_dim_max > 3: screen_res *= 100
+        else: screen_res *= 200
     else:  # Automatic
         if env_dim_max > 1000: screen_res = 9000
-        elif env_dim_max > 160: screen_res *= 9
-        elif env_dim_max > 120: screen_res *= 12
-        elif env_dim_max > 100: screen_res *= 15
-        elif env_dim_max > 80: screen_res *= 18
-        elif env_dim_max > 50: screen_res *= 20
-        elif env_dim_max > 30: screen_res *= 30
-        elif env_dim_max > 20: screen_res *= 50
-        elif env_dim_max > 10: screen_res *= 100
-        elif env_dim_max > 5: screen_res *= 150
-        else: screen_res *= 300
+        elif env_dim_max > 600: screen_res *= 9
+        elif env_dim_max > 400: screen_res *= 12
+        elif env_dim_max > 300: screen_res *= 15
+        elif env_dim_max > 200: screen_res *= 18
+        elif env_dim_max > 100: screen_res *= 30
+        elif env_dim_max > 80: screen_res *= 40
+        elif env_dim_max > 50: screen_res *= 50
+        elif env_dim_max > 30: screen_res *= 80
+        elif env_dim_max > 20: screen_res *= 100
+        elif env_dim_max > 10: screen_res *= 200
+        elif env_dim_max > 3: screen_res *= 300
+        else: screen_res *= 400
     return screen_res

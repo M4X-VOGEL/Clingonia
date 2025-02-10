@@ -4,65 +4,78 @@
 
 
 
-You can close this help text by pressing the ?.
-You can close the program by pressing the X or using 'ESC' on your keyboard.
-
-
 Generate Random Environment
 ---------------------------
-Here you can get a random environment.
-This will include a track network and a list of trains.
+Set parameters to create a complete, seed-based Flatland environment.
 
-You can adjust the settings of generation like how big you want the environment or how many trains you want on it.
+Define dimensions, the number of trains and cities, rail system details, and train behaviors.
+
+After generation, you will receive a detailed overview.
+
 
 
 Build New Environment
 ---------------------
-Here you can build your own environment.
-you can place the tracks and trains however you want.
+First, define your grid size and specify train behavior. Then, enter the Railway Creation Lab: Simply select and place rails onto the grid.
+
+Once your rail network is complete, you can add trains with their corresponding stations and details like Earliest Departure and Latest Arrival.
+
+Finally, feast your eyes on a detailed overview of your masterpiece!
 
 
-Modify Custom Environment
----------------------
-Here you can modify any environment.
-You can change the grid size or any other parameter.
-You can remove the tracks and trains.
-You can place new tracks and trains.
-Or you can change the settings of any train you placed.
+
+Modify Environment
+------------------
+Modify Mode works like Build Mode, allowing you to adjust the same parameters.
+
+Instead of starting with a blank grid, you begin with the environment that you have loaded, generated, or built.
+
+You will be able to reposition rails, trains, and stations using the same controls, and even modify the grid size.
+
+Once you are satisfied with your adjustments, you will receive a detailed overview.
 
 
-Save Custom Environment
------------------------
-Save the current environment to a .lp file.
-Just navigate to the folder where you want to save your environment and select any file you want to save to or enter the name of a new file.
+
+Save Environment
+----------------
+Choose where to store the LP file associated with the currently shown environment and specify a filename.
+
+Additionally, the Image-toggle lets you save the generated image with the LP file.
 
 
-Load Custom Environment
------------------------
-Here you can load a previously saved environment.
-Just click the button and select any .lp file that contains a flatland environment.
 
-NOTE:
+Load Environment
+----------------
+Select an LP file from your computer that contains the ASP code for an environment.
 
-If the file was not saved by this program, ensure your file only contains:
+The program then scans the file for explicit predicates:
 
-    - train(ID).
-    - start(ID,(column,row),earliest departure, direction).
-    - end(ID,(column,row),latest arrival).
-    - cell((column,row),trackID).
+- train(ID).
+- start(ID, (row, column), earliest_departure, direction).
+- end(ID, (row, column), latest_arrival).
+- cell((row, column), track).
 
-Where:
+Each predicate must adhere to these conditions:
 
-    - ID is an integer > 0.
-    - column and row are integers > 0.
-    - earliest departure is an integer > or = 0.
-    - latest arrival is an integer > 0.
-    - trackID is one of the id's defined by flatland.
-    - you need exactly one start and end for each train
-    - cells must fill a grid with size (columns,rows)
+ID: integer >= 0
+row and column: integers >= 0
+earliest_departure and latest_arrival: integers > 0
+direction: one of n, e, s, or w
+track: a Flatland-defined integer representing a specific rail
+
 
 
 Next: Clingo Solver
 -------------------
-This will take you to the settings for the clingo solver.
-Here you can also simulate your environment.
+Get to the final step: Enter your Clingo parameters and select the LP files for solving the environment.
+
+Once configured, you can run the simulation to produce the solutions.
+
+
+
+Don't Derail Now!
+----------------
+However, when you've enjoyed the ride,
+it's time to pull the brakes.
+At any time, you may exit the program
+by pressing the ESC key.
