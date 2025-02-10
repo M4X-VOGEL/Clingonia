@@ -4959,7 +4959,7 @@ def build_result_gif_frame():
     pictures['result_gif'] = GIF(
         root=frames['result_gif_frame'].frame,
         width=frames['result_gif_frame'].width ,
-        height=frames['result_gif_frame'].height,
+        height=frames['result_gif_frame'].height * 0.9,
         grid_pos=(0, 0),
         padding=(0, 0),
         sticky='nesw',
@@ -4968,7 +4968,23 @@ def build_result_gif_frame():
         visibility=True,
     )
 
-    frames['result_gif_frame'].frame.rowconfigure(0, weight=1)
+    buttons['save_gif_button'] = Button(
+        root=frames['result_gif_frame'].frame,
+        width=15,
+        height=1,
+        grid_pos=(1, 0),
+        padding=(5, 5),
+        sticky='s',
+        command=save_gif,
+        text='Save GIF',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#000000',
+        background_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    frames['result_gif_frame'].frame.rowconfigure((0,1), weight=1)
     frames['result_gif_frame'].frame.columnconfigure(0, weight=1)
     frames['result_gif_frame'].frame.grid_propagate(False)
 
@@ -5164,6 +5180,19 @@ def create_gif():
     low_q = user_params['lowQualityGIF']
     last_gif_params = (fps, low_q)
     build_gif(tracks, trains, current_paths, user_params, current_gif, fps, low_q)
+
+def save_gif():
+    file = filedialog.asksaveasfilename(
+        title="Select GIF save file",
+        initialdir='env',
+        defaultextension=".gif",
+        filetypes=[("GIFs", "*.gif"), ("All Files", "*.*")],
+    )
+
+    if not file:
+        return
+
+    shutil.copy2('data/running_tmp.gif', file)
 
 def df_to_timetable_text():
     def format_row(idx, line):
