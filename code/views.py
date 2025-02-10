@@ -426,6 +426,9 @@ def build_start_menu_help_frame():
 def toggle_start_menu_help():
     if 'start_menu_help_frame' in frames:
         frames['start_menu_help_frame'].toggle_visibility()
+        frames['start_menu_help_frame'].frame.rowconfigure(0, weight=1)
+        frames['start_menu_help_frame'].frame.columnconfigure(0, weight=1)
+        frames['start_menu_help_frame'].frame.grid_propagate(False)
     else:
         build_start_menu_help_frame()
 
@@ -1013,6 +1016,9 @@ def build_clingo_help_frame():
 def toggle_main_menu_help():
     if 'main_menu_help_frame' in frames:
         frames['main_menu_help_frame'].toggle_visibility()
+        frames['main_menu_help_frame'].frame.rowconfigure(0, weight=1)
+        frames['main_menu_help_frame'].frame.columnconfigure(0, weight=1)
+        frames['main_menu_help_frame'].frame.grid_propagate(False)
     else:
         build_main_menu_help_frame()
 
