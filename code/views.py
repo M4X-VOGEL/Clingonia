@@ -483,6 +483,7 @@ def switch_start_to_main():
         del frames['start_menu_env_viewer_frame']
 
     create_main_menu()
+    build_main_menu_load_info_frame()
 
 
 
@@ -713,6 +714,88 @@ def build_main_menu():
     frames['main_menu_frame'].frame.columnconfigure(1, weight=1)
     frames['main_menu_frame'].frame.columnconfigure(2, weight=5)
     frames['main_menu_frame'].frame.grid_propagate(False)
+
+def build_main_menu_load_info_frame():
+    get_load_info()
+
+    frames['main_menu_load_info_frame'] = Frame(
+        root=windows['flatland_window'].window,
+        width=screenwidth * 0.5,
+        height=screenheight,
+        grid_pos=(0, 1),
+        padding=(0, 0),
+        sticky='nesw',
+        background_color='#000000',
+        border_width=0,
+        visibility=True
+    )
+
+    with open("data/info_text.txt", "r") as file:
+        displaytext = file.read()
+
+    texts['main_menu_load_info'] = Text(
+        root=frames['main_menu_load_info_frame'].frame,
+        width=frames['main_menu_load_info_frame'].width,
+        height=frames['main_menu_load_info_frame'].height,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nesw',
+        columnspan=2,
+        text=displaytext,
+        font=("Courier", int(font_scale * 15)),
+        wrap='word',
+        foreground_color='#CCCCCC',
+        background_color='#000000',
+        border_width=0,
+        state='disabled',
+        visibility=True,
+    )
+
+    buttons['ok_info_button'] = Button(
+        root=frames['main_menu_load_info_frame'].frame,
+        width=30,
+        height=2,
+        grid_pos=(1, 0),
+        padding=(0, 0),
+        command=close_load_info,
+        text='Confirm',
+        font=('Arial', int(font_scale * base_font), 'bold'),
+        foreground_color='#000000',
+        background_color='#777777',
+        border_width=0,
+        visibility=True,
+    )
+
+    frames['main_menu_load_info_frame'].frame.rowconfigure(0, weight=2)
+    frames['main_menu_load_info_frame'].frame.rowconfigure(1, weight=1)
+    frames['main_menu_load_info_frame'].frame.columnconfigure((0,1), weight=1)
+    frames['main_menu_load_info_frame'].frame.grid_propagate(False)
+
+def get_load_info():
+    def format_row(index, row):
+        new_line = (f"| {index:>8} | {str(row['start_pos']):>14} "
+                    f"| {row['dir']:^3} | {str(row['end_pos']):>14} "
+                    f"| {row['e_dep']:>7} | {row['l_arr']:>7} |")
+        return new_line
+
+    table_header = ("| Train ID | Start Position | Dir |   "
+                    "End Position |   E Dep |   L Arr |")
+    table_divider = ("|----------|----------------|-----|"
+                     "----------------|---------|---------|")
+
+    new_rows = [format_row(index, row) for index, row in current_df.iterrows()]
+
+    with open('data/info_text.txt', "w") as file:
+        file.write(table_divider + '\n')
+        file.write(table_header + '\n')
+        file.write(table_divider + '\n')
+        file.writelines(row + '\n' for row in new_rows)
+        file.write(table_divider + '\n')
+
+def close_load_info():
+    if 'main_menu_load_info_frame' in frames:
+        frames['main_menu_load_info_frame'].destroy_frame()
+        del frames['main_menu_load_info_frame']
 
 def build_main_menu_help_frame():
     frames['main_menu_help_frame'] = Frame(
@@ -1085,6 +1168,9 @@ def switch_main_to_modify():
     if 'main_menu_env_viewer_frame' in frames:
         frames['main_menu_env_viewer_frame'].destroy_frame()
         del frames['main_menu_env_viewer_frame']
+    if 'main_menu_load_info_frame' in frames:
+        frames['main_menu_load_info_frame'].destroy_frame()
+        del frames['main_menu_load_info_frame']
 
     build_builder_para_frame()
 
@@ -2186,8 +2272,8 @@ def build_random_gen_env_menu():
         visibility=True,
     )
 
-    current_df_to_env_text()
-    with open("data/current_df.txt", "r") as file:
+    current_df_to_env_text(mode='gen')
+    with open("data/info_text.txt", "r") as file:
         displaytext = file.read()
 
     texts['random_gen_env_trains'] = Text(
@@ -4055,10 +4141,13 @@ def save_train_all_config():
     if la is not None:
         current_df['l_arr'] = [la] * len(current_df['l_arr'])
 
-    del entry_fields['all_eDep_entry']
-    del entry_fields['all_lArr_entry']
-    frames['train_all_config_frame'].destroy_frame()
-    del frames['train_all_config_frame']
+    if 'all_eDep_entry' in entry_fields:
+        del entry_fields['all_eDep_entry']
+    if 'all_lArr_entry' in entry_fields:
+        del entry_fields['all_lArr_entry']
+    if 'train_all_config_frame' in frames:
+        frames['train_all_config_frame'].destroy_frame()
+        del frames['train_all_config_frame']
 
 def build_builder_train_help_frame():
     frames['builder_train_help_frame'] = Frame(
@@ -4220,8 +4309,8 @@ def build_builder_env_menu():
         visibility=True,
     )
 
-    current_df_to_env_text()
-    with open("data/current_df.txt", "r") as file:
+    current_df_to_env_text(mode='build')
+    with open("data/info_text.txt", "r") as file:
         displaytext = file.read()
 
     texts['builder_env_trains'] = Text(
@@ -4818,7 +4907,7 @@ def build_result_timetable_frame():
         visibility=True
     )
 
-    with open("data/current_df.txt", "r") as file:
+    with open("data/info_text.txt", "r") as file:
         displaytext = file.read()
 
     texts['result_timetable_text'] = Text(
@@ -5092,29 +5181,61 @@ def df_to_timetable_text():
 
     new_rows = [format_row(index, row) for index, row in df.iterrows()]
 
-    with open('data/current_df.txt', "w") as file:
+    with open('data/info_text.txt', "w") as file:
         file.write(header + "\n")
         file.write(divider + "\n")
         file.writelines(new_row + "\n" for new_row in new_rows)
 
-def current_df_to_env_text():
+def current_df_to_env_text(mode):
     def format_row(index, row):
         new_line = (f"| {index:>8} | {str(row['start_pos']):>14} "
                     f"| {row['dir']:^3} | {str(row['end_pos']):>14} "
                     f"| {row['e_dep']:>7} | {row['l_arr']:>7} |")
         return new_line
 
-    header = ("| Train ID | Start Position | Dir |   "
-              "End Position |   E Dep |   L Arr |")
-    divider = ("|----------|----------------|-----|"
-               "----------------|---------|---------|")
+    param_header = '| Parameters |'
+    param_divider = '|------------|'
+
+    gen_param_text = [
+        f'|-Environment Seed: {user_params["seed"]}',
+        f'|-Grid Mode: {user_params["grid"]}',
+        f'|-Remove agents on arrival: {user_params["remove"]}',
+        f'|-Speeds of Trains: {user_params["speed"]}',
+        f'|-Malfunction rate: '
+        f'{user_params["malfunction"][0]}/{user_params["malfunction"][1]}',
+        f'|-Minimum Duration of Malfunctions: {user_params["min"]}',
+        f'|-Maximum Duration of Malfunctions: {user_params["max"]}',
+    ]
+    build_param_text = [
+        f'|-Remove agents on arrival: {user_params["remove"]}',
+        f'|-Speeds of Trains: {user_params["speed"]}',
+        f'|-Malfunction rate: '
+        f'{user_params["malfunction"][0]}/{user_params["malfunction"][1]}',
+        f'|-Minimum Duration of Malfunctions: {user_params["min"]}',
+        f'|-Maximum Duration of Malfunctions: {user_params["max"]}',
+    ]
+
+    spacing = '|\n|'
+
+    table_header = ("| Train ID | Start Position | Dir |   "
+                    "End Position |   E Dep |   L Arr |")
+    table_divider = ("|----------|----------------|-----|"
+                     "----------------|---------|---------|")
 
     new_rows = [format_row(index, row) for index, row in current_df.iterrows()]
 
-    with open('data/current_df.txt', "w") as file:
-        file.write(header + "\n")
-        file.write(divider + "\n")
-        file.writelines(new_row + "\n" for new_row in new_rows)
+    with open('data/info_text.txt', "w") as file:
+        file.write(param_divider + '\n')
+        file.write(param_header + '\n')
+        file.write(param_divider + '\n')
+        for row in gen_param_text if mode == 'gen' else build_param_text:
+            file.write(row + '\n')
+        file.write(spacing + '\n')
+        file.write(table_divider + '\n')
+        file.write(table_header + '\n')
+        file.write(table_divider + '\n')
+        file.writelines(row + '\n' for row in new_rows)
+        file.write(table_divider + '\n')
 
 def save_user_data_to_file():
     with open('data/user_params.json', 'w') as file:
@@ -5245,6 +5366,7 @@ def load_env_from_file():
         )
         frames['main_menu_frame'].frame.update()
         reload_main_env_viewer()
+        build_main_menu_load_info_frame()
 
 def save_env_to_file():
     file = filedialog.asksaveasfilename(
