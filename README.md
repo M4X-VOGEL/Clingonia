@@ -65,7 +65,7 @@ pip show imageio
 
 To use this repository locally, clone it:
 ```
-git clone git@github.com:M4X-VOGEL/Flatland-ASP-GUI.git
+git clone https://github.com/M4X-VOGEL/Clingonia.git
 ```
 
 <br>
