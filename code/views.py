@@ -2525,9 +2525,12 @@ def load_random_gen_env_params():
 # builder
 
 def builder_change_to_start_or_main():
-    global user_params, current_array, current_df
+    global build_mode, user_params, current_array, current_df
 
     user_params = user_params_backup.copy()
+
+    if build_mode == 'change_params':
+        build_mode = 'build'
 
     # if build_mode == 'build':
     #     current_array = current_builder_backup_array.copy()
@@ -3081,7 +3084,7 @@ def toggle_builder_para_help():
         build_builder_para_help_frame()
 
 def builder_para_to_track_grid():
-    global current_array, current_df, \
+    global build_mode, current_array, current_df, \
         current_builder_backup_array, current_builder_backup_df, \
         current_modify_backup_array, current_modify_backup_df
 
@@ -3162,10 +3165,15 @@ def builder_para_to_track_grid():
         current_builder_backup_array = current_array.copy()
         current_builder_backup_df = current_df.copy()
 
+    if build_mode == 'change_params':
+        build_mode = 'build'
+
     build_track_builder_menu_frame()
     build_builder_grid_frame()
 
 def builder_track_grid_to_para():
+    global build_mode
+
     if 'track_builder_menu_frame' in frames:
         frames['track_builder_menu_frame'].destroy_frame()
         del frames['track_builder_menu_frame']
@@ -3175,6 +3183,9 @@ def builder_track_grid_to_para():
     if 'builder_track_help_frame' in frames:
         frames['builder_track_help_frame'].destroy_frame()
         del frames['builder_track_help_frame']
+
+    if build_mode == 'build':
+        build_mode = 'change_params'
 
     build_builder_para_frame()
 
