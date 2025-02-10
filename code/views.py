@@ -25,6 +25,7 @@ font_scale = 1
 # state trackers
 build_mode = None
 last_menu = None
+last_gif_params = (None, None)
 
 
 # Widget handlers
@@ -5021,12 +5022,6 @@ def toggle_result_timetable():
         build_result_timetable_frame()
 
 def toggle_result_gif():
-    labels['gif_status_label'].label.config(
-        text='...Rendering GIF...',
-        fg='#00FF00',
-    )
-    frames['result_menu_frame'].frame.update()
-
     err_count = 0
 
     for field in entry_fields:
@@ -5079,13 +5074,7 @@ def toggle_result_gif():
         if type(data) is not str:
             user_params[key] = data
 
-
     if err_count:
-        labels['gif_status_label'].label.config(
-            text='',
-            fg='#00FF00',
-        )
-        frames['result_menu_frame'].frame.update()
         return -1
     else:
         labels['frameRate_error_label'].hide_label()
@@ -5098,13 +5087,30 @@ def toggle_result_gif():
     if ('result_help_frame' in frames and 
             frames['result_help_frame'].visibility):
         frames['result_help_frame'].toggle_visibility()
-        
-    if 'result_gif_frame' in frames:
+
+    current_gif_params = (user_params['frameRate'], user_params['lowQualityGIF'])
+
+    if 'result_gif_frame' in frames and last_gif_params == current_gif_params:
         frames['result_gif_frame'].toggle_visibility()
         frames['result_gif_frame'].frame.rowconfigure(0, weight=1)
         frames['result_gif_frame'].frame.columnconfigure(0, weight=1)
         frames['result_gif_frame'].frame.grid_propagate(False)
+    elif 'result_gif_frame' in frames and last_gif_params != current_gif_params:
+        frames['result_gif_frame'].destroy_frame()
+        del frames['result_gif_frame']
+        labels['gif_status_label'].label.config(
+            text='...Rendering GIF...',
+            fg='#00FF00',
+        )
+        frames['result_menu_frame'].frame.update()
+        create_gif()
+        build_result_gif_frame()
     else:
+        labels['gif_status_label'].label.config(
+            text='...Rendering GIF...',
+            fg='#00FF00',
+        )
+        frames['result_menu_frame'].frame.update()
         create_gif()
         build_result_gif_frame()
 
@@ -5149,13 +5155,14 @@ def change_save_image_status():
     user_params['saveImage'] = not user_params['saveImage']
 
 def create_gif():
-    global current_gif
+    global current_gif, last_gif_params
 
     tracks = current_array[0]
     trains = get_trains()
     current_gif = 'data/running_tmp.gif'
     fps = user_params['frameRate']
     low_q = user_params['lowQualityGIF']
+    last_gif_params = (fps, low_q)
     build_gif(tracks, trains, current_paths, user_params, current_gif, fps, low_q)
 
 def df_to_timetable_text():
