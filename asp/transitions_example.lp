@@ -79,12 +79,12 @@ trans(33825, w, w, move_forward).
 
 
 % Type 4 tracks
-trans(38443, n, n, move_forward).
-trans(38443, s, s, move_forward).
-trans(38443, e, e, move_forward).
-trans(38443, w, w, move_forward).
-trans(38443, e, s, move_right).
-trans(38443, n, w, move_left).
+trans(38433, n, n, move_forward).
+trans(38433, s, s, move_forward).
+trans(38433, e, e, move_forward).
+trans(38433, w, w, move_forward).
+trans(38433, e, s, move_right).
+trans(38433, n, w, move_left).
 
 trans(50211, n, n, move_forward).
 trans(50211, s, s, move_forward).

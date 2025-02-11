@@ -55,8 +55,9 @@ conda install -c potassco clingo
 
 📦 Additionally, ensure that the following required packages are installed:
 ```
-pip show pillow
-pip show imageio
+pip install pillow
+pip install imageio
+pip install clingo
 ```
 
 <br>
@@ -126,7 +127,5 @@ If you encounter unexpected issues, it may be due to any number of reasons. This
 ### ⚠️ Known issues
 
 - Users may experience decreased responsiveness when zooming in closely on environments.
-- Build mode: Avoid using the back button to return to the parameter settings, as this may cause loss of progress. Instead, modify the parameters after completing your build.
 - Our example `ASP` code for solving environments is provided for reference and simple environments. It is not flawless. We recommend using your own implementation for optimal results.
-- A `GIF` can only be generated once per simulation. To produce a new `GIF`, please restart the simulation.
 - On macOS, text input fields might not appear immediately upon loading the page. Interacting with a control, such as clicking "Advanced Options," should reveal them.
