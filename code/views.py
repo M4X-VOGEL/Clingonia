@@ -35,19 +35,21 @@ example_color = '#0FF000'
 selector_color = '#F0000F'
 good_status_color = '#00CC00'
 bad_status_color = '#CC0000'
+train_color = '#0FF000'
+station_color = '#000FF0'
 
-foreground_color = label_color,
-background_color = button_color,
-
-foreground_color = label_color,
-background_color = background_color,
-
-foreground_color = input_color,
-background_color = entry_color,
-example_color = example_color,
-
-foreground_color = bad_status_color,
-background_color = background_color,
+# foreground_color = label_color,
+# background_color = button_color,
+#
+# foreground_color = label_color,
+# background_color = background_color,
+#
+# foreground_color = input_color,
+# background_color = entry_color,
+# example_color = example_color,
+#
+# foreground_color = bad_status_color,
+# background_color = background_color,
 
 # state trackers
 build_mode = None
@@ -881,6 +883,7 @@ def build_main_menu_env_viewer():
         x=frames['main_menu_env_viewer_frame'].width * 0,
         y=frames['main_menu_env_viewer_frame'].height * 0,
         background_color=canvas_color,
+        grid_color=label_color,
         border_width=0,
         image=current_img,
         rows=user_params['rows'],
@@ -2263,6 +2266,7 @@ def build_random_gen_env_viewer():
         x=frames['random_gen_env_viewer_frame'].width * 0,
         y=frames['random_gen_env_viewer_frame'].height * 0,
         background_color=canvas_color,
+        grid_color=label_color,
         border_width=0,
         image=current_img,
         rows=user_params['rows'],
@@ -3231,6 +3235,9 @@ def build_builder_grid_frame():
         x=frames['builder_grid_frame'].width * 0,
         y=frames['builder_grid_frame'].height * 0,
         background_color=canvas_color,
+        grid_color=label_color,
+        train_color=train_color,
+        station_color=station_color,
         border_width=0,
         array=current_array,
         train_data=current_df,
@@ -3981,6 +3988,11 @@ def build_train_builder_menu_frame():
         x=frames['train_config_list_canvas_frame'].width * 0,
         y=frames['train_config_list_canvas_frame'].height * 0,
         background_color=background_color,
+        label_color=label_color,
+        button_color=button_color,
+        entry_color=entry_color,
+        input_color=input_color,
+        bad_status_color=bad_status_color,
         border_width=0,
         grid=canvases['builder_grid_canvas'],
         train_data=current_df,
@@ -4303,6 +4315,7 @@ def build_builder_env_viewer():
         x=frames['builder_env_viewer_frame'].width * 0,
         y=frames['builder_env_viewer_frame'].height * 0,
         background_color=canvas_color,
+        grid_color=label_color,
         border_width=0,
         image=current_img,
         rows=user_params['rows'],
@@ -4658,6 +4671,7 @@ def build_result_env_viewer():
         x=frames['result_viewer_frame'].width * 0,
         y=frames['result_viewer_frame'].height * 0,
         background_color=canvas_color,
+        grid_color=label_color,
         border_width=0,
         image=current_img,
         paths_df=current_paths,
@@ -4883,6 +4897,10 @@ def build_result_menu():
         x=frames['path_list_canvas_frame'].width * 0,
         y=frames['path_list_canvas_frame'].height * 0,
         background_color=background_color,
+        on_color=good_status_color,
+        off_color=bad_status_color,
+        handle_color=label_color,
+        label_color=label_color,
         border_width=0,
         train_data=current_df,
         grid=canvases['result_viewer_canvas'],
