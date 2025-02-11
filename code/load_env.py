@@ -1,6 +1,16 @@
 import os
 import pandas as pd
 
+valid_tracks = [
+    0,  # Type 0
+    32800, 1025, 4608, 16386, 72, 2064,  # Type 1
+    37408, 17411, 32872, 3089, 49186, 1097, 34864, 5633,  # Type 2
+    33825,  # Type 3
+    38433, 50211, 33897, 35889,  # Type 4
+    38505, 52275,  # Type 5
+    20994, 16458, 2136, 6672  # Type 6
+]
+
 def load_env(lp_file):
     """Extracts a list of tracks and a DataFrame with train-info from a .lp-file.
     
@@ -11,15 +21,19 @@ def load_env(lp_file):
         [list] 2D-list with track-types
         [pd.DataFrame] Train-configuration
     """
+    print(f"\nLoading environment {os.path.basename(lp_file)}...")
     if not file_in_directory(lp_file):
-        return -1, -1  # FileNotFoundError
+        print("❌ File Not Found Error: No environment loaded.")
+        return -1, -1  # FileNotFoundError -1
     df_tracks, tse_list = prep_tracks_and_trains(lp_file)
     if isinstance(df_tracks, int) or isinstance(tse_list, int):
-        return df_tracks, tse_list  # Errors -2, -3, -4, -5
+        print("❌ Load Error: No environment loaded.")
+        return df_tracks, tse_list  # Errors -2,-3,-4,-5,-11,-12
     # Validation
     rc = validate(tse_list, df_tracks)
     if rc != 0:
-        return rc, rc  # Errors -6, -7, -8, -9
+        print("❌ Validation Error: No environment loaded.")
+        return rc, rc  # Errors -6,-7,-8,-9,-10
     tracks = create_list_of_tracks(df_tracks)
     trains = create_df_of_trains(tse_list)
     return tracks, trains
@@ -56,6 +70,7 @@ def prep_tracks_and_trains(path):
 
 def add_cell(df_tracks, pred):
     # cell((X,Y), Track)
+    global valid_tracks
     # Extract variables
     params = pred[5:-1]
     cell = params.replace('(', '').replace(')', '').split(',')
@@ -64,7 +79,13 @@ def add_cell(df_tracks, pred):
     # Add row to DF
     try:
         y, x = int(cell[0].strip()), int(cell[1].strip())
+        if x < 0 or y < 0:
+            print(f"⚠️ Warning: Negative coordinates are not allowed.")
+            return -12  # Report cells with negative coordinates
         track = int(cell[2].strip())
+        if track not in valid_tracks:
+            track = 0  # Remove track and provide empty cell
+            print(f"⚠️ cell(({y},{x}),_) Warning: Invalid track type was replaced by 0.")
     except ValueError:
         return -2  # Report invalid cells
     df_tracks.loc[len(df_tracks)] = [x, y, track]
@@ -81,6 +102,9 @@ def fill_tse(tse_list, pred):
             return -3  # Report invalid trains
         try:
             id = int(train[0])
+            if id < 0:
+                print(f"⚠️ train({id}) Warning: Invalid ID.")
+                return -11  # Report invalid Train ID
         except ValueError:
             return -3  # Report invalid trains
         tse_list.append(id)
@@ -97,6 +121,9 @@ def fill_tse(tse_list, pred):
             y, x = int(start[1]), int(start[2])
             e_dep = int(start[3])
             dir = start[4]
+            if e_dep < 1:
+                print(f"⚠️ start({id},...) Warning: EarliestDeparture < 1 not allowed.")
+                return -13  # Report invalid EarliestDeparture
         except ValueError:
             return -4  # Report invalid start
         tse_list.append(["start", id, x, y, e_dep, dir])
@@ -111,6 +138,9 @@ def fill_tse(tse_list, pred):
             id = int(end[0])
             y_end, x_end = int(end[1]), int(end[2])
             l_arr = int(end[3])
+            if l_arr < 1:
+                print(f"⚠️ end({id},...) Warning: LatestArrival < 1 not allowed.")
+                return -14  # Report invalid LatestArrival
         except ValueError:
             return -5  # Report invalid end
         tse_list.append(["end", id, x_end, y_end, l_arr])
@@ -206,6 +236,33 @@ def validate_train_consistency(tse_list):
     return 0
 
 
+def validate_grid_completeness(df_tracks):
+    """Checks, if you can build a complete grid with the cell predicates.
+    
+    Returns:
+        0   -> Grid valid.
+        -10 -> Grid invalid: There is not a cell for every (X,Y) coordinate.
+    """
+    if df_tracks.empty:
+        print("⚠️ Warning: Grid is empty.")
+        return -10
+
+    # Dimensions
+    min_x = df_tracks['x'].min()
+    max_x = df_tracks['x'].max()
+    min_y = df_tracks['y'].min()
+    max_y = df_tracks['y'].max()
+
+    for y in range(min_y, max_y + 1):
+        for x in range(min_x, max_x + 1):
+            # Check, if any cell is missing
+            if not ((df_tracks['x'] == x) & (df_tracks['y'] == y)).any():
+                print(f"⚠️ Warning: cell({y},{x},_) missing.")
+                return -10
+    return 0
+
+
+
 def validate(tse_list, df_tracks):
     """Vadidates start directions, existence of requested cells and predicate consistency.
     """
@@ -231,4 +288,8 @@ def validate(tse_list, df_tracks):
     rc = validate_train_consistency(tse_list)
     if rc != 0:
         return rc
+    # Validate consistency of cell predicates
+    rc_grid = validate_grid_completeness(df_tracks)
+    if rc_grid != 0:
+        return rc_grid
     return 0

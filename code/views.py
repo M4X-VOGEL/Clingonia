@@ -176,21 +176,26 @@ err_dict = {
     }
 }
 loading_err_dict = {
-    -1: 'No environment .lp file found',
-    -2: 'A cell predicate is faulty',
-    -3: 'A train predicate is faulty',
-    -4: 'A start predicate is faulty',
-    -5: 'A end predicate is faulty',
-    -6: 'A direction in a start predicate is faulty',
-    -7: 'A train has no start or end predicate',
-    -8: 'A train starts or ends on an invalid cell',
-    -9: 'A train\'s latest arrival is earlier than its earliest departure',
+    -1: 'No environment .lp file found.',
+    -2: 'A cell predicate is improperly specified.',
+    -3: 'A train predicate is improperly specified.',
+    -4: 'A start predicate is improperly specified.',
+    -5: 'An end predicate is improperly specified.',
+    -6: 'A start direction is invalid.',
+    -7: 'A train has no start or end predicate.',
+    -8: 'A train starts or ends on an invalid cell.',
+    -9: 'A train\'s latest arrival earlier than its earliest departure.',
+    -10:'Incomplete grid: Missing cell predicates.',
+    -11:'A train\'s ID is negative.',
+    -12:'Negative coordinates are invalid.',
+    -13:'A start predicate has an invalid earliest departure.',
+    -14:'An end predicate has an invalid latest arrival.',
 }
 clingo_err_dict = {
-    -1: 'No .lp files given',
-    -2: 'Invalid clingo path',
-    -3: 'Clingo returned an error',
-    -4: 'Clingo returns UNSATISFIABLE',
+    -1: 'No .lp files given.',
+    -2: 'Invalid clingo path.',
+    -3: 'Clingo returned an error.',
+    -4: 'Clingo returns UNSATISFIABLE.',
     -5: f'Clingo did not provide the requested Answer: ',
 }
 
