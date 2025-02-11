@@ -16,7 +16,7 @@ class EnvCanvas:
             height: int,
             x: int,
             y: int,
-            font: [[str, int], [str, int, str, ...]],
+            font: [[str, int]],
             background_color: str,
             grid_color: str,
             border_width: int,
@@ -192,7 +192,7 @@ class EnvCanvas:
             )
 
         # Uncomment to draw row and column labels on the canvas
-        self.draw_grid_labels()
+        # self.draw_grid_labels()
 
     def draw_grid_labels(self):
         self.canvas.delete("grid_label")
@@ -244,7 +244,8 @@ class BuildCanvas:
             height: int,
             x: int,
             y: int,
-            font: [[str, int], [str, int, str, ...]],
+            font: [[str, int]],
+            id_label_font: [[str, int, str]],
             background_color: str,
             grid_color: str,
             train_color: str,
@@ -259,6 +260,7 @@ class BuildCanvas:
         self.x = x
         self.y = y
         self.font = font
+        self.id_label_font = id_label_font
         self.background_color = background_color
         self.grid_color = grid_color
         self.train_color = train_color
@@ -571,7 +573,11 @@ class BuildCanvas:
                     0] * adjusted_cell_size),
                 text=str(index),
                 anchor="center",
-                font=(self.font[0], int(self.font[1] * (adjusted_cell_size / 100))),
+                font=(
+                    self.id_label_font[0],
+                    int(self.id_label_font[1] * (adjusted_cell_size / 100)),
+                    self.id_label_font[2]
+                ),
                 fill=self.train_color,
                 tags="id_labels"
             )
@@ -588,7 +594,11 @@ class BuildCanvas:
                      station_pos[0] * adjusted_cell_size),
                     text=str(index),
                     anchor="center",
-                    font=(self.font[0], int(self.font[1] * (adjusted_cell_size / 100))),
+                    font=(
+                        self.id_label_font[0],
+                        int(self.id_label_font[1] * (adjusted_cell_size / 100)),
+                        self.id_label_font[2]
+                    ),
                     fill=self.station_color,
                     tags="id_labels"
                 )
@@ -739,8 +749,8 @@ class TrainListCanvas:
             height: int,
             x: int,
             y: int,
-            font: [[str, int], [str, int, str, ...]],
-            config_title_font: [str, int],
+            font: [[str, int]],
+            config_title_font: [[str, int, str]],
             background_color: str,
             label_color: str,
             button_color: str,
@@ -842,7 +852,7 @@ class TrainListCanvas:
                     frame,
                     width=8,height=1,
                     font=self.font,
-                    fg=self.label_color, bg=self.button_color,
+                    fg=self.label_color, bg=self.button_color, bd=0,
                     text='configure',
                     command=lambda index=idx: self.open_train_config_frame(index)
                 )
@@ -1123,7 +1133,8 @@ class ResultCanvas:
             height: int,
             x: int,
             y: int,
-            font: [[str, int], [str, int, str, ...]],
+            font: [[str, int]],
+            path_label_font: [[str, int, str]],
             background_color: str,
             grid_color: str,
             border_width: int,
@@ -1138,6 +1149,7 @@ class ResultCanvas:
         self.x = x
         self.y = y
         self.font = font
+        self.path_label_font = path_label_font
         self.background_color = background_color
         self.grid_color = grid_color
         self.border_width = border_width
@@ -1390,7 +1402,11 @@ class ResultCanvas:
                  offset_dict[row['cell_offset']][1]),
                 text=row['timestep'],
                 anchor="center",
-                font=(self.font[0], int(self.font[1] * (adjusted_cell_size/100))),
+                font=(
+                    self.path_label_font[0],
+                    int(self.path_label_font[1] * (adjusted_cell_size/100)),
+                    self.path_label_font[2]
+                ),
                 fill=train_colors[row['trainID']],
                 tags="path_labels"
             )
@@ -1416,7 +1432,7 @@ class PathListCanvas:
             height: int,
             x: int,
             y: int,
-            font: [[str, int], [str, int, str, ...]],
+            font: [[str, int]],
             background_color: str,
             on_color: str,
             off_color: str,

@@ -31,22 +31,24 @@ font_err_mod = 0.75
 # font layouts
 base_font_layout = ('Arial', int(font_base_mod * base_font_size), 'bold')
 canvas_font_layout = ('Arial', int(font_base_mod * base_font_size))
+canvas_label_font_layout = ('Arial', int(font_base_mod * base_font_size), 'bold')
 err_font_layout = ('Arial', int(font_base_mod * base_font_size * font_err_mod), 'bold')
+help_font_layout = ('Courier', int(font_base_mod * base_font_size))
 info_font_layout = ('Courier', int(font_base_mod * info_text_font_size))
 title_font_layout = ('Arial', int(font_base_mod * frame_title_font_size), 'bold')
 
 
 # color scheme
-background_color = '#0000FF'
-canvas_color = '#FFFFFF'
-button_color = '#00FF00'
-label_color = '#0000FF'
-entry_color = '#FF0000'
-input_color = '#000FF0'
-example_color = '#0FF000'
-selector_color = '#F0000F'
-good_status_color = '#00CC00'
-bad_status_color = '#CC0000'
+background_color = '#1E1F22'
+canvas_color = '#313338'
+button_color = '#2B2D31'
+label_color = '#FFFFFF'
+entry_color = '#383A40'
+input_color = '#F0F0F0'
+example_color = '#AFB3BA'
+selector_color = '#35373C'
+good_status_color = '#00FF00'
+bad_status_color = '#FF0000'
 train_color = '#0FF000'
 station_color = '#000FF0'
 
@@ -405,7 +407,7 @@ def build_start_menu_frame():
         text='',
         font=err_font_layout,
         foreground_color=label_color,
-        background_color=button_color,
+        background_color=background_color,
         visibility=True,
     )
 
@@ -438,7 +440,7 @@ def build_start_menu_help_frame():
         padding=(0, 0),
         sticky='nesw',
         text=help_displaytext,
-        font=info_font_layout,
+        font=help_font_layout,
         wrap='word',
         foreground_color=label_color,
         background_color=background_color,
@@ -847,7 +849,7 @@ def build_main_menu_help_frame():
         padding=(0, 0),
         sticky='nesw',
         text=help_displaytext,
-        font=info_font_layout,
+        font=help_font_layout,
         wrap='word',
         foreground_color=label_color,
         background_color=background_color,
@@ -880,7 +882,7 @@ def build_main_menu_env_viewer():
         y=frames['main_menu_env_viewer_frame'].height * 0,
         font=canvas_font_layout,
         background_color=canvas_color,
-        grid_color=label_color,
+        grid_color=background_color,
         border_width=0,
         image=current_img,
         rows=user_params['rows'],
@@ -1107,7 +1109,7 @@ def build_clingo_help_frame():
         padding=(0, 0),
         sticky='nesw',
         text=help_displaytext,
-        font=info_font_layout,
+        font=help_font_layout,
         wrap='word',
         foreground_color=label_color,
         background_color=background_color,
@@ -2144,7 +2146,7 @@ def build_random_gen_para_help_frame():
         padding=(0, 0),
         sticky='nes',
         text=help_displaytext,
-        font=info_font_layout,
+        font=help_font_layout,
         wrap='word',
         foreground_color=label_color,
         background_color=background_color,
@@ -2260,7 +2262,7 @@ def build_random_gen_env_viewer():
         y=frames['random_gen_env_viewer_frame'].height * 0,
         font=canvas_font_layout,
         background_color=canvas_color,
-        grid_color=label_color,
+        grid_color=background_color,
         border_width=0,
         image=current_img,
         rows=user_params['rows'],
@@ -3079,7 +3081,7 @@ def build_builder_para_help_frame():
         padding=(0, 0),
         sticky='nes',
         text=help_displaytext,
-        font=info_font_layout,
+        font=help_font_layout,
         wrap='word',
         foreground_color=label_color,
         background_color=background_color,
@@ -3227,8 +3229,9 @@ def build_builder_grid_frame():
         x=frames['builder_grid_frame'].width * 0,
         y=frames['builder_grid_frame'].height * 0,
         font=canvas_font_layout,
+        id_label_font=canvas_label_font_layout,
         background_color=canvas_color,
-        grid_color=label_color,
+        grid_color=background_color,
         train_color=train_color,
         station_color=station_color,
         border_width=0,
@@ -3726,7 +3729,7 @@ def build_builder_track_help_frame():
         padding=(0, 0),
         sticky='nes',
         text=help_displaytext,
-        font=info_font_layout,
+        font=help_font_layout,
         wrap='word',
         foreground_color=label_color,
         background_color=background_color,
@@ -4207,7 +4210,7 @@ def build_builder_train_help_frame():
         padding=(0, 0),
         sticky='nes',
         text=help_displaytext,
-        font=info_font_layout,
+        font=help_font_layout,
         wrap='word',
         foreground_color=label_color,
         background_color=background_color,
@@ -4305,7 +4308,7 @@ def build_builder_env_viewer():
         y=frames['builder_env_viewer_frame'].height * 0,
         font=canvas_font_layout,
         background_color=canvas_color,
-        grid_color=label_color,
+        grid_color=background_color,
         border_width=0,
         image=current_img,
         rows=user_params['rows'],
@@ -4661,8 +4664,9 @@ def build_result_env_viewer():
         x=frames['result_viewer_frame'].width * 0,
         y=frames['result_viewer_frame'].height * 0,
         font=canvas_font_layout,
+        path_label_font=canvas_label_font_layout,
         background_color=canvas_color,
-        grid_color=label_color,
+        grid_color=background_color,
         border_width=0,
         image=current_img,
         paths_df=current_paths,
@@ -4921,7 +4925,7 @@ def build_result_help_frame():
         padding=(0, 0),
         sticky='nes',
         text=help_displaytext,
-        font=info_font_layout,
+        font=help_font_layout,
         wrap='word',
         foreground_color=label_color,
         background_color=background_color,
