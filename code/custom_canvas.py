@@ -16,7 +16,9 @@ class EnvCanvas:
             height: int,
             x: int,
             y: int,
+            font: [[str, int]],
             background_color: str,
+            grid_color: str,
             border_width: int,
             image: str,
             rows: int,
@@ -27,7 +29,9 @@ class EnvCanvas:
         self.height = height
         self.x = x
         self.y = y
+        self.font = font
         self.background_color = background_color
+        self.grid_color = grid_color
         self.border_width = border_width
 
         self.image = self.get_image(image)
@@ -122,7 +126,7 @@ class EnvCanvas:
                 self.text_label = self.canvas.create_text(
                     event.x + 10, event.y + 10,  # Position next to the cursor
                     text=coords_text,
-                    font=("Arial", 20),
+                    font=self.font,
                     fill="#000000",  # Text color
                     anchor="nw"
                 )
@@ -173,7 +177,7 @@ class EnvCanvas:
                 self.y_offset + row * adjusted_cell_size,
                 self.x_offset + self.cols * adjusted_cell_size,
                 self.y_offset + row * adjusted_cell_size,
-                fill='#000000',
+                fill=self.grid_color,
                 tags='grid_line',
             )
 
@@ -183,7 +187,7 @@ class EnvCanvas:
                 self.y_offset,
                 self.x_offset + col * adjusted_cell_size,
                 self.y_offset + self.rows * adjusted_cell_size,
-                fill='#000000',
+                fill=self.grid_color,
                 tags='grid_line',
             )
 
@@ -201,8 +205,8 @@ class EnvCanvas:
                     adjusted_cell_size / 2,
                 text=str(row),
                 anchor="e",
-                font=("Arial", 10),
-                fill='#FFFFFF',
+                font=(self.font[0], int(self.font[1] * self.scale)),
+                fill=self.grid_color,
                 tags="grid_label"
             )
 
@@ -214,8 +218,8 @@ class EnvCanvas:
                 text=str(col),
                 angle=90,
                 anchor="e",
-                font=("Arial", 10),
-                fill='#FFFFFF',
+                font=(self.font[0], int(self.font[1] * self.scale)),
+                fill=self.grid_color,
                 tags="grid_label"
             )
 
@@ -240,7 +244,12 @@ class BuildCanvas:
             height: int,
             x: int,
             y: int,
+            font: [[str, int]],
+            id_label_font: [[str, int, str]],
             background_color: str,
+            grid_color: str,
+            train_color: str,
+            station_color: str,
             border_width: int,
             array: np.ndarray,
             train_data: pd.DataFrame,
@@ -250,7 +259,12 @@ class BuildCanvas:
         self.height = height
         self.x = x
         self.y = y
+        self.font = font
+        self.id_label_font = id_label_font
         self.background_color = background_color
+        self.grid_color = grid_color
+        self.train_color = train_color
+        self.station_color = station_color
         self.border_width = border_width
 
         self.canvas = self.create_canvas()
@@ -392,7 +406,7 @@ class BuildCanvas:
                 self.y_offset + row * adjusted_cell_size,
                 self.x_offset + self.cols * adjusted_cell_size,
                 self.y_offset + row * adjusted_cell_size,
-                fill='#FFFFFF',
+                fill=self.grid_color,
                 tags='grid_line',
             )
 
@@ -402,7 +416,7 @@ class BuildCanvas:
                 self.y_offset,
                 self.x_offset + col * adjusted_cell_size,
                 self.y_offset + self.rows * adjusted_cell_size,
-                fill='#FFFFFF',
+                fill=self.grid_color,
                 tags='grid_line',
             )
 
@@ -420,8 +434,8 @@ class BuildCanvas:
                 adjusted_cell_size / 2,
                 text=str(row),
                 anchor="e",
-                font=("Arial", 10),
-                fill='#FFFFFF',
+                font=(self.font[0], int(self.font[1] * self.scale)),
+                fill=self.grid_color,
                 tags="grid_label"
             )
 
@@ -433,8 +447,8 @@ class BuildCanvas:
                 text=str(col),
                 angle=90,
                 anchor="e",
-                font=("Arial", 10),
-                fill='#FFFFFF',
+                font=(self.font[0], int(self.font[1] * self.scale)),
+                fill=self.grid_color,
                 tags="grid_label"
             )
 
@@ -559,8 +573,12 @@ class BuildCanvas:
                     0] * adjusted_cell_size),
                 text=str(index),
                 anchor="center",
-                font=("Courier", int(20 * (adjusted_cell_size / 100)), 'bold'),
-                fill='#0FF000',
+                font=(
+                    self.id_label_font[0],
+                    int(self.id_label_font[1] * (adjusted_cell_size / 100)),
+                    self.id_label_font[2]
+                ),
+                fill=self.train_color,
                 tags="id_labels"
             )
 
@@ -577,8 +595,11 @@ class BuildCanvas:
                     text=str(index),
                     anchor="center",
                     font=(
-                    "Courier", int(20 * (adjusted_cell_size / 100)), 'bold'),
-                    fill='#000FF0',
+                        self.id_label_font[0],
+                        int(self.id_label_font[1] * (adjusted_cell_size / 100)),
+                        self.id_label_font[2]
+                    ),
+                    fill=self.station_color,
                     tags="id_labels"
                 )
 
@@ -604,7 +625,7 @@ class BuildCanvas:
                 event.x + 10,
                 event.y + 10,
                 text=coords_text,
-                font=("Arial", 20),
+                font=self.font,
                 fill="#FFFFFF",
                 anchor="nw"
             )
@@ -728,26 +749,36 @@ class TrainListCanvas:
             height: int,
             x: int,
             y: int,
+            font: [[str, int]],
+            config_title_font: [[str, int, str]],
             background_color: str,
+            label_color: str,
+            button_color: str,
+            entry_color: str,
+            input_color: str,
+            bad_status_color: str,
             border_width: int,
             grid: BuildCanvas,
             train_data: pd.DataFrame,
             outer_frame: tk.Tk,
-            base_font: int,
-            font_scale: float,
     ):
         self.root = root
         self.width = width
         self.height = height
         self.x = x
         self.y = y
+        self.font = font
+        self.config_title_font = config_title_font
         self.background_color = background_color
+        self.label_color = label_color
+        self.button_color = button_color
+        self.entry_color = entry_color
+        self.input_color = input_color
+        self.bad_status_color = bad_status_color
         self.border_width = border_width
         self.grid = grid
         self.train_data = train_data
         self.outer_frame = outer_frame
-        self.base_font = base_font
-        self.font_scale = font_scale
 
         self.config_dict = {}
         self.remove_dict = {}
@@ -765,7 +796,7 @@ class TrainListCanvas:
 
         self.canvas.configure(yscrollcommand=self.scrollbar.set)
 
-        self.scroll_frame = tk.Frame(self.canvas, bg='#000000')
+        self.scroll_frame = tk.Frame(self.canvas, bg=self.background_color)
         self.canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
 
         self.scroll_frame.update_idletasks()
@@ -794,14 +825,14 @@ class TrainListCanvas:
             widget.destroy()
 
         for idx, row in self.train_data.iterrows():
-            frame = tk.Frame(self.scroll_frame, bg='#000000')
+            frame = tk.Frame(self.scroll_frame, bg=self.background_color)
             frame.pack(fill='x', pady=5)
 
             label = tk.Label(
                 frame,
                 width=25,
-                font=('Arial', int(self.font_scale * self.base_font)),
-                fg='#FFFFFF', bg='#000000',
+                font=self.font,
+                fg=self.label_color, bg=self.background_color,
                 text=f'Train {idx}: {row["start_pos"]}, {row["dir"]}',
             )
             label.pack(side='left', padx=0)
@@ -810,7 +841,7 @@ class TrainListCanvas:
                 self.config_dict[idx] = tk.Button(
                     frame,
                     width=8,height=1,
-                    font=('Arial', int(self.font_scale * self.base_font)),
+                    font=self.font,
                     fg='#000000', bg='#333333',
                     text='configure',
                     command=lambda index=idx: self.open_train_config_frame(index)
@@ -820,8 +851,8 @@ class TrainListCanvas:
                 self.config_dict[idx] = tk.Button(
                     frame,
                     width=8,height=1,
-                    font=('Arial', int(self.font_scale * self.base_font)),
-                    fg='#FFFFFF', bg='#333333',
+                    font=self.font,
+                    fg=self.label_color, bg=self.button_color, bd=0,
                     text='configure',
                     command=lambda index=idx: self.open_train_config_frame(index)
                 )
@@ -830,8 +861,8 @@ class TrainListCanvas:
             self.remove_dict[idx] = tk.Button(
                 frame,
                 width=7, height=1,
-                font=('Arial', int(self.font_scale * self.base_font)),
-                fg='#FF0000', bg='#000000', bd=0,
+                font=self.font,
+                fg=self.bad_status_color, bg=self.background_color, bd=0,
                 text='remove',
                 command=lambda index=idx: self.remove_train(index)
             )
@@ -900,7 +931,7 @@ class TrainListCanvas:
             self.outer_frame,
             width=self.outer_frame.winfo_width(),
             height=self.outer_frame.winfo_height(),
-            bg='#000000',
+            bg=self.background_color,
             bd=0,
         )
         config_frame.place(x=0, y=0)
@@ -911,8 +942,8 @@ class TrainListCanvas:
         config_label = tk.Label(
             config_frame,
             text=f'Configure: Train {index}',
-            font=('Arial', int(self.font_scale * self.base_font * 2)),
-            foreground='#FFFFFF', background='#000000', bd=0,
+            font=self.config_title_font,
+            foreground=self.label_color, background=self.background_color, bd=0,
         )
         config_label.place(
             x=self.outer_frame.winfo_width() * 0.1,
@@ -922,8 +953,8 @@ class TrainListCanvas:
         ed_label = tk.Label(
             config_frame,
             text='Earliest Departure:',
-            font=('Arial', int(self.font_scale * self.base_font)),
-            foreground='#FFFFFF', background='#000000', bd=0,
+            font=self.font,
+            foreground=self.label_color, background=self.background_color, bd=0,
         )
         ed_label.place(
             x=self.outer_frame.winfo_width() * 0.1,
@@ -932,8 +963,8 @@ class TrainListCanvas:
 
         ed_entry = tk.Entry(
             config_frame,
-            width=5, font=('Arial', int(self.font_scale * self.base_font)),
-            foreground='#FFFFFF', background='#333333', bd=1,
+            width=5, font=self.font,
+            foreground=self.input_color, background=self.entry_color, bd=1,
         )
         ed_entry.place(
             x=self.outer_frame.winfo_width() * 0.4,
@@ -949,8 +980,8 @@ class TrainListCanvas:
         ed_err_label = tk.Label(
             config_frame,
             text='',
-            font=('Arial', int(self.font_scale * self.base_font)),
-            foreground='#FF0000', background='#000000',
+            font=self.font,
+            foreground=self.bad_status_color, background=self.background_color,
             bd=0,
         )
         ed_err_label.place(
@@ -961,8 +992,8 @@ class TrainListCanvas:
         la_label = tk.Label(
             config_frame,
             text='Latest Arrival:',
-            font=('Arial', int(self.font_scale * self.base_font)),
-            foreground='#FFFFFF', background='#000000',
+            font=self.font,
+            foreground=self.label_color, background=self.background_color,
             bd=0,
         )
         la_label.place(
@@ -972,8 +1003,8 @@ class TrainListCanvas:
 
         la_entry = tk.Entry(
             config_frame,
-            width=5, font=('Arial', int(self.font_scale * self.base_font)),
-            foreground='#FFFFFF', background='#333333', bd=1,
+            width=5, font=self.font,
+            foreground=self.input_color, background=self.entry_color, bd=1,
         )
         la_entry.place(
             x=self.outer_frame.winfo_width() * 0.4,
@@ -988,16 +1019,16 @@ class TrainListCanvas:
         la_err_label = tk.Label(
             config_frame,
             text='',
-            font=('Arial', int(self.font_scale * self.base_font)),
-            foreground='#FF0000', background='#000000',
+            font=self.font,
+            foreground=self.bad_status_color, background=self.background_color,
             bd=0,
         )
 
         station_label = tk.Label(
             config_frame,
             text='Place Station:',
-            font=('Arial', int(self.font_scale * self.base_font)),
-            foreground='#FFFFFF', background='#000000',
+            font=self.font,
+            foreground=self.label_color, background=self.background_color,
             bd=0,
         )
         station_label.place(
@@ -1010,7 +1041,8 @@ class TrainListCanvas:
             width=100, height=100,
             command=lambda: self.grid.select(5),
             image=self.station_img,
-            foreground='#000000', background='#000000', bd=0
+            foreground=self.background_color, background=self.background_color,
+            bd=0
         )
         place_station.place(
             x=self.outer_frame.winfo_width() * 0.39,
@@ -1033,8 +1065,8 @@ class TrainListCanvas:
                 la_err_label,
                 config_frame
             ),
-            text='Save', font=('Arial', int(self.font_scale * self.base_font)),
-            foreground='#000000', background='#777777', bd=0
+            text='Save', font=self.font,
+            foreground=self.label_color, background=self.button_color, bd=0
         )
         save.place(
             x=self.outer_frame.winfo_width() * 0.4,
@@ -1101,7 +1133,10 @@ class ResultCanvas:
             height: int,
             x: int,
             y: int,
+            font: [[str, int]],
+            path_label_font: [[str, int, str]],
             background_color: str,
+            grid_color: str,
             border_width: int,
             image: str,
             rows: int,
@@ -1113,7 +1148,10 @@ class ResultCanvas:
         self.height = height
         self.x = x
         self.y = y
+        self.font = font
+        self.path_label_font = path_label_font
         self.background_color = background_color
+        self.grid_color = grid_color
         self.border_width = border_width
 
         self.image = self.get_image(image)
@@ -1216,7 +1254,7 @@ class ResultCanvas:
                 self.text_label = self.canvas.create_text(
                     event.x + 10, event.y + 10,  # Position next to the cursor
                     text=coords_text,
-                    font=("Arial", 20),
+                    font=self.font,
                     fill="#000000",  # Text color
                     anchor="nw"
                 )
@@ -1267,7 +1305,7 @@ class ResultCanvas:
                 self.y_offset + row * adjusted_cell_size,
                 self.x_offset + self.cols * adjusted_cell_size,
                 self.y_offset + row * adjusted_cell_size,
-                fill='#000000',
+                fill=self.grid_color,
                 tags='grid_line',
             )
 
@@ -1277,7 +1315,7 @@ class ResultCanvas:
                 self.y_offset,
                 self.x_offset + col * adjusted_cell_size,
                 self.y_offset + self.rows * adjusted_cell_size,
-                fill='#000000',
+                fill=self.grid_color,
                 tags='grid_line',
             )
 
@@ -1295,8 +1333,8 @@ class ResultCanvas:
                 adjusted_cell_size / 2,
                 text=str(row),
                 anchor="e",
-                font=("Arial", 10),
-                fill='#FFFFFF',
+                font=(self.font[0], int(self.font[1] * self.scale)),
+                fill=self.grid_color,
                 tags="grid_label"
             )
 
@@ -1308,8 +1346,8 @@ class ResultCanvas:
                 text=str(col),
                 angle=90,
                 anchor="e",
-                font=("Arial", 10),
-                fill='#FFFFFF',
+                font=(self.font[0], int(self.font[1] * self.scale)),
+                fill=self.grid_color,
                 tags="grid_label"
             )
 
@@ -1364,7 +1402,11 @@ class ResultCanvas:
                  offset_dict[row['cell_offset']][1]),
                 text=row['timestep'],
                 anchor="center",
-                font=("Arial", int(20 * (adjusted_cell_size/100)), 'bold'),
+                font=(
+                    self.path_label_font[0],
+                    int(self.path_label_font[1] * (adjusted_cell_size/100)),
+                    self.path_label_font[2]
+                ),
                 fill=train_colors[row['trainID']],
                 tags="path_labels"
             )
@@ -1390,24 +1432,30 @@ class PathListCanvas:
             height: int,
             x: int,
             y: int,
+            font: [[str, int]],
             background_color: str,
+            on_color: str,
+            off_color: str,
+            handle_color: str,
+            label_color: str,
             border_width: int,
             train_data: pd.DataFrame,
             grid: ResultCanvas,
-            base_font: int,
-            font_scale: float,
     ):
         self.root = root
         self.width = width
         self.height = height
         self.x = x
         self.y = y
+        self.font = font
         self.background_color = background_color
+        self.on_color = on_color
+        self.off_color = off_color
+        self.handle_color = handle_color
+        self.label_color = label_color
         self.border_width = border_width
         self.train_data = train_data
         self.grid = grid
-        self.base_font = base_font
-        self.font_scale = font_scale
 
         self.show_button_dict = {}
         self.show_list = [False] * len(self.train_data)
@@ -1422,7 +1470,7 @@ class PathListCanvas:
 
         self.canvas.configure(yscrollcommand=self.scrollbar.set)
 
-        self.scroll_frame = tk.Frame(self.canvas, bg='#000000')
+        self.scroll_frame = tk.Frame(self.canvas, bg=self.background_color)
         self.canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
 
         self.scroll_frame.update_idletasks()
@@ -1448,22 +1496,23 @@ class PathListCanvas:
 
     def add_labels(self):
         for idx, row in self.train_data.iterrows():
-            frame = tk.Frame(self.scroll_frame, bg='#000000')
+            frame = tk.Frame(self.scroll_frame, bg=self.background_color)
             frame.pack(fill='x', pady=5)
 
             self.show_button_dict[idx] = ToggleSwitch(
                 frame,
                 width=70, height=30,
-                on_color='#00FF00', off_color='#FF0000',
-                handle_color='#FFFFFF', background_color='#000000',
+                on_color=self.on_color, off_color=self.off_color,
+                handle_color=self.handle_color,
+                background_color=self.background_color,
                 command=lambda index=idx: self.toggle_path(index)
             )
             self.show_button_dict[idx].pack(side='left', padx=0)
 
             label = tk.Label(
                 frame,
-                width=20, font=('Arial', int(self.font_scale * self.base_font)),
-                fg='#FFFFFF', bg='#000000',
+                width=20, font=self.font,
+                fg=self.label_color, bg=self.background_color,
                 text=f'Train {idx}: {row["start_pos"]}, {row["dir"]}',
                 anchor='w',
             )
