@@ -1,11 +1,11 @@
 % assignment predicates
-% start(ID, (Y,X), EarliestDeparture, Direction)
-% end(ID, (Y,X), LatestArrival)
-% cell((Y,X), TrackID)
+% start(ID, (X,Y), EarliestDeparture, Direction)
+% end(ID, (X,Y), LatestArrival)
+% cell((X,Y), Track)
 
 % custom predicates
-% action(train(ID), Move, Timestep)
-% position(ID, (Y,X), Direction, Timestep)
+% action(train(ID), Action, Timestep)
+% position(ID, (X,Y), Direction, Timestep)
 % trans(TrackID, IncomingDirection, OutgoingDirection, Move)
 % firstAction(ID, Timestep)
 
@@ -18,14 +18,16 @@ move(move_right).
 move(wait).
 
 
+% actions
 
 % Generate actions for path
 { action(train(ID), M, T) : move(M), T = (ED-1)..LA } N :- start(ID, _, ED, _),  end(ID, _, LA), N=LA-(ED-1).
 
-
-
 % first action
 firstAction(ID, T) :- action(train(ID), _, T), not action(train(ID), _, T-1).
+
+% ensure no unexpected timestep gaps in list of actions
+:- action(train(ID), _, T1), action(train(ID), _, T3), T3 = T1 + 2, not action(train(ID), _, T1+1).
 
 
 
@@ -62,7 +64,7 @@ position(ID, (XN,YN), n, TN) :- position(ID, (XO,YO), e, TO), action(train(ID), 
 position(ID, (XN,YN), e, TN) :- position(ID, (XO,YO), s, TO), action(train(ID), move_left, TO), cell((XO,YO), TID), trans(TID, s, e, move_left), XN=XO, YN=YO+1, TN=TO+1.
 position(ID, (XN,YN), s, TN) :- position(ID, (XO,YO), w, TO), action(train(ID), move_left, TO), cell((XO,YO), TID), trans(TID, w, s, move_left), XN=XO+1, YN=YO, TN=TO+1.
 
-%right turns
+% right turns
 position(ID, (XN,YN), e, TN) :- position(ID, (XO,YO), n, TO), action(train(ID), move_right, TO), cell((XO,YO), TID), trans(TID, n, e, move_right), XN=XO, YN=YO+1, TN=TO+1.
 position(ID, (XN,YN), s, TN) :- position(ID, (XO,YO), e, TO), action(train(ID), move_right, TO), cell((XO,YO), TID), trans(TID, e, s, move_right), XN=XO+1, YN=YO, TN=TO+1.
 position(ID, (XN,YN), w, TN) :- position(ID, (XO,YO), s, TO), action(train(ID), move_right, TO), cell((XO,YO), TID), trans(TID, s, w, move_right), XN=XO, YN=YO-1, TN=TO+1.
@@ -107,6 +109,5 @@ position(ID, (XN,YN), n, TN) :- position(ID, (XO,YO), w, TO), action(train(ID), 
 
 
 
-% show statements
-%#show position/4.
+% output
 #show action/3.

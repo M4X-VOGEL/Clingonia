@@ -1,9 +1,11 @@
+% Format:
 % trans(TrackID, Facing , Direction, Move)
 % trans(TrackID, ComingFrom, GoingTO, Move)
 
-% Type 1 tracks
 
-% straigts
+% Track Type #1
+
+% straights
 trans(32800, s, s, move_forward).
 trans(32800, n, n, move_forward).
 trans(1025, e, e, move_forward).
@@ -24,7 +26,7 @@ trans(2064, s, w, move_forward).
 
 
 
-% Type 2 tracks
+% Track Type #2
 
 % left hand switches
 trans(37408, s, s, move_forward).
@@ -70,7 +72,7 @@ trans(5633, n, w, move_forward).
 
 
 
-% Type 3 tracks
+% Track Type #3
 trans(33825, s, s, move_forward).
 trans(33825, n, n, move_forward).
 trans(33825, e, e, move_forward).
@@ -78,7 +80,7 @@ trans(33825, w, w, move_forward).
 
 
 
-% Type 4 tracks
+% Track Type #4
 trans(38433, n, n, move_forward).
 trans(38433, s, s, move_forward).
 trans(38433, e, e, move_forward).
@@ -109,7 +111,7 @@ trans(35889, s, w, move_right).
 
 
 
-% Type 5 tracks
+% Track Type #5
 trans(38505, n, n, move_forward).
 trans(38505, s, s, move_forward).
 trans(38505, e, e, move_forward).
@@ -130,7 +132,7 @@ trans(52275, n, e, move_right).
 
 
 
-% Type 6 tracks
+% Track Type #6
 trans(20994, n, e, move_right).
 trans(20994, n, w, move_left).
 trans(20994, e, s, move_forward).
