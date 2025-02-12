@@ -1,3 +1,5 @@
+from typing import Union, Tuple
+
 import tkinter as tk
 from PIL import Image, ImageTk, ImageDraw, ImageSequence
 import warnings
@@ -6,8 +8,8 @@ import warnings
 class Window:
     def __init__(
             self,
-            width: int | None,
-            height: int | None,
+            width: Union[int, None],
+            height: Union[int, None],
             title: str,
             background_color: str,
             fullscreen: bool = False,
@@ -48,16 +50,18 @@ class Frame:
             root: tk.Tk,
             width: int,
             height: int,
-            grid_pos: [int, int],
-            padding: [
-                [int, int], [[int, int], [int, int]],
-                [int, [int, int]], [[int, int], int]
+            grid_pos: Tuple[int, int],
+            padding: Union[
+                Tuple[int, int],
+                Tuple[Tuple[int, int], Tuple[int, int]],
+                Tuple[int, Tuple[int, int]],
+                Tuple[Tuple[int, int], int]
             ],
             background_color: str,
             border_width: int,
             visibility: bool,
-            sticky: str | None = None,
-            columnspan: int | None = None,
+            sticky: Union[str, None] = None,
+            columnspan: Union[int, None] = None,
     ):
         self.root = root
         self.width = width
@@ -126,22 +130,28 @@ class Button:
             root,
             width: int,
             height: int,
-            grid_pos: [int, int],
-            padding: [
-                [int, int], [[int, int],[int, int]],
-                [int, [int, int]], [[int, int], int]
+            grid_pos: Tuple[int, int],
+            padding: Union[
+                Tuple[int, int],
+                Tuple[Tuple[int, int], Tuple[int, int]],
+                Tuple[int, Tuple[int, int]],
+                Tuple[Tuple[int, int], int]
             ],
             command: callable,
             foreground_color: str,
             background_color: str,
             border_width: int,
             visibility: bool,
-            sticky: str | None = None,
-            columnspan: int | None = None,
-            text: str | None = None,
-            font: [[str, int], [str, int, str, ...], None]  = None,
-            image: str | None = None,
-            rotation: int| None = 0,
+            sticky: Union[str, None] = None,
+            columnspan: Union[int, None] = None,
+            text: Union[str, None] = None,
+            font: Union[
+                Tuple[str, int],
+                Tuple[str, int, str],
+                None
+            ] = None,
+            image: Union[str, None] = None,
+            rotation: Union[int, None] = 0,
     ):
         self.root = root
         self.width = width
@@ -228,18 +238,23 @@ class Label:
     def __init__(
             self,
             root,
-            grid_pos: [int, int],
-            padding: [
-                [int, int], [[int, int],[int, int]],
-                [int, [int, int]], [[int, int], int]
+            grid_pos: Tuple[int, int],
+            padding: Union[
+                Tuple[int, int],
+                Tuple[Tuple[int, int], Tuple[int, int]],
+                Tuple[int, Tuple[int, int]],
+                Tuple[Tuple[int, int], int]
             ],
             text: str,
-            font: [[str, int],[str, int, str,...]],
+            font: Union[
+                Tuple[str, int],
+                Tuple[str, int, str],
+            ],
             foreground_color: str,
             background_color: str,
             visibility: bool,
-            sticky: str | None = None,
-            columnspan: int | None = None,
+            sticky: Union[str, None] = None,
+            columnspan: Union[int, None] = None,
     ):
         self.root = root
         self.grid_pos = grid_pos
@@ -297,17 +312,19 @@ class Picture:
             root,
             width: int,
             height: int,
-            grid_pos: [int, int],
-            padding: [
-                [int, int], [[int, int],[int, int]],
-                [int, [int, int]], [[int, int], int]
+            grid_pos: Tuple[int, int],
+            padding: Union[
+                Tuple[int, int],
+                Tuple[Tuple[int, int], Tuple[int, int]],
+                Tuple[int, Tuple[int, int]],
+                Tuple[Tuple[int, int], int]
             ],
             image: str,
             foreground_color: str,
             background_color: str,
             visibility: bool,
-            sticky: str | None = None,
-            columnspan: int | None = None,
+            sticky: Union[str, None] = None,
+            columnspan: Union[int, None] = None,
     ):
         self.root = root
         self.width = width
@@ -374,16 +391,18 @@ class GIF:
             root,
             width: int,
             height: int,
-            grid_pos: [int, int],
-            padding: [
-                [int, int], [[int, int],[int, int]],
-                [int, [int, int]], [[int, int], int]
+            grid_pos: Tuple[int, int],
+            padding: Union[
+                Tuple[int, int],
+                Tuple[Tuple[int, int], Tuple[int, int]],
+                Tuple[int, Tuple[int, int]],
+                Tuple[Tuple[int, int], int]
             ],
             gif: str,
             background_color: str,
             visibility: bool,
-            sticky: str | None = None,
-            columnspan: int | None = None,
+            sticky: Union[str, None] = None,
+            columnspan: Union[int, None] = None,
     ):
         self.root = root
         self.width = width
@@ -486,13 +505,18 @@ class ZoomableGIF:
             root,
             width: int,
             height: int,
-            grid_pos: [int, int],
-            padding: [int, int],
+            grid_pos: Tuple[int, int],
+            padding: Union[
+                Tuple[int, int],
+                Tuple[Tuple[int, int], Tuple[int, int]],
+                Tuple[int, Tuple[int, int]],
+                Tuple[Tuple[int, int], int]
+            ],
             gif: str,
             background_color: str,
             visibility: bool,
-            sticky: str | None = None,
-            columnspan: int | None = None,
+            sticky: Union[str, None] = None,
+            columnspan: Union[int, None] = None,
     ):
         self.root = root
         self.width = width
@@ -649,20 +673,25 @@ class EntryField:
             root,
             width: int,
             height: int,
-            grid_pos: [int, int],
-            padding: [
-                [int, int], [[int, int],[int, int]],
-                [int, [int, int]], [[int, int], int]
+            grid_pos: Tuple[int, int],
+            padding: Union[
+                Tuple[int, int],
+                Tuple[Tuple[int, int], Tuple[int, int]],
+                Tuple[int, Tuple[int, int]],
+                Tuple[Tuple[int, int], int]
             ],
             text: str,
-            font: [[str, int],[str, int, str,...]],
+            font: Union[
+                Tuple[str, int],
+                Tuple[str, int, str],
+            ],
             foreground_color: str,
             background_color: str,
             example_color: str,
             border_width: int,
             visibility: bool,
-            sticky: str | None = None,
-            columnspan: int | None = None,
+            sticky: Union[str, None] = None,
+            columnspan: Union[int, None] = None,
     ):
         self.root = root
         self.width = width
@@ -779,21 +808,26 @@ class Text:
             root: tk.Tk,
             width: int,
             height: int,
-            grid_pos: [int, int],
-            padding: [
-                [int, int], [[int, int],[int, int]],
-                [int, [int, int]], [[int, int], int]
+            grid_pos: Tuple[int, int],
+            padding: Union[
+                Tuple[int, int],
+                Tuple[Tuple[int, int], Tuple[int, int]],
+                Tuple[int, Tuple[int, int]],
+                Tuple[Tuple[int, int], int]
             ],
             text: str,
-            font: [[str, int],[str, int, str,...]],
+            font: Union[
+                Tuple[str, int],
+                Tuple[str, int, str],
+            ],
             wrap: str,
             foreground_color: str,
             background_color: str,
             border_width: int,
             state: str,
             visibility: bool,
-            sticky: str | None = None,
-            columnspan: int | None = None,
+            sticky: Union[str, None] = None,
+            columnspan: Union[int, None] = None,
     ):
         self.root = root
         self.width = width

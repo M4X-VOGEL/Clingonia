@@ -39,7 +39,7 @@ Flatland is a [railway scheduling challenge](https://flatland.aicrowd.com/intro.
 
 It is recommended to install [Anaconda](https://www.anaconda.com/distribution/) and create a new conda environment:
 ```
-conda create python=3.7 --name flatland
+conda create python=3.11 --name flatland
 conda activate flatland
 ```
 
