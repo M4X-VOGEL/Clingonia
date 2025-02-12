@@ -23,7 +23,7 @@ screenwidth, screenheight = 1920, 1080
 
 # font styling
 base_font_size = 20
-info_text_font_size = 15
+info_text_font_size = 16
 frame_title_font_size = 50
 font_base_mod = 1
 font_err_mod = 0.75
