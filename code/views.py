@@ -1270,12 +1270,17 @@ def switch_clingo_para_to_result():
 
     if sim_result:
         if sim_result == -5:
-            clingo_err_dict[sim_result] = (clingo_err_dict[sim_result] +
+            answer_err = (clingo_err_dict[sim_result] +
                                            f'{user_params["answer"]}')
-        labels['clingo_status_label'].label.config(
-            text=clingo_err_dict[sim_result],
-            fg=bad_status_color,
-        )
+            labels['clingo_status_label'].label.config(
+                text=answer_err,
+                fg=bad_status_color,
+            )
+        else:
+            labels['clingo_status_label'].label.config(
+                text=clingo_err_dict[sim_result],
+                fg=bad_status_color,
+            )
         frames['clingo_para_frame'].frame.update()
         return
     else:
