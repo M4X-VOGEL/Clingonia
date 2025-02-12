@@ -170,17 +170,13 @@ def initial_render_test():
     agent.initial_direction = agent.direction
     agent.target = (0, 0)
     # Test rendering
-    try:
-        renderer = RenderTool(env, gl="PILSVG")
-        renderer.reset()
-        renderer.render_env(
-            show=True,
-            show_observations=False,
-            show_predictions=False
-        )
-    except OverflowError:
-        return -1
-    return 0
+    renderer = RenderTool(env, gl="PILSVG")
+    renderer.reset()
+    renderer.render_env(
+        show=True,
+        show_observations=False,
+        show_predictions=False
+    )
 
 
 def save_png(env, path="data/running_tmp.png", low_quality_mode=False):

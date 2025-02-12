@@ -4,9 +4,9 @@ import json
 import shutil
 from tkinter import filedialog
 
-from code.build_png import create_custom_env, initial_render_test, save_png
+from code.build_png import create_custom_env, save_png
 from code.custom_canvas import *
-from code.files import save_env, delete_tmp_lp, delete_tmp_png, delete_tmp_gif, delete_tmp_frames, initial_import_test
+from code.files import save_env, delete_tmp_lp, delete_tmp_png, delete_tmp_gif, delete_tmp_frames
 from code.gen_png import gen_env
 from code.load_env import load_env
 from code.positions import position_df
@@ -262,25 +262,6 @@ def create_start_menu():
 
     build_title_frame()
     build_start_menu_frame()
-
-    # Initial tests
-    initial_import_res = initial_import_test()
-    initial_render_res = initial_render_test()
-    if initial_import_res == 0 and initial_render_res == 0:
-        print('Info: Launch was successful.')
-    elif initial_import_res != 0:
-        print('\n❌ Warning: Essential python packets missing.\n'
-              'Make sure that you have all these packages installed:\n'
-              'flatland-rl, clingo, imageio, pillow, numpy, pandas, matplotlib.\n'
-              'You can check the installation with the Python package installer pip:\n\n'
-              '     pip show [NAME]\n\n'
-              'If one package was not found, use:\n\n'
-              '     pip install [NAME]\n'
-              )
-        exit()
-    else:
-        print('❌ Warning: Launch abnormal. Restart program.')
-        exit()
 
 def build_title_frame():
     frames['title_frame'] = Frame(
@@ -5732,7 +5713,10 @@ def run_simulation():
     save_env(tracks, trains)
 
     current_paths = calc_paths(tracks, trains)
-    current_paths['timestep'] = current_paths['timestep'].astype(int)
+    try:
+        current_paths['timestep'] = current_paths['timestep'].astype(int)
+    except TypeError:
+        pass
 
     if isinstance(current_paths, int):
         return current_paths

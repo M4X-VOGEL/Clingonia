@@ -1,5 +1,6 @@
 import os
 import shutil
+import importlib
 
 def save_env(tracks, trains, name="data/running_tmp.lp"):
     """Saves the env as a .lp file.
@@ -84,14 +85,31 @@ def write_tracks(tracks, lp):
 
 
 def initial_import_test():
-    try:
-        import flatland
-        import clingo
-        import imageio
-        import PIL
-        import numpy
-        import pandas
-        import matplotlib
-    except ImportError:
-        return -1
-    return 0
+    required_modules = [
+        'flatland',
+        'clingo',
+        'imageio',
+        'PIL',
+        'numpy',
+        'pandas',
+        'matplotlib'
+    ]
+    missing_modules = []
+    for module in required_modules:
+        try:
+            importlib.import_module(module)
+        except ImportError:
+            if module == 'flatland':
+                missing_modules.append('flatland-rl')
+            elif module == 'PIL':
+                missing_modules.append('pillow')
+            else:
+                missing_modules.append(module)
+    return missing_modules
+
+
+def remove_data_remnants():
+    delete_tmp_lp()
+    delete_tmp_png()
+    delete_tmp_gif()
+    delete_tmp_frames()
