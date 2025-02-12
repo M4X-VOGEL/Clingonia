@@ -101,6 +101,10 @@ position(ID, (XN,YN), n, TN) :- position(ID, (XO,YO), w, TO), action(train(ID), 
 
 % optimizations
 
+% Do you want a solution without waits?
+% Remove any waits for good by uncommenting this single constraint:
+%:- #count { ID, T : action(train(ID), wait, T) } > 0.
+
 % minimize number of actions
 #minimize { 1 : action(train(ID), _, _) }.
 #minimize { 1 : action(_, wait, _) }.

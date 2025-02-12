@@ -53,7 +53,7 @@ def delete_tmp_gif():
 
 
 def delete_tmp_frames():
-    """Löscht den Ordner 'tmp_frames' samt Inhalt.
+    """Deletes the temporary folder of the temporary gif frames.
     """
     path = "data/tmp_frames"
     if os.path.isdir(path):
