@@ -4058,9 +4058,24 @@ def open_train_all_config_frame():
         visibility=True
     )
 
+    buttons['back_button'] = Button(
+        root=frames['train_all_config_frame'].frame,
+        width=120,
+        height=60,
+        grid_pos=(0, 0),
+        padding=(5, 5),
+        sticky='nw' ,
+        command=lambda: save_train_all_config(False),
+        image='data/png/back.png',
+        foreground_color=label_color,
+        background_color=background_color,
+        border_width=0,
+        visibility=True,
+    )
+
     labels['all_config_label'] = Label(
         root=frames['train_all_config_frame'].frame,
-        grid_pos=(0,0),
+        grid_pos=(1,0),
         padding=(100,(200,100)),
         columnspan=2,
         sticky='s',
@@ -4073,7 +4088,7 @@ def open_train_all_config_frame():
 
     labels['eDep_label'] = Label(
         root=frames['train_all_config_frame'].frame,
-        grid_pos=(1,0),
+        grid_pos=(2,0),
         padding=(100,0),
         sticky='sw',
         text=f'Earliest Departure All Trains:',
@@ -4087,7 +4102,7 @@ def open_train_all_config_frame():
         root=frames['train_all_config_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(1, 1),
+        grid_pos=(2, 1),
         padding=(0, 0),
         sticky='s',
         text=f'e.g. 1',
@@ -4101,7 +4116,7 @@ def open_train_all_config_frame():
 
     labels['eDep_error_label'] = Label(
         root=frames['train_all_config_frame'].frame,
-        grid_pos=(1,2),
+        grid_pos=(2,2),
         padding=(0,0),
         sticky='s',
         text='',
@@ -4114,7 +4129,7 @@ def open_train_all_config_frame():
 
     labels['lArr_label'] = Label(
         root=frames['train_all_config_frame'].frame,
-        grid_pos=(2,0),
+        grid_pos=(3,0),
         padding=(100,20),
         sticky='sw',
         text=f'Latest Arrival All Trains:',
@@ -4128,7 +4143,7 @@ def open_train_all_config_frame():
         root=frames['train_all_config_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(2, 1),
+        grid_pos=(3, 1),
         padding=(0, 20),
         sticky='s',
         text=f'e.g. 200',
@@ -4142,7 +4157,7 @@ def open_train_all_config_frame():
 
     labels['lArr_error_label'] = Label(
         root=frames['train_all_config_frame'].frame,
-        grid_pos=(2,2),
+        grid_pos=(3,2),
         padding=(0,20),
         sticky='s',
         text='',
@@ -4156,11 +4171,11 @@ def open_train_all_config_frame():
         root=frames['train_all_config_frame'].frame,
         width=20,
         height=1,
-        grid_pos=(3, 0),
+        grid_pos=(4, 0),
         padding=(100, 40),
         sticky='sw',
         columnspan=2,
-        command=save_train_all_config,
+        command=lambda: save_train_all_config(True),
         text='Save',
         font=base_font_layout,
         foreground_color=label_color,
@@ -4169,12 +4184,22 @@ def open_train_all_config_frame():
         visibility=True,
     )
 
-    frames['train_builder_menu_frame'].frame.rowconfigure((0,1,2,3), weight=1)
+    frames['train_builder_menu_frame'].frame.rowconfigure((0,1,2,3,4), weight=1)
     frames['train_builder_menu_frame'].frame.columnconfigure((0,1,2), weight=1)
     frames['train_builder_menu_frame'].frame.grid_propagate(False)
 
-def save_train_all_config():
+def save_train_all_config(save):
     global current_df
+
+    if not save:
+        if 'all_eDep_entry' in entry_fields:
+            del entry_fields['all_eDep_entry']
+        if 'all_lArr_entry' in entry_fields:
+            del entry_fields['all_lArr_entry']
+        if 'train_all_config_frame' in frames:
+            frames['train_all_config_frame'].destroy_frame()
+            del frames['train_all_config_frame']
+        return 0
 
     ed = entry_fields['all_eDep_entry'].entry_field.get()
     la = entry_fields['all_lArr_entry'].entry_field.get()
@@ -4210,7 +4235,7 @@ def save_train_all_config():
         err_count += 1
 
     if err_count:
-        return
+        return -1
 
     if ed is not None:
         current_df['e_dep'] = [ed] * len(current_df['e_dep'])
