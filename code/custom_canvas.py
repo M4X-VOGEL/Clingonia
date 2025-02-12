@@ -224,16 +224,22 @@ class EnvCanvas:
             )
 
     def initial_zoom(self):
-        image_aspect = self.image.width / self.image.height
-        canvas_aspect = self.canvas.winfo_width() / self.canvas.winfo_height()
-
-        if image_aspect > canvas_aspect:
-            scale = self.canvas.winfo_width() / self.image.width
+        if self.rows > self.cols:
+            self.cell_size = (self.canvas.winfo_height() * 0.8) / self.rows
+            width = self.cell_size * self.cols
+            height = self.cell_size * self.rows
+            self.x_offset = (self.canvas.winfo_width() - width) // 2
+            self.y_offset = (self.canvas.winfo_height() - height) // 2
+            self.draw_grid()
+            self.draw_image()
         else:
-            scale = self.canvas.winfo_height() / self.image.height
-
-        self.cell_size = (self.image.height * scale) / self.rows
-        self.draw_image()
+            self.cell_size = (self.canvas.winfo_width() * 0.8) / self.cols
+            width = self.cell_size * self.cols
+            height = self.cell_size * self.rows
+            self.x_offset = (self.canvas.winfo_width() - width) // 2
+            self.y_offset = (self.canvas.winfo_height() - height) // 2
+            self.draw_grid()
+            self.draw_image()
 
 
 class BuildCanvas:
@@ -329,13 +335,13 @@ class BuildCanvas:
         self.current_selection = selection
 
     def calculate_initial_pos(self):
-        if max(self.rows, self.cols) > 30:
-            self.x_offset = 0
-            self.y_offset = 0
+        if max(self.rows, self.cols) > 50:
+            self.x_offset = 50
+            self.y_offset = 50
             self.draw_grid()
             self.draw_images()
         elif self.rows > self.cols:
-            self.cell_size = self.canvas.winfo_height() / self.rows
+            self.cell_size = (self.canvas.winfo_height() * 0.8) / self.rows
             width = self.cell_size * self.cols
             height = self.cell_size * self.rows
             self.x_offset = (self.canvas.winfo_width() - width) // 2
@@ -343,7 +349,7 @@ class BuildCanvas:
             self.draw_grid()
             self.draw_images()
         else:
-            self.cell_size = self.canvas.winfo_width() / self.cols
+            self.cell_size = (self.canvas.winfo_width() * 0.8) / self.cols
             width = self.cell_size * self.cols
             height = self.cell_size * self.rows
             self.x_offset = (self.canvas.winfo_width() - width) // 2
@@ -1412,16 +1418,22 @@ class ResultCanvas:
             )
 
     def initial_zoom(self):
-        image_aspect = self.image.width / self.image.height
-        canvas_aspect = self.canvas.winfo_width() / self.canvas.winfo_height()
-
-        if image_aspect > canvas_aspect:
-            scale = self.canvas.winfo_width() / self.image.width
+        if self.rows > self.cols:
+            self.cell_size = (self.canvas.winfo_height() * 0.8) / self.rows
+            width = self.cell_size * self.cols
+            height = self.cell_size * self.rows
+            self.x_offset = (self.canvas.winfo_width() - width) // 2
+            self.y_offset = (self.canvas.winfo_height() - height) // 2
+            self.draw_grid()
+            self.draw_image()
         else:
-            scale = self.canvas.winfo_height() / self.image.height
-
-        self.cell_size = (self.image.height * scale) / self.rows
-        self.draw_image()
+            self.cell_size = (self.canvas.winfo_width() * 0.8) / self.cols
+            width = self.cell_size * self.cols
+            height = self.cell_size * self.rows
+            self.x_offset = (self.canvas.winfo_width() - width) // 2
+            self.y_offset = (self.canvas.winfo_height() - height) // 2
+            self.draw_grid()
+            self.draw_image()
 
 
 class PathListCanvas:
