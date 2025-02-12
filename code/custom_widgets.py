@@ -557,6 +557,7 @@ class ZoomableGIF:
         self.canvas.bind("<ButtonPress-3>", self.pan_start_event)
         self.canvas.bind("<B3-Motion>", self.pan)
         self.animate_id = None
+
         if visibility:
             self.place_canvas()
             self.calculate_initial_pos()
@@ -609,8 +610,8 @@ class ZoomableGIF:
     def calculate_initial_pos(self):
         self.root.update_idletasks()
         orig_width, orig_height = self.orig_size
-        scale_x = self.canvas.winfo_width() / orig_width
-        scale_y = self.canvas.winfo_height() / orig_height
+        scale_x = self.canvas.winfo_width() * 0.8 / orig_width
+        scale_y = self.canvas.winfo_height() * 0.8 / orig_height
         self.scale = min(scale_x, scale_y)
         new_width = int(orig_width * self.scale)
         new_height = int(orig_height * self.scale)

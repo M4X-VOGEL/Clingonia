@@ -221,6 +221,7 @@ current_modify_backup_df = current_df.copy()
 # Environment image and gif
 current_img = None
 current_gif = None
+current_timestep = 0
 
 # Train Paths Dataframe
 current_paths = pd.DataFrame()
@@ -1324,6 +1325,9 @@ def load_lp_files():
         defaultextension=".lp",
         filetypes=[("Clingo Files", "*.lp"), ("All Files", "*.*")],
     )
+
+    if not files:
+        return
 
     user_params['lpFiles'] = list(files)
     displaytext = "\n".join(files)
@@ -5048,18 +5052,32 @@ def build_result_gif_frame():
         grid_pos=(0, 0),
         padding=(0, 0),
         sticky='nesw',
-        background_color=canvas_color,
+        background_color=background_color,
+        border_width=0,
+        visibility=True
+    )
+
+    frames['result_gif_container_frame'] = Frame(
+        root=frames['result_gif_frame'].frame,
+        width=frames['result_gif_frame'].width,
+        height=frames['result_gif_frame'].height * 0.9,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nesw',
+        columnspan=2,
+        background_color=background_color,
         border_width=0,
         visibility=True
     )
 
     pictures['result_gif'] = ZoomableGIF(
-        root=frames['result_gif_frame'].frame,
-        width=frames['result_gif_frame'].width ,
-        height=frames['result_gif_frame'].height * 0.9,
+        root=frames['result_gif_container_frame'].frame,
+        width=frames['result_gif_container_frame'].width ,
+        height=frames['result_gif_container_frame'].height,
         grid_pos=(0, 0),
         padding=(0, 0),
         sticky='nesw',
+        columnspan=2,
         gif=current_gif,
         background_color=canvas_color,
         visibility=True,
@@ -5071,7 +5089,6 @@ def build_result_gif_frame():
         height=1,
         grid_pos=(1, 0),
         padding=(5, 5),
-        sticky='s',
         command=save_gif,
         text='Save GIF',
         font=base_font_layout,
@@ -5081,9 +5098,113 @@ def build_result_gif_frame():
         visibility=True,
     )
 
+    buttons['toggle_timestep_view_button'] = Button(
+        root=frames['result_gif_frame'].frame,
+        width=20,
+        height=1,
+        grid_pos=(1, 1),
+        padding=(5, 5),
+        command=toggle_timestep_viewer,
+        text='Step-By-Step View',
+        font=base_font_layout,
+        foreground_color=label_color,
+        background_color=button_color,
+        border_width=0,
+        visibility=True,
+    )
+
     frames['result_gif_frame'].frame.rowconfigure((0,1), weight=1)
-    frames['result_gif_frame'].frame.columnconfigure(0, weight=1)
+    frames['result_gif_frame'].frame.columnconfigure((0, 1), weight=1)
     frames['result_gif_frame'].frame.grid_propagate(False)
+
+def build_timestep_viewer_frame():
+    frames['timestep_viewer_frame'] = Frame(
+        root=windows['flatland_window'].window,
+        width=frames['result_gif_frame'].width ,
+        height=frames['result_gif_frame'].height * 0.9,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='new',
+        background_color=background_color,
+        border_width=0,
+        visibility=True
+    )
+
+    frames['timestep_pic_container_frame'] = Frame(
+        root=frames['timestep_viewer_frame'].frame,
+        width=frames['timestep_viewer_frame'].width,
+        height=frames['timestep_viewer_frame'].height * 0.95,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        sticky='nesw',
+        columnspan=3,
+        background_color=background_color,
+        border_width=0,
+        visibility=True
+    )
+
+    canvases['timestep_pic'] = EnvCanvas(
+        root=frames['timestep_pic_container_frame'].frame,
+        width=frames['timestep_pic_container_frame'].width ,
+        height=frames['timestep_pic_container_frame'].height,
+        x=frames['timestep_pic_container_frame'].width * 0,
+        y=frames['timestep_pic_container_frame'].height * 0,
+        font=canvas_font_layout,
+        background_color=canvas_color,
+        grid_color=background_color,
+        border_width=0,
+        image='data/tmp_frames/frame_0000.png',
+        rows=user_params['rows'],
+        cols=user_params['cols'],
+    )
+
+    buttons['previous_button'] = Button(
+        root=frames['timestep_viewer_frame'].frame,
+        width=5,
+        height=1,
+        grid_pos=(1, 0),
+        padding=(5, 5),
+        sticky='e',
+        command=show_previous_timestep,
+        text='<',
+        font=base_font_layout,
+        foreground_color=label_color,
+        background_color=button_color,
+        border_width=0,
+        visibility=True,
+    )
+
+    labels['current_timestep_label'] = Label(
+        root=frames['timestep_viewer_frame'].frame,
+        grid_pos=(1, 1),
+        padding=(5, 5),
+        text='0',
+        font=base_font_layout,
+        foreground_color=label_color,
+        background_color=background_color,
+        visibility=True,
+    )
+
+    buttons['next_button'] = Button(
+        root=frames['timestep_viewer_frame'].frame,
+        width=5,
+        height=1,
+        grid_pos=(1, 2),
+        padding=(5, 5),
+        sticky='w',
+        command=show_next_timestep,
+        text='>',
+        font=base_font_layout,
+        foreground_color=label_color,
+        background_color=button_color,
+        border_width=0,
+        visibility=True,
+    )
+
+    frames['timestep_viewer_frame'].frame.rowconfigure((0,1), weight=1)
+    frames['timestep_viewer_frame'].frame.columnconfigure((0, 2), weight=5)
+    frames['timestep_viewer_frame'].frame.columnconfigure(1, weight=1)
+    frames['timestep_viewer_frame'].frame.grid_propagate(False)
 
 def toggle_all_paths():
     if ('result_timetable_frame' in frames and
@@ -5093,6 +5214,7 @@ def toggle_all_paths():
     if ('result_gif_frame' in frames and
             frames['result_gif_frame'].visibility):
         frames['result_gif_frame'].toggle_visibility()
+        frames['timestep_viewer_frame'].toggle_visibility()
 
     if ('result_help_frame' in frames and
             frames['result_help_frame'].visibility):
@@ -5104,10 +5226,11 @@ def toggle_result_help():
     if ('result_timetable_frame' in frames and 
             frames['result_timetable_frame'].visibility):
         frames['result_timetable_frame'].toggle_visibility()
-        
+
     if ('result_gif_frame' in frames and 
             frames['result_gif_frame'].visibility):
         frames['result_gif_frame'].toggle_visibility()
+        frames['timestep_viewer_frame'].toggle_visibility()
         
     if 'result_help_frame' in frames:
         frames['result_help_frame'].toggle_visibility()
@@ -5121,6 +5244,7 @@ def toggle_result_timetable():
     if ('result_gif_frame' in frames and 
             frames['result_gif_frame'].visibility):
         frames['result_gif_frame'].toggle_visibility()
+        frames['timestep_viewer_frame'].toggle_visibility()
         
     if ('result_help_frame' in frames and 
             frames['result_help_frame'].visibility):
@@ -5203,6 +5327,14 @@ def toggle_result_gif():
 
     current_gif_params = (user_params['frameRate'], user_params['lowQualityGIF'])
 
+    if 'timestep_viewer_frame' in frames:
+        frames['timestep_viewer_frame'].toggle_visibility()
+        frames['timestep_viewer_frame'].frame.rowconfigure(0, weight=2)
+        frames['timestep_viewer_frame'].frame.rowconfigure(1, weight=1)
+        frames['timestep_viewer_frame'].frame.columnconfigure((0, 2), weight=2)
+        frames['timestep_viewer_frame'].frame.columnconfigure(1, weight=1)
+        frames['timestep_viewer_frame'].frame.grid_propagate(False)
+
     if 'result_gif_frame' in frames and last_gif_params == current_gif_params:
         frames['result_gif_frame'].toggle_visibility()
         frames['result_gif_frame'].frame.rowconfigure(0, weight=1)
@@ -5211,6 +5343,11 @@ def toggle_result_gif():
     elif 'result_gif_frame' in frames and last_gif_params != current_gif_params:
         frames['result_gif_frame'].destroy_frame()
         del frames['result_gif_frame']
+
+        if 'timestep_viewer_frame' in frames:
+            frames['timestep_viewer_frame'].destroy_frame()
+            del frames['timestep_viewer_frame']
+
         labels['gif_status_label'].label.config(
             text='...Rendering GIF...',
             fg=good_status_color,
@@ -5233,6 +5370,59 @@ def toggle_result_gif():
     )
     frames['result_menu_frame'].frame.update()
 
+def toggle_timestep_viewer():
+    if 'timestep_viewer_frame' in frames :
+        frames['timestep_viewer_frame'].toggle_visibility()
+        frames['timestep_viewer_frame'].frame.rowconfigure(0, weight=2)
+        frames['timestep_viewer_frame'].frame.rowconfigure(1, weight=1)
+        frames['timestep_viewer_frame'].frame.columnconfigure((0, 2), weight=2)
+        frames['timestep_viewer_frame'].frame.columnconfigure(1, weight=1)
+        frames['timestep_viewer_frame'].frame.grid_propagate(False)
+    else:
+        build_timestep_viewer_frame()
+
+def show_previous_timestep():
+    global current_timestep
+
+    frame_list = []
+
+    for file in os.listdir('data/tmp_frames'):
+        frame_list.append(file)
+
+    if current_timestep == 0:
+        current_timestep = len(frame_list) - 1
+    else:
+        current_timestep -= 1
+
+    pic = f'data/tmp_frames/{frame_list[current_timestep]}'
+
+    canvases['timestep_pic'].image = canvases['timestep_pic'].get_image(pic)
+    canvases['timestep_pic'].draw_image()
+    labels['current_timestep_label'].label.config(text=str(current_timestep))
+    frames['timestep_pic_container_frame'].frame.update()
+    return
+
+def show_next_timestep():
+    global current_timestep
+
+    frame_list = []
+
+    for file in os.listdir('data/tmp_frames'):
+        frame_list.append(file)
+
+    if current_timestep < len(frame_list)-1:
+        current_timestep += 1
+    else:
+        current_timestep = 0
+
+    pic = f'data/tmp_frames/{frame_list[current_timestep]}'
+
+    canvases['timestep_pic'].image = canvases['timestep_pic'].get_image(pic)
+    canvases['timestep_pic'].draw_image()
+    labels['current_timestep_label'].label.config(text=str(current_timestep))
+    frames['timestep_pic_container_frame'].frame.update()
+    return
+
 def switch_result_to_main():
     if 'result_viewer_frame' in frames:
         frames['result_viewer_frame'].destroy_frame()
@@ -5249,6 +5439,9 @@ def switch_result_to_main():
     if 'result_gif_frame' in frames:
         frames['result_gif_frame'].destroy_frame()
         del frames['result_gif_frame']
+    if 'timestep_viewer_frame' in frames:
+        frames['timestep_viewer_frame'].destroy_frame()
+        del frames['timestep_viewer_frame']
 
     create_main_menu()
 
@@ -5539,6 +5732,7 @@ def run_simulation():
     save_env(tracks, trains)
 
     current_paths = calc_paths(tracks, trains)
+    current_paths['timestep'] = current_paths['timestep'].astype(int)
 
     if isinstance(current_paths, int):
         return current_paths
