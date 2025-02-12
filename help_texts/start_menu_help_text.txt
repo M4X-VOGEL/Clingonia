@@ -67,3 +67,11 @@ However, when you've enjoyed the ride,
 it's time to pull the brakes.
 At any time, you may exit the program
 by pressing the ESC key.
+
+
+
+About MadMotion
+---------------
+MadMotion was founded in 2024 at the University of Potsdam as part of the "Railway Scheduling in Flatland" project.
+
+Our team, comprised of two dedicated computer science students - Adrian Henze and Max Vogel - who began their studies in 2019, has united to develop Clingonia: A user-friendly GUI program that integrates the innovative realms of Flatland and Answer Set Programming (ASP).

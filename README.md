@@ -54,10 +54,10 @@ conda install -c potassco clingo
 ```
 
 📦 Additionally, ensure that the following required packages are installed:
+
+`flatland-rl`, `clingo`, `imageio`, `pillow`, `numpy`, `pandas`, `matplotlib`.
 ```
-pip install pillow
-pip install imageio
-pip install clingo
+pip install [package]
 ```
 
 <br>

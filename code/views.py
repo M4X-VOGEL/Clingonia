@@ -6,7 +6,7 @@ from tkinter import filedialog
 
 from code.build_png import create_custom_env, initial_render_test, save_png
 from code.custom_canvas import *
-from code.files import save_env, delete_tmp_lp, delete_tmp_png, delete_tmp_gif, delete_tmp_frames
+from code.files import save_env, delete_tmp_lp, delete_tmp_png, delete_tmp_gif, delete_tmp_frames, initial_import_test
 from code.gen_png import gen_env
 from code.load_env import load_env
 from code.positions import position_df
@@ -39,16 +39,22 @@ title_font_layout = ('Arial', int(font_base_mod * frame_title_font_size), 'bold'
 
 
 # color scheme
+dark_background_color = '#111214'
 background_color = '#1E1F22'
 canvas_color = '#313338'
 button_color = '#2B2D31'
+blue_active_color = '#5865F2'
+blue_inactive_color = '#4752C4'
+red_button_color = '#9B0000'
 label_color = '#FFFFFF'
 entry_color = '#383A40'
 input_color = '#F0F0F0'
 example_color = '#AFB3BA'
 selector_color = '#35373C'
-good_status_color = '#00FF00'
-bad_status_color = '#FF0000'
+good_status_color = '#209752'
+switch_on_color = '#2ECC71'
+switch_off_color = '#E03A3E'
+bad_status_color = '#F23F43'
 train_color = '#0FF000'
 station_color = '#000FF0'
 
@@ -255,12 +261,24 @@ def create_start_menu():
 
     build_title_frame()
     build_start_menu_frame()
-    # Test rendering
-    initial_test_res = initial_render_test()
-    if initial_test_res == 0:
-        print("Info: Launch was successful.")
+
+    # Initial tests
+    initial_import_res = initial_import_test()
+    initial_render_res = initial_render_test()
+    if initial_import_res == 0 and initial_render_res == 0:
+        print('Info: Launch was successful.')
+    elif initial_import_res != 0:
+        print('\n❌ Warning: Essential python packets missing.\n'
+              'Make sure that you have all these packages installed:\n'
+              'flatland-rl, clingo, imageio, pillow, numpy, pandas, matplotlib.\n'
+              'You can check the installation with the Python package installer pip:\n\n'
+              '     pip show [NAME]\n\n'
+              'If one package was not found, use:\n\n'
+              '     pip install [NAME]\n'
+              )
+        exit()
     else:
-        print("❌ Warning: Launch abnormal. Restart program.")
+        print('❌ Warning: Launch abnormal. Restart program.')
         exit()
 
 def build_title_frame():
@@ -271,17 +289,20 @@ def build_title_frame():
         grid_pos=(0, 0),
         padding=(0, 0),
         sticky='nsew',
-        background_color=background_color,
+        background_color=canvas_color,
         border_width=0,
         visibility=True
     )
 
-    if sys_platform == "Windows":
+    if sys_platform == 'Windows':
         title_frame_label('Lucida Handwriting', 80)
-    elif sys_platform == "Darwin":  # macOS
+        title_frame_subtitle_label('Lucida Handwriting', 30)
+    elif sys_platform == 'Darwin':  # macOS
         title_frame_label('Big Caslon', 100)
+        title_frame_subtitle_label('Big Caslon', 40)
     else:  # Linux and other
         title_frame_label('Arial', 80)
+        title_frame_subtitle_label('Arial', 30)
 
     pictures['title_gif'] = GIF(
         root=frames['title_frame'].frame,
@@ -291,7 +312,7 @@ def build_title_frame():
         padding=(0, 0),
         sticky='n',
         gif='data/png/title_gif.gif',
-        background_color=background_color,
+        background_color=canvas_color,
         visibility=True,
     )
 
@@ -309,7 +330,21 @@ def title_frame_label(font, scale_fac):
         text='CLINGONIA',
         font=(font, int(font_base_mod * scale_fac), 'bold'),
         foreground_color=label_color,
-        background_color=background_color,
+        background_color=canvas_color,
+        visibility=True,
+    )
+
+def title_frame_subtitle_label(font, scale_fac):
+    # Necessary for macOS
+    labels['title_label'] = Label(
+        root=frames['title_frame'].frame,
+        grid_pos=(2, 0),
+        padding=(0, (0,40)),
+        sticky='sew',
+        text='Powered by MadMotion',
+        font=(font, int(font_base_mod * scale_fac), 'bold'),
+        foreground_color=example_color,
+        background_color=canvas_color,
         visibility=True,
     )
 
@@ -429,7 +464,7 @@ def build_start_menu_help_frame():
         grid_pos=(0, 0),
         padding=(0, 0),
         sticky='nesw',
-        background_color=background_color,
+        background_color=dark_background_color,
         border_width=0,
         visibility=True
     )
@@ -448,7 +483,7 @@ def build_start_menu_help_frame():
         font=help_font_layout,
         wrap='word',
         foreground_color=label_color,
-        background_color=background_color,
+        background_color=dark_background_color,
         border_width=0,
         state='disabled',
         visibility=True,
@@ -656,7 +691,7 @@ def build_main_menu():
         buttons['saveImage_button'] = ToggleSwitch(
             root=frames['main_menu_frame'].frame,
             width=30, height=16,
-            on_color='#00FF00', off_color='#FF0000',
+            on_color=switch_on_color, off_color=switch_off_color,
             handle_color='#777777', background_color='#EEEEEE',
             command=change_save_image_status,
         )
@@ -689,8 +724,8 @@ def build_main_menu():
         buttons['saveImage_button'] = ToggleSwitch(
             root=frames['save_button_frame'].frame,
             width=70, height=30,
-            on_color=good_status_color, off_color=bad_status_color,
-            handle_color=label_color, background_color=button_color,
+            on_color=switch_on_color, off_color=switch_off_color,
+            handle_color=input_color, background_color=button_color,
             command=change_save_image_status,
         )
         buttons['saveImage_button'].grid(
@@ -737,7 +772,7 @@ def build_main_menu():
         text='Next: Clingo Solver',
         font=base_font_layout,
         foreground_color=label_color,
-        background_color=button_color,
+        background_color=blue_active_color,
         border_width=0,
         visibility=True,
     )
@@ -838,7 +873,7 @@ def build_main_menu_help_frame():
         grid_pos=(0, 0),
         padding=(0, 0),
         sticky='nesw',
-        background_color=background_color,
+        background_color=dark_background_color,
         border_width=0,
         visibility=True
     )
@@ -857,7 +892,7 @@ def build_main_menu_help_frame():
         font=help_font_layout,
         wrap='word',
         foreground_color=label_color,
-        background_color=background_color,
+        background_color=dark_background_color,
         border_width=0,
         state='disabled',
         visibility=True,
@@ -1061,7 +1096,7 @@ def build_clingo_para_frame():
         text='Run Simulation',
         font=base_font_layout,
         foreground_color=label_color,
-        background_color=button_color,
+        background_color=red_button_color,
         border_width=0,
         visibility=True,
     )
@@ -1098,7 +1133,7 @@ def build_clingo_help_frame():
         grid_pos=(0, 0),
         padding=(0, 0),
         sticky='nesw',
-        background_color=background_color,
+        background_color=dark_background_color,
         border_width=0,
         visibility=True
     )
@@ -1117,7 +1152,7 @@ def build_clingo_help_frame():
         font=help_font_layout,
         wrap='word',
         foreground_color=label_color,
-        background_color=background_color,
+        background_color=dark_background_color,
         border_width=0,
         state='disabled',
         visibility=True,
@@ -2063,8 +2098,8 @@ def build_random_gen_para_frame():
     buttons['lowQuality_button'] = ToggleSwitch(
         root=frames['random_gen_para_frame'].frame,
         width=70, height=30,
-        on_color=good_status_color, off_color=bad_status_color,
-        handle_color=label_color, background_color=background_color,
+        on_color=switch_on_color, off_color=switch_off_color,
+        handle_color=input_color, background_color=background_color,
         command=change_low_quality_status,
     )
     buttons['lowQuality_button'].set_state(user_params['lowQuality'])
@@ -2096,7 +2131,7 @@ def build_random_gen_para_frame():
         text='Generate',
         font=base_font_layout,
         foreground_color=label_color,
-        background_color=button_color,
+        background_color=red_button_color,
         border_width=0,
         visibility=True,
     )
@@ -2135,7 +2170,7 @@ def build_random_gen_para_help_frame():
         grid_pos=(0, 1),
         padding=(0, 0),
         sticky='nesw',
-        background_color=background_color,
+        background_color=dark_background_color,
         border_width=0,
         visibility=True
     )
@@ -2154,7 +2189,7 @@ def build_random_gen_para_help_frame():
         font=help_font_layout,
         wrap='word',
         foreground_color=label_color,
-        background_color=background_color,
+        background_color=dark_background_color,
         border_width=0,
         state='disabled',
         visibility=True,
@@ -3011,8 +3046,8 @@ def build_builder_para_frame():
     buttons['lowQuality_button'] = ToggleSwitch(
         root=frames['builder_para_frame'].frame,
         width=70, height=30,
-        on_color=good_status_color, off_color=bad_status_color,
-        handle_color=label_color, background_color=background_color,
+        on_color=switch_on_color, off_color=switch_off_color,
+        handle_color=input_color, background_color=background_color,
         command=change_low_quality_status,
     )
     buttons['lowQuality_button'].set_state(user_params['lowQuality'])
@@ -3044,7 +3079,7 @@ def build_builder_para_frame():
         text='Build' if build_mode == 'build' else 'Modify',
         font=base_font_layout,
         foreground_color=label_color,
-        background_color=button_color,
+        background_color=blue_active_color,
         border_width=0,
         visibility=True,
     )
@@ -3070,7 +3105,7 @@ def build_builder_para_help_frame():
         grid_pos=(0, 1),
         padding=(0, 0),
         sticky='nesw',
-        background_color=background_color,
+        background_color=dark_background_color,
         border_width=0,
         visibility=True
     )
@@ -3089,7 +3124,7 @@ def build_builder_para_help_frame():
         font=help_font_layout,
         wrap='word',
         foreground_color=label_color,
-        background_color=background_color,
+        background_color=dark_background_color,
         border_width=0,
         state='disabled',
         visibility=True,
@@ -3235,8 +3270,8 @@ def build_builder_grid_frame():
         y=frames['builder_grid_frame'].height * 0,
         font=canvas_font_layout,
         id_label_font=canvas_label_font_layout,
-        background_color=canvas_color,
-        grid_color=background_color,
+        background_color=dark_background_color,
+        grid_color=example_color,
         train_color=train_color,
         station_color=station_color,
         border_width=0,
@@ -3300,7 +3335,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(1025),
         image='data/png/Gleis_horizontal.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         visibility=True,
     )
@@ -3314,7 +3349,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(32800),
         image='data/png/Gleis_vertikal.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         visibility=True,
     )
@@ -3328,7 +3363,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(2064),
         image='data/png/Gleis_kurve_oben_links.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         visibility=True,
     )
@@ -3342,7 +3377,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(72),
         image='data/png/Gleis_kurve_oben_rechts.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         visibility=True,
     )
@@ -3356,7 +3391,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(16386),
         image='data/png/Gleis_kurve_unten_rechts.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         visibility=True,
     )
@@ -3370,7 +3405,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(4608),
         image='data/png/Gleis_kurve_unten_links.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         visibility=True,
     )
@@ -3384,7 +3419,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(3089),
         image='data/png/Weiche_horizontal_oben_links.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         visibility=True,
     )
@@ -3398,7 +3433,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(1097),
         image='data/png/Weiche_horizontal_oben_rechts.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         visibility=True,
     )
@@ -3412,7 +3447,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(17411),
         image='data/png/Weiche_horizontal_unten_rechts.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         visibility=True,
     )
@@ -3426,7 +3461,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(5633),
         image='data/png/Weiche_horizontal_unten_links.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         visibility=True,
     )
@@ -3440,7 +3475,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(34864),
         image='data/png/Weiche_vertikal_oben_links.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         visibility=True,
     )
@@ -3454,7 +3489,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(32872),
         image='data/png/Weiche_vertikal_oben_rechts.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         visibility=True,
     )
@@ -3468,7 +3503,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(49186),
         image='data/png/Weiche_vertikal_unten_rechts.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         visibility=True,
     )
@@ -3482,7 +3517,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(37408),
         image='data/png/Weiche_vertikal_unten_links.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         visibility=True,
     )
@@ -3496,7 +3531,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(33825),
         image='data/png/Gleis_Diamond_Crossing.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         visibility=True,
     )
@@ -3510,7 +3545,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(35889),
         image='data/png/Weiche_Single_Slip.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         rotation=270,
         visibility=True,
@@ -3525,7 +3560,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(33897),
         image='data/png/Weiche_Single_Slip.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         rotation=180,
         visibility=True,
@@ -3540,7 +3575,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(50211),
         image='data/png/Weiche_Single_Slip.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         rotation=90,
         visibility=True,
@@ -3555,7 +3590,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(38433),
         image='data/png/Weiche_Single_Slip.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         rotation=0,
         visibility=True,
@@ -3570,7 +3605,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(52275),
         image='data/png/Weiche_Double_Slip.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         rotation=90,
         visibility=True,
@@ -3585,7 +3620,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(38505),
         image='data/png/Weiche_Double_Slip.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         rotation=0,
         visibility=True,
@@ -3600,7 +3635,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(2136),
         image='data/png/Weiche_Symetrical.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         rotation=180,
         visibility=True,
@@ -3615,7 +3650,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(16458),
         image='data/png/Weiche_Symetrical.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         rotation=90,
         visibility=True,
@@ -3630,7 +3665,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(20994),
         image='data/png/Weiche_Symetrical.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         rotation=0,
         visibility=True,
@@ -3645,7 +3680,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(6672),
         image='data/png/Weiche_Symetrical.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         rotation=270,
         visibility=True,
@@ -3660,7 +3695,7 @@ def build_track_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(0),
         image='data/png/eraser.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         rotation=0,
         visibility=True,
@@ -3676,8 +3711,8 @@ def build_track_builder_menu_frame():
         command=lambda: open_reset_frame(frames['track_builder_menu_frame']),
         text='RESET',
         font=base_font_layout,
-        foreground_color=bad_status_color,
-        background_color=selector_color,
+        foreground_color=switch_off_color,
+        background_color=dark_background_color,
         border_width=0,
         visibility=True,
     )
@@ -3694,7 +3729,7 @@ def build_track_builder_menu_frame():
         text='Next: Trains',
         font=base_font_layout,
         foreground_color=label_color,
-        background_color=button_color,
+        background_color=blue_active_color,
         border_width=0,
         visibility=True,
     )
@@ -3718,7 +3753,7 @@ def build_builder_track_help_frame():
         grid_pos=(0, 0),
         padding=(0, 0),
         sticky='nesw',
-        background_color=background_color,
+        background_color=dark_background_color,
         border_width=0,
         visibility=True
     )
@@ -3737,7 +3772,7 @@ def build_builder_track_help_frame():
         font=help_font_layout,
         wrap='word',
         foreground_color=label_color,
-        background_color=background_color,
+        background_color=dark_background_color,
         border_width=0,
         state='disabled',
         visibility=True,
@@ -3832,7 +3867,7 @@ def build_train_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(1),
         image='data/png/Zug_Gleis_#0091ea.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         rotation=0,
         visibility=True,
@@ -3847,7 +3882,7 @@ def build_train_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(2),
         image='data/png/Zug_Gleis_#0091ea.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         rotation=270,
         visibility=True,
@@ -3862,7 +3897,7 @@ def build_train_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(3),
         image='data/png/Zug_Gleis_#0091ea.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         rotation=180,
         visibility=True,
@@ -3877,7 +3912,7 @@ def build_train_builder_menu_frame():
         command=lambda: canvases['builder_grid_canvas'].select(4),
         image='data/png/Zug_Gleis_#0091ea.png',
         foreground_color=selector_color,
-        background_color=selector_color,
+        background_color=background_color,
         border_width=0,
         rotation=90,
         visibility=True,
@@ -3892,8 +3927,8 @@ def build_train_builder_menu_frame():
         command=lambda: open_reset_frame(frames['train_builder_menu_frame']),
         text='RESET',
         font=base_font_layout,
-        foreground_color=bad_status_color,
-        background_color=selector_color,
+        foreground_color=switch_off_color,
+        background_color=dark_background_color,
         border_width=0,
         visibility=True,
     )
@@ -3950,7 +3985,7 @@ def build_train_builder_menu_frame():
         text='Finish Build' if build_mode == 'build' else 'Finish Modifying',
         font=base_font_layout,
         foreground_color=label_color,
-        background_color=button_color,
+        background_color=red_button_color,
         border_width=0,
         visibility=True,
     )
@@ -4039,8 +4074,8 @@ def open_train_all_config_frame():
     labels['eDep_label'] = Label(
         root=frames['train_all_config_frame'].frame,
         grid_pos=(1,0),
-        padding=(0,0),
-        sticky='s',
+        padding=(100,0),
+        sticky='sw',
         text=f'Earliest Departure All Trains:',
         font=base_font_layout,
         foreground_color=label_color,
@@ -4080,8 +4115,8 @@ def open_train_all_config_frame():
     labels['lArr_label'] = Label(
         root=frames['train_all_config_frame'].frame,
         grid_pos=(2,0),
-        padding=(0,20),
-        sticky='s',
+        padding=(100,20),
+        sticky='sw',
         text=f'Latest Arrival All Trains:',
         font=base_font_layout,
         foreground_color=label_color,
@@ -4122,8 +4157,8 @@ def open_train_all_config_frame():
         width=20,
         height=1,
         grid_pos=(3, 0),
-        padding=(0, 40),
-        sticky='s',
+        padding=(100, 40),
+        sticky='sw',
         columnspan=2,
         command=save_train_all_config,
         text='Save',
@@ -4199,7 +4234,7 @@ def build_builder_train_help_frame():
         grid_pos=(0, 0),
         padding=(0, 0),
         sticky='nesw',
-        background_color=background_color,
+        background_color=dark_background_color,
         border_width=0,
         visibility=True
     )
@@ -4218,7 +4253,7 @@ def build_builder_train_help_frame():
         font=help_font_layout,
         wrap='word',
         foreground_color=label_color,
-        background_color=background_color,
+        background_color=dark_background_color,
         border_width=0,
         state='disabled',
         visibility=True,
@@ -4830,8 +4865,8 @@ def build_result_menu():
     buttons['lowQuality_button'] = ToggleSwitch(
         root=frames['result_menu_frame'].frame,
         width=70, height=30,
-        on_color=good_status_color, off_color=bad_status_color,
-        handle_color=label_color, background_color=background_color,
+        on_color=switch_on_color, off_color=switch_off_color,
+        handle_color=input_color, background_color=background_color,
         command=change_low_quality_gif_status,
     )
     buttons['lowQuality_button'].grid(row=4, column=1, sticky='ne')
@@ -4914,7 +4949,7 @@ def build_result_help_frame():
         grid_pos=(0, 0),
         padding=(0, 0),
         sticky='nesw',
-        background_color=background_color,
+        background_color=dark_background_color,
         border_width=0,
         visibility=True
     )
@@ -4933,7 +4968,7 @@ def build_result_help_frame():
         font=help_font_layout,
         wrap='word',
         foreground_color=label_color,
-        background_color=background_color,
+        background_color=dark_background_color,
         border_width=0,
         state='disabled',
         visibility=True,
@@ -4988,7 +5023,7 @@ def build_result_gif_frame():
         grid_pos=(0, 0),
         padding=(0, 0),
         sticky='nesw',
-        background_color=background_color,
+        background_color=canvas_color,
         border_width=0,
         visibility=True
     )
@@ -5001,7 +5036,7 @@ def build_result_gif_frame():
         padding=(0, 0),
         sticky='nesw',
         gif=current_gif,
-        background_color=background_color,
+        background_color=canvas_color,
         visibility=True,
     )
 
@@ -5016,7 +5051,7 @@ def build_result_gif_frame():
         text='Save GIF',
         font=base_font_layout,
         foreground_color=label_color,
-        background_color=button_color,
+        background_color=good_status_color,
         border_width=0,
         visibility=True,
     )

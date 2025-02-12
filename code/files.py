@@ -81,3 +81,17 @@ def write_tracks(tracks, lp):
         for j, track in enumerate(row):
             lp.write(f"cell(({i},{j}),{track}).\n")
         lp.write(f'\n')
+
+
+def initial_import_test():
+    try:
+        import flatland
+        import clingo
+        import imageio
+        import PIL
+        import numpy
+        import pandas
+        import matplotlib
+    except ImportError:
+        return -1
+    return 0
