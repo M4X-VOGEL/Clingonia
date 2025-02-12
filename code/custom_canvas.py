@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 import pandas as pd
 import platform
@@ -16,7 +18,7 @@ class EnvCanvas:
             height: int,
             x: int,
             y: int,
-            font: [[str, int]],
+            font: Tuple[str, int],
             background_color: str,
             grid_color: str,
             border_width: int,
@@ -250,8 +252,8 @@ class BuildCanvas:
             height: int,
             x: int,
             y: int,
-            font: [[str, int]],
-            id_label_font: [[str, int, str]],
+            font: Tuple[str, int],
+            id_label_font: Tuple[str, int, str],
             background_color: str,
             grid_color: str,
             train_color: str,
@@ -755,8 +757,8 @@ class TrainListCanvas:
             height: int,
             x: int,
             y: int,
-            font: [[str, int]],
-            config_title_font: [[str, int, str]],
+            font: Tuple[str, int],
+            config_title_font: Tuple[str, int, str],
             background_color: str,
             label_color: str,
             button_color: str,
@@ -1139,8 +1141,8 @@ class ResultCanvas:
             height: int,
             x: int,
             y: int,
-            font: [[str, int]],
-            path_label_font: [[str, int, str]],
+            font: Tuple[str, int],
+            path_label_font: Tuple[str, int],
             background_color: str,
             grid_color: str,
             border_width: int,
@@ -1444,7 +1446,7 @@ class PathListCanvas:
             height: int,
             x: int,
             y: int,
-            font: [[str, int]],
+            font: Tuple[str, int],
             background_color: str,
             on_color: str,
             off_color: str,
