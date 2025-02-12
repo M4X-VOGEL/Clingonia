@@ -1038,14 +1038,14 @@ def build_clingo_para_frame():
 
     buttons['select_lp_files_button'] = Button(
         root=frames['clingo_para_frame'].frame,
-        width=20,
+        width=30,
         height=1,
         grid_pos=(5, 2),
         padding=(0, 0),
         sticky='nw',
         columnspan=2,
         command=load_lp_files,
-        text='Select LP Files',
+        text='Select Problem-Solving LP Files',
         font=base_font_layout,
         foreground_color=label_color,
         background_color=button_color,
