@@ -4052,7 +4052,7 @@ def open_train_all_config_frame():
         visibility=True
     )
 
-    buttons['back_button'] = Button(
+    buttons['go_back_button'] = Button(
         root=frames['train_all_config_frame'].frame,
         width=120,
         height=60,
