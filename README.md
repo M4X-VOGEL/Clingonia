@@ -1,6 +1,6 @@
 # Clingonia by MadMotion (Early Access)
 
-![Flatland animation](data/png/title_gif.gif)
+![Clingonia animation](data/png/title_gif.gif)
 
 ## 🌹 Introduction
 Experience next-generation Flatland environment management with our cutting-edge software "Clingonia".
@@ -131,3 +131,19 @@ If you encounter unexpected issues, please report them right away. Your input is
 - Users may experience decreased responsiveness when zooming in closely on environments.
 - Our example `ASP` code for solving environments is provided for reference and simple environments. It is not flawless. We recommend using your own implementation for optimal results.
 - On macOS, text input fields might not appear immediately upon loading the page. Interacting with a control, such as clicking "Advanced Options," should reveal them.
+
+<br>
+
+# 👁️ Insights
+
+### Build New Environment
+![Build New Environment](data/readme_png/Build.png)
+
+### Main Menu
+![Main Menu](data/readme_png/Menu.png)
+
+### Run Simulations
+![Run Simulation](data/readme_png/Solve.png)
+
+### Review Solutions
+![Results](data/readme_png/Results.png)
