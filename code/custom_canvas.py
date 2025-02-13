@@ -336,6 +336,10 @@ class BuildCanvas:
     def select(self, selection):
         self.current_selection = selection
 
+    def select_station(self, index):
+        self.current_selection = 5
+        self.train_index = index
+
     def calculate_initial_pos(self):
         if max(self.rows, self.cols) > 50:
             self.x_offset = 50
@@ -374,6 +378,8 @@ class BuildCanvas:
                     # station
                     self.array[2] = np.zeros(self.array[2].shape)
                     self.train_data.at[self.train_index, 'end_pos'] = (row, col)
+                    self.train_index = None
+                    self.current_selection = None
                     for r,c in self.train_data['end_pos']:
                         if r != -1:
                             self.array[2][r, c] = 5
@@ -788,11 +794,12 @@ class TrainListCanvas:
         self.train_data = train_data
         self.outer_frame = outer_frame
 
+        self.station_dict = {}
         self.config_dict = {}
         self.remove_dict = {}
 
         self.station_img = Image.open('data/png/Bahnhof_#d50000.png')
-        self.station_img = self.station_img.resize(size=(100, 100))
+        self.station_img = self.station_img.resize(size=(50, 50))
         self.station_img = ImageTk.PhotoImage(self.station_img)
 
         self.canvas = self.create_canvas()
@@ -836,35 +843,47 @@ class TrainListCanvas:
             frame = tk.Frame(self.scroll_frame, bg=self.background_color)
             frame.pack(fill='x', pady=5)
 
+            self.station_dict[idx] = tk.Button(
+                frame,
+                width=50, height=50,
+                command=lambda index=idx: self.grid.select_station(index),
+                image=self.station_img,
+                foreground=self.background_color,
+                background=self.background_color,
+                bd=0
+            )
+            self.station_dict[idx].pack(side='left', padx=0)
+
             label = tk.Label(
                 frame,
                 width=25,
                 font=self.font,
                 fg=self.label_color, bg=self.background_color,
-                text=f'Train {idx}: {row["start_pos"]}, {row["dir"]}',
+                text=f'Train {idx}:   {row["start_pos"]},  {row["dir"]}',
+                anchor='w',
             )
             label.pack(side='left', padx=0)
 
             if sys_platform == "Darwin":  # macOS
                 self.config_dict[idx] = tk.Button(
                     frame,
-                    width=8,height=1,
+                    width=12,height=1,
                     font=self.font,
                     fg='#000000', bg='#333333',
-                    text='configure',
+                    text=f'configure {idx}',
                     command=lambda index=idx: self.open_train_config_frame(index)
                 )
-                self.config_dict[idx].pack(side='left', padx=15)
+                self.config_dict[idx].pack(side='left', padx=5)
             else:  # Window, Linux and other
                 self.config_dict[idx] = tk.Button(
                     frame,
-                    width=8,height=1,
+                    width=12,height=1,
                     font=self.font,
                     fg=self.label_color, bg=self.button_color, bd=0,
-                    text='configure',
+                    text=f'configure {idx}',
                     command=lambda index=idx: self.open_train_config_frame(index)
                 )
-                self.config_dict[idx].pack(side='left', padx=15)
+                self.config_dict[idx].pack(side='left', padx=5)
 
             self.remove_dict[idx] = tk.Button(
                 frame,
@@ -944,9 +963,6 @@ class TrainListCanvas:
         )
         config_frame.place(x=0, y=0)
 
-        self.grid.current_selection = None
-        self.grid.train_index = index
-
         config_label = tk.Label(
             config_frame,
             text=f'Configure: Train {index}',
@@ -993,8 +1009,8 @@ class TrainListCanvas:
             bd=0,
         )
         ed_err_label.place(
-            x=self.outer_frame.winfo_width() * 0.1,
-            y=self.outer_frame.winfo_height() * 0.45
+            x=self.outer_frame.winfo_width() * 0.5,
+            y=self.outer_frame.winfo_height() * 0.4
         )
 
         la_label = tk.Label(
@@ -1006,7 +1022,7 @@ class TrainListCanvas:
         )
         la_label.place(
             x=self.outer_frame.winfo_width() * 0.1,
-            y=self.outer_frame.winfo_height() * 0.5
+            y=self.outer_frame.winfo_height() * 0.45
         )
 
         la_entry = tk.Entry(
@@ -1016,7 +1032,7 @@ class TrainListCanvas:
         )
         la_entry.place(
             x=self.outer_frame.winfo_width() * 0.4,
-            y=self.outer_frame.winfo_height() * 0.5
+            y=self.outer_frame.winfo_height() * 0.45
         )
         if self.train_data.loc[index, 'l_arr'] != -1:
             la_entry.insert(
@@ -1031,36 +1047,10 @@ class TrainListCanvas:
             foreground=self.bad_status_color, background=self.background_color,
             bd=0,
         )
-
-        station_label = tk.Label(
-            config_frame,
-            text='Place Station:',
-            font=self.font,
-            foreground=self.label_color, background=self.background_color,
-            bd=0,
+        ed_err_label.place(
+            x=self.outer_frame.winfo_width() * 0.5,
+            y=self.outer_frame.winfo_height() * 0.45
         )
-        station_label.place(
-            x=self.outer_frame.winfo_width() * 0.1,
-            y=self.outer_frame.winfo_height() * 0.6
-        )
-
-        place_station = tk.Button(
-            config_frame,
-            width=100, height=100,
-            command=lambda: self.grid.select(5),
-            image=self.station_img,
-            foreground=self.background_color, background=self.background_color,
-            bd=0
-        )
-        place_station.place(
-            x=self.outer_frame.winfo_width() * 0.39,
-            y=self.outer_frame.winfo_height() * 0.56
-        )
-        if self.train_data.loc[index, 'end_pos'][0] != -1:
-            row, col = self.train_data.loc[index, 'end_pos']
-            self.grid.array[2][row, col] = 5
-            self.grid.update_image_storage()
-            self.grid.draw_trains()
 
         save = tk.Button(
             config_frame,
@@ -1078,7 +1068,7 @@ class TrainListCanvas:
         )
         save.place(
             x=self.outer_frame.winfo_width() * 0.4,
-            y=self.outer_frame.winfo_height() * 0.68
+            y=self.outer_frame.winfo_height() * 0.5
         )
 
     def save_ed_la(
@@ -1101,9 +1091,9 @@ class TrainListCanvas:
                 ed_err_label.place_forget()
             except ValueError:
                 ed_err_label.config(text='has to be an integer > 0')
-                la_err_label.place(
-                    x=self.outer_frame.winfo_width() * 0.1,
-                    y=self.outer_frame.winfo_height() * 0.45
+                ed_err_label.place(
+                    x=self.outer_frame.winfo_width() * 0.5,
+                    y=self.outer_frame.winfo_height() * 0.4
                 )
                 err_count += 1
 
@@ -1116,8 +1106,8 @@ class TrainListCanvas:
             except ValueError:
                 la_err_label.config(text='has to be an integer > 0')
                 la_err_label.place(
-                    x=self.outer_frame.winfo_width() * 0.1,
-                    y=self.outer_frame.winfo_height() * 0.55
+                    x=self.outer_frame.winfo_width() * 0.5,
+                    y=self.outer_frame.winfo_height() * 0.45
                 )
                 err_count += 1
 
@@ -1126,10 +1116,6 @@ class TrainListCanvas:
 
         self.train_data.loc[index, 'e_dep'] = ed
         self.train_data.loc[index, 'l_arr'] = la
-        self.grid.current_selection = None
-        self.grid.train_index = None
-        self.grid.update_image_storage()
-        self.grid.draw_trains()
         config_frame.destroy()
 
 

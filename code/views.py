@@ -291,8 +291,8 @@ def build_title_frame():
 
     pictures['title_gif'] = GIF(
         root=frames['title_frame'].frame,
-        width=frames['title_frame'].width * 0.8,
-        height=frames['title_frame'].height * 0.3,
+        width=frames['title_frame'].width,
+        height=frames['title_frame'].height * 0.35,
         grid_pos=(1, 0),
         padding=(0, 0),
         sticky='n',
@@ -3936,11 +3936,11 @@ def build_train_builder_menu_frame():
 
     frames['train_config_list_canvas_frame'] = Frame(
         root=frames['train_builder_menu_frame'].frame,
-        width=frames['train_builder_menu_frame'].width * 0.75,
+        width=frames['train_builder_menu_frame'].width * 0.95,
         height=frames['train_builder_menu_frame'].height * 0.52,
-        grid_pos=(2, 2),
+        grid_pos=(2, 0),
         padding=(0, 0),
-        columnspan=6,
+        columnspan=8,
         background_color=background_color,
         border_width=0,
         visibility=True,
