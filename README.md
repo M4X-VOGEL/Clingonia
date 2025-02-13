@@ -1,6 +1,6 @@
 # Clingonia by MadMotion (Early Access)
 
-![Flatland animation](https://i.imgur.com/9cNtWjs.gif)
+![Flatland animation](data/png/title_gif.gif)
 
 ## 🌹 Introduction
 Experience next-generation Flatland environment management with our cutting-edge software "Clingonia".
