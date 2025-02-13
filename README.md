@@ -75,13 +75,15 @@ git clone https://github.com/M4X-VOGEL/Clingonia.git
 
 ### 🐣 Initial development
 
-First of all, individual developers are responsible for writing encodings in clingo that are capable of solving Flatland problems.  During the development phase, the `lp` representation of the environment may be beneficial for initial testing and debugging of the encoding or encodings.  Keep in mind that several encodings can be called simulatenously by clingo, for example:
+We will provide all necessary resources to be able to use all features of Clingonia.
+
+If you want to use your own ASP encodings, make sure that they are capable of solving Flatland problems.  During the development phase, the `lp` representation of the environment may be beneficial for initial testing and debugging of the encoding or encodings.  Keep in mind that several encodings can be called simulatenously by clingo, for example:
 ```
 clingo env.lp example1.lp example2.lp
 ```
 
 The order is not important.  What will ultimately be necessary is that the output be appropriately formatted in the following manner:
-`action(train(ID), Action, Time).` 
+`action(train(ID), Action, Timestep).` 
 
 The `Action` variable must be one of the following:
 - `move_forward`
@@ -120,7 +122,7 @@ This will launch the program.
 
 ### 🛠️ Troubleshooting
 
-If you encounter unexpected issues, it may be due to any number of reasons. This is still an early version and we are hard at work at MadMotion to get our program to the next level. Feel free to report any issues to us so we can address them promptly.
+If you encounter unexpected issues, please report them right away. Your input is extremely helpful to us.
 
 <br>
 

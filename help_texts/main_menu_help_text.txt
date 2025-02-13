@@ -4,13 +4,17 @@
 
 
 
+(!) Terminal
+------------
+Important: Clingonia provides real-time status updates in the terminal. During extended load times, we recommend checking there to monitor your progress.
+
+
+
 Generate Random Environment
 ---------------------------
 Set parameters to create a complete, seed-based Flatland environment.
 
 Define dimensions, the number of trains and cities, rail system details, and train behaviors.
-
-After generation, you will receive a detailed overview.
 
 
 
@@ -20,7 +24,7 @@ First, define your grid size and specify train behavior. Then, enter the Railway
 
 Once your rail network is complete, you can add trains with their corresponding stations and details like Earliest Departure and Latest Arrival.
 
-Finally, feast your eyes on a detailed overview of your masterpiece!
+Finally, feast your eyes on a rendered image of your masterpiece!
 
 
 
@@ -31,8 +35,6 @@ Modify Mode works like Build Mode, allowing you to adjust the same parameters.
 Instead of starting with a blank grid, you begin with the environment that you have loaded, generated, or built.
 
 You will be able to reposition rails, trains, and stations using the same controls, and even modify the grid size.
-
-Once you are satisfied with your adjustments, you will receive a detailed overview.
 
 
 

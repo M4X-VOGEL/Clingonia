@@ -5,8 +5,12 @@ from PIL import Image, ImageDraw, ImageFont
 from code.build_png import create_custom_env
 
 DIR_MAP = {'n': 0, 'e': 1, 's': 2, 'w': 3}
+images = []  # Frame list
+# Re-rendering parameters
+old_env_counter = 0
+old_low_q = None
 
-def build_gif(tracks, trains, df_pos, env_params, output_gif='data/running_tmp.gif', fps=2, low_quality_mode=False):
+def render_gif(tracks, trains, df_pos, env_params, env_counter, output_gif='data/running_tmp.gif', fps=2, low_quality_mode=False):
     """Creates the gif of the environment with a frame for every timestep.
     
     Args:
@@ -18,6 +22,12 @@ def build_gif(tracks, trains, df_pos, env_params, output_gif='data/running_tmp.g
         fps (float): timesteps per second.
         low_quality_mode (int): False for auto resolution; True for low resolution.
     """
+    global images, old_env_counter, old_low_q
+    if images and old_env_counter == env_counter and old_low_q == low_quality_mode:
+        # Same environment, same quality: no re-render needed
+        build_gif_from_frames(output_gif, fps)
+        return
+    images = []
     print("\nRendering animation...")
     env = create_custom_env(tracks, trains, env_params)
     # Get max timesteps to determine gif length
@@ -29,8 +39,6 @@ def build_gif(tracks, trains, df_pos, env_params, output_gif='data/running_tmp.g
     # Separate trains into groups
     groups = {train_id: group.sort_values(by='timestep') 
               for train_id, group in df_pos.groupby('trainID')}
-    # Frame list
-    images = []
     
     # For each timestep
     for t in range(0, max_timestep + 1):
@@ -70,9 +78,16 @@ def build_gif(tracks, trains, df_pos, env_params, output_gif='data/running_tmp.g
         images.append(imageio.imread(frame_filename))
     
     # Combine frames to one GIF
+    build_gif_from_frames(output_gif, fps)
+    old_env_counter = env_counter
+    old_low_q = low_quality_mode
+    print(f"\n✅ Animation done.")
+
+
+def build_gif_from_frames(output_gif, fps):
+    global images
     ms_per_timestep = int(1000/fps)
     imageio.mimsave(output_gif, images, format='GIF', loop=0, duration=ms_per_timestep)
-    print(f"\n✅ Animation done.")
 
 
 def calc_gif_resolution(low_quality_mode, env):

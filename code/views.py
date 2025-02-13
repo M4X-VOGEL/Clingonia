@@ -10,7 +10,7 @@ from code.files import save_env, delete_tmp_lp, delete_tmp_png, delete_tmp_gif, 
 from code.gen_png import gen_env
 from code.load_env import load_env
 from code.positions import position_df
-from code.build_gif import build_gif
+from code.build_gif import render_gif
 
 
 # Platform: 
@@ -57,12 +57,14 @@ switch_on_color = '#2ECC71'
 switch_off_color = '#E03A3E'
 train_color = '#0FF000'
 station_color = '#000FF0'
+golden_color = '#F0B232'
 
 
 # state trackers
 build_mode = None
 last_menu = None
 last_gif_params = (None, None)
+env_counter = 0
 
 
 # Widget handlers
@@ -698,7 +700,7 @@ def build_main_menu():
             padding=((0, 10), (5, 0)),
             sticky='n',
             text='Image',
-            font=('Arial', int(font_base_mod * base_font_size), 'normal'),
+            font=('Arial', int(font_base_mod * base_font_size * 0.8), 'italic'),
             foreground_color=label_color,
             background_color=button_color,
             visibility=True,
@@ -711,7 +713,7 @@ def build_main_menu():
             command=change_save_image_status,
         )
         buttons['saveImage_button'].grid(
-            row=0, column=0, padx=(0, 10), pady=(50, 0), sticky="n"
+            row=0, column=0, padx=(0, 10), pady=(45, 0), sticky="n"
         )
         buttons['saveImage_button'].set_state(user_params['saveImage'])
 
@@ -806,7 +808,8 @@ def build_main_menu_load_info_frame():
         width=30,
         height=2,
         grid_pos=(1, 0),
-        padding=(0, 0),
+        padding=(30, (0,50)),
+        sticky='sw',
         command=close_load_info,
         text='Confirm',
         font=base_font_layout,
@@ -2190,7 +2193,7 @@ def build_random_gen_para_help_frame():
     frames['random_gen_para_help_frame'].frame.grid_propagate(False)
 
 def random_gen_para_to_env():
-    global current_img, current_df, current_array
+    global current_img, current_df, current_array, env_counter
 
     if save_random_gen_env_params() == -1:
         return
@@ -2203,6 +2206,7 @@ def random_gen_para_to_env():
 
     try:
         tracks, trains = gen_env(user_params, user_params['lowQuality'])
+        env_counter += 1
     except ValueError as e:
         labels['random_gen_status_label'].label.config(
             text='Cannot fit more than one city in this map',
@@ -4289,7 +4293,7 @@ def toggle_builder_train_help():
 
 def builder_train_grid_to_env():
     global current_img, current_builder_backup_array, current_builder_backup_df, \
-        current_modify_backup_array, current_modify_backup_df
+        current_modify_backup_array, current_modify_backup_df, env_counter
 
     if len(current_df) == 0:
         labels['builder_status_label'].label.config(
@@ -4312,6 +4316,7 @@ def builder_train_grid_to_env():
     
     print("\nBuilding environment...")
     env = create_custom_env(tracks, trains, user_params)
+    env_counter += 1
     os.makedirs("data", exist_ok=True)
     if save_png(env, "data/running_tmp.png", user_params["lowQuality"]) == -1:
         labels['builder_status_label'].label.config(
@@ -5091,9 +5096,9 @@ def build_result_gif_frame():
         grid_pos=(1, 1),
         padding=(5, 5),
         command=toggle_timestep_viewer,
-        text='Step-By-Step View',
+        text='Toggle View',
         font=base_font_layout,
-        foreground_color=label_color,
+        foreground_color=golden_color,
         background_color=button_color,
         border_width=0,
         visibility=True,
@@ -5200,6 +5205,9 @@ def toggle_all_paths():
     if ('result_gif_frame' in frames and
             frames['result_gif_frame'].visibility):
         frames['result_gif_frame'].toggle_visibility()
+
+    if ('timestep_viewer_frame' in frames and
+            frames['timestep_viewer_frame'].visibility):
         frames['timestep_viewer_frame'].toggle_visibility()
 
     if ('result_help_frame' in frames and
@@ -5230,6 +5238,9 @@ def toggle_result_timetable():
     if ('result_gif_frame' in frames and 
             frames['result_gif_frame'].visibility):
         frames['result_gif_frame'].toggle_visibility()
+
+    if ('timestep_viewer_frame' in frames and 
+            frames['timestep_viewer_frame'].visibility):
         frames['timestep_viewer_frame'].toggle_visibility()
         
     if ('result_help_frame' in frames and 
@@ -5313,7 +5324,8 @@ def toggle_result_gif():
 
     current_gif_params = (user_params['frameRate'], user_params['lowQualityGIF'])
 
-    if 'timestep_viewer_frame' in frames:
+    if ('timestep_viewer_frame' in frames and 
+            frames['timestep_viewer_frame'].visibility):
         frames['timestep_viewer_frame'].toggle_visibility()
         frames['timestep_viewer_frame'].frame.rowconfigure(0, weight=2)
         frames['timestep_viewer_frame'].frame.rowconfigure(1, weight=1)
@@ -5447,15 +5459,14 @@ def change_save_image_status():
     user_params['saveImage'] = not user_params['saveImage']
 
 def create_gif():
-    global current_gif, last_gif_params
-
+    global current_gif, last_gif_params, env_counter
     tracks = current_array[0]
     trains = get_trains()
     current_gif = 'data/running_tmp.gif'
     fps = user_params['frameRate']
     low_q = user_params['lowQualityGIF']
     last_gif_params = (fps, low_q)
-    build_gif(tracks, trains, current_paths, user_params, current_gif, fps, low_q)
+    render_gif(tracks, trains, current_paths, user_params, env_counter, current_gif, fps, low_q)
 
 def save_gif():
     file = filedialog.asksaveasfilename(
@@ -5584,7 +5595,7 @@ def load_user_data_from_file():
             user_params[key] = default_params[key]
 
 def load_env_from_file():
-    global current_array, current_df, current_img
+    global current_array, current_df, current_img, env_counter
 
     file = filedialog.askopenfilename(
         title="Select LP Environment File",
@@ -5660,6 +5671,7 @@ def load_env_from_file():
 
     print("\nBuilding environment...")
     env = create_custom_env(tracks, trains, user_params)
+    env_counter += 1
     os.makedirs("data", exist_ok=True)
     if save_png(env, "data/running_tmp.png") == -1:
         if last_menu == 'start':
@@ -5707,7 +5719,11 @@ def save_env_to_file():
 
     save_env(tracks, trains, name=file)
     if user_params['saveImage']:
-        shutil.copy2(current_img, file.removesuffix('.lp') +'.png')
+        if file.endswith('.lp'):
+            image_file = file[:-2] + 'png'
+        else:
+            image_file = file + '.png'
+        shutil.copy2(current_img, image_file)
 
 def run_simulation():
     global current_paths
