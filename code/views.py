@@ -291,8 +291,8 @@ def build_title_frame():
 
     pictures['title_gif'] = GIF(
         root=frames['title_frame'].frame,
-        width=frames['title_frame'].width * 0.8,
-        height=frames['title_frame'].height * 0.3,
+        width=frames['title_frame'].width,
+        height=frames['title_frame'].height * 0.35,
         grid_pos=(1, 0),
         padding=(0, 0),
         sticky='n',
