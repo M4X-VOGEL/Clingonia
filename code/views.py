@@ -193,12 +193,11 @@ loading_err_dict = {
     -6: 'A start direction is invalid.',
     -7: 'A train has no start or end predicate.',
     -8: 'A train starts or ends on an invalid cell.',
-    -9: 'A train\'s latest arrival earlier than its earliest departure.',
+    -9: 'A train\'s latest arr. is earlier than its earliest dep.',
     -10:'Incomplete grid: Missing cell predicates.',
     -11:'A train\'s ID is negative.',
     -12:'Negative coordinates are invalid.',
-    -13:'A start predicate has an invalid earliest departure.',
-    -14:'An end predicate has an invalid latest arrival.',
+    -13:'An end predicate has an invalid latest arrival.',
 }
 clingo_err_dict = {
     -1: 'No .lp files given.',
@@ -2213,15 +2212,13 @@ def random_gen_para_to_env():
         env_counter += 1
     except ValueError as e:
         labels['random_gen_status_label'].label.config(
-            text='Cannot fit more than one city in this map',
+            text='Cannot fit more than one city in this map.\n' + \
+                 'Hint: min. dimensions are 18×10 or 10×18.\n' + \
+                 'Tip: reduce Max. num. of rail pairs in cities.',
             fg=bad_status_color,
         )
         frames['random_gen_para_frame'].frame.update()
-        print(f'❌ FLATLAND {e}\nThat probably means your environment is too small. Here are some tips:\n'
-               '   - minimum dim. for generated envs are 18×10 or 10×18\n'
-               '   - to generate small envs, reduce \"Max. number of rail pairs in cities\"\n'
-               '   - you can also build even smaller environments yourself :)'
-               )
+        print(f'❌ FLATLAND is unable to generate environment with provided parameters.\n')
         return
 
     if tracks == -1:

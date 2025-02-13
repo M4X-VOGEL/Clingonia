@@ -122,8 +122,8 @@ def fill_tse(tse_list, pred):
             e_dep = int(start[3])
             dir = start[4]
             if e_dep < 1:
-                print(f"⚠️ start({id},...) Warning: EarliestDeparture < 1 not allowed.")
-                return -13  # Report invalid EarliestDeparture
+                print(f"⚠️ start({id},...) Warning: Earliest dep. < 1 changed to 1.")
+                e_dep = 1
         except ValueError:
             return -4  # Report invalid start
         tse_list.append(["start", id, x, y, e_dep, dir])
@@ -139,8 +139,8 @@ def fill_tse(tse_list, pred):
             y_end, x_end = int(end[1]), int(end[2])
             l_arr = int(end[3])
             if l_arr < 1:
-                print(f"⚠️ end({id},...) Warning: LatestArrival < 1 not allowed.")
-                return -14  # Report invalid LatestArrival
+                print(f"⚠️ end({id},...) Warning: Latest arr. < 1 not allowed.")
+                return -13  # Report invalid LatestArrival
         except ValueError:
             return -5  # Report invalid end
         tse_list.append(["end", id, x_end, y_end, l_arr])
