@@ -887,6 +887,11 @@ class Text:
             self.visibility = True
         return
 
+    def change_text(self, new_text):
+        self.text.config(state='normal')
+        self.text.delete('1.0', tk.END)
+        self.text.insert(tk.END, new_text)
+        self.text.config(state='disabled')
 
 class ToggleSwitch(tk.Canvas):
     def __init__(

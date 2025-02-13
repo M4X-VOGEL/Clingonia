@@ -43,8 +43,7 @@ dark_background_color = '#111214'
 background_color = '#1E1F22'
 canvas_color = '#313338'
 button_color = '#2B2D31'
-blue_active_color = '#5865F2'
-blue_inactive_color = '#4752C4'
+blue_button_color = '#5865F2'
 red_button_color = '#9B0000'
 label_color = '#FFFFFF'
 entry_color = '#383A40'
@@ -63,6 +62,8 @@ golden_color = '#F0B232'
 # state trackers
 build_mode = None
 last_menu = None
+current_act_err_log = None
+show_act_err_logs = False
 last_gif_params = (None, None)
 env_counter = 0
 
@@ -756,7 +757,7 @@ def build_main_menu():
         text='Next: Clingo Solver',
         font=base_font_layout,
         foreground_color=label_color,
-        background_color=blue_active_color,
+        background_color=blue_button_color,
         border_width=0,
         visibility=True,
     )
@@ -1487,6 +1488,9 @@ def random_gen_para_to_start():
     if 'random_gen_para_frame' in frames:
         frames['random_gen_para_frame'].destroy_frame()
         del frames['random_gen_para_frame']
+    if 'random_gen_para_help_frame' in frames:
+        frames['random_gen_para_help_frame'].destroy_frame()
+        del frames['random_gen_para_help_frame']
 
     create_start_menu()
 
@@ -2672,6 +2676,9 @@ def builder_para_to_start():
     if 'builder_para_frame' in frames:
         frames['builder_para_frame'].destroy_frame()
         del frames['builder_para_frame']
+    if 'builder_para_help_frame' in frames:
+        frames['builder_para_help_frame'].destroy_frame()
+        del frames['builder_para_help_frame']
 
     create_start_menu()
 
@@ -3073,7 +3080,7 @@ def build_builder_para_frame():
         text='Build' if build_mode == 'build' else 'Modify',
         font=base_font_layout,
         foreground_color=label_color,
-        background_color=blue_active_color,
+        background_color=blue_button_color,
         border_width=0,
         visibility=True,
     )
@@ -3723,7 +3730,7 @@ def build_track_builder_menu_frame():
         text='Next: Trains',
         font=base_font_layout,
         foreground_color=label_color,
-        background_color=blue_active_color,
+        background_color=blue_button_color,
         border_width=0,
         visibility=True,
     )
@@ -4765,6 +4772,22 @@ def build_result_menu():
         visibility=True,
     )
 
+    buttons['show_error_logs_button'] = Button(
+        root=frames['result_menu_frame'].frame,
+        width=12,
+        height=1,
+        grid_pos=(0, 1),
+        padding=(0, 10),
+        sticky='n',
+        command=show_error_logs,
+        text='ActErr Log',
+        font=base_font_layout,
+        foreground_color=label_color,
+        background_color=blue_button_color,
+        border_width=0,
+        visibility=show_act_err_logs,
+    )
+
     labels['spacing_err_label'] = Label(
         root=frames['result_menu_frame'].frame,
         grid_pos=(0, 2),
@@ -5269,13 +5292,9 @@ def toggle_result_gif():
 
         try:
             if data.startswith('e.g.'):
-                data = None
-                user_params[key] = data
-                continue
+                data = default_params[key]
             elif data == '':
-                data = None
-                user_params[key] = data
-                continue
+                data = default_params[key]
             else:
                 data = float(data)
 
@@ -5299,7 +5318,7 @@ def toggle_result_gif():
             err = 'negativeFrameRate'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
-        if key=='frameRate' and data > 60:
+        elif key=='frameRate' and data > 60:
             err_count += 1
             err = 'tooBigFrameRate'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
@@ -5421,6 +5440,97 @@ def show_next_timestep():
     frames['timestep_pic_container_frame'].frame.update()
     return
 
+def show_error_logs():
+    global current_act_err_log
+
+    frames['result_error_log_frame'] = Frame(
+        root=windows['flatland_window'].window,
+        width=screenwidth * 0.5,
+        height=screenheight,
+        grid_pos=(0, 1),
+        padding=(0, 0),
+        sticky='nesw',
+        background_color=background_color,
+        border_width=0,
+        visibility=True
+    )
+
+    buttons['hide_error_logs_button'] = Button(
+        root=frames['result_error_log_frame'].frame,
+        width=15,
+        height=1,
+        grid_pos=(0, 0),
+        padding=(0, 0),
+        command=hide_error_logs,
+        text='Hide Log',
+        font=base_font_layout,
+        foreground_color=label_color,
+        background_color=button_color,
+        border_width=0,
+        visibility=True,
+    )
+
+    buttons['switch_error_logs_button'] = Button(
+        root=frames['result_error_log_frame'].frame,
+        width=15,
+        height=1,
+        grid_pos=(0, 1),
+        padding=(0, 0),
+        command=switch_error_logs,
+        text='Toggle Details',
+        font=base_font_layout,
+        foreground_color=golden_color,
+        background_color=button_color,
+        border_width=0,
+        visibility=True,
+    )
+
+    with open("data/act_err_min.txt", "r") as file:
+        displaytext = file.read()
+    current_act_err_log = 'min'
+
+    texts['result_error_log_text'] = Text(
+        root=frames['result_error_log_frame'].frame,
+        width=frames['result_error_log_frame'].width,
+        height=frames['result_error_log_frame'].height,
+        grid_pos=(1, 0),
+        padding=(0, 0),
+        sticky='nesw',
+        columnspan=2,
+        text=displaytext,
+        font=help_font_layout,
+        wrap='word',
+        foreground_color=label_color,
+        background_color=dark_background_color,
+        border_width=0,
+        state='disabled',
+        visibility=True,
+    )
+
+    frames['result_error_log_frame'].frame.rowconfigure(0, weight=1)
+    frames['result_error_log_frame'].frame.rowconfigure(1, weight=5)
+    frames['result_error_log_frame'].frame.columnconfigure((0,1), weight=1)
+    frames['result_error_log_frame'].frame.grid_propagate(False)
+
+def switch_error_logs():
+    global current_act_err_log
+
+    if current_act_err_log == 'min':
+        with open("data/act_err.txt", "r") as file:
+            displaytext = file.read()
+        current_act_err_log = 'full'
+    else:
+        with open("data/act_err_min.txt", "r") as file:
+            displaytext = file.read()
+        current_act_err_log = 'min'
+
+    texts['result_error_log_text'].change_text(displaytext)
+
+def hide_error_logs():
+    if 'result_error_log_frame' in frames:
+        frames['result_error_log_frame'].destroy_frame()
+        del frames['result_error_log_frame']
+
 def switch_result_to_main():
     if 'result_viewer_frame' in frames:
         frames['result_viewer_frame'].destroy_frame()
@@ -5482,6 +5592,8 @@ def save_gif():
     shutil.copy2('data/running_tmp.gif', file)
 
 def df_to_timetable_text():
+    global show_act_err_logs
+
     def format_row(idx, line):
         new_line = (f"| {idx:>8} | {line['e_dep']:>8} | {line['a_dep']:>6} | "
                     f"{line['l_arr']:>6} | {line['a_arr']:>6} |")
@@ -5501,6 +5613,7 @@ def df_to_timetable_text():
         if row['start_pos'] != row['end_pos'] and a_dep[index] == a_arr[index] and a_arr[index] == 0:
             a_dep[index] = 'ActErr'
             a_arr[index] = 'ActErr'
+            show_act_err_logs = True
 
     df = pd.DataFrame({
         'e_dep': current_df['e_dep'],

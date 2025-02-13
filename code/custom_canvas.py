@@ -1509,6 +1509,13 @@ class PathListCanvas:
         self.canvas.pack(side='top', padx=self.x, pady=self.y, anchor='nw')
 
     def add_labels(self):
+        colors = [
+            "#d50000", "#c51162", "#aa00ff", "#6200ea", "#304ffe", "#2962ff",
+            "#0091ea", "#00b8d4", "#00bfa5", "#00c853", "#64dd17", "#aeea00",
+            "#ffd600", "#ffab00", "#ff6d00", "#ff3d00", "#5d4037", "#455a64"
+        ]
+        colors = (colors * ((len(self.train_data) // len(colors)) + 1))
+
         for idx, row in self.train_data.iterrows():
             frame = tk.Frame(self.scroll_frame, bg=self.background_color)
             frame.pack(fill='x', pady=5)
@@ -1526,7 +1533,7 @@ class PathListCanvas:
             label = tk.Label(
                 frame,
                 width=20, font=self.font,
-                fg=self.label_color, bg=self.background_color,
+                fg=colors[idx], bg=self.background_color,
                 text=f'Train {idx}: {row["start_pos"]}, {row["dir"]}',
                 anchor='w',
             )
