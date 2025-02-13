@@ -4827,7 +4827,7 @@ def build_result_menu():
         text='Render Animation',
         font=base_font_layout,
         foreground_color=label_color,
-        background_color=button_color,
+        background_color=red_button_color,
         border_width=0,
         visibility=True,
     )

@@ -21,7 +21,7 @@ move(wait).
 % actions
 
 % Generate actions for path
-{ action(train(ID), M, T) : move(M), T = (ED-1)..LA } N :- start(ID, _, ED, _),  end(ID, _, LA), N=LA-ED+2.
+{ action(train(ID), M, T) : move(M), T = (ED-1)..LA } N :- start(ID, _, ED, _),  end(ID, _, LA), N=LA-(ED-1).
 
 % first action
 firstAction(ID, T) :- action(train(ID), _, T), not action(train(ID), _, T-1).
@@ -78,7 +78,7 @@ position(ID, (XN,YN), n, TN) :- position(ID, (XO,YO), w, TO), action(train(ID), 
 :- end(ID, (X,Y), _), not position(ID, (X,Y), _, _).
 
 % no position after latest arrival
-:- end(ID, _, LA), position(ID, _, _,T), T>LA+1.
+:- end(ID, _, LA), position(ID, _, _,T), T>LA.
 
 % no position after reaching endpoint
 :- end(ID, (X,Y), _), position(ID, (X,Y), _, TA), position(ID, _, _, TB), TB>TA.
