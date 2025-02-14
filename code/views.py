@@ -370,7 +370,7 @@ def build_start_menu_frame():
         command=windows['flatland_window'].toggle_fullscreen,
         image='data/png/fullscreen.png',
         foreground_color=label_color,
-        background_color=button_color,
+        background_color=background_color,
         border_width=0,
         visibility=True,
     )
@@ -606,7 +606,7 @@ def build_main_menu():
         command=windows['flatland_window'].toggle_fullscreen,
         image='data/png/fullscreen.png',
         foreground_color=label_color,
-        background_color=button_color,
+        background_color=background_color,
         border_width=0,
         visibility=True,
     )
@@ -3208,6 +3208,8 @@ def builder_para_to_track_grid():
     else:
         current_rows, current_cols = current_array.shape[1:3]
 
+        current_df.reset_index(drop=True, inplace=True)
+
         if (rows,cols) != (current_rows,current_cols):
             if current_rows < rows:
                 # add array rows
@@ -5688,7 +5690,7 @@ def df_to_timetable_text():
     )
     a_arr = current_paths.groupby("trainID")["timestep"].max().tolist()
 
-    for index, row in current_df.iterrows():
+    for index, (_, row) in enumerate(current_df.iterrows()):
         if row['start_pos'] == row['end_pos']:
             a_dep[index] = '--'
             a_arr[index] = '--'
@@ -5751,7 +5753,7 @@ def current_df_to_env_text(mode):
     table_divider = ("|----------|----------------|-----|"
                      "----------------|---------|---------|")
 
-    new_rows = [format_row(index, row) for index, row in current_df.iterrows()]
+    new_rows = [format_row(index, row) for index, (_, row) in enumerate(current_df.iterrows())]
 
     with open('data/info_text.txt', "w") as file:
         file.write(param_divider + '\n')
@@ -5836,12 +5838,13 @@ def load_env_from_file():
     end_pos = list(zip(trains['y_end'], trains['x_end']))
 
     current_df = pd.DataFrame({
+        '': trains['id'],
         'start_pos': start_pos,
         'dir': trains['dir'],
         'end_pos': end_pos,
         'e_dep': trains['e_dep'],
         'l_arr': trains['l_arr']
-    })
+    }).set_index('')
 
 
     direction = {
@@ -5965,5 +5968,5 @@ def get_trains():
         "y_end": y_end,
         "e_dep": current_df['e_dep'],
         "l_arr": current_df['l_arr']
-    })
+    }).reset_index(drop=True)
     return trains

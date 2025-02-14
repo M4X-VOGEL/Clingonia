@@ -839,61 +839,61 @@ class TrainListCanvas:
         for widget in self.scroll_frame.winfo_children():
             widget.destroy()
 
-        for idx, row in self.train_data.iterrows():
+        for index, row in self.train_data.iterrows():
             frame = tk.Frame(self.scroll_frame, bg=self.background_color)
             frame.pack(fill='x', pady=5)
 
-            self.station_dict[idx] = tk.Button(
+            self.station_dict[index] = tk.Button(
                 frame,
                 width=50, height=50,
-                command=lambda index=idx: self.grid.select_station(index),
+                command=lambda i=index: self.grid.select_station(i),
                 image=self.station_img,
                 foreground=self.background_color,
                 background=self.background_color,
                 bd=0
             )
-            self.station_dict[idx].pack(side='left', padx=0)
+            self.station_dict[index].pack(side='left', padx=0)
 
             label = tk.Label(
                 frame,
                 width=25,
                 font=self.font,
                 fg=self.label_color, bg=self.background_color,
-                text=f' Train {idx}:   {row["start_pos"]},  {row["dir"]}',
+                text=f' Train {index}:   {row["start_pos"]},  {row["dir"]}',
                 anchor='w',
             )
             label.pack(side='left', padx=0)
 
             if sys_platform == "Darwin":  # macOS
-                self.config_dict[idx] = tk.Button(
+                self.config_dict[index] = tk.Button(
                     frame,
                     width=12,height=1,
                     font=self.font,
                     fg='#000000', bg='#333333',
-                    text=f'configure {idx}',
-                    command=lambda index=idx: self.open_train_config_frame(index)
+                    text=f'configure {index}',
+                    command=lambda i=index: self.open_train_config_frame(i)
                 )
-                self.config_dict[idx].pack(side='left', padx=5)
+                self.config_dict[index].pack(side='left', padx=5)
             else:  # Window, Linux and other
-                self.config_dict[idx] = tk.Button(
+                self.config_dict[index] = tk.Button(
                     frame,
                     width=12,height=1,
                     font=self.font,
                     fg=self.label_color, bg=self.button_color, bd=0,
-                    text=f'configure {idx}',
-                    command=lambda index=idx: self.open_train_config_frame(index)
+                    text=f'configure {index}',
+                    command=lambda i=index: self.open_train_config_frame(i)
                 )
-                self.config_dict[idx].pack(side='left', padx=5)
+                self.config_dict[index].pack(side='left', padx=5)
 
-            self.remove_dict[idx] = tk.Button(
+            self.remove_dict[index] = tk.Button(
                 frame,
                 width=7, height=1,
                 font=self.font,
                 fg=self.bad_status_color, bg=self.background_color, bd=0,
                 text='remove',
-                command=lambda index=idx: self.remove_train(index)
+                command=lambda i=index: self.remove_train(i)
             )
-            self.remove_dict[idx].pack(side='left', padx=10)
+            self.remove_dict[index].pack(side='left', padx=10)
 
     def on_frame_configure(self, event):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
@@ -1346,7 +1346,7 @@ class ResultCanvas:
             )
 
     def update_paths(self):
-        show_dict = {idx: val for idx, val in enumerate(self.show_list)}
+        show_dict = dict(zip(self.paths_df['trainID'].unique(), self.show_list))
 
         self.show_df = (self.paths_df[self.paths_df['trainID'].map(show_dict)]
                         .copy())
@@ -1386,7 +1386,7 @@ class ResultCanvas:
             "#ffd600", "#ffab00", "#ff6d00", "#ff3d00", "#5d4037", "#455a64"
         ]
         colors = (colors * ((len(self.paths_df) // len(colors)) + 1))
-        train_colors = dict(zip(self.paths_df.index, colors))
+        train_colors = dict(zip(self.paths_df['trainID'].unique(), colors))
 
         for _, row in self.show_df.iterrows():
             self.canvas.create_text(
@@ -1502,24 +1502,24 @@ class PathListCanvas:
         ]
         colors = (colors * ((len(self.train_data) // len(colors)) + 1))
 
-        for idx, row in self.train_data.iterrows():
+        for index, (idx, row) in enumerate(self.train_data.iterrows()):
             frame = tk.Frame(self.scroll_frame, bg=self.background_color)
             frame.pack(fill='x', pady=5)
 
-            self.show_button_dict[idx] = ToggleSwitch(
+            self.show_button_dict[index] = ToggleSwitch(
                 frame,
                 width=70, height=30,
                 on_color=self.on_color, off_color=self.off_color,
                 handle_color=self.handle_color,
                 background_color=self.background_color,
-                command=lambda index=idx: self.toggle_path(index)
+                command=lambda i=index: self.toggle_path(i)
             )
-            self.show_button_dict[idx].pack(side='left', padx=0)
+            self.show_button_dict[index].pack(side='left', padx=0)
 
             label = tk.Label(
                 frame,
                 width=20, font=self.font,
-                fg=colors[idx], bg=self.background_color,
+                fg=colors[index], bg=self.background_color,
                 text=f'Train {idx}: {row["start_pos"]}, {row["dir"]}',
                 anchor='w',
             )
