@@ -37,29 +37,34 @@ def render_gif(tracks, trains, df_pos, env_params, env_counter, output_gif='data
     tmp_dir = "data/tmp_frames"
     os.makedirs(tmp_dir, exist_ok=True)
     # Separate trains into groups
-    groups = {train_id: group.sort_values(by='timestep') 
-              for train_id, group in df_pos.groupby('trainID')}
+    groups = {id: group.sort_values(by='timestep') 
+              for id, group in df_pos.groupby('trainID')}
+    
+    # Mapping to handle custom id settings
+    agent_by_id = {id: agent for id, agent in zip(trains['id'], env.agents)}
     
     # For each timestep
     for t in range(0, max_timestep + 1):
         print(f"{t}", end=" ", flush=True)
         # For each agent
-        for i, agent in enumerate(env.agents):
-            if i in groups:
-                group = groups[i]
-                # Get row with corresponding timestep
-                row = group[group['timestep'] == t]
-                if row.empty:
-                    if env_params["remove"]:
-                        # Remove agents
-                        agent.position = None
-                        agent.direction = None
-                    continue
-                else:
-                    row = row.iloc[0]
-                # Update position and direction
-                agent.position = (int(row['y']), int(row['x']))
-                agent.direction = DIR_MAP[row['dir']]
+        for id, group in groups.items():
+            # Skip ID if there is no agent assigned
+            if id not in agent_by_id:
+                continue
+            agent = agent_by_id[id]
+            # Line of current timestep
+            row = group[group['timestep'] == t]
+            if row.empty:
+                if env_params["remove"]:
+                    # Remove if there data is missing
+                    agent.position = None
+                    agent.direction = None
+                continue
+            else:
+                row = row.iloc[0]
+            # Position and direction
+            agent.position = (int(row['y']), int(row['x']))
+            agent.direction = DIR_MAP[row['dir']]
         
         # Render
         screen_res = calc_gif_resolution(low_quality_mode, env)
