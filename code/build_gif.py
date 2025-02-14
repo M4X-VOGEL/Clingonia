@@ -29,7 +29,7 @@ def render_gif(tracks, trains, df_pos, env_params, env_counter, output_gif='data
         return
     images = []
     print("\nRendering animation...")
-    env = create_custom_env(tracks, trains, env_params)
+    env,_,_,_ = create_custom_env(tracks, trains, env_params)
     # Get max timesteps to determine gif length
     max_timestep = int(df_pos['timestep'].max())
     print(f"{max_timestep+1} Timesteps to render.\nProgress:", end=" ")

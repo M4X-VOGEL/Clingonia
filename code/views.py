@@ -2218,7 +2218,7 @@ def random_gen_para_to_env():
             fg=bad_status_color,
         )
         frames['random_gen_para_frame'].frame.update()
-        print(f'❌ FLATLAND is unable to generate environment with provided parameters.\n')
+        print(f'❌ FLATLAND is unable to generate environment with current parameters.\n')
         return
 
     if tracks == -1:
@@ -4316,10 +4316,37 @@ def builder_train_grid_to_env():
     tracks = current_array[0]
     trains = get_trains()
 
+    prev_agent_count = user_params['agents']
     user_params['agents'] = len(trains)
     
     print("\nBuilding environment...")
-    env = create_custom_env(tracks, trains, user_params)
+    env, trains, invalid_train, invalid_station = create_custom_env(tracks, trains, user_params)
+    if invalid_train is not None:
+        user_params['agents'] = prev_agent_count
+        labels['builder_status_label'].label.config(
+            text=f'Train {invalid_train} not on track',
+            fg=bad_status_color,
+        )
+        frames['train_builder_menu_frame'].frame.update()
+        return
+    if invalid_station is not None:
+        if invalid_station >= 0:
+            user_params['agents'] = prev_agent_count
+            labels['builder_status_label'].label.config(
+                text=f'Station of Train {invalid_station} not on track',
+                fg=bad_status_color,
+            )
+            frames['train_builder_menu_frame'].frame.update()
+            return
+        else:
+            user_params['agents'] = prev_agent_count
+            labels['builder_status_label'].label.config(
+                text=f'Missing Station of Train {-(invalid_station+1)}',
+                fg=bad_status_color,
+            )
+            frames['train_builder_menu_frame'].frame.update()
+            return
+
     env_counter += 1
     os.makedirs("data", exist_ok=True)
     if save_png(env, "data/running_tmp.png", user_params["lowQuality"]) == -1:
@@ -5780,7 +5807,7 @@ def load_env_from_file():
     user_params['agents'] = len(trains)
 
     print("\nBuilding environment...")
-    env = create_custom_env(tracks, trains, user_params)
+    env,_,_,_ = create_custom_env(tracks, trains, user_params)
     env_counter += 1
     os.makedirs("data", exist_ok=True)
     if save_png(env, "data/running_tmp.png") == -1:

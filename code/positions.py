@@ -5,6 +5,80 @@ import subprocess
 from code.clingo_actions import clingo_to_df
 
 invalid_path = None
+# Directional changes - (DirIn, Type): DirOut
+fw_tracks = {
+    # Curves
+    ('n', 4608):  'w',
+    ('e', 4608):  's',
+    ('n', 16386): 'e',
+    ('w', 16386): 's',
+    ('s', 72):    'e',
+    ('w', 72):    'n',
+    ('s', 2064):  'w',
+    ('e', 2064):  'n',
+    # Switches
+    ('e', 37408): 's',
+    ('n', 17411): 'e',
+    ('w', 32872): 'n',
+    ('s', 3089):  'w',
+    ('w', 49186): 's',
+    ('s', 1097):  'e',
+    ('e', 34864): 'n',
+    ('n', 5633):  'w',
+    # Splits
+    ('e', 20994): 's',
+    ('w', 20994): 's',
+    ('n', 16458): 'e',
+    ('s', 16458): 'e',
+    ('e', 2136):  'n',
+    ('w', 2136):  'n',
+    ('n', 6672):  'w',
+    ('s', 6672):  'w'
+}
+
+to_left_tracks = {
+    # Switches
+    ('n', 37408): 'w',
+    ('w', 17411): 's',
+    ('s', 32872): 'e',
+    ('e', 3089): 'n',
+    # Crossings
+    ('n', 38433): 'w',
+    ('w', 50211): 's',
+    ('s', 33897): 'e',
+    ('e', 35889): 'n',
+    ('n', 38505): 'w',
+    ('s', 38505): 'e',
+    ('e', 52275): 'n',
+    ('w', 52275): 's',
+    # Splits
+    ('n', 20994): 'w',
+    ('w', 16458): 's',
+    ('s', 2136): 'e',
+    ('e', 6672): 'n'
+}
+
+to_right_tracks = {
+    # Switches
+    ('n', 49186): 'e',
+    ('w', 1097): 'n',
+    ('s', 34864): 'w',
+    ('e', 5633): 's',
+    # Crossings
+    ('e', 38433): 's',
+    ('n', 50211): 'e',
+    ('w', 33897): 'n',
+    ('s', 35889): 'w',
+    ('e', 38505): 's',
+    ('w', 38505): 'n',
+    ('n', 52275): 'e',
+    ('s', 52275): 'w',
+    # Splits
+    ('n', 20994): 'e',
+    ('w', 16458): 'n',
+    ('s', 2136): 'w',
+    ('e', 6672): 's'
+}
 
 def position_df(tracks, trains, clingo_path, lp_files, answer_number):
     """
@@ -169,7 +243,7 @@ def next_pos(id, x, y, action, dir, tracks):
 
 
 def dir_change(id, x, y, action, dir, tracks):
-    global invalid_path
+    global invalid_path, fw_tracks, to_left_tracks, to_right_tracks
     # Check, if coordinates are valid
     if not (0 <= y < len(tracks) and 0 <= x < len(tracks[0])):
         # Invalid: No dir change: path will be adjusted later
@@ -179,80 +253,6 @@ def dir_change(id, x, y, action, dir, tracks):
 
     track = tracks[y][x]
 
-    # Directional changes - (DirIn, Type): DirOut
-    fw_tracks = {
-        # Curves
-        ('n', 4608):  'w',
-        ('e', 4608):  's',
-        ('n', 16386): 'e',
-        ('w', 16386): 's',
-        ('s', 72):    'e',
-        ('w', 72):    'n',
-        ('s', 2064):  'w',
-        ('e', 2064):  'n',
-        # Switches
-        ('e', 37408): 's',
-        ('n', 17411): 'e',
-        ('w', 32872): 'n',
-        ('s', 3089):  'w',
-        ('w', 49186): 's',
-        ('s', 1097):  'e',
-        ('e', 34864): 'n',
-        ('n', 5633):  'w',
-        # Splits
-        ('e', 20994): 's',
-        ('w', 20994): 's',
-        ('n', 16458): 'e',
-        ('s', 16458): 'e',
-        ('e', 2136):  'n',
-        ('w', 2136):  'n',
-        ('n', 6672):  'w',
-        ('s', 6672):  'w'
-    }
-
-    to_left_tracks = {
-        # Switches
-        ('n', 37408): 'w',
-        ('w', 17411): 's',
-        ('s', 32872): 'e',
-        ('e', 3089): 'n',
-        # Crossings
-        ('n', 38433): 'w',
-        ('w', 50211): 's',
-        ('s', 33897): 'e',
-        ('e', 35889): 'n',
-        ('n', 38505): 'w',
-        ('s', 38505): 'e',
-        ('e', 52275): 'n',
-        ('w', 52275): 's',
-        # Splits
-        ('n', 20994): 'w',
-        ('w', 16458): 's',
-        ('s', 2136): 'e',
-        ('e', 6672): 'n'
-    }
-
-    to_right_tracks = {
-        # Switches
-        ('n', 49186): 'e',
-        ('w', 1097): 'n',
-        ('s', 34864): 'w',
-        ('e', 5633): 's',
-        # Crossings
-        ('e', 38433): 's',
-        ('n', 50211): 'e',
-        ('w', 33897): 'n',
-        ('s', 35889): 'w',
-        ('e', 38505): 's',
-        ('w', 38505): 'n',
-        ('n', 52275): 'e',
-        ('s', 52275): 'w',
-        # Splits
-        ('n', 20994): 'e',
-        ('w', 16458): 'n',
-        ('s', 2136): 'w',
-        ('e', 6672): 's'
-    }
     # Check for the action type, if current track allows direction change
     if action == "move_forward":
         if (dir, track) in fw_tracks:

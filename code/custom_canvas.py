@@ -799,7 +799,7 @@ class TrainListCanvas:
         self.remove_dict = {}
 
         self.station_img = Image.open('data/png/Bahnhof_#d50000.png')
-        self.station_img = self.station_img.resize(size=(50, 50))
+        self.station_img = self.station_img.resize(size=(70, 70))
         self.station_img = ImageTk.PhotoImage(self.station_img)
 
         self.canvas = self.create_canvas()
@@ -859,7 +859,7 @@ class TrainListCanvas:
                 width=25,
                 font=self.font,
                 fg=self.label_color, bg=self.background_color,
-                text=f'Train {idx}:   {row["start_pos"]},  {row["dir"]}',
+                text=f' Train {idx}:   {row["start_pos"]},  {row["dir"]}',
                 anchor='w',
             )
             label.pack(side='left', padx=0)
