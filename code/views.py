@@ -5592,6 +5592,13 @@ def show_error_logs():
         visibility=True,
     )
 
+    scrollbar = tk.Scrollbar(
+        frames['result_error_log_frame'].frame,
+        command=texts['result_error_log_text'].text.yview
+    )
+    texts['result_error_log_text'].text.config(yscrollcommand=scrollbar.set)
+    scrollbar.grid(row=1, column=0, sticky='nes', columnspan=2)
+
     frames['result_error_log_frame'].frame.rowconfigure(0, weight=1)
     frames['result_error_log_frame'].frame.rowconfigure(1, weight=5)
     frames['result_error_log_frame'].frame.columnconfigure((0,1), weight=1)

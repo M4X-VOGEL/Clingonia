@@ -909,6 +909,7 @@ class Text:
         self.text.insert(tk.END, new_text)
         self.text.config(state='disabled')
 
+
 class ToggleSwitch(tk.Canvas):
     def __init__(
             self,
