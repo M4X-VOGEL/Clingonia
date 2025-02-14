@@ -2240,6 +2240,7 @@ def random_gen_para_to_env():
 
     try:
         tracks, trains = gen_env(user_params, user_params['lowQuality'])
+        delete_tmp_frames()
         env_counter += 1
     except ValueError as e:
         labels['random_gen_status_label'].label.config(
@@ -4407,7 +4408,8 @@ def builder_train_grid_to_env():
         'e_dep': trains['e_dep'],
         'l_arr': trains['l_arr']
     })
-
+    
+    delete_tmp_frames()
     env_counter += 1
     os.makedirs("data", exist_ok=True)
     if save_png(env, "data/running_tmp.png", user_params["lowQuality"]) == -1:
@@ -5877,6 +5879,7 @@ def load_env_from_file():
 
     print("\nBuilding environment...")
     env,_,_,_ = create_custom_env(tracks, trains, user_params)
+    delete_tmp_frames()
     env_counter += 1
     os.makedirs("data", exist_ok=True)
     if save_png(env, "data/running_tmp.png") == -1:

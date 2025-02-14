@@ -152,6 +152,7 @@ def create_custom_env(tracks, trains, params):
         # Redirect improperly oriented trains on tracks
         elif (dir, train_track) in dir_replacement:
             dir = dir_replacement[(dir, train_track)]
+            print(f"⚠️ Train {i} at ({row_init},{col_init}): Invalid orientation corrected.")
         trains.loc[i, 'dir'] = dir
         agent.direction = DIR_MAP[dir]
         agent.initial_direction = agent.direction
