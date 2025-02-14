@@ -255,6 +255,7 @@ def build_flatland_window():
     windows['flatland_window'].window.columnconfigure((0, 1), weight=1)
 
 def start_flatland():
+    print('Info: Launch was successful.')
     windows['flatland_window'].run()
 
 def create_start_menu():

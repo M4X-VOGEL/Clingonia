@@ -111,7 +111,9 @@ class EnvCanvas:
         self.y_offset += dy
         self.pan_start = (event.x, event.y)
 
-        self.draw_image()
+        self.canvas.move("env_image", dx, dy)
+        self.canvas.move("grid_line", dx, dy)
+        self.canvas.move("grid_label", dx, dy)
 
     def draw_mouse_symbols(self, event):
         adjusted_x = (event.x - self.x_offset) / self.scale
@@ -159,7 +161,8 @@ class EnvCanvas:
                 self.x_offset,
                 self.y_offset,
                 anchor="nw",
-                image=self.display_image
+                image=self.display_image,
+                tags='env_image'
             )
         else:
             self.canvas.itemconfig(self.canvas_image,image=self.display_image)
@@ -1230,8 +1233,10 @@ class ResultCanvas:
         self.y_offset += dy
         self.pan_start = (event.x, event.y)
 
-        self.draw_image()
-        self.draw_paths()
+        self.canvas.move("env_image", dx, dy)
+        self.canvas.move("grid_line", dx, dy)
+        self.canvas.move("grid_label", dx, dy)
+        self.canvas.move("path_labels", dx, dy)
 
     def draw_mouse_symbols(self, event):
         adjusted_x = (event.x - self.x_offset) / self.scale
@@ -1279,7 +1284,8 @@ class ResultCanvas:
                 self.x_offset,
                 self.y_offset,
                 anchor="nw",
-                image=self.display_image
+                image=self.display_image,
+                tags='env_image',
             )
         else:
             self.canvas.itemconfig(self.canvas_image, image=self.display_image)
