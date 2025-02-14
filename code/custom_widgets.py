@@ -22,19 +22,22 @@ class Window:
 
         self.window = self.create_window()
 
+        self.window.update_idletasks()
+
+        self.screenwidth = self.window.winfo_screenwidth()
+        self.screenheight = self.window.winfo_screenheight()
+
+        if self.fullscreen:
+            self.window.attributes("-fullscreen", self.fullscreen)
+        elif self.width is None and self.height is None:
+            self.window.geometry(f"{self.screenwidth//2}x{self.screenheight//2}")
+        else:
+            self.window.geometry(f"{self.width}x{self.height}")
+
     def create_window(self):
         window = tk.Tk()
         window.title(self.title)
         window.configure(bg=self.background_color)
-
-        if self.fullscreen is False:
-            if self.width is None and self.height is None:
-                window.geometry(f"500x500")
-            else:
-                window.geometry(f"{self.width}x{self.height}")
-        else:
-            window.attributes("-fullscreen", self.fullscreen)
-
         return window
 
     def close_window(self):
@@ -42,6 +45,12 @@ class Window:
 
     def run(self):
         self.window.mainloop()
+
+    def toggle_fullscreen(self):
+        self.fullscreen = not self.fullscreen
+        self.window.attributes("-fullscreen", self.fullscreen)
+        if not self.fullscreen:
+            self.window.geometry(f"{self.screenwidth//2}x{self.screenheight//2}")
 
 
 class Frame:

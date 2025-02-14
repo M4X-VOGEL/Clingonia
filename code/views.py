@@ -360,6 +360,21 @@ def build_start_menu_frame():
         visibility=True,
     )
 
+    buttons['start_toggle_fullscreen_button'] = Button(
+        root=frames['start_menu_frame'].frame,
+        width=60,
+        height=60,
+        grid_pos=(0, 1),
+        padding=(5, 5),
+        sticky='nw',
+        command=windows['flatland_window'].toggle_fullscreen,
+        image='data/png/fullscreen.png',
+        foreground_color=label_color,
+        background_color=button_color,
+        border_width=0,
+        visibility=True,
+    )
+
     buttons['exit_button'] = Button(
         root=frames['start_menu_frame'].frame,
         width=160,
@@ -577,6 +592,21 @@ def build_main_menu():
         image='data/png/info.png',
         foreground_color=label_color,
         background_color=background_color,
+        border_width=0,
+        visibility=True,
+    )
+
+    buttons['main_toggle_fullscreen_button'] = Button(
+        root=frames['main_menu_frame'].frame,
+        width=60,
+        height=60,
+        grid_pos=(0, 1),
+        padding=(5, 5),
+        sticky='nw',
+        command=windows['flatland_window'].toggle_fullscreen,
+        image='data/png/fullscreen.png',
+        foreground_color=label_color,
+        background_color=button_color,
         border_width=0,
         visibility=True,
     )
