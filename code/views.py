@@ -4297,7 +4297,8 @@ def toggle_builder_train_help():
 
 def builder_train_grid_to_env():
     global current_img, current_builder_backup_array, current_builder_backup_df, \
-        current_modify_backup_array, current_modify_backup_df, env_counter
+        current_modify_backup_array, current_modify_backup_df, env_counter, \
+        current_df
 
     if len(current_df) == 0:
         labels['builder_status_label'].label.config(
@@ -4318,7 +4319,7 @@ def builder_train_grid_to_env():
 
     prev_agent_count = user_params['agents']
     user_params['agents'] = len(trains)
-    
+
     print("\nBuilding environment...")
     env, trains, invalid_train, invalid_station = create_custom_env(tracks, trains, user_params)
     if invalid_train is not None:
@@ -4346,6 +4347,33 @@ def builder_train_grid_to_env():
             )
             frames['train_builder_menu_frame'].frame.update()
             return
+    if current_df['e_dep'].isin([-1]).any():
+        user_params['agents'] = prev_agent_count
+        labels['builder_status_label'].label.config(
+            text='A train has no earliest departure',
+            fg=bad_status_color,
+        )
+        frames['train_builder_menu_frame'].frame.update()
+        return
+    elif current_df['l_arr'].isin([-1]).any():
+        user_params['agents'] = prev_agent_count
+        labels['builder_status_label'].label.config(
+            text='A train has no latest arrival',
+            fg=bad_status_color,
+        )
+        frames['train_builder_menu_frame'].frame.update()
+        return
+
+    start_pos = list(zip(trains['y'], trains['x']))
+    end_pos = list(zip(trains['y_end'], trains['x_end']))
+
+    current_df = pd.DataFrame({
+        'start_pos': start_pos,
+        'dir': trains['dir'],
+        'end_pos': end_pos,
+        'e_dep': trains['e_dep'],
+        'l_arr': trains['l_arr']
+    })
 
     env_counter += 1
     os.makedirs("data", exist_ok=True)
