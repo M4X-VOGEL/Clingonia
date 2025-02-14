@@ -29,8 +29,10 @@ class Window:
 
         if self.fullscreen:
             self.window.attributes("-fullscreen", self.fullscreen)
-        elif self.width is None and self.height is None:
-            self.window.geometry(f"{self.screenwidth//2}x{self.screenheight//2}")
+        elif self.width is None or self.height is None:
+            self.window.geometry(
+                f"{self.screenwidth//2}x{self.screenheight//2}"
+            )
         else:
             self.window.geometry(f"{self.width}x{self.height}")
 
@@ -50,7 +52,12 @@ class Window:
         self.fullscreen = not self.fullscreen
         self.window.attributes("-fullscreen", self.fullscreen)
         if not self.fullscreen:
-            self.window.geometry(f"{self.screenwidth//2}x{self.screenheight//2}")
+            if self.width is None or self.height is None:
+                self.window.geometry(
+                    f"{self.screenwidth // 2}x{self.screenheight // 2}"
+                )
+            else:
+                self.window.geometry(f"{self.width}x{self.height}")
 
 
 class Frame:
