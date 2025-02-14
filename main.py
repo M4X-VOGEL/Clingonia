@@ -4,7 +4,6 @@ def main():
     initial_import_authorization()
     initial_render_authorization()
     start_clingonia()
-    print('Info: Launch was successful.')
 
 
 def initial_import_authorization():
