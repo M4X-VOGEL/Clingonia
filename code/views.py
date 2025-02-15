@@ -2269,6 +2269,17 @@ def random_gen_para_to_env():
         frames['random_gen_para_frame'].frame.update()
         return
 
+    if np.isin(tracks, [8192,4,128,256]).any():
+        labels['random_gen_status_label'].label.config(
+            text='Flatland generated a faulty environment\n'
+                 'Please try a different seed or parameter combination',
+            fg=bad_status_color,
+            anchor="w",
+            justify="left",
+        )
+        frames['random_gen_para_frame'].frame.update()
+        return
+
     if len(trains):
         start_pos = list(zip(trains['x'], trains['y']))
         end_pos = list(zip(trains['x_end'], trains['y_end']))
@@ -2362,10 +2373,10 @@ def build_random_gen_env_menu():
         padding=(0, 0),
         sticky='n',
         command=switch_random_gen_to_main,
-        text='Return To Main Menu',
+        text='Confirm',
         font=base_font_layout,
         foreground_color=label_color,
-        background_color=button_color,
+        background_color=blue_button_color,
         border_width=0,
         visibility=True,
     )
@@ -4499,10 +4510,10 @@ def build_builder_env_menu():
         padding=(0, 0),
         sticky='n',
         command=switch_builder_to_main,
-        text='Return To Main Menu',
+        text='Confirm',
         font=base_font_layout,
         foreground_color=label_color,
-        background_color=button_color,
+        background_color=blue_button_color,
         border_width=0,
         visibility=True,
     )
