@@ -850,7 +850,7 @@ def build_main_menu_load_info_frame():
         text='Confirm',
         font=base_font_layout,
         foreground_color=label_color,
-        background_color=button_color,
+        background_color=blue_button_color,
         border_width=0,
         visibility=True,
     )
