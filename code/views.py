@@ -10,7 +10,7 @@ from code.files import save_env, delete_tmp_lp, delete_tmp_png, delete_tmp_gif, 
 from code.gen_png import gen_env
 from code.load_env import load_env
 from code.positions import position_df
-from code.build_gif import render_gif
+from code.build_gif import render_gif, render_time_prediction
 
 
 # Platform: 
@@ -213,6 +213,11 @@ current_array = np.zeros((3, 40, 40), dtype=int)
 current_builder_backup_array = current_array.copy()
 current_modify_backup_array = current_array.copy()
 
+# Positions DataFrame
+pos_df = pd.DataFrame(
+    columns=["trainID", "x", "y", "dir", "timestep"]
+)
+
 # Trains Dataframe
 current_df = pd.DataFrame(
     columns=['start_pos', 'dir', 'end_pos', 'e_dep', 'l_arr']
@@ -223,7 +228,7 @@ current_modify_backup_df = current_df.copy()
 # Environment image and gif
 current_img = None
 current_gif = None
-current_timestep = 0
+current_timestep = None
 
 # Train Paths Dataframe
 current_paths = pd.DataFrame()
@@ -4832,6 +4837,8 @@ def build_result_env_viewer():
     frames['result_viewer_frame'].frame.grid_propagate(False)
 
 def build_result_menu():
+    global pos_df
+
     frames['result_menu_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -4903,6 +4910,11 @@ def build_result_menu():
         visibility=True,
     )
 
+    min_t = int(pos_df['timestep'].min())
+    max_t = int(pos_df['timestep'].max())
+    timesteps = max_t - min_t + 1
+    cells = user_params['rows'] * user_params['cols']
+    render_time = render_time_prediction(timesteps, cells)
     buttons['show_gif_button'] = Button(
         root=frames['result_menu_frame'].frame,
         width=25,
@@ -4911,7 +4923,7 @@ def build_result_menu():
         padding=(0, 0),
         sticky='nwe',
         command=toggle_result_gif,
-        text='Render Animation',
+        text=f'Render Animation (~{render_time})',
         font=base_font_layout,
         foreground_color=label_color,
         background_color=red_button_color,
@@ -5219,6 +5231,10 @@ def build_result_gif_frame():
     frames['result_gif_frame'].frame.grid_propagate(False)
 
 def build_timestep_viewer_frame():
+    global pos_df
+    min_timestep = int(pos_df['timestep'].min())
+    timestep_file_format = str(min_timestep).zfill(4)
+
     frames['timestep_viewer_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=frames['result_gif_frame'].width ,
@@ -5254,7 +5270,7 @@ def build_timestep_viewer_frame():
         background_color=canvas_color,
         grid_color=background_color,
         border_width=0,
-        image='data/tmp_frames/frame_0000.png',
+        image=f'data/tmp_frames/frame_{timestep_file_format}.png',
         rows=user_params['rows'],
         cols=user_params['cols'],
     )
@@ -5279,7 +5295,7 @@ def build_timestep_viewer_frame():
         root=frames['timestep_viewer_frame'].frame,
         grid_pos=(1, 1),
         padding=(5, 5),
-        text='0',
+        text=str(min_timestep),
         font=base_font_layout,
         foreground_color=label_color,
         background_color=background_color,
@@ -5486,19 +5502,24 @@ def toggle_timestep_viewer():
         build_timestep_viewer_frame()
 
 def show_previous_timestep():
-    global current_timestep
+    global current_timestep, pos_df
 
     frame_list = []
 
     for file in os.listdir('data/tmp_frames'):
         frame_list.append(file)
 
-    if current_timestep == 0:
-        current_timestep = len(frame_list) - 1
+    min_t = int(pos_df['timestep'].min())
+    max_t = int(pos_df['timestep'].max())
+    if current_timestep is None:
+        current_timestep = min_t
+    
+    if current_timestep == min_t:
+        current_timestep = max_t
     else:
         current_timestep -= 1
 
-    pic = f'data/tmp_frames/{frame_list[current_timestep]}'
+    pic = f'data/tmp_frames/{frame_list[current_timestep-min_t]}'
 
     canvases['timestep_pic'].image = canvases['timestep_pic'].get_image(pic)
     canvases['timestep_pic'].draw_image()
@@ -5507,19 +5528,23 @@ def show_previous_timestep():
     return
 
 def show_next_timestep():
-    global current_timestep
+    global current_timestep, pos_df
 
     frame_list = []
 
     for file in os.listdir('data/tmp_frames'):
         frame_list.append(file)
 
-    if current_timestep < len(frame_list)-1:
+    min_t = int(pos_df['timestep'].min())
+    if current_timestep is None:
+        current_timestep = min_t
+    
+    if current_timestep-min_t < len(frame_list)-1:
         current_timestep += 1
     else:
-        current_timestep = 0
+        current_timestep = min_t
 
-    pic = f'data/tmp_frames/{frame_list[current_timestep]}'
+    pic = f'data/tmp_frames/{frame_list[current_timestep-min_t]}'
 
     canvases['timestep_pic'].image = canvases['timestep_pic'].get_image(pic)
     canvases['timestep_pic'].draw_image()
@@ -5955,14 +5980,15 @@ def run_simulation():
     return 0
 
 def calc_paths(tracks, trains):
-    df_pos = position_df(
+    global pos_df
+    pos_df = position_df(
         tracks,
         trains,
         user_params['clingo'],
         user_params['lpFiles'] + ['data/running_tmp.lp'],
         user_params['answer']
     )
-    return df_pos
+    return pos_df
 
 def get_trains():
     x = [t[1] for t in current_df['start_pos']]
