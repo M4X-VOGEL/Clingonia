@@ -4349,6 +4349,7 @@ def builder_train_grid_to_env():
     global current_img, current_builder_backup_array, current_builder_backup_df, \
         current_modify_backup_array, current_modify_backup_df, env_counter, \
         current_df
+    print("\nBuilding environment...")
 
     if len(current_df) == 0:
         labels['builder_status_label'].label.config(
@@ -4356,6 +4357,7 @@ def builder_train_grid_to_env():
             fg=bad_status_color,
         )
         frames['train_builder_menu_frame'].frame.update()
+        print(f"❌ Environment needs at least one train.")
         return
     else:
         labels['builder_status_label'].label.config(
@@ -4370,7 +4372,6 @@ def builder_train_grid_to_env():
     prev_agent_count = user_params['agents']
     user_params['agents'] = len(trains)
 
-    print("\nBuilding environment...")
     env, trains, invalid_train, invalid_station = create_custom_env(tracks, trains, user_params)
     if invalid_train is not None:
         user_params['agents'] = prev_agent_count
@@ -4404,6 +4405,7 @@ def builder_train_grid_to_env():
             fg=bad_status_color,
         )
         frames['train_builder_menu_frame'].frame.update()
+        print(f"❌ All trains must be fully configured.")
         return
     elif current_df['l_arr'].isin([-1]).any():
         user_params['agents'] = prev_agent_count
