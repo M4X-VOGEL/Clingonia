@@ -59,7 +59,7 @@ class EnvCanvas:
         self.canvas.bind("<Leave>", self.remove_mouse_symbols)
         self.canvas.bind("<Motion>", self.draw_mouse_symbols)
 
-        self.root.after(10, self.initial_zoom)
+        self.root.after(100, self.initial_zoom)
 
     def create_canvas(self):
         canvas = tk.Canvas(
@@ -149,6 +149,11 @@ class EnvCanvas:
     def draw_image(self):
         width = int(self.cols * self.cell_size * self.scale)
         height = int(self.rows * self.cell_size * self.scale)
+
+        if width <= 0 or height <= 0:
+            self.root.after(100, self.initial_zoom)
+            return
+
         self.display_image = ImageTk.PhotoImage(
             self.image.resize((width, height))
         )
@@ -322,7 +327,7 @@ class BuildCanvas:
             'w': 4,
         }
 
-        self.root.after(10, self.calculate_initial_pos)
+        self.root.after(100, self.calculate_initial_pos)
 
     def create_canvas(self):
         canvas = tk.Canvas(
@@ -1174,7 +1179,7 @@ class ResultCanvas:
         self.canvas.bind("<Leave>", self.remove_mouse_symbols)
         self.canvas.bind("<Motion>", self.draw_mouse_symbols)
 
-        self.root.after(10, self.initial_zoom)
+        self.root.after(100, self.initial_zoom)
 
         self.paths_df = paths_df
         self.show_df = pd.DataFrame(
@@ -1272,6 +1277,11 @@ class ResultCanvas:
     def draw_image(self):
         width = int(self.cols * self.cell_size * self.scale)
         height = int(self.rows * self.cell_size * self.scale)
+
+        if width <= 0 or height <= 0:
+            self.root.after(100, self.initial_zoom)
+            return
+
         self.display_image = ImageTk.PhotoImage(
             self.image.resize((width, height))
         )
