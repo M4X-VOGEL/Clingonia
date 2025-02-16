@@ -72,6 +72,7 @@ env_counter = 0
 # Widget handlers
 windows, frames, buttons, labels = {}, {}, {}, {}
 canvases, entry_fields, pictures, texts = {}, {}, {}, {}
+scroll_bars = {}
 
 
 # Parameter Dictionaries
@@ -5374,6 +5375,9 @@ def toggle_result_help():
     if ('result_gif_frame' in frames and 
             frames['result_gif_frame'].visibility):
         frames['result_gif_frame'].toggle_visibility()
+
+    if ('timestep_viewer_frame' in frames and
+            frames['timestep_viewer_frame'].visibility):
         frames['timestep_viewer_frame'].toggle_visibility()
         
     if 'result_help_frame' in frames:
@@ -5622,10 +5626,10 @@ def show_error_logs():
     )
 
     with open("data/act_err_min.txt", "r") as file:
-        displaytext = file.read()
+        min_displaytext = file.read()
     current_act_err_log = 'min'
 
-    texts['result_error_log_text'] = Text(
+    texts['result_min_error_log_text'] = Text(
         root=frames['result_error_log_frame'].frame,
         width=frames['result_error_log_frame'].width,
         height=frames['result_error_log_frame'].height,
@@ -5633,7 +5637,7 @@ def show_error_logs():
         padding=(0, 0),
         sticky='nesw',
         columnspan=2,
-        text=displaytext,
+        text=min_displaytext,
         font=help_font_layout,
         wrap='word',
         foreground_color=label_color,
@@ -5643,12 +5647,45 @@ def show_error_logs():
         visibility=True,
     )
 
-    scrollbar = tk.Scrollbar(
+    scroll_bars['min_err_log'] = tk.Scrollbar(
         frames['result_error_log_frame'].frame,
-        command=texts['result_error_log_text'].text.yview
+        command=texts['result_min_error_log_text'].text.yview
     )
-    texts['result_error_log_text'].text.config(yscrollcommand=scrollbar.set)
-    scrollbar.grid(row=1, column=0, sticky='nes', columnspan=2)
+    texts['result_min_error_log_text'].text.config(
+        yscrollcommand=scroll_bars['min_err_log'].set
+    )
+    scroll_bars['min_err_log'].grid(
+        row=1, column=0, sticky='nes', columnspan=2
+    )
+
+    with open("data/act_err.txt", "r") as file:
+        full_displaytext = file.read()
+
+    texts['result_full_error_log_text'] = Text(
+        root=frames['result_error_log_frame'].frame,
+        width=frames['result_error_log_frame'].width,
+        height=frames['result_error_log_frame'].height,
+        grid_pos=(1, 0),
+        padding=(0, 0),
+        sticky='nesw',
+        columnspan=2,
+        text=full_displaytext,
+        font=help_font_layout,
+        wrap='word',
+        foreground_color=label_color,
+        background_color=dark_background_color,
+        border_width=0,
+        state='disabled',
+        visibility=False,
+    )
+
+    scroll_bars['full_err_log'] = tk.Scrollbar(
+        frames['result_error_log_frame'].frame,
+        command=texts['result_full_error_log_text'].text.yview
+    )
+    texts['result_full_error_log_text'].text.config(
+        yscrollcommand=scroll_bars['full_err_log'].set
+    )
 
     frames['result_error_log_frame'].frame.rowconfigure(0, weight=1)
     frames['result_error_log_frame'].frame.rowconfigure(1, weight=5)
@@ -5659,20 +5696,31 @@ def switch_error_logs():
     global current_act_err_log
 
     if current_act_err_log == 'min':
-        with open("data/act_err.txt", "r") as file:
-            displaytext = file.read()
+        texts['result_full_error_log_text'].place_text()
+        scroll_bars['full_err_log'].grid(
+            row=1, column=0, sticky='nes', columnspan=2
+        )
+        texts['result_min_error_log_text'].hide_text()
+        scroll_bars['min_err_log'].grid_forget()
         current_act_err_log = 'full'
     else:
-        with open("data/act_err_min.txt", "r") as file:
-            displaytext = file.read()
+        texts['result_min_error_log_text'].place_text()
+        scroll_bars['min_err_log'].grid(
+            row=1, column=0, sticky='nes', columnspan=2
+        )
+        texts['result_full_error_log_text'].hide_text()
+        scroll_bars['full_err_log'].grid_forget()
         current_act_err_log = 'min'
-
-    texts['result_error_log_text'].change_text(displaytext)
 
 def hide_error_logs():
     if 'result_error_log_frame' in frames:
-        frames['result_error_log_frame'].destroy_frame()
-        del frames['result_error_log_frame']
+        frames['result_error_log_frame'].toggle_visibility()
+        frames['result_error_log_frame'].frame.rowconfigure(0, weight=1)
+        frames['result_error_log_frame'].frame.rowconfigure(1, weight=5)
+        frames['result_error_log_frame'].frame.columnconfigure((0, 1), weight=1)
+        frames['result_error_log_frame'].frame.grid_propagate(False)
+    else:
+        show_error_logs()
 
 def switch_result_to_main():
     if 'result_viewer_frame' in frames:
@@ -5693,6 +5741,9 @@ def switch_result_to_main():
     if 'timestep_viewer_frame' in frames:
         frames['timestep_viewer_frame'].destroy_frame()
         del frames['timestep_viewer_frame']
+    if 'result_error_log_frame' in frames:
+        frames['result_error_log_frame'].destroy_frame()
+        del frames['result_error_log_frame']
 
     create_main_menu()
 
