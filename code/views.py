@@ -65,6 +65,7 @@ last_menu = None
 current_act_err_log = None
 show_act_err_logs = False
 last_gif_params = (None, None)
+last_solve_params = (None, None, [])
 env_counter = 0
 
 
@@ -1288,6 +1289,8 @@ def switch_clingo_para_to_main():
     create_main_menu()
 
 def switch_clingo_para_to_result():
+    global last_solve_params
+
     if save_clingo_params() == -1:
         return
 
@@ -1305,36 +1308,44 @@ def switch_clingo_para_to_result():
         frames['clingo_para_frame'].frame.update()
         return
 
-    sim_result = run_simulation()
 
-    if sim_result:
-        if sim_result == -5:
-            answer_err = (clingo_err_dict[sim_result] +
-                                           f'{user_params["answer"]}')
-            labels['clingo_status_label'].label.config(
-                text=answer_err,
-                fg=bad_status_color,
-            )
-        else:
-            labels['clingo_status_label'].label.config(
-                text=clingo_err_dict[sim_result],
-                fg=bad_status_color,
-            )
-        frames['clingo_para_frame'].frame.update()
-        return
-    else:
-        if 'clingo_para_frame' in frames:
-            frames['clingo_para_frame'].destroy_frame()
-            del frames['clingo_para_frame']
-        if 'clingo_help_frame' in frames:
-            frames['clingo_help_frame'].destroy_frame()
-            del frames['clingo_help_frame']
-        if 'main_menu_env_viewer_frame' in frames:
-            frames['main_menu_env_viewer_frame'].destroy_frame()
-            del frames['main_menu_env_viewer_frame']
 
-        df_to_timetable_text()
-        create_result_menu()
+    current_solve_params = (
+        env_counter, user_params['answer'], user_params['lpFiles']
+    )
+
+    if last_solve_params != current_solve_params:
+        last_solve_params = current_solve_params
+        sim_result = run_simulation()
+
+        if sim_result:
+            if sim_result == -5:
+                answer_err = (clingo_err_dict[sim_result] +
+                                               f'{user_params["answer"]}')
+                labels['clingo_status_label'].label.config(
+                    text=answer_err,
+                    fg=bad_status_color,
+                )
+            else:
+                labels['clingo_status_label'].label.config(
+                    text=clingo_err_dict[sim_result],
+                    fg=bad_status_color,
+                )
+            frames['clingo_para_frame'].frame.update()
+            return
+
+    if 'clingo_para_frame' in frames:
+        frames['clingo_para_frame'].destroy_frame()
+        del frames['clingo_para_frame']
+    if 'clingo_help_frame' in frames:
+        frames['clingo_help_frame'].destroy_frame()
+        del frames['clingo_help_frame']
+    if 'main_menu_env_viewer_frame' in frames:
+        frames['main_menu_env_viewer_frame'].destroy_frame()
+        del frames['main_menu_env_viewer_frame']
+
+    df_to_timetable_text()
+    create_result_menu()
 
 def reload_main_env_viewer():
     if 'main_menu_env_viewer_frame' in frames:
