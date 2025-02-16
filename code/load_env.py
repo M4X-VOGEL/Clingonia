@@ -11,6 +11,8 @@ valid_tracks = [
     20994, 16458, 2136, 6672  # Type 6
 ]
 
+dead_ends = [8192, 4, 128, 256]
+
 def load_env(lp_file):
     """Extracts a list of tracks and a DataFrame with train-info from a .lp-file.
     
@@ -83,7 +85,9 @@ def add_cell(df_tracks, pred):
             print(f"⚠️ Warning: Negative coordinates are not allowed.")
             return -12  # Report cells with negative coordinates
         track = int(cell[2].strip())
-        if track not in valid_tracks:
+        if track in dead_ends:
+            return -14  # Report dead end
+        elif track not in valid_tracks:
             track = 0  # Remove track and provide empty cell
             print(f"⚠️ cell(({y},{x}),_) Warning: Invalid track type was replaced by 0.")
     except ValueError:
