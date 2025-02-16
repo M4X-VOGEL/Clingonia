@@ -99,13 +99,15 @@ Once an encoding or set of encodings has been developed that produces valid path
 
 Valid predicates are:
 - `train(ID).`
-- `start(ID,(X,Y),Dep,Dir).`
-- `end(ID,(X,Y),Arr).`
+- `start(ID,(X,Y),Earliest_Dep,Dir).`
+- `end(ID,(X,Y),Latest_Arr).`
 - `cell((X,Y),Track).`
 
 Keep in mind:
 - `row=X`
 - `col=Y`
+- Earliest_Dep is the earliest timestep a train moves away from its starting position, with the train always spawning one timestep prior.
+
 
 <br>
 
@@ -131,6 +133,11 @@ If you encounter unexpected issues, please report them right away. Your input is
 - Users may experience decreased responsiveness when zooming in closely on environments.
 - Our example `ASP` code for solving environments is provided for reference and simple environments. It is not flawless. We recommend using your own implementation for optimal results.
 - On macOS, text input fields might not appear immediately upon loading the page. Interacting with a control, such as clicking "Advanced Options," should reveal them.
+- The following parameters currently have no impact on Clingo and may be enhanced in the future by upcoming students:
+        - Speed ratio map
+        - Malfunction rate
+        - Min. duration for malfunctions
+        - Max. duration for malfunctions
 
 <br>
 

@@ -18,8 +18,9 @@ Overview of departure and arrival times. The table displays the earliest departu
 ----------------
 Render Animation
 ----------------
-Generate an animated GIF of the solution within the estimated render time on the button. 
-> Setting:
+Generate an animated GIF of the solution.
+The estimated render time is on the button. 
+> Settings:
     - GIF Timesteps/sec: Set the frame rate of the animation.
     - GIF Low Quality Mode: Lower resolution to significantly reduce the GIF file size.
 
