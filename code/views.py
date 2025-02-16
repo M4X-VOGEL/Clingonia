@@ -196,10 +196,11 @@ loading_err_dict = {
     -7: 'A train has no start or end predicate.',
     -8: 'A train starts or ends on an invalid cell.',
     -9: 'A train\'s latest arr. is earlier than its earliest dep.',
-    -10:'Incomplete grid: Missing cell predicates.',
-    -11:'A train\'s ID is negative.',
-    -12:'Negative coordinates are invalid.',
-    -13:'An end predicate has an invalid latest arrival.',
+    -10: 'Incomplete grid: Missing cell predicates.',
+    -11: 'A train\'s ID is negative.',
+    -12: 'Negative coordinates are invalid.',
+    -13: 'An end predicate has an invalid latest arrival.',
+    -14: 'No dead ends allowed in the environment.'
 }
 clingo_err_dict = {
     -1: 'No .lp files given.',
