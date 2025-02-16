@@ -1,36 +1,56 @@
-            |------------|
-            |   Result   |
-            |------------|
+|------------|
+|   Result   |
+|------------|
 
 
 
-Toggle Time Table
------------------
-This will show a table with the train IDs their earliest departure and latest arrival setting and when they actually departed and arrived.
-If ActErr appears, it signifies that Clingo's suggested actions failed to guide the train to its intended destination. Consequently, only a spawn move will be executed for that train.
+View detailed insights into your simulation results: multiple views and controls for thorough analysis of Clingo's output. This page always opens with the "Toggle All Paths" View.
 
 
 
-Toggle Gif
 ----------
-This will display an animated gif of the train movements.
+Time Table
+----------
+Overview of departure and arrival times. The table displays the earliest departure, actual departure, latest arrival, and actual arrival times for each train.
 
 
 
-Toggle All Paths
------------------
-This will show or hide all train paths
-
-
-
-Show/Hide
----------
-Here you can show or hide specific train paths
-
-
-
-Don't Derail Now!
 ----------------
+Render Animation
+----------------
+Generate an animated GIF of the solution within the estimated render time on the button. 
+> Setting:
+    - GIF Timesteps/sec: Set the frame rate of the animation.
+    - GIF Low Quality Mode: Lower resolution to significantly reduce the GIF file size.
+
+After initiating the render, please monitor the terminal for progress. 
+
+Once complete, the GIF animation will be displayed.
+Under the animation, two additional buttons will appear:
+    - Save GIF: Save the animation as a file.
+    - Toggle View: Switch to the manual frame-by-frame view for detailed analysis.
+
+
+
+----------------
+Toggle All Paths
+----------------
+The button, along with its associated list below, allows you to see the individual numbered train paths along with its start coordinates and orientation. The number in the cell represents the timestep on which the train occupies the cell.
+
+Clicking the "Toggle All Paths" Button will either show all numbered paths or hide them.
+
+
+
+-------------------
+Return To Main Menu
+-------------------
+This will bring you back to the Main Menu. Please note: To get back onto the Results page, you must run the simulation again.
+
+
+
+-----------------
+Don't Derail Now!
+-----------------
 However, when you've enjoyed the ride,
 it's time to pull the brakes.
 At any time, you may exit the program

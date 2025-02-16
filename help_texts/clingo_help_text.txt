@@ -1,37 +1,46 @@
-            |-----------------------|
-            |   Clingo Parameters   |
-            |-----------------------|
+|-------------------|
+|   Clingo Solver   |
+|-------------------|
 
 
 
+Configure the Clingo executable path,  select which answer set to visualize, and choose your additional ASP problem-solving files. Once all parameters are set, you can run the simulation.
+
+
+
+-----------
+Clingo Path
+-----------
+Enter the full path to your clingo.exe (but without ".exe") or simply use "clingo" if it is included in your system's PATH.
+
+
+
+-----------------
+Answer to display
+-----------------
+Choose which answer set from Clingo should be visualized (default is 1).
+
+
+
+-------------------------------
+Select Problem-Solving LP Files
+-------------------------------
+Browse and select your ASP encoding files via the file explorer. These files should only contain the ASP code for solving the environment. Please ensure that the environment encoding is not included here.
+
+
+
+--------------
 Run Simulation
------
-Run clingo on your current environment with the specified .lp files and look for the given answer.
+--------------
+Once the parameters are set, click this button to execute Clingo and visualize the solution based on the answer set.
+
+Please note that the simulation may range from a few seconds to several minutes, depending on the complexity of the problem. During extended load times, we recommend checking the terminal to monitor your progress.
 
 
 
-Select LP Files
----------------
-This will ask you to select all the .lp files that contain your clingo implementation.
-You have to add all files at the same time, so you should put them into the same folder.
-You can use the asp folder we provide for this.
-
-
-
-Parameter Information
----------------------
-
-clingo path:
-the path to clingo.
-If you have it installed in this project it should just be "clingo".
-
-Answer:
-The number of the answer you want to display as a result.
-
-
-
+-----------------
 Don't Derail Now!
-----------------
+-----------------
 However, when you've enjoyed the ride,
 it's time to pull the brakes.
 At any time, you may exit the program

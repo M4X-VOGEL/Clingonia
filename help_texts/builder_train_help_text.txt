@@ -1,50 +1,95 @@
-            |-------------------|
-            |   Train Builder   |
-            |-------------------|
+|-----------------------------|
+|   Train Configuration Lab   |
+|-----------------------------|
 
 
 
-Grid
-----
-You can move the grid while pressing your right mouse button and moving the mouse.
-You can zoom with your mouse wheel.
-To place trains first click on the symbol then on the grid cells.
-To place stations see Train List below.
-To configure trains see Train List below.
-To remove trains see Train List below.
+Design a custom rail network: Use the grid canvas on the left and the tool panel on the right to create and refine your layout.
 
 
 
-Finish Building
+----------------------
+Grid Canvas Navigation
+----------------------
+- Interact:     LMB (left mouse button)
+- Pan Canvas:   RMB (right mouse button)
+- Zoom in/out:  Scroll Wheel
+
+
+
 ---------------
-This will save your environment and the trains and take you to a result screen where you can review it.
+Building Trains
+---------------
+1. Select a train (with desired orientation) from the right panel (LMB).
+2. Place the train on the grid (LMB).
 
 
 
-Train List
-----------
-Config:
-    - place stations in the same way as trains.
-    - configure the earliest departure and latest arrival.
-Remove:
-    - this will delete the train.
+--------------------
+Train List: Overview
+--------------------
+Each placed train appears in a list with its ID, start position, and orientation.
+
+A station icon with configuration and remove options accompanies each train entry.
 
 
 
-Reset
------
-This resets the grid to the status it was when the track builder opened.
-
-
-
-Trains
-------
-This allows you to place trains by clicking a grid cell with you left mouse button.
-
-
-
-Don't Derail Now!
 ----------------
+Placing Stations
+----------------
+1. Click the station icon next to a train in the list (LMB).
+2. Place the station on the grid (LMB).
+
+
+
+------------------------
+Individual Configuration
+------------------------
+1. Click the "configure [ID]" button for the desired train in the list.
+2. Enter integers (> 0) for Earliest DEP and Latest ARR.
+3. Click "Save".
+
+
+
+--------------------
+Configure All Trains
+--------------------
+Set the Earliest DEP and Latest ARR to the same values for every train.
+
+1. Click the "Config All Trains" button.
+2. Enter integers (> 0) for Earliest DEP and Latest ARR.
+3. Click "Save".
+
+
+
+---------------
+Removing Trains
+---------------
+Click the "remove" button for the desired train in the list.
+
+This action also deletes its associated station and configuration.
+
+
+
+------------
+Reset Button
+------------
+The reset button behaves differently depending on the mode:
+- Build mode: Clears the entire grid.
+- Modify mode: Reverts the grid to its previous state.
+
+
+
+------------
+Finish Build
+------------
+Ends the build process, renders the image, and displays an overview of your environment.
+
+
+
+-----------------
+Don't Derail Now!
+-----------------
 However, when you've enjoyed the ride,
 it's time to pull the brakes.
 At any time, you may exit the program

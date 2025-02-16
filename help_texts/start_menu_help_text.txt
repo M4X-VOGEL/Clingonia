@@ -1,9 +1,10 @@
-                |---------------------------|
-                |   Welcome to Clingonia!   |
-                |---------------------------|
+|---------------------------|
+|   Welcome to Clingonia!   |
+|---------------------------|
 
 
 
+------------
 Introduction
 ------------
 Experience next-generation Flatland environment management:
@@ -14,18 +15,21 @@ Additionally, visualize your solutions as a numbered path, detailed timetable, o
 
 
 
+------------
 (!) Terminal
 ------------
 Important: Clingonia provides real-time status updates in the terminal. During extended load times, we recommend checking there to monitor your progress.
 
 
 
+-----------
 Get Started
 -----------
-Begin by generating a Flatland environment based on your parameters, building a custom setup via our build menu, or importing an existing LP file with the environment ASP code into Clingonia.
+Begin by generating a Flatland environment based on your parameters, building a custom setup via our build menu, or importing an existing LP file containing the environment ASP code into Clingonia.
 
 
 
+---------------------------
 Generate Random Environment
 ---------------------------
 Set parameters to create a complete, seed-based Flatland environment.
@@ -34,16 +38,18 @@ Define dimensions, the number of trains and cities, rail system details, and tra
 
 
 
+---------------------
 Build New Environment
 ---------------------
-First, define your grid size and specify train behavior. Then, enter the Railway Creation Lab: Simply select and place rails onto the grid.
+Kick off your custom build by defining your grid size and specifying train behavior. Then, unleash your creativity in the Railway Creation Lab: Simply select and place rails onto the grid.
 
-Once your rail network is complete, you can add trains with their corresponding stations and details like Earliest Departure and Latest Arrival.
+Once your rail network is complete, add trains with their corresponding stations and details.
 
 Finally, feast your eyes on a rendered image of your masterpiece!
 
 
 
+----------------
 Load Environment
 ----------------
 Select an LP file from your computer that contains the ASP code for an environment.
@@ -65,8 +71,16 @@ track: a Flatland-defined integer representing a specific rail
 
 
 
+---------------
+Fullscreen Mode
+---------------
+Toggle fullscreen mode by clicking the black square next to the info button.
+
+
+
+-----------------
 Don't Derail Now!
-----------------
+-----------------
 However, when you've enjoyed the ride,
 it's time to pull the brakes.
 At any time, you may exit the program
@@ -74,6 +88,7 @@ by pressing the ESC key.
 
 
 
+---------------
 About MadMotion
 ---------------
 MadMotion was founded in 2024 at the University of Potsdam as part of the "Railway Scheduling in Flatland" project.
