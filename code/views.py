@@ -178,7 +178,9 @@ err_dict = {
         'negativeValue': 'needs int > 0',
     },
     'answer': {ValueError: 'needs int > 0'},
-    'clingo': {},
+    'clingo': {
+        'noPathToClingo': 'The given path does not lead to clingo',
+    },
     'lpFiles': {},
     'frameRate': {
         ValueError: 'needs 0 < num <= 60',
@@ -1401,20 +1403,20 @@ def save_clingo_params():
 
         try:
             if data.startswith('e.g.'):
-                data = None
-                user_params[key] = data
-                continue
+                data = default_params[key]
             elif data == '':
-                data = None
-                user_params[key] = data
-                continue
+                data = default_params[key]
             elif key == 'clingo':
-                data = data
+                if data.endswith('clingo.exe'):
+                    data = data[:-4]
+                else:
+                    data = data
             else:
                 data = int(data)
 
             labels[f'{key}_error_label'].hide_label()
         except Exception as e:
+            err_count += 1
             err = type(e)
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
@@ -1422,7 +1424,13 @@ def save_clingo_params():
                 print(e)
                 print(err)
                 print(data)
+            continue
+
+        if key == 'clingo' and not data.endswith('clingo'):
             err_count += 1
+            err = 'noPathToClingo'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
 
         if type(data) is not str or key == 'clingo':
             user_params[key] = data
