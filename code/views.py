@@ -256,10 +256,25 @@ def build_flatland_window():
 
     screenwidth = windows['flatland_window'].window.winfo_screenwidth()
     screenheight = windows['flatland_window'].window.winfo_screenheight()
-    font_base_mod = ((screenwidth / 1920) ** 0.6) * ((screenheight / 1080) ** 0.4)
+
+    update_fonts()
 
     windows['flatland_window'].window.rowconfigure(0, weight=1)
     windows['flatland_window'].window.columnconfigure((0, 1), weight=1)
+
+def update_fonts():
+    global font_base_mod, base_font_layout, canvas_font_layout, \
+        canvas_label_font_layout, err_font_layout, help_font_layout, \
+        info_font_layout, title_font_layout
+
+    font_base_mod = ((screenwidth / 1920) ** 0.6) * ((screenheight / 1080) ** 0.4)
+    base_font_layout = ('Arial', int(font_base_mod * base_font_size), 'bold')
+    canvas_font_layout = ('Arial', int(font_base_mod * base_font_size))
+    canvas_label_font_layout = ('Arial', int(font_base_mod * base_font_size), 'bold')
+    err_font_layout = ('Arial', int(font_base_mod * base_font_size * font_err_mod), 'bold')
+    help_font_layout = ('Courier', int(font_base_mod * base_font_size))
+    info_font_layout = ('Courier', int(font_base_mod * info_text_font_size))
+    title_font_layout = ('Arial', int(font_base_mod * frame_title_font_size), 'bold')
 
 def start_flatland():
     print('Info: Launch was successful.')
