@@ -5184,7 +5184,7 @@ def build_result_timetable_frame():
         padding=(0, 0),
         sticky='nes',
         text=displaytext,
-        font=info_font_layout,
+        font=help_font_layout,
         wrap='word',
         foreground_color=label_color,
         background_color=background_color,
