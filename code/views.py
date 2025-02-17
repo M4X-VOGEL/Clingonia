@@ -1327,13 +1327,11 @@ def switch_clingo_para_to_result():
         frames['clingo_para_frame'].frame.update()
         return
 
-
-
     current_solve_params = (
         env_counter, user_params['answer'], user_params['lpFiles']
     )
 
-    if last_solve_params != current_solve_params:
+    if last_solve_params != current_solve_params or isinstance(current_paths, int):
         last_solve_params = current_solve_params
         sim_result = run_simulation()
 
@@ -1388,6 +1386,8 @@ def load_lp_files():
     displaytext = "\n".join(files)
 
     labels['clingo_paths_label'].label.config(text=displaytext)
+    if labels['clingo_status_label'].label.cget('text') == 'No .lp files given.':
+        labels['clingo_status_label'].label.config(text='')
 
 def save_clingo_params():
     err_count = 0
