@@ -3,6 +3,7 @@ import random
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import math
 from flatland.envs.rail_env import RailEnv
 from flatland.envs.rail_generators import sparse_rail_generator
 from flatland.envs.line_generators import sparse_line_generator
@@ -34,20 +35,19 @@ def create_agents_from_train_stations(hints, num_agents, np_random):
     agents_targets = []
     
     for agent_idx in range(num_agents):
-        # Logic to determine start and end for agents.
-        if agent_idx % 2 == 0:
-            city_start = 0
-            city_target = 1
-        else:
-            city_start = 1
-            city_target = 0
-        
-        # Choose random station in each city
-        start_station_idx = np_random.randint(0, len(train_stations[city_start]))
-        target_station_idx = np_random.randint(0, len(train_stations[city_target]))
-        
-        start_station = train_stations[city_start][start_station_idx]
-        target_station = train_stations[city_target][target_station_idx]
+        # Randomly select two different cities from the available ones.
+        num_cities = len(train_stations)
+        start_city = np_random.randint(0, num_cities)
+        possible_targets = list(range(num_cities))
+        possible_targets.remove(start_city)
+        target_city = np_random.choice(possible_targets)
+
+        # Choose a random station within each selected city
+        start_station_idx = np_random.randint(0, len(train_stations[start_city]))
+        target_station_idx = np_random.randint(0, len(train_stations[target_city]))
+
+        start_station = train_stations[start_city][start_station_idx]
+        target_station = train_stations[target_city][target_station_idx]
         
         # Station format: ((x, y),base_direction)
         start_position, base_direction = start_station
@@ -61,10 +61,10 @@ def create_agents_from_train_stations(hints, num_agents, np_random):
     return agents_positions, agents_directions, agents_targets
 
 
-def custom_sparse_line_generator(speed_ratio_map=None, seed=1):
+def custom_sparse_line_generator(env_params, seed=1):
     """Custom line generator to be able to generate agents.
     """
-    base_line_gen = sparse_line_generator(speed_ratio_map, seed)
+    base_line_gen = sparse_line_generator(env_params["speed"], seed)
 
     def generator(rail, num_agents, hints, num_resets, np_random):
         global LAST_HINTS
@@ -72,9 +72,12 @@ def custom_sparse_line_generator(speed_ratio_map=None, seed=1):
         # When there are no hint, generate dummy hints.
         if hints is None or 'train_stations' not in hints or 'city_positions' not in hints or 'city_orientations' not in hints:
             hints = {
-                'train_stations': [[((0, 0),)] for _ in range(1)],
-                'city_positions': [(0, 0)],
-                'city_orientations': [0]
+                'train_stations': [
+                    [((0, 0), 0)],
+                    [((env_params['cols']-1, env_params['rows']-1), 0)]
+                ],
+                'city_positions': [(0, 0), (env_params['cols']-1, env_params['rows']-1)],
+                'city_orientations': [0, 0]
             }
         LAST_HINTS = hints  # Save for DF
 
@@ -95,19 +98,22 @@ def custom_sparse_line_generator(speed_ratio_map=None, seed=1):
     return generator
 
 
-def extract_trains_from_hints(hints, num_agents, np_random):
+def extract_trains_from_hints(hints, num_agents, np_random, env_params):
     """Creates trains DF with the hints.
     
     Args:
         hints (dict).
         num_agents (int).
         np_random (np.random.RandomState).
+        env_params (dict): Parameters for environment.
     
     Returns:
         [pd.DataFrame] Agent configuration.
     """
     agents_positions, agents_directions, agents_targets = create_agents_from_train_stations(hints, num_agents, np_random)
     direction_map = {0: 'n', 1: 'e', 2: 's', 3: 'w'}
+    # Default for Lastest Arrival based on Dimensions and number of Agents
+    l_arr = math.ceil(2 * max(env_params['rows'], env_params['cols'])) + 5 * num_agents
     data = {
         "id": list(range(num_agents)),
         "x": [pos[0] for pos in agents_positions],
@@ -116,7 +122,7 @@ def extract_trains_from_hints(hints, num_agents, np_random):
         "x_end": [target[0] for target in agents_targets],
         "y_end": [target[1] for target in agents_targets],
         "e_dep": [1] * num_agents,  # Default value 1
-        "l_arr": [200] * num_agents  # Default value 200
+        "l_arr": [l_arr] * num_agents 
     }
     df = pd.DataFrame(data)
     return df
@@ -154,7 +160,7 @@ def create_env(env_params):
     )
 
     # Custom Line Generator
-    line_gen = custom_sparse_line_generator(env_params['speed'], used_seed)
+    line_gen = custom_sparse_line_generator(env_params, used_seed)
 
     observation_builder = GlobalObsForRailEnv()
     
@@ -308,6 +314,8 @@ def extract_trains(env):
         "l_arr": []
     }
     direction_map = {0: 'n', 1: 'e', 2: 's', 3: 'w'}
+    # Default for Lastest Arrival based on Dimensions and number of Agents
+    l_arr = math.ceil(2 * max(env.height, env.width)) + 5 * len(env.agents)
     # Agents
     for agent in env.agents:
         if agent.position is not None:
@@ -319,7 +327,7 @@ def extract_trains(env):
             trains_data["x_end"].append(x_end)
             trains_data["y_end"].append(y_end)
             trains_data["e_dep"].append(1)  # Default value 1
-            trains_data["l_arr"].append(200)  # Default value 200
+            trains_data["l_arr"].append(l_arr)  # l_arr based on Environment Dimensions
     trains_df = pd.DataFrame(trains_data)
     return trains_df
 
