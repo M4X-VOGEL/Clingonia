@@ -15,9 +15,9 @@ clingo_frustration = {
     210: "timetable's a mess...",
     240: "whoa, that flatland grass is lush!...",
     270: "trains just fired up!...",
-    300: "numbers crashing, this is nuts...",
+    300: "numbers crashing, this is nuts!...",
     330: "hold on, that rail bend is fascinating!...",
-    360: "no route in sight, let me think..."
+    360: "give me a break, man..."
 }
 
 clingo_finisher = {
@@ -70,7 +70,6 @@ def run_clingo(clingo_path, lp_files, answer_number):
     Returns:
         [str]: Clingo output with its answers.
     """
-    # Run Clingo (with timer)
     timer_start = time.perf_counter()
     proc = subprocess.Popen(
         [clingo_path] + lp_files + [str(answer_number)],
@@ -79,7 +78,7 @@ def run_clingo(clingo_path, lp_files, answer_number):
         text=True,
         bufsize=1
     )
-    # Timer-Thread
+    # Timer-Thread for status updates while Clingo runs.
     def timer():
         counter, frustration = 30, 30
         while proc.poll() is None:
@@ -92,40 +91,35 @@ def run_clingo(clingo_path, lp_files, answer_number):
                 frustration += 30
                 if frustration > 360:
                     frustration = 30  # Loop Clingo quotes
-        # Clingo's last words
-        if counter <= 30:
-            pass
-        elif counter <= 90:
-            print(f"Clingo: \'{clingo_finisher[1]}\'")
-        elif counter <= 300:
-            print(f"Clingo: \'{clingo_finisher[2]}\'")
-        elif counter <= 1200:
-            print(f"Clingo: \'{clingo_finisher[3]}\'")
-        elif counter <= 3600:
-            print(f"Clingo: \'{clingo_finisher[4]}\'")
-        else:
-            print(f"Clingo: \'{clingo_finisher[5]}\'")
-        # Total Clingo execution time
+        # Final message with total execution time
         execution_time = time.perf_counter() - timer_start
+        if execution_time <= 90:
+            print(f"Clingo: '{clingo_finisher.get(1, '')}'")
+        elif execution_time <= 300:
+            print(f"Clingo: '{clingo_finisher.get(2, '')}'")
+        elif execution_time <= 1200:
+            print(f"Clingo: '{clingo_finisher.get(3, '')}'")
+        elif execution_time <= 3600:
+            print(f"Clingo: '{clingo_finisher.get(4, '')}'")
+        else:
+            print(f"Clingo: '{clingo_finisher.get(5, '')}'")
         print(f"🕓 Clingo ran for {execution_time:.2f}s.", flush=True)
-    
-    # Start Timer-Thread
+    # Initialize Timer Thread
     timer_thread = threading.Thread(target=timer)
+    timer_thread.daemon = True  # Preventing thread from blocking exit
     timer_thread.start()
-    
-    # Send data to stdout and stderr
+    # Capture Clingo's output
     stdout, stderr = proc.communicate()
-    timer_thread.join()  # Ensures end of Timer-Thread
+    # End of Thread
+    timer_thread.join(timeout=1)
     # Error Handling
     if proc.returncode != 0:
         error_message = stderr.strip()
-        # Ignore empty Errors and all Warnings
         if error_message and "Warn" not in error_message:
             print(f"Clingo returned an error:\n{error_message}")
             return -3
-    # Save Output as String
-    output = stdout.strip()
-    return output
+    return stdout.strip()
+
 
 
 def get_clingo_answer(clingo_output, answer_number):

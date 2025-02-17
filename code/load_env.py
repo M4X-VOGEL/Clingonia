@@ -27,6 +27,9 @@ def load_env(lp_file):
     if not file_in_directory(lp_file):
         print("❌ File Not Found Error: No environment loaded.")
         return -1, -1  # FileNotFoundError -1
+    if not lp_file.endswith(".lp"):
+        print("❌ Load Error: Environment must be a .lp file.")
+        return -15, -15  # Report invalid file type
     df_tracks, tse_list = prep_tracks_and_trains(lp_file)
     if isinstance(df_tracks, int) or isinstance(tse_list, int):
         print("❌ Load Error: No environment loaded.")
@@ -204,6 +207,17 @@ def validate_cell_with_track_exists(x, y, df_tracks):
     condition = (df_tracks['x'] == x) & (df_tracks['y'] == y) & (df_tracks['track'] != 0)
     if not condition.any():
         return -8
+    return 0
+
+def validate_cell_with_track_exists(x, y, df_tracks):
+    # Check if cell with given x, y exists
+    condition = (df_tracks['x'] == x) & (df_tracks['y'] == y)
+    if not condition.any():
+        return -8  # Report non-existant cell
+    # Check for track
+    track = df_tracks.loc[condition, 'track'].iloc[0]
+    if track == 0:
+        print(f"⚠️ cell({y},{x},{track}) Warning: Train or Station not on a track.")
     return 0
 
 

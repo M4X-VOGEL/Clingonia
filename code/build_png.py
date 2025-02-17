@@ -5,6 +5,8 @@ from flatland.envs.rail_generators import rail_from_grid_transition_map
 from flatland.envs.malfunction_generators import MalfunctionParameters, ParamMalfunctionGen
 from flatland.utils.rendertools import RenderTool
 from flatland.core.transition_map import GridTransitionMap
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 # Numeric directions
 DIR_MAP = {'n': 0, 'e': 1, 's': 2, 'w': 3}
@@ -134,25 +136,29 @@ def create_custom_env(tracks, trains, params):
         obs_builder_object=DummyObservationBuilder(),
         random_seed=params['seed']
     )
-    env.reset()
+    try:
+        obs, info = env.reset()
+    except ValueError as e:
+        print("⚠️ Warning: No agents specified.")
 
     # Trains and stations
     for i, agent in enumerate(env.agents):
+        id = trains.loc[i, 'id']
         # Train
-        row_init = trains.loc[i, 'y']
-        col_init = trains.loc[i, 'x']
-        agent.initial_position = (row_init, col_init)
+        row_start = trains.loc[i, 'y']
+        col_start = trains.loc[i, 'x']
+        agent.initial_position = (row_start, col_start)
         agent.position = agent.initial_position
         # Direction
         dir = trains.loc[i, 'dir']
-        train_track = tracks[row_init][col_init]
+        train_track = tracks[row_start][col_start]
         if train_track == 0:
-            invalid_train = i  # Report train not on track
-            print(f"❌ Train {i} not on track.")
+            invalid_train = id  # Report train not on track
+            print(f"❌ Train {id} not on track.")
         # Redirect improperly oriented trains on tracks
         elif (dir, train_track) in dir_replacement:
             dir = dir_replacement[(dir, train_track)]
-            print(f"⚠️ Train {i} at ({row_init},{col_init}): Invalid orientation corrected.")
+            print(f"⚠️ Train {id} at ({row_start},{col_start}): Invalid orientation corrected.")
         trains.loc[i, 'dir'] = dir
         agent.direction = DIR_MAP[dir]
         agent.initial_direction = agent.direction
@@ -162,12 +168,13 @@ def create_custom_env(tracks, trains, params):
         agent.target = (row_target, col_target)
         if row_target < 0 or col_target < 0:
             invalid_station = -(i+1)  # Report missing station
-            print(f"❌ Missing Station of Train {i}.")
+            print(f"❌ Missing Station of Train {id}.")
         else:
             station_track = tracks[row_target][col_target]
             if station_track == 0:
-                invalid_station = i  # Report station not on track
-                print(f"❌ Station of Train {i} not on track.")
+                invalid_station = id  # Report station not on track
+                print(f"❌ Station of Train {id} not on track.")
+
 
     return env, trains, invalid_train, invalid_station
 

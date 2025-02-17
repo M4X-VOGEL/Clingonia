@@ -202,7 +202,8 @@ loading_err_dict = {
     -11: 'A train\'s ID is negative.',
     -12: 'Negative coordinates are invalid.',
     -13: 'An end predicate has an invalid latest arrival.',
-    -14: 'No dead ends allowed in the environment.'
+    -14: 'No dead ends allowed in the environment.',
+    -15: 'Invalid file type. Environment must be a .lp file'
 }
 clingo_err_dict = {
     -1: 'No .lp files given.',
