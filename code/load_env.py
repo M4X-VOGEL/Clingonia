@@ -126,8 +126,8 @@ def fill_tse(tse_list, pred):
             y, x = int(start[1]), int(start[2])
             e_dep = int(start[3])
             dir = start[4]
-            if e_dep < 1:
-                print(f"⚠️ start({id},...) Warning: Earliest dep. < 1 changed to 1.")
+            if e_dep < 0:
+                print(f"⚠️ start({id},...) Warning: Earliest dep. < 0 changed to 1.")
                 e_dep = 1
         except ValueError:
             return -4  # Report invalid start

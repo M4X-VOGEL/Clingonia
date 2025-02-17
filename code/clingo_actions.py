@@ -1,7 +1,33 @@
 import os
 import time
+import threading
 import subprocess
 import pandas as pd
+
+
+clingo_frustration = {
+    30:  "I'm lost in Flatland, again...",
+    60:  "tracks won't align, damn it...",
+    90:  "man, grass as far as the eye can see...",
+    120: "grid's a mess...",
+    150: "signals are dead, total blackout...",
+    180: "routes are all screwed up...",
+    210: "timetable's a mess...",
+    240: "whoa, that flatland grass is lush!...",
+    270: "trains just fired up!...",
+    300: "numbers crashing, this is nuts...",
+    330: "hold on, that rail bend is fascinating!...",
+    360: "no route in sight, let me think..."
+}
+
+clingo_finisher = {
+    1: "Boom! Finished faster than I thought!",
+    2: "Done! But these rails had me burning!",
+    3: "All that sweat, tears, and blood truly paid off!",
+    4: "Finally done! Clinging like a train on busted rails!",
+    5: "Tracks laid, but what a ride! Victory's ours!"
+}
+
 
 def clingo_to_df(clingo_path="clingo", lp_files=[], answer_number=1):
     """Runs clingo program and creates a DataFrame with the reduced output of the stated answer.
@@ -46,24 +72,59 @@ def run_clingo(clingo_path, lp_files, answer_number):
     """
     # Run Clingo (with timer)
     timer_start = time.perf_counter()
-    result = subprocess.run(
+    proc = subprocess.Popen(
         [clingo_path] + lp_files + [str(answer_number)],
-        capture_output=True,
-        text=True
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        bufsize=1
     )
-    timer_end = time.perf_counter()
-    # Timer result
-    execution_time = timer_end - timer_start
-    print(f"🕓 Clingo ran for {execution_time:.2f}s.")
+    # Timer-Thread
+    def timer():
+        counter, frustration = 30, 30
+        while proc.poll() is None:
+            time.sleep(0.1)
+            elapsed = int(time.perf_counter() - timer_start)
+            if elapsed == counter:
+                # Clingo updates
+                print(f"Clingo: \'{clingo_frustration[frustration]}\'")
+                counter += 30
+                frustration += 30
+                if frustration > 360:
+                    frustration = 30  # Loop Clingo quotes
+        # Clingo's last words
+        if counter <= 30:
+            pass
+        elif counter <= 90:
+            print(f"Clingo: \'{clingo_finisher[1]}\'")
+        elif counter <= 300:
+            print(f"Clingo: \'{clingo_finisher[2]}\'")
+        elif counter <= 1200:
+            print(f"Clingo: \'{clingo_finisher[3]}\'")
+        elif counter <= 3600:
+            print(f"Clingo: \'{clingo_finisher[4]}\'")
+        else:
+            print(f"Clingo: \'{clingo_finisher[5]}\'")
+        # Total Clingo execution time
+        execution_time = time.perf_counter() - timer_start
+        print(f"🕓 Clingo ran for {execution_time:.2f}s.", flush=True)
+    
+    # Start Timer-Thread
+    timer_thread = threading.Thread(target=timer)
+    timer_thread.start()
+    
+    # Send data to stdout and stderr
+    stdout, stderr = proc.communicate()
+    timer_thread.join()  # Ensures end of Timer-Thread
     # Error Handling
-    if result.returncode != 0:
-        error_message = result.stderr.strip()
+    if proc.returncode != 0:
+        error_message = stderr.strip()
         # Ignore empty Errors and all Warnings
         if error_message and "Warn" not in error_message:
             print(f"Clingo returned an error:\n{error_message}")
             return -3
     # Save Output as String
-    output = result.stdout.strip()
+    output = stdout.strip()
     return output
 
 
