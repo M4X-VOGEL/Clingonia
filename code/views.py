@@ -1388,6 +1388,8 @@ def load_lp_files():
     displaytext = "\n".join(files)
 
     labels['clingo_paths_label'].label.config(text=displaytext)
+    if labels['clingo_status_label'].label.cget('text') == 'No .lp files given.':
+        labels['clingo_status_label'].label.config(text='')
 
 def save_clingo_params():
     err_count = 0
