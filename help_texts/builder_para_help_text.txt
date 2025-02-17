@@ -7,6 +7,7 @@
 -------------------------
 "Build" / "Modify" Button
 -------------------------
+
 Creates the grid with the defined size for your upcoming custom build and sets the train behavior parameters that cannot be built on a grid.
 
 
@@ -29,6 +30,7 @@ The width of the rail map. (Y-direction in Flatland)
 ----------------
 Advanced Options
 ----------------
+
 Displays additional parameters for advanced users.
 
 
@@ -40,8 +42,18 @@ Parameters (Advanced)
 === Remove agents on arrival:
 True: Agents are removed upon reaching their destination.
 False: Agents remain, blocking the destination.
-=== 
+===
 
+
+=== Low quality mode:
+Lowers resolution to significantly reduce the PNG file size.
+===
+
+
+
+-----------------------------
+Parameters (no Clingo impact)
+-----------------------------
 
 === Speed ratio map for trains:
 Defines the distribution of train speeds.
@@ -66,11 +78,6 @@ The longest duration (in timesteps) that a malfunction can last.
 === 
 
 
-=== Low quality mode:
-Lowers resolution to significantly reduce the PNG file size.
-===
-
-
 
 =================
 For a more detailed explanation, please refer to the official Flatland documentation.
@@ -81,6 +88,7 @@ For a more detailed explanation, please refer to the official Flatland documenta
 -----------------
 Don't Derail Now!
 -----------------
+
 However, when you've enjoyed the ride,
 it's time to pull the brakes.
 At any time, you may exit the program

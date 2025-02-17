@@ -7,6 +7,7 @@
 ------------
 (!) Terminal
 ------------
+
 Important: Clingonia provides real-time status updates in the terminal. During extended load times, we recommend checking there to monitor your progress.
 
 
@@ -14,6 +15,7 @@ Important: Clingonia provides real-time status updates in the terminal. During e
 ---------------------------
 Generate Random Environment
 ---------------------------
+
 Set parameters to create a complete, seed-based Flatland environment.
 
 Define dimensions, the number of trains and cities, rail system details, and train behaviors.
@@ -23,6 +25,7 @@ Define dimensions, the number of trains and cities, rail system details, and tra
 ---------------------
 Build New Environment
 ---------------------
+
 Kick off your custom build by defining your grid size and specifying train behavior. Then, unleash your creativity in the Railway Creation Lab: Simply select and place rails onto the grid.
 
 Once your rail network is complete, add trains with their corresponding stations and details.
@@ -34,6 +37,7 @@ Finally, feast your eyes on a rendered image of your masterpiece!
 ------------------
 Modify Environment
 ------------------
+
 Modify Mode works like Build Mode, allowing you to adjust the same parameters.
 
 Instead of starting with a blank grid, you begin with the environment that you have loaded, generated, or built.
@@ -45,6 +49,7 @@ You can reposition rails, trains, and stations and even adjust the grid size usi
 ----------------
 Save Environment
 ----------------
+
 Choose where to save the LP file for the current environment and specify a filename.
 
 Additionally, the "Image" toggle allows you to save the generated image with the LP file.
@@ -54,6 +59,7 @@ Additionally, the "Image" toggle allows you to save the generated image with the
 ----------------
 Load Environment
 ----------------
+
 Select an LP file from your computer that contains the ASP code for an environment.
 
 The program then scans the file for explicit predicates:
@@ -76,6 +82,7 @@ track: a Flatland-defined integer representing a specific rail
 -------------------
 Next: Clingo Solver
 -------------------
+
 Proceed to the final step: Enter your Clingo parameters and select the LP files for solving the environment. Once configured, you can run the simulation to visualize the solution.
 
 
@@ -83,6 +90,7 @@ Proceed to the final step: Enter your Clingo parameters and select the LP files 
 ---------------
 Fullscreen Mode
 ---------------
+
 Toggle fullscreen mode by clicking the black square next to the info button.
 
 
@@ -90,6 +98,7 @@ Toggle fullscreen mode by clicking the black square next to the info button.
 -----------------
 Don't Derail Now!
 -----------------
+
 However, when you've enjoyed the ride,
 it's time to pull the brakes.
 At any time, you may exit the program

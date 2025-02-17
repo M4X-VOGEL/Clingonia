@@ -7,7 +7,11 @@
 -----------------
 "Generate" Button
 -----------------
+
 Generates a complete Flatland environment and corresponding image based on the specified parameters.
+
+(!) Please note that the generation may range from a few seconds to several minutes, depending on the size of the environment.
+
 
 
 
@@ -44,6 +48,7 @@ A starting number that directly influences the Flatland environment. Using the s
 ----------------
 Advanced Options
 ----------------
+
 Displays additional parameters for advanced users.
 
 
@@ -75,6 +80,16 @@ False: Agents remain, blocking the destination.
 === 
 
 
+=== Low quality mode:
+Lowers resolution to significantly reduce the PNG file size.
+===
+
+
+
+-----------------------------
+Parameters (no Clingo impact)
+-----------------------------
+
 === Speed ratio map for trains:
 Defines the distribution of train speeds.
 Format: {speed : chance of occurring}.
@@ -98,11 +113,6 @@ The longest duration (in timesteps) that a malfunction can last.
 === 
 
 
-=== Low quality mode:
-Lowers resolution to significantly reduce the PNG file size.
-===
-
-
 
 =================
 For a more detailed explanation, please refer to the official Flatland documentation.
@@ -113,6 +123,7 @@ For a more detailed explanation, please refer to the official Flatland documenta
 -----------------
 Don't Derail Now!
 -----------------
+
 However, when you've enjoyed the ride,
 it's time to pull the brakes.
 At any time, you may exit the program

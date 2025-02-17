@@ -82,10 +82,11 @@ def add_cell(df_tracks, pred):
     try:
         y, x = int(cell[0].strip()), int(cell[1].strip())
         if x < 0 or y < 0:
-            print(f"⚠️ Warning: Negative coordinates are not allowed.")
+            print(f"❌ Error: Negative coordinates are not allowed.")
             return -12  # Report cells with negative coordinates
         track = int(cell[2].strip())
         if track in dead_ends:
+            print(f"❌ cell(({y},{x}),_) Dead end is not allowed.")
             return -14  # Report dead end
         elif track not in valid_tracks:
             track = 0  # Remove track and provide empty cell

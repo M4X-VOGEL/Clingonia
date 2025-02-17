@@ -7,6 +7,7 @@
 ------------
 Introduction
 ------------
+
 Experience next-generation Flatland environment management:
 
 Effortlessly generate, build, modify, save, and solve environments using Clingo powered by the Answer Set Programming Language.
@@ -18,6 +19,7 @@ Additionally, visualize your solutions as a numbered path, detailed timetable, o
 ------------
 (!) Terminal
 ------------
+
 Important: Clingonia provides real-time status updates in the terminal. During extended load times, we recommend checking there to monitor your progress.
 
 
@@ -25,6 +27,7 @@ Important: Clingonia provides real-time status updates in the terminal. During e
 -----------
 Get Started
 -----------
+
 Begin by generating a Flatland environment based on your parameters, building a custom setup via our build menu, or importing an existing LP file containing the environment ASP code into Clingonia.
 
 
@@ -32,6 +35,7 @@ Begin by generating a Flatland environment based on your parameters, building a 
 ---------------------------
 Generate Random Environment
 ---------------------------
+
 Set parameters to create a complete, seed-based Flatland environment.
 
 Define dimensions, the number of trains and cities, rail system details, and train behaviors.
@@ -41,6 +45,7 @@ Define dimensions, the number of trains and cities, rail system details, and tra
 ---------------------
 Build New Environment
 ---------------------
+
 Kick off your custom build by defining your grid size and specifying train behavior. Then, unleash your creativity in the Railway Creation Lab: Simply select and place rails onto the grid.
 
 Once your rail network is complete, add trains with their corresponding stations and details.
@@ -52,6 +57,7 @@ Finally, feast your eyes on a rendered image of your masterpiece!
 ----------------
 Load Environment
 ----------------
+
 Select an LP file from your computer that contains the ASP code for an environment.
 
 The program then scans the file for explicit predicates:
@@ -74,6 +80,7 @@ track: a Flatland-defined integer representing a specific rail
 ---------------
 Fullscreen Mode
 ---------------
+
 Toggle fullscreen mode by clicking the black square next to the info button.
 
 
@@ -81,6 +88,7 @@ Toggle fullscreen mode by clicking the black square next to the info button.
 -----------------
 Don't Derail Now!
 -----------------
+
 However, when you've enjoyed the ride,
 it's time to pull the brakes.
 At any time, you may exit the program
@@ -91,6 +99,7 @@ by pressing the ESC key.
 ---------------
 About MadMotion
 ---------------
+
 MadMotion was founded in 2024 at the University of Potsdam as part of the "Railway Scheduling in Flatland" project.
 
 Our team, comprised of two dedicated computer science students - Adrian Henze and Max Vogel - who began their studies in 2019, has united to develop Clingonia: A user-friendly GUI program that integrates the innovative realms of Flatland and Answer Set Programming (ASP).

@@ -4,7 +4,11 @@
 
 
 
-View detailed insights into your simulation results: multiple views and controls for thorough analysis of Clingo's output. This page always opens with the "Toggle All Paths" View.
+View detailed insights into your simulation results:
+Multiple views and controls for thorough
+analysis of Clingo's output.
+
+This page always opens with the "Toggle All Paths" View.
 
 
 
@@ -13,6 +17,19 @@ Time Table
 ----------
 Overview of departure and arrival times. The table displays the earliest departure, actual departure, latest arrival, and actual arrival times for each train.
 
+An ActErr indicates that, despite generating an answer set, Clingo's actions failed to guide the train to its destination, resulting in only a spawn move at timestep 0 in Clingonia.
+
+
+
+----------
+ActErr Log
+----------
+(!) Displayed only when an ActErr occured.
+
+This log summarizes Clingo's actions for trains whose paths could not be visualized, allowing you to verify them.
+
+You can choose between full or minimal views of the action predicates for analysis.
+
 
 
 ----------------
@@ -20,23 +37,26 @@ Render Animation
 ----------------
 Generate an animated GIF of the solution.
 The estimated render time is on the button. 
+
 > Settings:
     - GIF Timesteps/sec: Set the frame rate of the animation.
     - GIF Low Quality Mode: Lower resolution to significantly reduce the GIF file size.
 
-After initiating the render, please monitor the terminal for progress. 
+After initiating the render, please monitor the terminal for progress. Once complete, the GIF animation will be displayed.
 
-Once complete, the GIF animation will be displayed.
 Under the animation, two additional buttons will appear:
     - Save GIF: Save the animation as a file.
-    - Toggle View: Switch to the manual frame-by-frame view for detailed analysis.
+    - Toggle View: Switch to the manual frame-by-frame view
+                   for detailed analysis.
 
 
 
 ----------------
 Toggle All Paths
 ----------------
-The button, along with its associated list below, allows you to see the individual numbered train paths along with its start coordinates and orientation. The number in the cell represents the timestep on which the train occupies the cell.
+The button, along with its associated list below, allows you to see the individual numbered train paths along with its start coordinates and orientation.
+
+The number in the cell represents the timestep on which the train occupies the cell.
 
 Clicking the "Toggle All Paths" Button will either show all numbered paths or hide them.
 
@@ -45,7 +65,7 @@ Clicking the "Toggle All Paths" Button will either show all numbered paths or hi
 -------------------
 Return To Main Menu
 -------------------
-This will bring you back to the Main Menu. Please note: To get back onto the Results page, you must run the simulation again.
+This button will bring you back to the Main Menu.
 
 
 

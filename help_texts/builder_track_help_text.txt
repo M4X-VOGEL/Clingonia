@@ -11,6 +11,7 @@ Design a custom rail network: Use the grid canvas on the left and the tool panel
 ----------------------
 Grid Canvas Navigation
 ----------------------
+
 - Interact:     LMB
 - Pan Canvas:   RMB
 - Zoom in/out:  Scroll Wheel
@@ -20,6 +21,7 @@ Grid Canvas Navigation
 --------------
 Building Rails
 --------------
+
 1. Select a rail type from the right panel (LMB).
 2. Place the rail on the grid (LMB).
 
@@ -28,6 +30,7 @@ Building Rails
 -----------
 Eraser Tool
 -----------
+
 1. Select the red-blue eraser (LMB).
 2. Remove rails on grid (LMB).
 
@@ -36,6 +39,7 @@ Eraser Tool
 ------------
 Reset Button
 ------------
+
 The reset button behaves differently depending on the mode:
 - Build mode: Clears the entire grid.
 - Modify mode: Reverts the grid to its previous state.
@@ -45,6 +49,7 @@ The reset button behaves differently depending on the mode:
 ------------
 Next: Trains
 ------------
+
 Proceed to place trains, stations, and set Earliest DEP and Latest ARR.
 
 
@@ -52,6 +57,7 @@ Proceed to place trains, stations, and set Earliest DEP and Latest ARR.
 -----------------
 Don't Derail Now!
 -----------------
+
 However, when you've enjoyed the ride,
 it's time to pull the brakes.
 At any time, you may exit the program

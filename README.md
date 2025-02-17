@@ -133,11 +133,11 @@ If you encounter unexpected issues, please report them right away. Your input is
 - Users may experience decreased responsiveness when zooming in closely on environments.
 - Our example `ASP` code for solving environments is provided for reference and simple environments. It is not flawless. We recommend using your own implementation for optimal results.
 - On macOS, text input fields might not appear immediately upon loading the page. Interacting with a control, such as clicking "Advanced Options," should reveal them.
-- The following parameters currently have no impact on Clingo and may be enhanced in the future by upcoming students:
-        - Speed ratio map
-        - Malfunction rate
-        - Min. duration for malfunctions
-        - Max. duration for malfunctions
+
+- (!) The following parameters currently have **no impact on Clingo** and may be enhanced in the future by upcoming students:
+- `Speed ratio map`
+- `Malfunction rate`
+- `Min./Max. duration for malfunctions`.
 
 <br>
 
