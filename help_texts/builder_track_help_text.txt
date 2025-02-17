@@ -12,8 +12,8 @@ Design a custom rail network: Use the grid canvas on the left and the tool panel
 Grid Canvas Navigation
 ----------------------
 
-- Interact:     LMB
-- Pan Canvas:   RMB
+- Interact:     LMB (left mouse button)
+- Pan Canvas:   RMB (right mouse button)
 - Zoom in/out:  Scroll Wheel
 
 
