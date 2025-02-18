@@ -533,6 +533,10 @@ def toggle_start_menu_help():
         build_start_menu_help_frame()
 
 def switch_start_to_random_gen():
+    global user_params_backup
+
+    user_params_backup = user_params.copy()
+
     if 'title_frame' in frames:
         frames['title_frame'].destroy_frame()
         del frames['title_frame']
@@ -1227,6 +1231,10 @@ def toggle_clingo_help():
         build_clingo_help_frame()
 
 def switch_main_to_random_gen():
+    global user_params_backup
+
+    user_params_backup = user_params.copy()
+
     if 'main_menu_frame' in frames:
         frames['main_menu_frame'].destroy_frame()
         del frames['main_menu_frame']
@@ -1555,6 +1563,10 @@ def close_exit_confirmation_frame():
 # random generation
 
 def random_gen_change_to_start_or_main():
+    global user_params
+
+    user_params = user_params_backup.copy()
+
     if last_menu == 'start':
         random_gen_para_to_start()
     else:
@@ -2273,7 +2285,8 @@ def build_random_gen_para_help_frame():
     frames['random_gen_para_help_frame'].frame.grid_propagate(False)
 
 def random_gen_para_to_env():
-    global current_img, current_df, current_array, env_counter
+    global current_img, current_df, current_array, env_counter, \
+        user_params_backup
 
     if save_random_gen_env_params() == -1:
         return
@@ -2362,6 +2375,7 @@ def random_gen_para_to_env():
         frames['random_gen_para_help_frame'].destroy_frame()
         del frames['random_gen_para_help_frame']
 
+    user_params_backup = user_params.copy()
     build_random_gen_env_viewer()
     build_random_gen_env_menu()
 
