@@ -12,6 +12,7 @@ from flatland.utils.rendertools import RenderTool
 from flatland.envs.agent_utils import SpeedCounter
 from flatland.envs.observations import GlobalObsForRailEnv
 from flatland.envs.timetable_utils import Line
+from code.build_png import calc_resolution
 
 LAST_HINTS = None
 
@@ -174,23 +175,22 @@ def create_env(env_params):
         malfunction_generator=malfunction_gen,
         remove_agents_at_target=False
     )
-
-    obs, info = env.reset()  # obs and info only necessary for correct agent initilization
-    
-    # Ensure that agents have positions
-    if any(agent.position is None for agent in env.agents):
+    try:
+        obs, info = env.reset()
+    except OverflowError as e:
+        obs, info = fallback_reset(env)
+    # Ensure that all agents have positions
+    if any(agent.position is None or agent.position[0] < 0 or agent.position[1] < 0 for agent in env.agents):
         np_random = np.random.RandomState(seed=env_params['seed'])
         agents_positions, agents_directions, agents_targets = create_agents_from_train_stations(LAST_HINTS, env_params['agents'], np_random)
         for idx, agent in enumerate(env.agents):
             agent.position = agents_positions[idx]
             agent.direction = agents_directions[idx]
             agent.target = agents_targets[idx]
-    
     # Speed
     for idx, agent in enumerate(env.agents):
         agent_speed = float(env_params['speed'].get(idx, 1.0))
         agent.speed_counter = SpeedCounter(speed=agent_speed)
-    
     # Validate that initial agent direction matches with track
     for agent in env.agents:
         if agent.position is not None:
@@ -216,6 +216,22 @@ def create_env(env_params):
                             agent.direction = desired_dir
                         break
     return env
+
+
+def fallback_reset(env):
+    print("Handling issues...")
+    # Negative rails become 0
+    if np.any(env.rail.grid < 0):
+        env.rail.grid[env.rail.grid < 0] = 0
+    env.reset_agents()
+    env.agent_positions = np.zeros((env.height, env.width), dtype=int) - 1
+    env._update_agent_positions_map(ignore_old_positions=False)
+    env.obs_builder.reset()
+    env._elapsed_steps = 0
+    env.dones = dict.fromkeys(list(range(env.get_num_agents())) + ["__all__"], False)
+    observation_dict = env._get_observations()
+    info_dict = env.get_info_dict()
+    return observation_dict, info_dict
 
 
 def get_allowed_dirs(track):
@@ -252,7 +268,7 @@ def get_allowed_dirs(track):
     return allowed_dirs
 
 
-def gen_env(env_params, low_quality_mode=False):
+def gen_env(env_params):
     """Creates environment and corresponding png.
     
     Args:
@@ -276,7 +292,9 @@ def gen_env(env_params, low_quality_mode=False):
                 np_random = np.random.RandomState(seed=env_params['seed'])
                 trains = extract_trains_from_hints(LAST_HINTS, env_params['agents'], np_random)
             # Render
-            screen_res = calc_resolution(low_quality_mode, tracks)
+            est_render_time = render_time_prediction(1, env.height*env.width)
+            print(f"Rendering image (~{est_render_time})...")
+            screen_res = calc_resolution(env_params['lowQuality'], tracks)
             renderer = RenderTool(env, screen_height=screen_res, screen_width=screen_res)
             renderer.render_env(show=False)
             # Save image
@@ -296,6 +314,13 @@ def extract_tracks(env):
         track_row = []
         for col in range(env.width):
             transition = env.rail.get_full_transitions(row, col)
+            if transition in [8192,4,128,256]:
+                # Replace Dead-Ends
+                print("> Dead-end at (" + str(row) + "," + str(col) + ") replaced.")
+                if transition == 4 or transition == 256:
+                    transition = 1025
+                else:
+                    transition = 32800
             track_row.append(transition)
         tracks.append(track_row)
     tracks = [[int(cell) for cell in row] for row in tracks]
@@ -332,34 +357,32 @@ def extract_trains(env):
     return trains_df
 
 
-def calc_resolution(low_quality_mode, env):
-    if isinstance(env, list):  # tracks list
-        env_dim_max = max(len(env), len(env[0]))
-    else:  # RailEnv object
-        env_dim_max = max(env.height, env.width)
-    screen_res = env_dim_max  # Base value
-    if low_quality_mode:  # Low
-        if env_dim_max > 1000: screen_res = 6000
-        elif env_dim_max > 600: screen_res *= 6
-        elif env_dim_max > 160: screen_res *= 9
-        elif env_dim_max > 100: screen_res *= 12
-        elif env_dim_max > 50: screen_res *= 18
-        elif env_dim_max > 20: screen_res *= 30
-        elif env_dim_max > 10: screen_res *= 50
-        elif env_dim_max > 3: screen_res *= 100
-        else: screen_res *= 200
-    else:  # Automatic
-        if env_dim_max > 1000: screen_res = 9000
-        elif env_dim_max > 600: screen_res *= 9
-        elif env_dim_max > 400: screen_res *= 12
-        elif env_dim_max > 300: screen_res *= 15
-        elif env_dim_max > 200: screen_res *= 18
-        elif env_dim_max > 100: screen_res *= 30
-        elif env_dim_max > 80: screen_res *= 40
-        elif env_dim_max > 50: screen_res *= 50
-        elif env_dim_max > 30: screen_res *= 80
-        elif env_dim_max > 20: screen_res *= 100
-        elif env_dim_max > 10: screen_res *= 200
-        elif env_dim_max > 3: screen_res *= 300
-        else: screen_res *= 400
-    return screen_res
+def render_time_prediction(timesteps, cells):
+    if cells < 30: sec = 1.2 * timesteps
+    elif cells < 50: sec = 1.3 * timesteps
+    elif cells < 80: sec = 1.4 * timesteps
+    elif cells < 1180:
+        # Runtime increases linearly from 80 to 1180
+        sec = (1.4 + (cells-80) * 0.3/1100) * timesteps
+    else:
+        # Benchmark: 2.25 seconds runtime for 2000 cells
+        # Runtime increases linearly by 25% every 1000 cells
+        sec = 2.25 * (1 + 0.25 * ((cells-2000)/1000)) * timesteps
+    return render_time_pred_str(sec)
+
+
+def render_time_pred_str(seconds):
+    # Round up to full seconds
+    sec = math.ceil(seconds)
+    if sec < 60:
+        return f"{sec}s"
+    elif sec < 3600:
+        minutes = sec // 60
+        sec = sec % 60
+        return f"{minutes}m{sec}s"
+    else:
+        hours = sec // 3600
+        remainder = sec % 3600
+        minutes = remainder // 60
+        sec = remainder % 60
+        return f"{hours}h{minutes}m{sec}s"

@@ -1,5 +1,4 @@
 import os
-import math
 import imageio.v2 as imageio
 from flatland.utils.rendertools import RenderTool
 from PIL import Image, ImageDraw, ImageFont
@@ -137,34 +136,3 @@ def draw_timestep(t, frame_filename):
         position = (img.width - text_width - padding, img.height - text_height - padding)
         draw.text(position, text, fill="black")
         img.save(frame_filename)
-
-
-def render_time_prediction(timesteps, cells):
-    if cells < 30: sec = 1.2 * timesteps
-    elif cells < 50: sec = 1.3 * timesteps
-    elif cells < 80: sec = 1.4 * timesteps
-    elif cells < 1180:
-        # Runtime increases linearly from 80 to 1180
-        sec = (1.4 + (cells-80) * 0.3/1100) * timesteps
-    else:
-        # Benchmark: 2.25 seconds runtime for 2000 cells
-        # Runtime increases linearly by 25% every 1000 cells
-        sec = 2.25 * (1 + 0.25 * ((cells-2000)/1000)) * timesteps
-    return render_time_pred_str(sec)
-
-
-def render_time_pred_str(seconds):
-    # Round up to full seconds
-    sec = math.ceil(seconds)
-    if sec < 60:
-        return f"{sec}s"
-    elif sec < 3600:
-        minutes = sec // 60
-        sec = sec % 60
-        return f"{minutes}m{sec}s"
-    else:
-        hours = sec // 3600
-        remainder = sec % 3600
-        minutes = remainder // 60
-        sec = remainder % 60
-        return f"{hours}h{minutes}m{sec}s"

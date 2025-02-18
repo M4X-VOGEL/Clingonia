@@ -8,10 +8,10 @@ from tkinter import filedialog
 from code.build_png import create_custom_env, save_png
 from code.custom_canvas import *
 from code.files import save_env, delete_tmp_lp, delete_tmp_png, delete_tmp_gif, delete_tmp_frames
-from code.gen_png import gen_env
+from code.gen_png import gen_env, render_time_prediction
 from code.load_env import load_env
 from code.positions import position_df
-from code.build_gif import render_gif, render_time_prediction
+from code.build_gif import render_gif
 
 
 # Platform: 
@@ -87,7 +87,7 @@ default_params = {
     'agents': 4,
     'cities': 4,
     'seed': 1,
-    'grid': True,
+    'grid': False,
     'intercity': 2,
     'incity': 2,
     'remove': True,
@@ -2299,7 +2299,7 @@ def random_gen_para_to_env():
     frames['random_gen_para_frame'].frame.update()
 
     try:
-        tracks, trains = gen_env(user_params, user_params['lowQuality'])
+        tracks, trains = gen_env(user_params)
         delete_tmp_frames()
         env_counter += 1
     except ValueError as e:
@@ -2317,17 +2317,6 @@ def random_gen_para_to_env():
         labels['random_gen_status_label'].label.config(
             text='No environment generated.\n'
                  'Please restart the program.',
-            fg=bad_status_color,
-            anchor="w",
-            justify="left",
-        )
-        frames['random_gen_para_frame'].frame.update()
-        return
-
-    if np.isin(tracks, [8192,4,128,256]).any():
-        labels['random_gen_status_label'].label.config(
-            text='Flatland generated a faulty environment\n'
-                 'Please try a different seed or parameter combination',
             fg=bad_status_color,
             anchor="w",
             justify="left",

@@ -1,5 +1,4 @@
 import numpy as np
-from code.gen_png import calc_resolution
 from flatland.envs.rail_env import RailEnv
 from flatland.envs.rail_generators import rail_from_grid_transition_map
 from flatland.envs.malfunction_generators import MalfunctionParameters, ParamMalfunctionGen
@@ -267,3 +266,36 @@ def save_png(env, path="data/running_tmp.png", low_quality_mode=False):
     renderer.reset()
     print("✅ Build done.")
     return 0
+
+
+def calc_resolution(low_quality_mode, env):
+    if isinstance(env, list):  # tracks list
+        env_dim_max = max(len(env), len(env[0]))
+    else:  # RailEnv object
+        env_dim_max = max(env.height, env.width)
+    screen_res = env_dim_max  # Base value
+    if low_quality_mode:  # Low
+        if env_dim_max > 1000: screen_res = 6000
+        elif env_dim_max > 600: screen_res *= 6
+        elif env_dim_max > 160: screen_res *= 9
+        elif env_dim_max > 100: screen_res *= 12
+        elif env_dim_max > 50: screen_res *= 18
+        elif env_dim_max > 20: screen_res *= 30
+        elif env_dim_max > 10: screen_res *= 50
+        elif env_dim_max > 3: screen_res *= 100
+        else: screen_res *= 200
+    else:  # Automatic
+        if env_dim_max > 1000: screen_res = 9000
+        elif env_dim_max > 600: screen_res *= 9
+        elif env_dim_max > 400: screen_res *= 12
+        elif env_dim_max > 300: screen_res *= 15
+        elif env_dim_max > 200: screen_res *= 18
+        elif env_dim_max > 100: screen_res *= 30
+        elif env_dim_max > 80: screen_res *= 40
+        elif env_dim_max > 50: screen_res *= 50
+        elif env_dim_max > 30: screen_res *= 80
+        elif env_dim_max > 20: screen_res *= 100
+        elif env_dim_max > 10: screen_res *= 200
+        elif env_dim_max > 3: screen_res *= 300
+        else: screen_res *= 400
+    return screen_res
