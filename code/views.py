@@ -60,6 +60,7 @@ switch_off_color = '#E03A3E'
 train_color = '#0FF000'
 station_color = '#000FF0'
 golden_color = '#F0B232'
+grid_color = '#AFB3BA'
 
 
 # state trackers
@@ -972,7 +973,7 @@ def build_main_menu_env_viewer():
         y=frames['main_menu_env_viewer_frame'].height * 0,
         font=canvas_font_layout,
         background_color=canvas_color,
-        grid_color=background_color,
+        grid_color=grid_color,
         border_width=0,
         image=current_img,
         rows=user_params['rows'],
@@ -2400,7 +2401,7 @@ def build_random_gen_env_viewer():
         y=frames['random_gen_env_viewer_frame'].height * 0,
         font=canvas_font_layout,
         background_color=canvas_color,
-        grid_color=background_color,
+        grid_color=grid_color,
         border_width=0,
         image=current_img,
         rows=user_params['rows'],
@@ -3405,7 +3406,7 @@ def build_builder_grid_frame():
         font=canvas_font_layout,
         id_label_font=canvas_label_font_layout,
         background_color=dark_background_color,
-        grid_color=example_color,
+        grid_color=grid_color,
         train_color=train_color,
         station_color=station_color,
         border_width=0,
@@ -4566,7 +4567,7 @@ def build_builder_env_viewer():
         y=frames['builder_env_viewer_frame'].height * 0,
         font=canvas_font_layout,
         background_color=canvas_color,
-        grid_color=background_color,
+        grid_color=grid_color,
         border_width=0,
         image=current_img,
         rows=user_params['rows'],
@@ -4924,7 +4925,7 @@ def build_result_env_viewer():
         font=canvas_font_layout,
         path_label_font=canvas_label_font_layout,
         background_color=canvas_color,
-        grid_color=background_color,
+        grid_color=grid_color,
         border_width=0,
         image=current_img,
         paths_df=current_paths,
@@ -5367,7 +5368,7 @@ def build_timestep_viewer_frame():
         y=frames['timestep_pic_container_frame'].height * 0,
         font=canvas_font_layout,
         background_color=canvas_color,
-        grid_color=background_color,
+        grid_color=grid_color,
         border_width=0,
         image=f'data/tmp_frames/frame_{timestep_file_format}.png',
         rows=user_params['rows'],

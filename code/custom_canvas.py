@@ -181,6 +181,9 @@ class EnvCanvas:
         self.canvas.delete("grid_line")
         adjusted_cell_size = self.cell_size * self.scale
 
+        if adjusted_cell_size < 8:
+            return
+
         for row in range(self.rows + 1):
             self.canvas.create_line(
                 self.x_offset,
@@ -188,6 +191,7 @@ class EnvCanvas:
                 self.x_offset + self.cols * adjusted_cell_size,
                 self.y_offset + row * adjusted_cell_size,
                 fill=self.grid_color,
+                width=(adjusted_cell_size/100)*(1/self.scale),
                 tags='grid_line',
             )
 
@@ -198,6 +202,7 @@ class EnvCanvas:
                 self.x_offset + col * adjusted_cell_size,
                 self.y_offset + self.rows * adjusted_cell_size,
                 fill=self.grid_color,
+                width=(adjusted_cell_size/100)*(1/self.scale),
                 tags='grid_line',
             )
 
@@ -240,7 +245,6 @@ class EnvCanvas:
             height = self.cell_size * self.rows
             self.x_offset = (self.canvas.winfo_width() - width) // 2
             self.y_offset = (self.canvas.winfo_height() - height) // 2
-            self.draw_grid()
             self.draw_image()
         else:
             self.cell_size = (self.canvas.winfo_width() * 0.8) / self.cols
@@ -248,7 +252,6 @@ class EnvCanvas:
             height = self.cell_size * self.rows
             self.x_offset = (self.canvas.winfo_width() - width) // 2
             self.y_offset = (self.canvas.winfo_height() - height) // 2
-            self.draw_grid()
             self.draw_image()
 
 
@@ -422,6 +425,9 @@ class BuildCanvas:
         self.canvas.delete("grid_line")
         adjusted_cell_size = self.cell_size * self.scale
 
+        if adjusted_cell_size < 8:
+            return
+
         for row in range(self.rows + 1):
             self.canvas.create_line(
                 self.x_offset,
@@ -429,6 +435,7 @@ class BuildCanvas:
                 self.x_offset + self.cols * adjusted_cell_size,
                 self.y_offset + row * adjusted_cell_size,
                 fill=self.grid_color,
+                width=(adjusted_cell_size / 100) * (1 / self.scale),
                 tags='grid_line',
             )
 
@@ -439,6 +446,7 @@ class BuildCanvas:
                 self.x_offset + col * adjusted_cell_size,
                 self.y_offset + self.rows * adjusted_cell_size,
                 fill=self.grid_color,
+                width=(adjusted_cell_size / 100) * (1 / self.scale),
                 tags='grid_line',
             )
 
@@ -1309,6 +1317,9 @@ class ResultCanvas:
         self.canvas.delete("grid_line")
         adjusted_cell_size = self.cell_size * self.scale
 
+        if adjusted_cell_size < 8:
+            return
+
         for row in range(self.rows + 1):
             self.canvas.create_line(
                 self.x_offset,
@@ -1316,6 +1327,7 @@ class ResultCanvas:
                 self.x_offset + self.cols * adjusted_cell_size,
                 self.y_offset + row * adjusted_cell_size,
                 fill=self.grid_color,
+                width=(adjusted_cell_size / 100) * (1 / self.scale),
                 tags='grid_line',
             )
 
@@ -1326,6 +1338,7 @@ class ResultCanvas:
                 self.x_offset + col * adjusted_cell_size,
                 self.y_offset + self.rows * adjusted_cell_size,
                 fill=self.grid_color,
+                width=(adjusted_cell_size / 100) * (1 / self.scale),
                 tags='grid_line',
             )
 
