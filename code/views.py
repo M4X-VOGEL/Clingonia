@@ -60,6 +60,7 @@ golden_color = '#F0B232'
 
 
 # state trackers
+first_mod_try = True
 build_mode = None
 last_menu = None
 current_act_err_log = None
@@ -2671,12 +2672,14 @@ def load_random_gen_env_params():
 # builder
 
 def builder_change_to_start_or_main():
-    global build_mode, user_params, current_array, current_df
+    global first_mod_try, build_mode, user_params, current_array, current_df
 
     user_params = user_params_backup.copy()
 
     if build_mode == 'change_params':
         build_mode = 'build'
+    elif build_mode == 'modify':
+        first_mod_try = True
 
     current_array = current_modify_backup_array.copy()
     current_df = current_modify_backup_df.copy()
@@ -3167,6 +3170,18 @@ def build_builder_para_frame():
         visibility=True,
     )
 
+    labels['build_para_status_label'] = Label(
+        root=frames['builder_para_frame'].frame,
+        grid_pos=(9, 4),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=err_font_layout,
+        foreground_color=bad_status_color,
+        background_color=background_color,
+        visibility=False,
+    )
+
     frames['builder_para_frame'].frame.rowconfigure(0, weight=1)
     frames['builder_para_frame'].frame.rowconfigure(
         tuple(range(1,10)), weight=2
@@ -3227,9 +3242,26 @@ def toggle_builder_para_help():
         build_builder_para_help_frame()
 
 def builder_para_to_track_grid():
-    global build_mode, current_array, current_df, \
+    global first_mod_try, build_mode, current_array, current_df, \
         current_builder_backup_array, current_builder_backup_df, \
         current_modify_backup_array, current_modify_backup_df
+
+    if build_mode == 'modify' and first_mod_try:
+        first_mod_try = False
+        pic_count = np.count_nonzero(current_array)
+        if pic_count > 6:
+            labels['build_para_status_label'].label.config(
+                text='⚠️Warning your environment is very large,\n '
+                     'you might encounter issues loading this env.\n'
+                     f'Click again to continue. {pic_count}',
+                fg=golden_color,
+            )
+            labels['build_para_status_label'].place_label()
+            return
+        else:
+            print(pic_count)
+    else:
+        first_mod_try = True
 
     if save_builder_env_params() == -1:
         return
