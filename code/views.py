@@ -3267,17 +3267,15 @@ def builder_para_to_track_grid():
     if build_mode == 'modify' and first_mod_try:
         first_mod_try = False
         pic_count = np.count_nonzero(current_array)
-        if pic_count > 6:
+        if pic_count > 4500:
             labels['build_para_status_label'].label.config(
-                text='⚠️Warning your environment is very large,\n '
-                     'you might encounter issues loading this env.\n'
-                     f'Click again to continue. {pic_count}',
+                text=f'Warning: High element count ({pic_count})\n'
+                     f'Memory issues may disrupt execution\n\n'
+                     f'⚠️Click again to proceed at your own risk⚠️',
                 fg=golden_color,
             )
             labels['build_para_status_label'].place_label()
             return
-        else:
-            print(pic_count)
     else:
         first_mod_try = True
 
