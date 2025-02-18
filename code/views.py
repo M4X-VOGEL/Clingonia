@@ -1,4 +1,5 @@
 import os
+import re
 import ast
 import json
 import shutil
@@ -26,12 +27,14 @@ base_font_size = 20
 info_text_font_size = 16
 frame_title_font_size = 50
 font_base_mod = 1
+font_path_mod = 0.75
 font_err_mod = 0.75
 
 # font layouts
 base_font_layout = ('Arial', int(font_base_mod * base_font_size), 'bold')
 canvas_font_layout = ('Arial', int(font_base_mod * base_font_size))
 canvas_label_font_layout = ('Arial', int(font_base_mod * base_font_size), 'bold')
+path_font_layout = ('Arial', int(font_base_mod * base_font_size * font_path_mod), 'bold')
 err_font_layout = ('Arial', int(font_base_mod * base_font_size * font_err_mod), 'bold')
 help_font_layout = ('Courier', int(font_base_mod * base_font_size))
 info_font_layout = ('Courier', int(font_base_mod * info_text_font_size))
@@ -1121,7 +1124,7 @@ def build_clingo_para_frame():
         sticky='w',
         columnspan=2,
         text='',
-        font=base_font_layout,
+        font=path_font_layout,
         foreground_color=label_color,
         background_color=background_color,
         visibility=True,
@@ -5594,6 +5597,11 @@ def show_previous_timestep():
     for file in os.listdir('data/tmp_frames'):
         frame_list.append(file)
 
+    frame_list = sorted(
+        frame_list,
+        key=lambda x: int(re.search(r'\d{4}', x).group())
+    )
+
     min_t = int(pos_df['timestep'].min())
     max_t = int(pos_df['timestep'].max())
     if current_timestep is None:
@@ -5619,6 +5627,11 @@ def show_next_timestep():
 
     for file in os.listdir('data/tmp_frames'):
         frame_list.append(file)
+
+    frame_list = sorted(
+        frame_list,
+        key=lambda x: int(re.search(r'\d{4}', x).group())
+    )
 
     min_t = int(pos_df['timestep'].min())
     if current_timestep is None:
