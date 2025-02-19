@@ -5371,7 +5371,7 @@ def build_timestep_viewer_frame():
 
     buttons['previous_button'] = Button(
         root=frames['timestep_viewer_frame'].frame,
-        width=5,
+        width=10,
         height=1,
         grid_pos=(1, 0),
         padding=(5, 5),
@@ -5398,7 +5398,7 @@ def build_timestep_viewer_frame():
 
     buttons['next_button'] = Button(
         root=frames['timestep_viewer_frame'].frame,
-        width=5,
+        width=10,
         height=1,
         grid_pos=(1, 2),
         padding=(5, 5),
