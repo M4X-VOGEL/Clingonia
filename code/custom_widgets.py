@@ -197,73 +197,45 @@ class Button:
             self.place_button()
 
     def create_button(self):
-        if True:#sys.platform == 'darwin':
-            # macOS: Verwende ttk.Button mit einem angepassten Style
-            style = ttk.Style()
-            style.theme_use('clam')  # 'clam' erlaubt mehr Farbanpassungen
-            # Erzeuge einen einzigartigen Style-Namen, um Konflikte zu vermeiden
-            style_name = f"Custom.TButton.{id(self)}"
+        style = ttk.Style()
+        style.theme_use('clam')
+        style_name = f"Custom.TButton.{id(self)}"
+
+        style.configure(
+            style_name,
+            foreground=self.foreground_color,
+            background=self.background_color,
+            borderwidth=self.border_width
+        )
+
+        style.layout(style_name, style.layout("TButton"))
+
+        if self.text:
+            if self.font:
+                style.configure(style_name, font=self.font)
+
             style.configure(
                 style_name,
-                foreground=self.foreground_color,
-                background=self.background_color,
-                borderwidth=self.border_width
+                padding=(self.width * 2, self.height * 10)
             )
-            # Wichtiger Schritt: Kopiere das Standardlayout von TButton
-            style.layout(style_name, style.layout("TButton"))
 
-            # Für ttk.Button sind die Dimensionen ggf. nicht direkt nutzbar.
-            if self.text:
-                button = ttk.Button(
-                    self.root,
-                    text=self.text,
-                    command=self.command,
-                    style=style_name
-                )
-            elif self.image:
-                button = ttk.Button(
-                    self.root,
-                    image=self.image,
-                    command=self.command,
-                    style=style_name
-                )
-            else:
-                warnings.warn('No text or image given to Button', UserWarning)
-                return None
-            return button
+            button = ttk.Button(
+                self.root,
+                text=self.text,
+                command=self.command,
+                style=style_name
+            )
+        elif self.image:
+            button = ttk.Button(
+                self.root,
+                image=self.image,
+                command=self.command,
+                style=style_name
+            )
         else:
-            # Windows: Verwende tk.Button
-            if self.text:
-                button = tk.Button(
-                    self.root,
-                    command=self.command,
-                    width=self.width,
-                    height=self.height,
-                    text=self.text,
-                    font=self.font,
-                    fg=self.foreground_color,
-                    bg=self.background_color,
-                    bd=self.border_width,
-                    activebackground=self.background_color,
-                    highlightbackground=self.background_color
-                )
-            elif self.image:
-                button = tk.Button(
-                    self.root,
-                    command=self.command,
-                    width=self.width,
-                    height=self.height,
-                    image=self.image,
-                    fg=self.foreground_color,
-                    bg=self.background_color,
-                    bd=self.border_width,
-                    activebackground=self.background_color,
-                    highlightbackground=self.background_color
-                )
-            else:
-                warnings.warn('No text or image given to Button', UserWarning)
-                return None
-            return button
+            warnings.warn('No text or image given to Button', UserWarning)
+            return None
+        return button
 
     def place_button(self):
         self.button.grid(

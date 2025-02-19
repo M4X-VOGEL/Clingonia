@@ -894,7 +894,7 @@ class TrainListCanvas:
                 width=12,
                 height=1,
                 grid_pos=(index, 2),
-                padding=(0, 0),
+                padding=(20, 0),
                 command=lambda i=index: self.open_train_config_frame(i),
                 text=f'Configure {index}',
                 font=self.base_font_layout,
