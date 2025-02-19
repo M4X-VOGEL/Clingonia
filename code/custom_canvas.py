@@ -779,44 +779,49 @@ class TrainListCanvas:
             height: int,
             x: int,
             y: int,
-            font: Tuple[str, int],
-            config_title_font: Tuple[str, int, str],
+            base_font_layout: Tuple[str, int],
+            err_font_layout: Tuple[str, int, str],
+            title_font_layout: Tuple[str, int, str],
             background_color: str,
             label_color: str,
             button_color: str,
             entry_color: str,
             input_color: str,
+            example_color: str,
             bad_status_color: str,
             border_width: int,
             grid: BuildCanvas,
             train_data: pd.DataFrame,
-            outer_frame: tk.Tk,
+            windows: dict,
+            frames: dict,
     ):
         self.root = root
         self.width = width
         self.height = height
         self.x = x
         self.y = y
-        self.font = font
-        self.config_title_font = config_title_font
+        self.base_font_layout = base_font_layout
+        self.err_font_layout = err_font_layout
+        self.title_font_layout = title_font_layout
         self.background_color = background_color
         self.label_color = label_color
         self.button_color = button_color
         self.entry_color = entry_color
         self.input_color = input_color
+        self.example_color = example_color
         self.bad_status_color = bad_status_color
         self.border_width = border_width
         self.grid = grid
         self.train_data = train_data
-        self.outer_frame = outer_frame
+        self.windows = windows
+        self.frames = frames
+
 
         self.station_dict = {}
         self.config_dict = {}
         self.remove_dict = {}
 
-        self.station_img = Image.open('data/png/Bahnhof_#d50000.png')
-        self.station_img = self.station_img.resize(size=(70, 70))
-        self.station_img = ImageTk.PhotoImage(self.station_img)
+        self.station_img = 'data/png/Bahnhof_#d50000.png'
 
         self.canvas = self.create_canvas()
         self.pack_canvas()
@@ -859,57 +864,60 @@ class TrainListCanvas:
             frame = tk.Frame(self.scroll_frame, bg=self.background_color)
             frame.pack(fill='x', pady=5)
 
-            self.station_dict[index] = tk.Button(
-                frame,
-                width=50, height=50,
+            self.station_dict[index] = Button(
+                root=frame,
+                width=70,
+                height=70,
+                grid_pos=(index, 0),
+                padding=(0, 0),
                 command=lambda i=index: self.grid.select_station(i),
                 image=self.station_img,
-                foreground=self.background_color,
-                background=self.background_color,
-                bd=0
+                foreground_color=self.background_color,
+                background_color=self.background_color,
+                border_width=0,
+                visibility=True,
             )
-            self.station_dict[index].pack(side='left', padx=0)
 
-            label = tk.Label(
-                frame,
-                width=25,
-                font=self.font,
-                fg=self.label_color, bg=self.background_color,
+            Label(
+                root=frame,
+                grid_pos=(index, 1),
+                padding=(0, 0),
                 text=f' Train {index}:   {row["start_pos"]},  {row["dir"]}',
-                anchor='w',
+                font=self.base_font_layout,
+                foreground_color=self.label_color,
+                background_color=self.background_color,
+                visibility=True,
             )
-            label.pack(side='left', padx=0)
 
-            if sys_platform == "Darwin":  # macOS
-                self.config_dict[index] = tk.Button(
-                    frame,
-                    width=12,height=1,
-                    font=self.font,
-                    fg='#000000', bg='#333333',
-                    text=f'configure {index}',
-                    command=lambda i=index: self.open_train_config_frame(i)
-                )
-                self.config_dict[index].pack(side='left', padx=5)
-            else:  # Window, Linux and other
-                self.config_dict[index] = tk.Button(
-                    frame,
-                    width=12,height=1,
-                    font=self.font,
-                    fg=self.label_color, bg=self.button_color, bd=0,
-                    text=f'configure {index}',
-                    command=lambda i=index: self.open_train_config_frame(i)
-                )
-                self.config_dict[index].pack(side='left', padx=5)
-
-            self.remove_dict[index] = tk.Button(
-                frame,
-                width=7, height=1,
-                font=self.font,
-                fg=self.bad_status_color, bg=self.background_color, bd=0,
-                text='remove',
-                command=lambda i=index: self.remove_train(i)
+            self.config_dict[index] = Button(
+                root=frame,
+                width=12,
+                height=1,
+                grid_pos=(index, 2),
+                padding=(20, 0),
+                command=lambda i=index: self.open_train_config_frame(i),
+                text=f'Configure {index}',
+                font=self.base_font_layout,
+                foreground_color=self.label_color,
+                background_color=self.button_color,
+                border_width=0,
+                visibility=True,
             )
-            self.remove_dict[index].pack(side='left', padx=10)
+
+            self.remove_dict[index] = Button(
+                root=frame,
+                width=7,
+                height=1,
+                grid_pos=(index, 3),
+                padding=(0, 0),
+                command=lambda i=index: self.remove_train(i),
+                text=f'Remove',
+                font=self.base_font_layout,
+                foreground_color=self.bad_status_color,
+                background_color=self.background_color,
+                border_width=0,
+                visibility=True,
+            )
 
     def on_frame_configure(self, event):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
@@ -970,122 +978,144 @@ class TrainListCanvas:
         return
 
     def open_train_config_frame(self, index):
-        config_frame = tk.Frame(
-            self.outer_frame,
-            width=self.outer_frame.winfo_width(),
-            height=self.outer_frame.winfo_height(),
-            bg=self.background_color,
-            bd=0,
-        )
-        config_frame.place(x=0, y=0)
-
-        config_label = tk.Label(
-            config_frame,
-            text=f'Configure: Train {index}',
-            font=self.config_title_font,
-            foreground=self.label_color, background=self.background_color, bd=0,
-        )
-        config_label.place(
-            x=self.outer_frame.winfo_width() * 0.1,
-            y=self.outer_frame.winfo_height() * 0.3
+        config_frame = Frame(
+            root=self.windows['flatland_window'].window,
+            width=self.frames['train_builder_menu_frame'].width,
+            height=self.frames['train_builder_menu_frame'].height,
+            grid_pos=(0, 1),
+            padding=(0, 0),
+            sticky='nesw',
+            background_color=self.background_color,
+            border_width=0,
+            visibility=True
         )
 
-        ed_label = tk.Label(
-            config_frame,
-            text='Earliest Departure:',
-            font=self.font,
-            foreground=self.label_color, background=self.background_color, bd=0,
-        )
-        ed_label.place(
-            x=self.outer_frame.winfo_width() * 0.1,
-            y=self.outer_frame.winfo_height() * 0.4
-        )
-
-        ed_entry = tk.Entry(
-            config_frame,
-            width=5, font=self.font,
-            foreground=self.input_color, background=self.entry_color, bd=1,
-        )
-        ed_entry.place(
-            x=self.outer_frame.winfo_width() * 0.4,
-            y=self.outer_frame.winfo_height() * 0.4
+        Label(
+            root=config_frame.frame,
+            grid_pos=(0,0),
+            padding=(100,(125,0)),
+            columnspan=2,
+            sticky='sw',
+            text=f'Train {index}',
+            font=self.title_font_layout,
+            foreground_color=self.label_color,
+            background_color=self.background_color,
+            visibility=True,
         )
 
+        Label(
+            root=config_frame.frame,
+            grid_pos=(1, 0),
+            padding=(100, 0),
+            sticky='sw',
+            text=f'Earliest Departure:',
+            font=self.base_font_layout,
+            foreground_color=self.label_color,
+            background_color=self.background_color,
+            visibility=True,
+        )
+
+        ed_entry = EntryField(
+            root=config_frame.frame,
+            width=10,
+            height=1,
+            grid_pos=(1, 0),
+            padding=(0, 0),
+            sticky='se',
+            text=f'e.g. 1',
+            font=self.base_font_layout,
+            foreground_color=self.input_color,
+            background_color=self.entry_color,
+            example_color=self.example_color,
+            border_width=0,
+            visibility=True,
+        )
         if self.train_data.loc[index, 'e_dep'] != -1:
-            ed_entry.insert(
-                0,
-                str(int(self.train_data.loc[index, 'e_dep']))
-            )
+            ed_entry.insert_string(str(self.train_data.loc[index, 'e_dep']))
 
-        ed_err_label = tk.Label(
-            config_frame,
+        ed_err_label = Label(
+            root=config_frame.frame,
+            grid_pos=(1,1),
+            padding=((50,0),0),
+            sticky='sw',
             text='',
-            font=self.font,
-            foreground=self.bad_status_color, background=self.background_color,
-            bd=0,
-        )
-        ed_err_label.place(
-            x=self.outer_frame.winfo_width() * 0.5,
-            y=self.outer_frame.winfo_height() * 0.4
+            font=self.err_font_layout,
+            foreground_color=self.bad_status_color,
+            background_color=self.background_color,
+            visibility=True,
         )
 
-        la_label = tk.Label(
-            config_frame,
-            text='Latest Arrival:',
-            font=self.font,
-            foreground=self.label_color, background=self.background_color,
-            bd=0,
-        )
-        la_label.place(
-            x=self.outer_frame.winfo_width() * 0.1,
-            y=self.outer_frame.winfo_height() * 0.45
+        Label(
+            root=config_frame.frame,
+            grid_pos=(2, 0),
+            padding=(100, 20),
+            sticky='w',
+            text=f'Latest Arrival:',
+            font=self.base_font_layout,
+            foreground_color=self.label_color,
+            background_color=self.background_color,
+            visibility=True,
         )
 
-        la_entry = tk.Entry(
-            config_frame,
-            width=5, font=self.font,
-            foreground=self.input_color, background=self.entry_color, bd=1,
-        )
-        la_entry.place(
-            x=self.outer_frame.winfo_width() * 0.4,
-            y=self.outer_frame.winfo_height() * 0.45
+        la_entry = EntryField(
+            root=config_frame.frame,
+            width=10,
+            height=1,
+            grid_pos=(2, 0),
+            padding=(0, 20),
+            sticky='e',
+            text=f'e.g. 200',
+            font=self.base_font_layout,
+            foreground_color=self.input_color,
+            background_color=self.entry_color,
+            example_color=self.example_color,
+            border_width=0,
+            visibility=True,
         )
         if self.train_data.loc[index, 'l_arr'] != -1:
-            la_entry.insert(
-                0,
-                str(int(self.train_data.loc[index, 'l_arr']))
-            )
+            la_entry.insert_string(str(self.train_data.loc[index, 'l_arr']))
 
-        la_err_label = tk.Label(
-            config_frame,
+        la_err_label = Label(
+            root=config_frame.frame,
+            grid_pos=(2,1),
+            padding=((50,0),20),
+            sticky='w',
             text='',
-            font=self.font,
-            foreground=self.bad_status_color, background=self.background_color,
-            bd=0,
-        )
-        ed_err_label.place(
-            x=self.outer_frame.winfo_width() * 0.5,
-            y=self.outer_frame.winfo_height() * 0.45
+            font=self.err_font_layout,
+            foreground_color=self.bad_status_color,
+            background_color=self.background_color,
+            visibility=True,
         )
 
-        save = tk.Button(
-            config_frame,
-            width=5, height=1,
+        Button(
+            root=config_frame.frame,
+            width=20,
+            height=1,
+            grid_pos=(3, 0),
+            padding=(100, 40),
+            sticky='nw',
+            columnspan=2,
             command=lambda: self.save_ed_la(
                 index,
                 ed_entry,
                 la_entry,
                 ed_err_label,
                 la_err_label,
-                config_frame
+                config_frame,
+                True
             ),
-            text='Save', font=self.font,
-            foreground=self.label_color, background=self.button_color, bd=0
+            text='Save',
+            font=self.base_font_layout,
+            foreground_color=self.label_color,
+            background_color=self.button_color,
+            border_width=0,
+            visibility=True,
         )
-        save.place(
-            x=self.outer_frame.winfo_width() * 0.4,
-            y=self.outer_frame.winfo_height() * 0.5
-        )
+
+        config_frame.frame.rowconfigure((0, 3),weight=10)
+        config_frame.frame.rowconfigure((1, 2), weight=1)
+        config_frame.frame.columnconfigure((0, 1),weight=1)
+        config_frame.frame.grid_propagate(False)
 
     def save_ed_la(
             self,
@@ -1094,45 +1124,72 @@ class TrainListCanvas:
             la_entry,
             ed_err_label,
             la_err_label,
-            config_frame
+            config_frame,
+            save
     ):
-        err_count = 0
-        ed = ed_entry.get()
-        la = la_entry.get()
-        if ed == '':
-            ed = -1
-        else:
-            try:
-                ed = int(ed)
-                ed_err_label.place_forget()
-            except ValueError:
-                ed_err_label.config(text='has to be an integer > 0')
-                ed_err_label.place(
-                    x=self.outer_frame.winfo_width() * 0.5,
-                    y=self.outer_frame.winfo_height() * 0.4
-                )
-                err_count += 1
 
-        if la == '':
-            la = -1
-        else:
-            try:
+        if not save:
+            config_frame.destroy_frame()
+            return 0
+
+        ed = ed_entry.entry_field.get()
+        la = la_entry.entry_field.get()
+
+        err_count = 0
+
+        try:
+            if ed.startswith('e.g.') or ed == '' or ed is None:
+                ed = -1
+            else:
+                ed = int(ed)
+                ed_err_label.hide_label()
+        except ValueError:
+            ed_err_label.label.config(
+                text='needs int > 0',
+                fg=self.bad_status_color,
+            )
+            ed_err_label.place_label()
+            err_count += 1
+
+        try:
+            if la.startswith('e.g.') or la == '' or la is None:
+                la = -1
+            else:
                 la = int(la)
-                la_err_label.place_forget()
-            except ValueError:
-                la_err_label.config(text='has to be an integer > 0')
-                la_err_label.place(
-                    x=self.outer_frame.winfo_width() * 0.5,
-                    y=self.outer_frame.winfo_height() * 0.45
-                )
-                err_count += 1
+                la_err_label.hide_label()
+        except ValueError:
+            la_err_label.label.config(
+                text='needs int > 0',
+                fg=self.bad_status_color,
+            )
+            la_err_label.place_label()
+            err_count += 1
+
+        if err_count:
+            return -1
+
+        if ed < 1:
+            ed_err_label.label.config(
+                text='needs int > 0',
+                fg=self.bad_status_color,
+            )
+            ed_err_label.place_label()
+            err_count += 1
+
+        if la < 1:
+            la_err_label.label.config(
+                text='needs int > 0',
+                fg=self.bad_status_color,
+            )
+            la_err_label.place_label()
+            err_count += 1
 
         if err_count:
             return -1
 
         self.train_data.loc[index, 'e_dep'] = ed
         self.train_data.loc[index, 'l_arr'] = la
-        config_frame.destroy()
+        config_frame.destroy_frame()
 
 
 class ResultCanvas:

@@ -1,6 +1,7 @@
 from typing import Union, Tuple
 
 import tkinter as tk
+from tkinter import ttk
 from PIL import Image, ImageTk, ImageDraw, ImageSequence
 import warnings
 
@@ -187,7 +188,7 @@ class Button:
         self.rotation = rotation
 
         if self.image:
-             self.image = self.get_image(self.image)
+            self.image = self.get_image(self.image)
 
         self.button = self.create_button()
 
@@ -195,32 +196,54 @@ class Button:
             self.place_button()
 
     def create_button(self):
+        style = ttk.Style()
+        style.theme_use('clam')
+        style_name = f"Custom.TButton.{id(self)}"
+
+        style.configure(
+            style_name,
+            foreground=self.foreground_color,
+            background=self.background_color,
+            borderwidth=self.border_width
+        )
+
+        style.layout(style_name, style.layout("TButton"))
+
         if self.text:
-            button = tk.Button(
-                self.root, command=self.command,
-                width=self.width, height=self.height,
-                text=self.text, font=self.font,
-                fg=self.foreground_color, bg=self.background_color,
-                bd=self.border_width
+            if self.font:
+                style.configure(style_name, font=self.font)
+
+            style.configure(
+                style_name,
+                padding=(self.width * 2, self.height * 10)
             )
-            return button
+
+            button = ttk.Button(
+                self.root,
+                text=self.text,
+                command=self.command,
+                style=style_name
+            )
         elif self.image:
-            button = tk.Button(
-                self.root, command=self.command,
-                width=self.width, height=self.height,
+            button = ttk.Button(
+                self.root,
                 image=self.image,
-                fg=self.foreground_color, bg=self.background_color,
-                bd=self.border_width
+                command=self.command,
+                style=style_name
             )
-            return button
         else:
             warnings.warn('No text or image given to Button', UserWarning)
+            return None
+        return button
 
     def place_button(self):
         self.button.grid(
-            row=self.grid_pos[0], column=self.grid_pos[1],
-            padx=self.padding[0], pady=self.padding[1],
-            sticky=self.sticky, columnspan=self.columnspan,
+            row=self.grid_pos[0],
+            column=self.grid_pos[1],
+            padx=self.padding[0],
+            pady=self.padding[1],
+            sticky=self.sticky,
+            columnspan=self.columnspan,
         )
         self.visibility = True
 
@@ -235,12 +258,14 @@ class Button:
             self.visibility = False
         else:
             self.button.grid(
-                row=self.grid_pos[0], column=self.grid_pos[1],
-                padx=self.padding[0], pady=self.padding[1],
-                sticky=self.sticky, columnspan=self.columnspan,
+                row=self.grid_pos[0],
+                column=self.grid_pos[1],
+                padx=self.padding[0],
+                pady=self.padding[1],
+                sticky=self.sticky,
+                columnspan=self.columnspan,
             )
             self.visibility = True
-        return
 
     def get_image(self, image_path):
         image = Image.open(image_path)
