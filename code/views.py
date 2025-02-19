@@ -34,6 +34,7 @@ font_err_mod = 0.75
 base_font_layout = ('Arial', int(font_base_mod * base_font_size), 'bold')
 canvas_font_layout = ('Arial', int(font_base_mod * base_font_size))
 canvas_label_font_layout = ('Arial', int(font_base_mod * base_font_size), 'bold')
+save_font_layout = ('Arial', int(font_base_mod * base_font_size), 'italic')
 path_font_layout = ('Arial', int(font_base_mod * base_font_size * font_path_mod), 'bold')
 err_font_layout = ('Arial', int(font_base_mod * base_font_size * font_err_mod), 'bold')
 help_font_layout = ('Courier', int(font_base_mod * base_font_size))
@@ -352,7 +353,7 @@ def title_frame_label(font, scale_fac):
 
 def title_frame_subtitle_label(font, scale_fac):
     # Necessary for macOS
-    labels['title_label'] = Label(
+    labels['sub_title_label'] = Label(
         root=frames['title_frame'].frame,
         grid_pos=(2, 0),
         padding=(0, (0,40)),
@@ -726,62 +727,43 @@ def build_main_menu():
         visibility=True,
     )
 
-    if sys_platform == "Darwin":  # macOS
-        labels['saveImage_label'] = Label(
-            root=frames['main_menu_frame'].frame,
-            grid_pos=(4, 1),
-            padding=(28, 2, 0, 0),
-            sticky='ne',
-            text='Image',
-            font=('Arial', int(font_base_mod * base_font_size), 'normal'),
-            foreground_color='#000000',
-            background_color='#EEEEEE',
-            visibility=True,
-        )
-        buttons['saveImage_button'] = ToggleSwitch(
-            root=frames['main_menu_frame'].frame,
-            width=30, height=16,
-            on_color=switch_on_color, off_color=switch_off_color,
-            handle_color='#777777', background_color='#EEEEEE',
-            command=change_save_image_status,
-        )
-        buttons['saveImage_button'].grid(row=4, column=1, pady=(25,0), padx=40, sticky="ne")
-        buttons['saveImage_button'].set_state(user_params['saveImage'])
-    else:  # Windows, Linux and other
-        frames['save_button_frame'] = Frame(
-            root=frames['main_menu_frame'].frame,
-            width=10,
-            height=10,
-            grid_pos=(4, 1),
-            padding=(0, 0),
-            sticky='ne',
-            background_color=button_color,
-            border_width=0,
-            visibility=True
-        )
+    frames['save_button_frame'] = Frame(
+        root=frames['main_menu_frame'].frame,
+        width=10,
+        height=10,
+        grid_pos=(4, 1),
+        padding=(0, 0),
+        sticky='ne',
+        background_color=button_color,
+        border_width=0,
+        visibility=True
+    )
 
-        labels['saveImage_label'] = Label(
-            root=frames['save_button_frame'].frame,
-            grid_pos=(0, 0),
-            padding=((0, 10), (5, 0)),
-            sticky='n',
-            text='Image',
-            font=('Arial', int(font_base_mod * base_font_size * 0.8), 'italic'),
-            foreground_color=label_color,
-            background_color=button_color,
-            visibility=True,
-        )
-        buttons['saveImage_button'] = ToggleSwitch(
-            root=frames['save_button_frame'].frame,
-            width=70, height=30,
-            on_color=switch_on_color, off_color=switch_off_color,
-            handle_color=input_color, background_color=button_color,
-            command=change_save_image_status,
-        )
-        buttons['saveImage_button'].grid(
-            row=0, column=0, padx=(0, 10), pady=(45, 0), sticky="n"
-        )
-        buttons['saveImage_button'].set_state(user_params['saveImage'])
+    labels['saveImage_label'] = Label(
+        root=frames['save_button_frame'].frame,
+        grid_pos=(0, 0),
+        padding=((0, 10), (5, 0)),
+        sticky='n',
+        text='Image',
+        font=save_font_layout,
+        foreground_color=label_color,
+        background_color=button_color,
+        visibility=True,
+    )
+    buttons['saveImage_button'] = ToggleSwitch(
+        root=frames['save_button_frame'].frame,
+        width=frames['save_button_frame'].width * 5,
+        height=frames['save_button_frame'].height * 2,
+        on_color=switch_on_color,
+        off_color=switch_off_color,
+        handle_color=input_color,
+        background_color=button_color,
+        command=change_save_image_status,
+    )
+    buttons['saveImage_button'].grid(
+        row=1, column=0, padx=(0, 10), pady=(5, 0), sticky="s"
+    )
+    buttons['saveImage_button'].set_state(user_params['saveImage'])
 
     buttons['load_env_button'] = Button(
         root=frames['main_menu_frame'].frame,
