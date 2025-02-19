@@ -1,4 +1,4 @@
-from typing import Union, Tuple
+from typing import Union, Tuple, Dict
 
 import tkinter as tk
 from tkinter import ttk
@@ -169,6 +169,8 @@ class Button:
             ] = None,
             image: Union[str, None] = None,
             rotation: Union[int, None] = 0,
+            style: Union[Dict[str, Union[str, int, Tuple]], None] = None,
+            style_map: Union[Dict[str, list], None] = None
     ):
         self.root = root
         self.width = width
@@ -186,6 +188,8 @@ class Button:
         self.text = text
         self.image = image
         self.rotation = rotation
+        self.style_config = style if style else {}
+        self.style_map_config = style_map if style_map else {}
 
         if self.image:
             self.image = self.get_image(self.image)
@@ -206,6 +210,12 @@ class Button:
             background=self.background_color,
             borderwidth=self.border_width
         )
+
+        for key, value in self.style_config.items():
+            style.configure(style_name, **{key: value})
+
+        for key, value in self.style_map_config.items():
+            style.map(style_name, **{key: value})
 
         style.layout(style_name, style.layout("TButton"))
 
