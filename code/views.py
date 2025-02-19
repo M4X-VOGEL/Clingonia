@@ -4141,18 +4141,21 @@ def build_train_builder_menu_frame():
         height=frames['train_config_list_canvas_frame'].height,
         x=frames['train_config_list_canvas_frame'].width * 0,
         y=frames['train_config_list_canvas_frame'].height * 0,
-        font=canvas_font_layout,
-        config_title_font=title_font_layout,
+        base_font_layout=base_font_layout,
+        err_font_layout=err_font_layout,
+        title_font_layout=title_font_layout,
         background_color=background_color,
         label_color=label_color,
         button_color=button_color,
         entry_color=entry_color,
         input_color=input_color,
+        example_color=example_color,
         bad_status_color=bad_status_color,
         border_width=0,
         grid=canvases['builder_grid_canvas'],
         train_data=current_df,
-        outer_frame=frames['train_builder_menu_frame'].frame,
+        frames=frames,
+        windows=windows,
     )
     canvases['builder_grid_canvas'].train_list = canvases['train_config_list']
 
@@ -4239,7 +4242,7 @@ def open_train_all_config_frame():
     labels['eDep_error_label'] = Label(
         root=frames['train_all_config_frame'].frame,
         grid_pos=(2,2),
-        padding=(0,0),
+        padding=((0,50),0),
         sticky='s',
         text='',
         font=err_font_layout,
@@ -4280,7 +4283,7 @@ def open_train_all_config_frame():
     labels['lArr_error_label'] = Label(
         root=frames['train_all_config_frame'].frame,
         grid_pos=(3,2),
-        padding=(0,20),
+        padding=((0,50),20),
         sticky='s',
         text='',
         font=err_font_layout,
@@ -4360,10 +4363,24 @@ def save_train_all_config(save):
         return -1
 
     if ed is not None:
-        current_df['e_dep'] = [ed] * len(current_df['e_dep'])
+        if ed < 1:
+            labels['eDep_error_label'].label.config(
+                text='needs int > 0',
+                fg=bad_status_color,
+            )
+            labels['eDep_error_label'].place_label()
+        else:
+            current_df['e_dep'] = [ed] * len(current_df['e_dep'])
 
     if la is not None:
-        current_df['l_arr'] = [la] * len(current_df['l_arr'])
+        if la < 1:
+            labels['lArr_error_label'].label.config(
+                text='needs int > 0',
+                fg=bad_status_color,
+            )
+            labels['lArr_error_label'].place_label()
+        else:
+            current_df['l_arr'] = [la] * len(current_df['l_arr'])
 
     if 'all_eDep_entry' in entry_fields:
         del entry_fields['all_eDep_entry']
