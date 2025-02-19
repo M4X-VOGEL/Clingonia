@@ -821,9 +821,7 @@ class TrainListCanvas:
         self.config_dict = {}
         self.remove_dict = {}
 
-        self.station_img = Image.open('data/png/Bahnhof_#d50000.png')
-        self.station_img = self.station_img.resize(size=(70, 70))
-        self.station_img = ImageTk.PhotoImage(self.station_img)
+        self.station_img = 'data/png/Bahnhof_#d50000.png'
 
         self.canvas = self.create_canvas()
         self.pack_canvas()
@@ -866,57 +864,60 @@ class TrainListCanvas:
             frame = tk.Frame(self.scroll_frame, bg=self.background_color)
             frame.pack(fill='x', pady=5)
 
-            self.station_dict[index] = tk.Button(
-                frame,
-                width=50, height=50,
+            self.station_dict[index] = Button(
+                root=frame,
+                width=70,
+                height=70,
+                grid_pos=(index, 0),
+                padding=(0, 0),
                 command=lambda i=index: self.grid.select_station(i),
                 image=self.station_img,
-                foreground=self.background_color,
-                background=self.background_color,
-                bd=0
+                foreground_color=self.background_color,
+                background_color=self.background_color,
+                border_width=0,
+                visibility=True,
             )
-            self.station_dict[index].pack(side='left', padx=0)
 
-            label = tk.Label(
-                frame,
-                width=25,
-                font=self.base_font_layout,
-                fg=self.label_color, bg=self.background_color,
+            Label(
+                root=frame,
+                grid_pos=(index, 1),
+                padding=(0, 0),
                 text=f' Train {index}:   {row["start_pos"]},  {row["dir"]}',
-                anchor='w',
-            )
-            label.pack(side='left', padx=0)
-
-            if sys_platform == "Darwin":  # macOS
-                self.config_dict[index] = tk.Button(
-                    frame,
-                    width=12,height=1,
-                    font=self.base_font_layout,
-                    fg='#000000', bg='#333333',
-                    text=f'configure {index}',
-                    command=lambda i=index: self.open_train_config_frame(i)
-                )
-                self.config_dict[index].pack(side='left', padx=5)
-            else:  # Window, Linux and other
-                self.config_dict[index] = tk.Button(
-                    frame,
-                    width=12,height=1,
-                    font=self.base_font_layout,
-                    fg=self.label_color, bg=self.button_color, bd=0,
-                    text=f'configure {index}',
-                    command=lambda i=index: self.open_train_config_frame(i)
-                )
-                self.config_dict[index].pack(side='left', padx=5)
-
-            self.remove_dict[index] = tk.Button(
-                frame,
-                width=7, height=1,
                 font=self.base_font_layout,
-                fg=self.bad_status_color, bg=self.background_color, bd=0,
-                text='remove',
-                command=lambda i=index: self.remove_train(i)
+                foreground_color=self.label_color,
+                background_color=self.background_color,
+                visibility=True,
             )
-            self.remove_dict[index].pack(side='left', padx=10)
+
+            self.config_dict[index] = Button(
+                root=frame,
+                width=12,
+                height=1,
+                grid_pos=(index, 2),
+                padding=(0, 0),
+                command=lambda i=index: self.open_train_config_frame(i),
+                text=f'Configure {index}',
+                font=self.base_font_layout,
+                foreground_color=self.label_color,
+                background_color=self.button_color,
+                border_width=0,
+                visibility=True,
+            )
+
+            self.remove_dict[index] = Button(
+                root=frame,
+                width=7,
+                height=1,
+                grid_pos=(index, 3),
+                padding=(0, 0),
+                command=lambda i=index: self.remove_train(i),
+                text=f'Remove',
+                font=self.base_font_layout,
+                foreground_color=self.bad_status_color,
+                background_color=self.background_color,
+                border_width=0,
+                visibility=True,
+            )
 
     def on_frame_configure(self, event):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
