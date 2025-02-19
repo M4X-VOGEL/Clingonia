@@ -47,6 +47,7 @@ False: Agents remain, blocking the destination.
 
 === Low quality mode:
 Lowers resolution to significantly reduce the PNG file size.
+Low quality is the default for environments over 1000×1000.
 ===
 
 

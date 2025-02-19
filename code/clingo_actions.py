@@ -93,7 +93,9 @@ def run_clingo(clingo_path, lp_files, answer_number):
                     frustration = 30  # Loop Clingo quotes
         # Final message with total execution time
         execution_time = time.perf_counter() - timer_start
-        if execution_time <= 90:
+        if execution_time <= 30:
+            pass
+        elif execution_time <= 90:
             print(f"Clingo: '{clingo_finisher.get(1, '')}'")
         elif execution_time <= 300:
             print(f"Clingo: '{clingo_finisher.get(2, '')}'")

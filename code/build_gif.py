@@ -2,7 +2,7 @@ import os
 import imageio.v2 as imageio
 from flatland.utils.rendertools import RenderTool
 from PIL import Image, ImageDraw, ImageFont
-from code.build_png import create_custom_env
+from code.build_png import create_custom_env, pil_config
 
 DIR_MAP = {'n': 0, 'e': 1, 's': 2, 'w': 3}
 images = []  # Frame list
@@ -67,12 +67,20 @@ def render_gif(tracks, trains, df_pos, env_params, env_counter, output_gif='data
             agent.position = (int(row['y']), int(row['x']))
             agent.direction = DIR_MAP[row['dir']]
         
-        # Render
+        # Render image
+        if env.width * env.height > 1000000:
+            low_quality_mode = True
         screen_res = calc_gif_resolution(low_quality_mode, env)
-        renderer = RenderTool(env, gl="PILSVG", screen_height=screen_res, screen_width=screen_res)
+        graphics_lib = "PIL" if low_quality_mode else "PILSVG"
+        renderer = RenderTool(env, gl=graphics_lib, screen_height=screen_res, screen_width=screen_res)
         renderer.reset()
-        renderer.render_env(show=False, show_observations=False, show_predictions=False)
-
+        if graphics_lib == "PIL":
+            pil_config(renderer)
+        renderer.render_env(
+            show=False,
+            show_observations=False,
+            show_predictions=False
+        )
         # Save tmp frames
         frame_filename = os.path.join(tmp_dir, f"frame_{t:04d}.png")
         renderer.gl.save_image(frame_filename)

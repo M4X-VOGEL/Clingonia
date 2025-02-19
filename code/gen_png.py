@@ -12,7 +12,7 @@ from flatland.utils.rendertools import RenderTool
 from flatland.envs.agent_utils import SpeedCounter
 from flatland.envs.observations import GlobalObsForRailEnv
 from flatland.envs.timetable_utils import Line
-from code.build_png import calc_resolution
+from code.build_png import calc_resolution, pil_config
 
 LAST_HINTS = None
 
@@ -28,8 +28,6 @@ def create_agents_from_train_stations(hints, num_agents, np_random):
         [tuple] Agent positions, directions und targets.
     """
     train_stations = hints['train_stations']
-    if len(train_stations) < 2:  # Check for minimum of 2 cities
-        raise ValueError("Mindestens zwei Städte benötigt, um Start- und Zielbahnhöfe zu unterscheiden.")
     
     agents_positions = []
     agents_directions = []
@@ -99,7 +97,7 @@ def custom_sparse_line_generator(env_params, seed=1):
     return generator
 
 
-def extract_trains_from_hints(hints, num_agents, np_random, env_params):
+def extract_trains_from_hints(hints, np_random, env_params):
     """Creates trains DF with the hints.
     
     Args:
@@ -111,6 +109,7 @@ def extract_trains_from_hints(hints, num_agents, np_random, env_params):
     Returns:
         [pd.DataFrame] Agent configuration.
     """
+    num_agents = env_params["agents"]
     agents_positions, agents_directions, agents_targets = create_agents_from_train_stations(hints, num_agents, np_random)
     direction_map = {0: 'n', 1: 'e', 2: 's', 3: 'w'}
     # Default for Lastest Arrival based on Dimensions and number of Agents
@@ -122,7 +121,7 @@ def extract_trains_from_hints(hints, num_agents, np_random, env_params):
         "dir": [direction_map.get(d, 'unknown') for d in agents_directions],
         "x_end": [target[0] for target in agents_targets],
         "y_end": [target[1] for target in agents_targets],
-        "e_dep": [1] * num_agents,  # Default value 1
+        "e_dep": [1] * num_agents,
         "l_arr": [l_arr] * num_agents 
     }
     df = pd.DataFrame(data)
@@ -290,12 +289,19 @@ def gen_env(env_params):
             if trains.empty:
                 # Use hints
                 np_random = np.random.RandomState(seed=env_params['seed'])
-                trains = extract_trains_from_hints(LAST_HINTS, env_params['agents'], np_random)
-            # Render
+                trains = extract_trains_from_hints(LAST_HINTS, np_random, env_params)
             est_render_time = render_time_prediction(1, env.height*env.width)
             print(f"Rendering image (~{est_render_time})...")
-            screen_res = calc_resolution(env_params['lowQuality'], tracks)
-            renderer = RenderTool(env, screen_height=screen_res, screen_width=screen_res)
+            # Render image
+            if env.width * env.height > 1000000:
+                low_quality_mode = True
+            else:
+                low_quality_mode = env_params['lowQuality']
+            screen_res = calc_resolution(low_quality_mode, tracks)
+            graphics_lib = "PIL" if low_quality_mode else "PILSVG"
+            renderer = RenderTool(env, gl=graphics_lib, screen_height=screen_res, screen_width=screen_res)
+            if graphics_lib == "PIL":
+                pil_config(renderer)
             renderer.render_env(show=False)
             # Save image
             image_data = renderer.get_image()
@@ -314,7 +320,7 @@ def extract_tracks(env):
         track_row = []
         for col in range(env.width):
             transition = env.rail.get_full_transitions(row, col)
-            if transition in [8192,4,128,256]:
+            if transition in [8192, 4, 128, 256]:
                 # Replace Dead-Ends
                 print("> Dead-end at (" + str(row) + "," + str(col) + ") replaced.")
                 if transition == 4 or transition == 256:
@@ -351,8 +357,8 @@ def extract_trains(env):
             x_end, y_end = agent.target[0], agent.target[1]
             trains_data["x_end"].append(x_end)
             trains_data["y_end"].append(y_end)
-            trains_data["e_dep"].append(1)  # Default value 1
-            trains_data["l_arr"].append(l_arr)  # l_arr based on Environment Dimensions
+            trains_data["e_dep"].append(1)
+            trains_data["l_arr"].append(l_arr)
     trains_df = pd.DataFrame(trains_data)
     return trains_df
 

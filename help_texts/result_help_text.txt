@@ -36,7 +36,8 @@ You can choose between full or minimal views of the action predicates for analys
 Render Animation
 ----------------
 Generate an animated GIF of the solution.
-The estimated render time is on the button. 
+The estimated render time (high quality)
+is shown on the button. 
 
 > Settings:
     - GIF Timesteps/sec: Set the frame rate of the animation.

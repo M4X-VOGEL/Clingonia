@@ -250,9 +250,13 @@ def save_png(env, path="data/running_tmp.png", low_quality_mode=False):
     print("Rendering image...")
     # Render image
     try:
+        if env.width * env.height > 1000000:
+            low_quality_mode = True
         screen_res = calc_resolution(low_quality_mode, env)
-        renderer = RenderTool(env, gl="PILSVG", screen_height=screen_res, screen_width=screen_res)
+        graphics_lib = "PIL" if low_quality_mode else "PILSVG"
+        renderer = RenderTool(env, gl=graphics_lib, screen_height=screen_res, screen_width=screen_res)
         renderer.reset()
+        pil_config(renderer)
         renderer.render_env(
             show=True,
             show_observations=False,
@@ -299,3 +303,80 @@ def calc_resolution(low_quality_mode, env):
         elif env_dim_max > 3: screen_res *= 300
         else: screen_res *= 400
     return screen_res
+
+
+def pil_setup():
+    try:
+        from flatland.core.transition_map import Grid4Transitions
+        if not hasattr(Grid4Transitions, "is_valid"):
+            def is_valid(self, cell_transition):
+                return cell_transition != 0
+            Grid4Transitions.is_valid = is_valid
+    except ImportError:
+        pass
+
+
+pil_setup()
+
+def pil_config(renderer):
+    # Agent colors
+    colors = [
+        "#d50000", "#c51162", "#aa00ff", "#6200ea", "#304ffe", "#2962ff",
+        "#0091ea", "#00b8d4", "#00bfa5", "#00c853", "#64dd17", "#aeea00",
+        "#ffd600", "#ffab00", "#ff6d00", "#ff3d00", "#5d4037", "#455a64"
+    ]
+    def hex_to_rgb(hex_str):
+        hex_str = hex_str.lstrip('#')
+        return tuple(int(hex_str[i:i+2], 16) for i in (0, 2, 4))
+    custom_colors = [hex_to_rgb(c) for c in colors]
+    renderer.gl.agent_colors = custom_colors
+    renderer.gl.n_agent_colors = len(custom_colors)
+    
+    # Custom colors for agents
+    def custom_get_cmap(name, lut):
+        def cmap(idx):
+            return custom_colors[idx % len(custom_colors)]
+        return cmap
+    renderer.gl.get_cmap = custom_get_cmap
+
+    # Remove elapsed time text
+    original_text = renderer.gl.text
+    def patched_text(x, y, text, *args, **kwargs):
+        if text.startswith("elapsed:"):
+            return
+        return original_text(x, y, text, *args, **kwargs)
+    renderer.gl.text = patched_text
+
+    # Center agents
+    original_plot_single_agent = renderer.renderer.plot_single_agent
+    def centered_plot_single_agent(self, position_row_col, direction, color="r", target=None, static=False, selected=False):
+        import numpy as np
+        rt = self.__class__
+        pos = np.array(position_row_col)
+        if pos.ndim == 0 or pos.size == 0:
+            return
+        xyPos = np.matmul(pos, rt.row_col_to_xy) + rt.x_y_half
+        if static:
+            color = self.gl.adapt_color(color, lighten=True)
+        # Agent size
+        self.gl.scatter(*xyPos, color=color, layer=1, marker="o", s=16)
+        direction_row_col = rt.transitions_row_col[direction]
+        direction_xy = np.matmul(direction_row_col, rt.row_col_to_xy)
+        xy_dir_line = np.array([xyPos, xyPos + direction_xy / 2]).T
+        self.gl.plot(*xy_dir_line, color=color, layer=1, lw=5, ms=0, alpha=0.6)
+        if selected:
+            self._draw_square(xyPos, 1, color)
+        if target is not None:
+            target_row_col = np.array(target)
+            target_xy = np.matmul(target_row_col, rt.row_col_to_xy) + rt.x_y_half
+            self._draw_square(target_xy, 1/3, color, layer=1)
+    renderer.renderer.plot_single_agent = centered_plot_single_agent.__get__(renderer.renderer, renderer.renderer.__class__)
+
+    # Change color of cells with no track to canvas_color
+    original_scatter = renderer.gl.scatter
+    def patched_scatter(x, y, color, *args, **kwargs):
+        if color == "r" and kwargs.get("s", None) == 30:
+            color = "#313338"
+            kwargs["s"] = 0
+        return original_scatter(x, y, color, *args, **kwargs)
+    renderer.gl.scatter = patched_scatter
