@@ -428,7 +428,7 @@ def build_start_menu_frame():
         height=2,
         grid_pos=(1,1),
         padding=(0,0),
-        sticky='n',
+        sticky='new',
         command=switch_start_to_random_gen,
         text='Generate Random Environment',
         font=base_font_layout,
@@ -444,7 +444,7 @@ def build_start_menu_frame():
         height=2,
         grid_pos=(2, 1),
         padding=(0, 0),
-        sticky='n',
+        sticky='new',
         command=switch_start_to_builder,
         text='Build New Environment',
         font=base_font_layout,
@@ -460,7 +460,7 @@ def build_start_menu_frame():
         height=2,
         grid_pos=(3, 1),
         padding=(0, 0),
-        sticky='n',
+        sticky='new',
         command=load_env_from_file,
         text='Load Environment',
         font=base_font_layout,
@@ -2241,7 +2241,7 @@ def build_random_gen_para_frame():
     frames['random_gen_para_frame'].frame.columnconfigure(0, weight=1)
     frames['random_gen_para_frame'].frame.columnconfigure(1, weight=1)
     frames['random_gen_para_frame'].frame.columnconfigure(2, weight=2)
-    frames['random_gen_para_frame'].frame.columnconfigure(3, weight=2)
+    frames['random_gen_para_frame'].frame.columnconfigure(3, weight=0)
     frames['random_gen_para_frame'].frame.columnconfigure(4, weight=2)
 
     frames['random_gen_para_frame'].frame.grid_propagate(False)

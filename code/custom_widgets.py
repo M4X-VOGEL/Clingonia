@@ -4,7 +4,6 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk, ImageDraw, ImageSequence
 import warnings
-import sys
 
 
 class Window:
