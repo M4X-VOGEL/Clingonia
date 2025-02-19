@@ -1,4 +1,4 @@
-# Clingonia by MadMotion (Early Access)
+# Clingonia by MadMotion
 
 ![Clingonia animation](data/png/title_gif.gif)
 

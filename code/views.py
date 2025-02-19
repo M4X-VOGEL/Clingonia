@@ -66,6 +66,7 @@ grid_color = '#AFB3BA'
 
 # state trackers
 first_mod_try = True
+first_build_try = True
 build_mode = None
 last_menu = None
 current_act_err_log = None
@@ -1547,9 +1548,11 @@ def close_exit_confirmation_frame():
 # random generation
 
 def random_gen_change_to_start_or_main():
-    global user_params
+    global user_params, first_build_try
 
     user_params = user_params_backup.copy()
+
+    first_build_try = True
 
     if last_menu == 'start':
         random_gen_para_to_start()
@@ -2270,11 +2273,25 @@ def build_random_gen_para_help_frame():
     frames['random_gen_para_help_frame'].frame.grid_propagate(False)
 
 def random_gen_para_to_env():
-    global current_img, current_df, current_array, env_counter, \
+    global first_build_try, current_img, current_df, current_array, env_counter, \
         user_params_backup
 
     if save_random_gen_env_params() == -1:
         return
+
+    if first_build_try:
+        first_build_try = False
+        if user_params['rows'] * user_params['cols'] > 1000000:
+            labels['random_gen_status_label'].label.config(
+                text=f'Warning: Extremely high RAM usage\n'
+                     f'for this environment size!\n\n'
+                     f'⚠️Click again to proceed at your own risk⚠️',
+                fg=golden_color,
+            )
+            labels['random_gen_status_label'].place_label()
+            return
+    else:
+        first_build_try = True
 
     labels['random_gen_status_label'].label.config(
         text='...Generating...',
@@ -2663,14 +2680,15 @@ def load_random_gen_env_params():
 # builder
 
 def builder_change_to_start_or_main():
-    global first_mod_try, build_mode, user_params, current_array, current_df
+    global first_mod_try, first_build_try, build_mode, user_params, current_array, current_df
 
     user_params = user_params_backup.copy()
 
     if build_mode == 'change_params':
         build_mode = 'build'
-    elif build_mode == 'modify':
-        first_mod_try = True
+
+    first_mod_try = True
+    first_build_try = True
 
     current_array = current_modify_backup_array.copy()
     current_df = current_modify_backup_df.copy()
@@ -3235,27 +3253,52 @@ def toggle_builder_para_help():
         build_builder_para_help_frame()
 
 def builder_para_to_track_grid():
-    global first_mod_try, build_mode, current_array, current_df, \
+    global first_mod_try, first_build_try, build_mode, current_array, current_df, \
         current_builder_backup_array, current_builder_backup_df, \
         current_modify_backup_array, current_modify_backup_df
 
-    if build_mode == 'modify' and first_mod_try:
-        first_mod_try = False
+    if build_mode == 'modify' and sys_platform == 'Windows':
         pic_count = np.count_nonzero(current_array)
-        if pic_count > 4500:
+
+        if pic_count > 4800:
             labels['build_para_status_label'].label.config(
-                text=f'Warning: High element count ({pic_count})\n'
-                     f'Memory issues may disrupt execution\n\n'
+                text=f'Windows cannot render\n'
+                     f'this many elements ({pic_count})\n '
+                     f'on the canvas.\n',
+                fg=bad_status_color,
+            )
+            labels['build_para_status_label'].place_label()
+            return
+        elif pic_count > 4500:
+            if first_mod_try:
+                first_mod_try = False
+                labels['build_para_status_label'].label.config(
+                    text=f'Warning: High element count ({pic_count})\n'
+                         f'Memory issues may disrupt execution\n\n'
+                         f'⚠️Click again to proceed at your own risk⚠️',
+                    fg=golden_color,
+                )
+                labels['build_para_status_label'].place_label()
+                return
+            else:
+                first_mod_try = True
+
+    if save_builder_env_params() == -1:
+        return
+
+    if first_build_try:
+        first_build_try = False
+        if user_params['rows'] * user_params['cols'] > 1000000:
+            labels['build_para_status_label'].label.config(
+                text=f'Warning: Extremely high RAM usage\n'
+                     f'for this environment size!\n\n'
                      f'⚠️Click again to proceed at your own risk⚠️',
                 fg=golden_color,
             )
             labels['build_para_status_label'].place_label()
             return
     else:
-        first_mod_try = True
-
-    if save_builder_env_params() == -1:
-        return
+        first_build_try = True
 
     if build_mode == 'modify':
         current_modify_backup_array = current_array.copy()
