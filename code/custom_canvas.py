@@ -1117,6 +1117,8 @@ class TrainListCanvas:
         config_frame.frame.columnconfigure((0, 1),weight=1)
         config_frame.frame.grid_propagate(False)
 
+        self.windows['flatland_window'].window.update_idletasks()
+
     def save_ed_la(
             self,
             index,

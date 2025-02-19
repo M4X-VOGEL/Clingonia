@@ -1157,6 +1157,7 @@ def build_clingo_para_frame():
     frames['clingo_para_frame'].frame.grid_propagate(False)
 
     load_clingo_params()
+    windows['flatland_window'].window.update_idletasks()
 
 def build_clingo_help_frame():
     frames['clingo_help_frame'] = Frame(
@@ -2229,6 +2230,7 @@ def build_random_gen_para_frame():
     frames['random_gen_para_frame'].frame.grid_propagate(False)
 
     load_random_gen_env_params()
+    windows['flatland_window'].window.update_idletasks()
 
 def build_random_gen_para_help_frame():
     frames['random_gen_para_help_frame'] = Frame(
@@ -3183,6 +3185,8 @@ def build_builder_para_frame():
     frames['builder_para_frame'].frame.grid_propagate(False)
 
     load_builder_env_params()
+
+    windows['flatland_window'].window.update_idletasks()
 
 def build_builder_para_help_frame():
     frames['builder_para_help_frame'] = Frame(
@@ -4295,6 +4299,8 @@ def open_train_all_config_frame():
     frames['train_builder_menu_frame'].frame.columnconfigure((0,1,2), weight=1)
     frames['train_builder_menu_frame'].frame.grid_propagate(False)
 
+    windows['flatland_window'].window.update_idletasks()
+
 def save_train_all_config(save):
     global current_df
 
@@ -5168,6 +5174,8 @@ def build_result_menu():
         train_data=current_df,
         grid=canvases['result_viewer_canvas'],
     )
+
+    windows['flatland_window'].window.update_idletasks()
 
 def build_result_help_frame():
     frames['result_help_frame'] = Frame(
