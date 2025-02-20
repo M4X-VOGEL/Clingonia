@@ -242,9 +242,7 @@ def create_env_retry(env_params):
             obs, info = env.reset()
             return env, obs, info
         except Exception as e:
-            print(f"⚠️ Versuch {attempt + 1} fehlgeschlagen: {e}")
-            print("DEBUG PARAMS:\n", env_params)
-    raise RuntimeError()
+            raise RuntimeError(e)
 
 
 def get_allowed_dirs(track):
