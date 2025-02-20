@@ -5050,6 +5050,7 @@ def build_result_menu():
     timesteps = max_t - min_t + 1
     cells = user_params['rows'] * user_params['cols']
     render_time = render_time_prediction(timesteps, cells)
+
     buttons['show_gif_button'] = Button(
         root=frames['result_menu_frame'].frame,
         width=25,
@@ -5522,6 +5523,8 @@ def toggle_result_timetable():
         build_result_timetable_frame()
 
 def toggle_result_gif():
+    global first_build_try
+
     err_count = 0
 
     for field in entry_fields:
@@ -5601,6 +5604,21 @@ def toggle_result_gif():
         frames['result_gif_frame'].frame.columnconfigure(0, weight=1)
         frames['result_gif_frame'].frame.grid_propagate(False)
     elif 'result_gif_frame' in frames and last_gif_params != current_gif_params:
+        if first_build_try:
+            first_build_try = False
+            if user_params['rows'] * user_params['cols'] > 1000000:
+                labels['gif_status_label'].label.config(
+                    text=f'Warning: Large GIF size.\n'
+                         f'Memory issues may disrupt execution.\n\n'
+                         f'⚠️Click again to proceed at your own risk⚠️',
+                    fg=golden_color,
+                    font=err_font_layout,
+                )
+                labels['gif_status_label'].place_label()
+                return
+        else:
+            first_build_try = True
+
         frames['result_gif_frame'].destroy_frame()
         del frames['result_gif_frame']
 
@@ -5616,6 +5634,21 @@ def toggle_result_gif():
         create_gif()
         build_result_gif_frame()
     else:
+        if first_build_try:
+            first_build_try = False
+            if user_params['rows'] * user_params['cols'] > 1000000:
+                labels['gif_status_label'].label.config(
+                    text=f'Warning: Large GIF size.\n'
+                         f'Memory issues may disrupt execution.\n\n'
+                         f'⚠️Click again to proceed at your own risk⚠️',
+                    fg=golden_color,
+                    font=err_font_layout,
+                )
+                labels['gif_status_label'].place_label()
+                return
+        else:
+            first_build_try = True
+
         labels['gif_status_label'].label.config(
             text='...Rendering GIF...',
             fg=good_status_color,
@@ -5845,6 +5878,10 @@ def hide_error_logs():
         show_error_logs()
 
 def switch_result_to_main():
+    global first_build_try
+
+    first_build_try = True
+
     if 'result_viewer_frame' in frames:
         frames['result_viewer_frame'].destroy_frame()
         del frames['result_viewer_frame']
