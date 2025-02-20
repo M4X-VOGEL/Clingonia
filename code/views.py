@@ -1306,7 +1306,7 @@ def switch_clingo_para_to_main():
     create_main_menu()
 
 def switch_clingo_para_to_result():
-    global last_solve_params
+    global last_solve_params, show_act_err_logs
 
     if save_clingo_params() == -1:
         return
@@ -1330,6 +1330,7 @@ def switch_clingo_para_to_result():
     )
 
     if last_solve_params != current_solve_params or isinstance(current_paths, int):
+        show_act_err_logs = False
         last_solve_params = current_solve_params
         sim_result = run_simulation()
 
