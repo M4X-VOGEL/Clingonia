@@ -2324,6 +2324,17 @@ def random_gen_para_to_env():
         )
         frames['random_gen_para_frame'].frame.update()
         return
+    elif tracks == -2:
+        labels['random_gen_status_label'].label.config(
+            text='No environment generated.\n'
+                 'Please try again with\n'
+                 'different parameters',
+            fg=bad_status_color,
+            anchor="w",
+            justify="left",
+        )
+        frames['random_gen_para_frame'].frame.update()
+        return
 
     if len(trains):
         start_pos = list(zip(trains['x'], trains['y']))
@@ -3892,7 +3903,7 @@ def build_track_builder_menu_frame():
         tuple(range(1,7)), weight=2
     )
     frames['track_builder_menu_frame'].frame.columnconfigure(
-        tuple(range(2,10)), weight=2
+        tuple(range(2,9)), weight=2
     )
     frames['track_builder_menu_frame'].frame.grid_propagate(False)
 
