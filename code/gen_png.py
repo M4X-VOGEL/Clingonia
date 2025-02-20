@@ -217,8 +217,10 @@ def create_env(env_params):
     return env
 
 
-def fallback_reset(env):
+def fallback_reset(env, env_params):
     print("Handling issues...")
+    if env.rail is None or env.rail.grid is None:
+        return create_env_retry(env_params) 
     # Negative rails become 0
     if np.any(env.rail.grid < 0):
         env.rail.grid[env.rail.grid < 0] = 0
@@ -228,9 +230,21 @@ def fallback_reset(env):
     env.obs_builder.reset()
     env._elapsed_steps = 0
     env.dones = dict.fromkeys(list(range(env.get_num_agents())) + ["__all__"], False)
-    observation_dict = env._get_observations()
-    info_dict = env.get_info_dict()
-    return observation_dict, info_dict
+    obs = env._get_observations()
+    info = env.get_info_dict()
+    return env, obs, info
+
+
+def create_env_retry(env_params):
+    for attempt in range(3):
+        try:
+            env = create_env(env_params)
+            obs, info = env.reset()
+            return env, obs, info
+        except Exception as e:
+            print(f"⚠️ Versuch {attempt + 1} fehlgeschlagen: {e}")
+            print("DEBUG PARAMS:\n", env_params)
+    raise RuntimeError()
 
 
 def get_allowed_dirs(track):
@@ -309,8 +323,12 @@ def gen_env(env_params):
             plt.imsave(path, image_data)
             print("✅ Environment generated.")
         except OverflowError as e:
-            print("❌ Environment could not be generated.")
+            print(f"❌ Environment could not be generated:\n{e}")
             return -1, -1
+        except RuntimeError as e:
+            print(f"❌ Environment could not be generated:\n{e}")
+            return -2, -2
+
     return tracks, trains
 
 
