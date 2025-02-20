@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Dict
 
 import numpy as np
 import pandas as pd
@@ -9,6 +9,7 @@ from code.custom_widgets import *
 
 # Platform: 
 sys_platform = platform.system()
+
 
 class EnvCanvas:
     def __init__(
@@ -789,6 +790,9 @@ class TrainListCanvas:
             input_color: str,
             example_color: str,
             bad_status_color: str,
+            base_button_style_map: Dict[str, list],
+            selector_button_style_map: Dict[str, list],
+            remove_button_style_map: Dict[str, list],
             border_width: int,
             grid: BuildCanvas,
             train_data: pd.DataFrame,
@@ -810,6 +814,9 @@ class TrainListCanvas:
         self.input_color = input_color
         self.example_color = example_color
         self.bad_status_color = bad_status_color
+        self.base_button_style_map = base_button_style_map
+        self.selector_button_style_map = selector_button_style_map
+        self.remove_button_style_map = remove_button_style_map
         self.border_width = border_width
         self.grid = grid
         self.train_data = train_data
@@ -877,6 +884,7 @@ class TrainListCanvas:
                 border_width=0,
                 visibility=True,
                 style={'padding': (0, 0)},
+                style_map=self.selector_button_style_map,
             )
 
             Label(
@@ -903,6 +911,7 @@ class TrainListCanvas:
                 background_color=self.button_color,
                 border_width=0,
                 visibility=True,
+                style_map=self.base_button_style_map,
             )
 
             self.remove_dict[index] = Button(
@@ -918,6 +927,7 @@ class TrainListCanvas:
                 background_color=self.background_color,
                 border_width=0,
                 visibility=True,
+                style_map=self.remove_button_style_map,
             )
 
     def on_frame_configure(self, event):
@@ -1111,6 +1121,7 @@ class TrainListCanvas:
             background_color=self.button_color,
             border_width=0,
             visibility=True,
+            style_map=self.base_button_style_map,
         )
 
         config_frame.frame.rowconfigure((0, 3),weight=10)
@@ -1142,7 +1153,7 @@ class TrainListCanvas:
 
         try:
             if ed.startswith('e.g.') or ed == '' or ed is None:
-                ed = -1
+                ed = None
             else:
                 ed = int(ed)
                 ed_err_label.hide_label()
@@ -1156,7 +1167,7 @@ class TrainListCanvas:
 
         try:
             if la.startswith('e.g.') or la == '' or la is None:
-                la = -1
+                la = None
             else:
                 la = int(la)
                 la_err_label.hide_label()
@@ -1171,27 +1182,35 @@ class TrainListCanvas:
         if err_count:
             return -1
 
-        if ed < 1:
-            ed_err_label.label.config(
-                text='needs int > 0',
-                fg=self.bad_status_color,
-            )
-            ed_err_label.place_label()
-            err_count += 1
+        if ed is not None:
+            if ed < 1:
+                ed_err_label.label.config(
+                    text='needs int > 0',
+                    fg=self.bad_status_color,
+                )
+                ed_err_label.place_label()
+                err_count += 1
+            else:
+                self.train_data.loc[index, 'e_dep'] = ed
+        else:
+            self.train_data.loc[index, 'e_dep'] = -1
 
-        if la < 1:
-            la_err_label.label.config(
-                text='needs int > 0',
-                fg=self.bad_status_color,
-            )
-            la_err_label.place_label()
-            err_count += 1
+        if la is not None:
+            if la < 1:
+                la_err_label.label.config(
+                    text='needs int > 0',
+                    fg=self.bad_status_color,
+                )
+                la_err_label.place_label()
+                err_count += 1
+            else:
+                self.train_data.loc[index, 'l_arr'] = la
+        else:
+            self.train_data.loc[index, 'l_arr'] = -1
 
         if err_count:
             return -1
 
-        self.train_data.loc[index, 'e_dep'] = ed
-        self.train_data.loc[index, 'l_arr'] = la
         config_frame.destroy_frame()
 
 

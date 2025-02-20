@@ -64,6 +64,41 @@ golden_color = '#F0B232'
 grid_color = '#AFB3BA'
 
 
+# Button Style Maps
+base_button_style_map = {
+    'foreground': [('active', '#F1F1F1')],
+    'background': [('active', '#27292D')]
+}
+yellow_text_button_style_map = {
+    'foreground': [('active', '#E2A323')],
+    'background': [('active', '#27292D')]
+}
+blue_button_style_map = {
+    'foreground': [('active', '#F1F1F1')],
+    'background': [('active', '#4752C4')]
+}
+red_button_style_map = {
+    'foreground': [('active', '#F1F1F1')],
+    'background': [('active', '#690000')]
+}
+green_button_style_map = {
+    'foreground': [('active', '#F1F1F1')],
+    'background': [('active', '#206552')]
+}
+tool_button_style_map = {
+    'foreground': [('active', '#000000')],
+    'background': [('active', '#2B2D31')]
+}
+selector_button_style_map = {
+    'foreground': [('active', '#000000')],
+    'background': [('active', '#111214')]
+}
+reset_button_style_map = {
+    'foreground': [('active', '#111214')],
+    'background': [('active', '#E03A3E')]
+}
+
+
 # state trackers
 first_mod_try = True
 first_build_try = True
@@ -392,6 +427,7 @@ def build_start_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=tool_button_style_map,
     )
 
     buttons['start_toggle_fullscreen_button'] = Button(
@@ -407,6 +443,7 @@ def build_start_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=tool_button_style_map,
     )
 
     buttons['exit_button'] = Button(
@@ -422,6 +459,7 @@ def build_start_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=tool_button_style_map,
     )
 
     buttons['random_gen_button'] = Button(
@@ -438,6 +476,7 @@ def build_start_menu_frame():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     buttons['build_env_button'] = Button(
@@ -454,6 +493,7 @@ def build_start_menu_frame():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     buttons['load_env_button'] = Button(
@@ -470,6 +510,7 @@ def build_start_menu_frame():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     labels['start_load_status_label'] = Label(
@@ -632,6 +673,7 @@ def build_main_menu():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=tool_button_style_map,
     )
 
     buttons['main_toggle_fullscreen_button'] = Button(
@@ -647,6 +689,7 @@ def build_main_menu():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=tool_button_style_map,
     )
 
     buttons['exit_button'] = Button(
@@ -662,6 +705,7 @@ def build_main_menu():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=tool_button_style_map,
     )
 
     buttons['random_gen_button'] = Button(
@@ -678,6 +722,7 @@ def build_main_menu():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     buttons['build_env_button'] = Button(
@@ -694,6 +739,7 @@ def build_main_menu():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     buttons['modify_env_button'] = Button(
@@ -710,6 +756,7 @@ def build_main_menu():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     buttons['save_env_button'] = Button(
@@ -726,6 +773,7 @@ def build_main_menu():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     frames['save_button_frame'] = Frame(
@@ -780,6 +828,7 @@ def build_main_menu():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     labels['main_load_status_label'] = Label(
@@ -808,6 +857,7 @@ def build_main_menu():
         background_color=blue_button_color,
         border_width=0,
         visibility=True,
+        style_map=blue_button_style_map,
     )
 
     frames['main_menu_frame'].frame.rowconfigure(tuple(range(9)), weight=1)
@@ -866,6 +916,7 @@ def build_main_menu_load_info_frame():
         background_color=blue_button_color,
         border_width=0,
         visibility=True,
+        style_map=blue_button_style_map,
     )
 
     frames['main_menu_load_info_frame'].frame.rowconfigure(0, weight=2)
@@ -989,6 +1040,7 @@ def build_clingo_para_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=tool_button_style_map,
     )
 
     buttons['back_button'] = Button(
@@ -1004,6 +1056,7 @@ def build_clingo_para_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=tool_button_style_map,
     )
 
     labels['clingo_label'] = Label(
@@ -1103,6 +1156,7 @@ def build_clingo_para_frame():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     labels['clingo_paths_label'] = Label(
@@ -1133,6 +1187,7 @@ def build_clingo_para_frame():
         background_color=red_button_color,
         border_width=0,
         visibility=True,
+        style_map=red_button_style_map,
     )
 
     labels['clingo_status_label'] = Label(
@@ -1505,6 +1560,7 @@ def open_exit_confirmation_frame(event=None):
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     buttons['no_exit_button'] = Button(
@@ -1521,6 +1577,7 @@ def open_exit_confirmation_frame(event=None):
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     frames['exit_confirmation_frame'].frame.rowconfigure(0, weight=2)
@@ -1606,6 +1663,7 @@ def build_random_gen_para_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=tool_button_style_map,
     )
 
     buttons['back_button'] = Button(
@@ -1621,6 +1679,7 @@ def build_random_gen_para_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=tool_button_style_map,
     )
 
     labels['spacing_err_label'] = Label(
@@ -2191,6 +2250,7 @@ def build_random_gen_para_frame():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     buttons['generate_button'] = Button(
@@ -2207,6 +2267,7 @@ def build_random_gen_para_frame():
         background_color=red_button_color,
         border_width=0,
         visibility=True,
+        style_map=red_button_style_map,
     )
 
     labels['random_gen_status_label'] = Label(
@@ -2437,6 +2498,7 @@ def build_random_gen_env_menu():
         background_color=blue_button_color,
         border_width=0,
         visibility=True,
+        style_map=blue_button_style_map,
     )
 
     current_df_to_env_text(mode='gen')
@@ -2751,6 +2813,7 @@ def open_builder_discard_changes_frame():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     buttons['no_discard_changes_button'] = Button(
@@ -2767,6 +2830,7 @@ def open_builder_discard_changes_frame():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     frames['builder_discard_changes_frame'].frame.rowconfigure(0, weight=2)
@@ -2828,6 +2892,7 @@ def build_builder_para_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=tool_button_style_map,
     )
 
     buttons['back_button'] = Button(
@@ -2843,6 +2908,7 @@ def build_builder_para_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=tool_button_style_map,
     )
 
     labels['spacing_err_label'] = Label(
@@ -3173,6 +3239,7 @@ def build_builder_para_frame():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     buttons['build_button'] = Button(
@@ -3189,6 +3256,7 @@ def build_builder_para_frame():
         background_color=blue_button_color,
         border_width=0,
         visibility=True,
+        style_map=blue_button_style_map,
     )
 
     labels['build_para_status_label'] = Label(
@@ -3472,6 +3540,7 @@ def build_track_builder_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=tool_button_style_map,
     )
 
     buttons['back_button'] = Button(
@@ -3487,6 +3556,7 @@ def build_track_builder_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=tool_button_style_map,
     )
 
     buttons['horizontal_straight_button'] = Button(
@@ -3501,6 +3571,7 @@ def build_track_builder_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['vertical_straight_button'] = Button(
@@ -3515,6 +3586,7 @@ def build_track_builder_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['corner_top_left_button'] = Button(
@@ -3529,6 +3601,7 @@ def build_track_builder_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['corner_top_right_button'] = Button(
@@ -3543,6 +3616,7 @@ def build_track_builder_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['corner_bottom_right_button'] = Button(
@@ -3557,6 +3631,7 @@ def build_track_builder_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['corner_bottom_left_button'] = Button(
@@ -3571,6 +3646,7 @@ def build_track_builder_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['switch_hor_top_left_button'] = Button(
@@ -3585,6 +3661,7 @@ def build_track_builder_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['switch_hor_top_right_button'] = Button(
@@ -3599,6 +3676,7 @@ def build_track_builder_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['switch_hor_bottom_right_button'] = Button(
@@ -3613,6 +3691,7 @@ def build_track_builder_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['switch_hor_bottom_left_button'] = Button(
@@ -3627,6 +3706,7 @@ def build_track_builder_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['switch_ver_top_left_button'] = Button(
@@ -3641,6 +3721,7 @@ def build_track_builder_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['switch_ver_top_right_button'] = Button(
@@ -3655,6 +3736,7 @@ def build_track_builder_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['switch_ver_bottom_right_button'] = Button(
@@ -3669,6 +3751,7 @@ def build_track_builder_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['switch_ver_bottom_left_button'] = Button(
@@ -3683,6 +3766,7 @@ def build_track_builder_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['diamond_crossing_button'] = Button(
@@ -3697,6 +3781,7 @@ def build_track_builder_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['single_slip_top_left_button'] = Button(
@@ -3712,6 +3797,7 @@ def build_track_builder_menu_frame():
         border_width=0,
         rotation=270,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['single_slip_top_right_button'] = Button(
@@ -3727,6 +3813,7 @@ def build_track_builder_menu_frame():
         border_width=0,
         rotation=180,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['single_slip_bottom_right_button'] = Button(
@@ -3742,6 +3829,7 @@ def build_track_builder_menu_frame():
         border_width=0,
         rotation=90,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['single_slip_bottom_left_button'] = Button(
@@ -3757,6 +3845,7 @@ def build_track_builder_menu_frame():
         border_width=0,
         rotation=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['double_slip_top_left_bottom_right_button'] = Button(
@@ -3772,6 +3861,7 @@ def build_track_builder_menu_frame():
         border_width=0,
         rotation=90,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['double_slip_bottom_left_top_right_button'] = Button(
@@ -3787,6 +3877,7 @@ def build_track_builder_menu_frame():
         border_width=0,
         rotation=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['symmetrical_top_left_top_right_button'] = Button(
@@ -3802,6 +3893,7 @@ def build_track_builder_menu_frame():
         border_width=0,
         rotation=180,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['symmetrical_top_right_bottom_right_button'] = Button(
@@ -3817,6 +3909,7 @@ def build_track_builder_menu_frame():
         border_width=0,
         rotation=90,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['symmetrical_bottom_left_bottom_right_button'] = Button(
@@ -3832,6 +3925,7 @@ def build_track_builder_menu_frame():
         border_width=0,
         rotation=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['symmetrical_top_left_bottom_left_button'] = Button(
@@ -3847,6 +3941,7 @@ def build_track_builder_menu_frame():
         border_width=0,
         rotation=270,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['delete_button'] = Button(
@@ -3862,6 +3957,7 @@ def build_track_builder_menu_frame():
         border_width=0,
         rotation=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['reset_button'] = Button(
@@ -3878,6 +3974,7 @@ def build_track_builder_menu_frame():
         background_color=dark_background_color,
         border_width=0,
         visibility=True,
+        style_map=reset_button_style_map,
     )
 
     buttons['train_builder_button'] = Button(
@@ -3895,6 +3992,7 @@ def build_track_builder_menu_frame():
         background_color=blue_button_color,
         border_width=0,
         visibility=True,
+        style_map=blue_button_style_map,
     )
 
     frames['track_builder_menu_frame'].frame.rowconfigure(0, weight=1)
@@ -4004,6 +4102,7 @@ def build_train_builder_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=tool_button_style_map,
     )
 
     buttons['back_button'] = Button(
@@ -4019,6 +4118,7 @@ def build_train_builder_menu_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=tool_button_style_map,
     )
 
     buttons['train_north_button'] = Button(
@@ -4034,6 +4134,7 @@ def build_train_builder_menu_frame():
         border_width=0,
         rotation=0,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['train_east_button'] = Button(
@@ -4049,6 +4150,7 @@ def build_train_builder_menu_frame():
         border_width=0,
         rotation=270,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['train_south_button'] = Button(
@@ -4064,6 +4166,7 @@ def build_train_builder_menu_frame():
         border_width=0,
         rotation=180,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['train_west_button'] = Button(
@@ -4079,6 +4182,7 @@ def build_train_builder_menu_frame():
         border_width=0,
         rotation=90,
         visibility=True,
+        style_map=selector_button_style_map,
     )
 
     buttons['reset_button'] = Button(
@@ -4094,6 +4198,7 @@ def build_train_builder_menu_frame():
         background_color=dark_background_color,
         border_width=0,
         visibility=True,
+        style_map=reset_button_style_map,
     )
 
     frames['train_config_list_canvas_frame'] = Frame(
@@ -4122,6 +4227,7 @@ def build_train_builder_menu_frame():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     labels['configAll_status_label'] = Label(
@@ -4151,6 +4257,7 @@ def build_train_builder_menu_frame():
         background_color=red_button_color,
         border_width=0,
         visibility=True,
+        style_map=red_button_style_map,
     )
 
     labels['builder_status_label'] = Label(
@@ -4192,6 +4299,9 @@ def build_train_builder_menu_frame():
         input_color=input_color,
         example_color=example_color,
         bad_status_color=bad_status_color,
+        base_button_style_map=base_button_style_map,
+        selector_button_style_map=selector_button_style_map,
+        remove_button_style_map=reset_button_style_map,
         border_width=0,
         grid=canvases['builder_grid_canvas'],
         train_data=current_df,
@@ -4237,6 +4347,7 @@ def open_train_all_config_frame():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=tool_button_style_map,
     )
 
     labels['all_config_label'] = Label(
@@ -4348,6 +4459,7 @@ def open_train_all_config_frame():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     frames['train_builder_menu_frame'].frame.rowconfigure((0,1,2,3,4), weight=1)
@@ -4412,6 +4524,7 @@ def save_train_all_config(save):
                 fg=bad_status_color,
             )
             labels['eDep_error_label'].place_label()
+            err_count += 1
         else:
             current_df['e_dep'] = [ed] * len(current_df['e_dep'])
 
@@ -4422,8 +4535,12 @@ def save_train_all_config(save):
                 fg=bad_status_color,
             )
             labels['lArr_error_label'].place_label()
+            err_count += 1
         else:
             current_df['l_arr'] = [la] * len(current_df['l_arr'])
+
+    if err_count:
+        return -1
 
     if 'all_eDep_entry' in entry_fields:
         del entry_fields['all_eDep_entry']
@@ -4652,6 +4769,7 @@ def build_builder_env_menu():
         background_color=blue_button_color,
         border_width=0,
         visibility=True,
+        style_map=blue_button_style_map,
     )
 
     current_df_to_env_text(mode='build')
@@ -4890,6 +5008,7 @@ def open_reset_frame(parent_frame):
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     buttons['no_reset_button'] = Button(
@@ -4906,6 +5025,7 @@ def open_reset_frame(parent_frame):
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     frames['reset_frame'].frame.rowconfigure(0, weight=2)
@@ -5011,6 +5131,7 @@ def build_result_menu():
         background_color=background_color,
         border_width=0,
         visibility=True,
+        style_map=tool_button_style_map,
     )
 
     buttons['show_error_logs_button'] = Button(
@@ -5027,6 +5148,7 @@ def build_result_menu():
         background_color=blue_button_color,
         border_width=0,
         visibility=show_act_err_logs,
+        style_map=blue_button_style_map,
     )
 
     labels['spacing_err_label'] = Label(
@@ -5055,6 +5177,7 @@ def build_result_menu():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     min_t = int(pos_df['timestep'].min())
@@ -5077,6 +5200,7 @@ def build_result_menu():
         background_color=red_button_color,
         border_width=0,
         visibility=True,
+        style_map=red_button_style_map,
     )
 
     labels['gif_status_label'] = Label(
@@ -5176,6 +5300,7 @@ def build_result_menu():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     frames['path_list_canvas_frame'] = Frame(
@@ -5204,6 +5329,7 @@ def build_result_menu():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     frames['result_menu_frame'].frame.rowconfigure(0, weight=1)
@@ -5359,6 +5485,7 @@ def build_result_gif_frame():
         background_color=good_status_color,
         border_width=0,
         visibility=True,
+        style_map=green_button_style_map,
     )
 
     buttons['toggle_timestep_view_button'] = Button(
@@ -5374,6 +5501,7 @@ def build_result_gif_frame():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=yellow_text_button_style_map,
     )
 
     frames['result_gif_frame'].frame.rowconfigure((0,1), weight=1)
@@ -5439,6 +5567,7 @@ def build_timestep_viewer_frame():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     labels['current_timestep_label'] = Label(
@@ -5466,6 +5595,7 @@ def build_timestep_viewer_frame():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     frames['timestep_viewer_frame'].frame.rowconfigure((0,1), weight=1)
@@ -5775,6 +5905,7 @@ def show_error_logs():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=base_button_style_map,
     )
 
     buttons['switch_error_logs_button'] = Button(
@@ -5790,6 +5921,7 @@ def show_error_logs():
         background_color=button_color,
         border_width=0,
         visibility=True,
+        style_map=yellow_text_button_style_map,
     )
 
     with open("data/act_err_min.txt", "r") as file:
@@ -6073,7 +6205,9 @@ def load_user_data_from_file():
             user_params[key] = default_params[key]
 
 def load_env_from_file():
-    global current_array, current_df, current_img, env_counter
+    global current_array, current_df, current_img, env_counter, \
+        current_builder_backup_array, current_builder_backup_df, \
+        current_modify_backup_array, current_modify_backup_df
 
     file = filedialog.askopenfilename(
         title="Select LP Environment File",
@@ -6171,6 +6305,11 @@ def load_env_from_file():
         return
 
     current_img = 'data/running_tmp.png'
+
+    current_builder_backup_array = current_array.copy()
+    current_builder_backup_df = current_df.copy()
+    current_modify_backup_array = current_array.copy()
+    current_modify_backup_df = current_df.copy()
 
     if last_menu == 'start':
         switch_start_to_main()
