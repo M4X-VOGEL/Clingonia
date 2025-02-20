@@ -876,6 +876,7 @@ class TrainListCanvas:
                 background_color=self.background_color,
                 border_width=0,
                 visibility=True,
+                style={'padding': (0, 0)},
             )
 
             Label(
