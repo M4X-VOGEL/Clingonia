@@ -2389,8 +2389,8 @@ def random_gen_para_to_env():
     elif tracks == -2:
         labels['random_gen_status_label'].label.config(
             text='No environment generated.\n'
-                 'Please try again with\n'
-                 'different parameters',
+                 'Try different parameters;\n'
+                 'perhaps another seed.',
             fg=bad_status_color,
             anchor="w",
             justify="left",

@@ -15,6 +15,12 @@ from flatland.envs.timetable_utils import Line
 from code.build_png import calc_resolution, pil_config
 
 LAST_HINTS = None
+valid_tracks = {32800, 1025, 4608, 16386, 72, 2064,  # Track Type #1
+                37408, 17411, 32872, 3089, 49186, 1097, 34864, 5633,  # Track Type #2
+                33825,  # Track Type #3
+                38433, 50211, 33897, 35889,  # Track Type #4
+                38505, 52275,  # Track Type #5
+                20994, 16458, 2136, 6672}  # Track Type #6
 
 def create_agents_from_train_stations(hints, num_agents, np_random):
     """Generates agents out of station information from hints.
@@ -150,14 +156,40 @@ def create_env(env_params):
     )
     malfunction_gen = ParamMalfunctionGen(parameters=malfunction_params)
     
-    # Rail Generator
-    rail_gen = sparse_rail_generator(
+    def rail_gen_test(width, height, number_of_agents, num_resets, np_random):
+        try:
+            # Test if the original rail generator works
+            rail, optionals = rail_gen_original(width, height, number_of_agents, num_resets, np_random)
+            return rail, optionals
+        except Exception as e:
+            print("Handling rail generator issues...")
+            # If necessary, increase size up to +5 to make generation possible
+            max_attempts = 5
+            for i in range(1, max_attempts + 1):
+                new_width = width + i
+                new_height = height + i
+                try:
+                    rail, optionals = rail_gen_original(new_width, new_height, number_of_agents, num_resets, np_random)
+                    break
+                except Exception as e2:
+                    if i == max_attempts:
+                        raise e2
+            # Trim afterwards
+            cropped_grid = rail.grid[:width, :height]
+            rail.grid = cropped_grid
+            return rail, optionals
+
+    # Original Rail Generator
+    rail_gen_original = sparse_rail_generator(
         max_num_cities=env_params['cities'],
         seed=used_seed,
         grid_mode=env_params['grid'],
         max_rails_between_cities=env_params['intercity'],
         max_rail_pairs_in_city=env_params['incity']
     )
+
+    # Test Rail Generator
+    rail_gen = rail_gen_test
 
     # Custom Line Generator
     line_gen = custom_sparse_line_generator(env_params, used_seed)
@@ -176,7 +208,7 @@ def create_env(env_params):
     )
     try:
         obs, info = env.reset()
-    except OverflowError as e:
+    except Exception as e:
         obs, info = fallback_reset(env)
     # Ensure that all agents have positions
     if any(agent.position is None or agent.position[0] < 0 or agent.position[1] < 0 for agent in env.agents):
@@ -217,10 +249,10 @@ def create_env(env_params):
     return env
 
 
-def fallback_reset(env, env_params):
-    print("Handling issues...")
+def fallback_reset(env):
+    print("Handling rail issues...")
     if env.rail is None or env.rail.grid is None:
-        return create_env_retry(env_params) 
+        raise RuntimeError("Grid was empty.")
     # Negative rails become 0
     if np.any(env.rail.grid < 0):
         env.rail.grid[env.rail.grid < 0] = 0
@@ -232,17 +264,7 @@ def fallback_reset(env, env_params):
     env.dones = dict.fromkeys(list(range(env.get_num_agents())) + ["__all__"], False)
     obs = env._get_observations()
     info = env.get_info_dict()
-    return env, obs, info
-
-
-def create_env_retry(env_params):
-    for attempt in range(3):
-        try:
-            env = create_env(env_params)
-            obs, info = env.reset()
-            return env, obs, info
-        except Exception as e:
-            raise RuntimeError(e)
+    return obs, info
 
 
 def get_allowed_dirs(track):
@@ -299,12 +321,12 @@ def gen_env(env_params):
             tracks = extract_tracks(env)
             trains = extract_trains(env)
             if trains.empty:
-                # Use hints
+                # Use hints to place agents
                 np_random = np.random.RandomState(seed=env_params['seed'])
                 trains = extract_trains_from_hints(LAST_HINTS, np_random, env_params)
+            # Render image
             est_render_time = render_time_prediction(1, env.height*env.width)
             print(f"Rendering image (~{est_render_time})...")
-            # Render image
             if env.width * env.height > 1000000:
                 low_quality_mode = True
             else:
@@ -323,8 +345,8 @@ def gen_env(env_params):
         except OverflowError as e:
             print(f"❌ Environment could not be generated:\n{e}")
             return -1, -1
-        except RuntimeError as e:
-            print(f"❌ Environment could not be generated:\n{e}")
+        except Exception as e:
+            print(f"❌ No Environment generated:\n{e}")
             return -2, -2
 
     return tracks, trains
@@ -335,18 +357,46 @@ def extract_tracks(env):
     for row in range(env.height):
         track_row = []
         for col in range(env.width):
-            transition = env.rail.get_full_transitions(row, col)
-            if transition in [8192, 4, 128, 256]:
-                # Replace Dead-Ends
-                print("> Dead-end at (" + str(row) + "," + str(col) + ") replaced.")
-                if transition == 4 or transition == 256:
-                    transition = 1025
-                else:
-                    transition = 32800
-            track_row.append(transition)
+            track = validate_track(env, row, col)
+            track_row.append(track)
         tracks.append(track_row)
-    tracks = [[int(cell) for cell in row] for row in tracks]
     return tracks
+
+
+def validate_track(env, row, col):
+    transition = env.rail.get_full_transitions(row, col)
+    # Check for Dead-Ends
+    if transition in {8192, 4, 128, 256}:
+        print("> Dead-end at (" + str(row) + "," + str(col) + ") replaced.")
+        if transition == 4 or transition == 256:
+            transition = 1025
+        else:
+            transition = 32800
+    # Check for invalid Tracks
+    elif transition != 0:
+        if transition not in valid_tracks:
+            # Known problem cases
+            if transition in {1285, 1281, 1029}:
+                transition = 1025
+            elif transition in {41120, 40992, 32928}:
+                transition = 32800
+            elif transition in {40996}:
+                transition = 49186
+            elif transition in {32932}:
+                transition = 32872
+            elif transition in {32804}:
+                transition = 49186
+            elif transition in {9473}:
+                transition = 5633
+            elif transition in {9221}:
+                transition = 17411
+            else:
+                # Unknown problem cases
+                print(f"> UNKNOWN: {transition} at ({row},{col}) removed.")
+                transition = 0
+            print(f"> Invalid track at ({row},{col}) replaced.")
+    env.rail.grid[row, col] = transition
+    return int(transition)
 
 
 def extract_trains(env):
