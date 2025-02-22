@@ -373,85 +373,6 @@ class Label:
         return
 
 
-class Picture:
-    def __init__(
-            self,
-            root,
-            width: int,
-            height: int,
-            grid_pos: Tuple[int, int],
-            padding: Union[
-                Tuple[int, int],
-                Tuple[Tuple[int, int], Tuple[int, int]],
-                Tuple[int, Tuple[int, int]],
-                Tuple[Tuple[int, int], int]
-            ],
-            image: str,
-            foreground_color: str,
-            background_color: str,
-            visibility: bool,
-            sticky: Union[str, None] = None,
-            columnspan: Union[int, None] = None,
-    ):
-        self.root = root
-        self.width = width
-        self.height = height
-        self.grid_pos = grid_pos
-        self.padding = padding
-        self.sticky = sticky
-        self.columnspan = columnspan
-        self.foreground_color = foreground_color
-        self.background_color = background_color
-        self.visibility = visibility
-
-        self.image = self.get_image(image)
-        self.label = self.create_label()
-
-        if visibility:
-            self.place_label()
-
-    def create_label(self):
-        label = tk.Label(
-            self.root,
-            image=self.image,
-            width=self.width, height=self.height,
-            fg=self.foreground_color, bg=self.background_color
-        )
-        return label
-
-    def place_label(self):
-        self.label.grid(
-            row=self.grid_pos[0], column=self.grid_pos[1],
-            padx=self.padding[0], pady=self.padding[1],
-            sticky=self.sticky, columnspan=self.columnspan,
-        )
-        self.visibility = True
-
-    def hide_label(self):
-        self.label.grid_forget()
-        self.visibility = False
-
-    def toggle_visibility(self):
-        if self.visibility:
-            self.label.grid_forget()
-            self.visibility = False
-        else:
-            self.label.grid(
-                row=self.grid_pos[0], column=self.grid_pos[1],
-                padx=self.padding[0], pady=self.padding[1],
-                sticky=self.sticky, columnspan=self.columnspan,
-            )
-            self.visibility = True
-        return
-
-    def get_image(self, image_path):
-        image = Image.open(image_path)
-        image = image.crop((0, 0, image.width - 4, image.height - 4))
-        image = image.resize((int(self.width), int(self.height)))
-        image = ImageTk.PhotoImage(image)
-        return image
-
-
 class GIF:
     def __init__(
             self,
@@ -844,30 +765,6 @@ class EntryField:
         self.entry_field.delete(0, tk.END)
         self.entry_field.insert(0, string)
         self.entry_field.config(fg=self.foreground_color)
-
-
-class Popup:
-    def __init__(
-            self,
-            root: tk.Tk,
-            width: int,
-            height: int,
-            title: str,
-            background_color: str,
-    ):
-        self.root = root
-        self.width = width
-        self.height = height
-        self.title = title
-        self.background_color = background_color
-
-        self.popup = self.create_popup()
-
-    def create_popup(self):
-        popup = tk.Toplevel(self.root, bg=self.background_color)
-        popup.title(self.title)
-        popup.geometry(f"{self.width}x{self.height}")
-        return popup
 
 
 class Text:
