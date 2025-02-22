@@ -33,7 +33,7 @@ def render_gif(tracks, trains, df_pos, env_params, env_counter, output_gif='data
     # Get timestep range to determine gif length
     min_timestep = int(df_pos['timestep'].min())
     max_timestep = int(df_pos['timestep'].max())
-    print(f"{max_timestep+1} Timesteps to render.\nProgress:", end=" ")
+    print(f"{max_timestep-min_timestep+1} Timesteps to render.\nProgress:", end=" ")
     # Directory for gif frames
     tmp_dir = "data/tmp_frames"
     os.makedirs(tmp_dir, exist_ok=True)
