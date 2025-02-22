@@ -17,7 +17,6 @@ Additionally, visualize your solutions as a numbered path, detailed timetable, o
 - 📁 `code` contains python source codes.
 - 📁 `data` contains images and saved parameters.
 - 📁 `env` contains environment encodings.
-- 📁 `help_texts` provide information inside the program.
 - 📝 `main.py` is pretty much the only file YOU have to care about. Its execution starts the program.
 - 📝 `README.md` is what you are reading right now.
 
