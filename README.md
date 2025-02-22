@@ -15,8 +15,8 @@ Additionally, visualize your solutions as a numbered path, detailed timetable, o
 
 - 📁 `asp` is where YOU can put your asp files. Contains working `lp` files.
 - 📁 `code` contains python source codes.
-- 📁 `data` contains images and saved parameters.
-- 📁 `env` contains environment encodings.
+- 📁 `data` contains images, saved parameters, helper texts and runtime information.
+- 📁 `env` contains environment `lp` encodings.
 - 📝 `main.py` is pretty much the only file YOU have to care about. Its execution starts the program.
 - 📝 `README.md` is what you are reading right now.
 
