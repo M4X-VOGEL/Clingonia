@@ -24,10 +24,10 @@ screenwidth, screenheight = 1920, 1080
 
 # font styling
 base_font_size = 20
-info_text_font_size = 16
+info_text_font_size = 15
 frame_title_font_size = 50
 font_base_mod = 1
-font_path_mod = 0.75
+font_path_mod = 0.5
 font_err_mod = 0.75
 
 # font layouts
@@ -1439,7 +1439,9 @@ def load_lp_files():
     user_params['lpFiles'] = list(files)
     displaytext = "\n".join(files)
 
-    labels['clingo_paths_label'].label.config(text=displaytext)
+    labels['clingo_paths_label'].label.config(
+        text=displaytext, wraplength=500, justify='left',
+    )
     if labels['clingo_status_label'].label.cget('text') == 'No .lp files given.':
         labels['clingo_status_label'].label.config(text='')
 
@@ -1508,7 +1510,9 @@ def load_clingo_params():
 
     if user_params['lpFiles'] is not None:
         displaytext = "\n".join(user_params["lpFiles"])
-        labels['clingo_paths_label'].label.config(text=displaytext)
+        labels['clingo_paths_label'].label.config(
+            text=displaytext, wraplength=500, justify='left',
+        )
 
 
 
