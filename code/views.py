@@ -36,7 +36,7 @@ canvas_font_layout = ('Arial', int(font_base_mod * base_font_size))
 canvas_label_font_layout = ('Arial', int(font_base_mod * base_font_size), 'bold')
 save_font_layout = ('Arial', int(font_base_mod * base_font_size), 'italic')
 path_font_layout = ('Arial', int(font_base_mod * base_font_size * font_path_mod), 'bold')
-err_font_layout = ('Arial', int(font_base_mod * base_font_size * font_err_mod), 'bold')
+err_font_layout = ('Arial', int(font_base_mod * font_err_mod * base_font_size), 'bold')
 help_font_layout = ('Courier', int(font_base_mod * base_font_size))
 info_font_layout = ('Courier', int(font_base_mod * info_text_font_size))
 title_font_layout = ('Arial', int(font_base_mod * frame_title_font_size), 'bold')
@@ -317,7 +317,7 @@ def update_fonts():
     base_font_layout = ('Arial', int(font_base_mod * base_font_size), 'bold')
     canvas_font_layout = ('Arial', int(font_base_mod * base_font_size))
     canvas_label_font_layout = ('Arial', int(font_base_mod * base_font_size), 'bold')
-    err_font_layout = ('Arial', int(font_base_mod * base_font_size * font_err_mod), 'bold')
+    err_font_layout = ('Arial', int(font_base_mod * font_err_mod * base_font_size), 'bold')
     help_font_layout = ('Courier', int(font_base_mod * base_font_size))
     info_font_layout = ('Courier', int(font_base_mod * info_text_font_size))
     title_font_layout = ('Arial', int(font_base_mod * frame_title_font_size), 'bold')
@@ -543,7 +543,7 @@ def build_start_menu_help_frame():
         visibility=True
     )
 
-    with open("help_texts/start_menu_help_text.txt", "r") as file:
+    with open("data/help_texts/start_menu_help_text.txt", "r") as file:
         help_displaytext = file.read()
 
     texts['start_menu_help_frame'] = Text(
@@ -963,7 +963,7 @@ def build_main_menu_help_frame():
         visibility=True
     )
 
-    with open("help_texts/main_menu_help_text.txt", "r") as file:
+    with open("data/help_texts/main_menu_help_text.txt", "r") as file:
         help_displaytext = file.read()
 
     texts['main_menu_help'] = Text(
@@ -1228,7 +1228,7 @@ def build_clingo_help_frame():
         visibility=True
     )
 
-    with open("help_texts/clingo_help_text.txt", "r") as file:
+    with open("data/help_texts/clingo_help_text.txt", "r") as file:
         help_displaytext = file.read()
 
     texts['clingo_help'] = Text(
@@ -2310,7 +2310,7 @@ def build_random_gen_para_help_frame():
         visibility=True
     )
 
-    with open("help_texts/random_gen_para_help_text.txt", "r") as file:
+    with open("data/help_texts/random_gen_para_help_text.txt", "r") as file:
         help_displaytext = file.read()
 
     texts['random_gen_para_help'] = Text(
@@ -3299,7 +3299,7 @@ def build_builder_para_help_frame():
         visibility=True
     )
 
-    with open("help_texts/builder_para_help_text.txt", "r") as file:
+    with open("data/help_texts/builder_para_help_text.txt", "r") as file:
         help_displaytext = file.read()
 
     texts['builder_para_help_text'] = Text(
@@ -4019,7 +4019,7 @@ def build_builder_track_help_frame():
         visibility=True
     )
 
-    with open("help_texts/builder_track_help_text.txt", "r") as file:
+    with open("data/help_texts/builder_track_help_text.txt", "r") as file:
         help_displaytext = file.read()
 
     texts['builder_track_help_text'] = Text(
@@ -4563,7 +4563,7 @@ def build_builder_train_help_frame():
         visibility=True
     )
 
-    with open("help_texts/builder_train_help_text.txt", "r") as file:
+    with open("data/help_texts/builder_train_help_text.txt", "r") as file:
         help_displaytext = file.read()
 
     texts['builder_train_help_text'] = Text(
@@ -5372,7 +5372,7 @@ def build_result_help_frame():
         visibility=True
     )
 
-    with open("help_texts/result_help_text.txt", "r") as file:
+    with open("data/help_texts/result_help_text.txt", "r") as file:
         help_displaytext = file.read()
 
     texts['result_help_text'] = Text(

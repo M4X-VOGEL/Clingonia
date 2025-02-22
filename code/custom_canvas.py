@@ -5,6 +5,7 @@ import pandas as pd
 import platform
 
 from code.custom_widgets import *
+from code.config import AGENT_COLORS
 
 
 # Platform: 
@@ -1488,12 +1489,10 @@ class ResultCanvas:
             8: (adjusted_cell_size * 0.2, adjusted_cell_size * 0.8),
         }
 
-        colors = [
-            "#d50000", "#c51162", "#aa00ff", "#6200ea", "#304ffe", "#2962ff",
-            "#0091ea", "#00b8d4", "#00bfa5", "#00c853", "#64dd17", "#aeea00",
-            "#ffd600", "#ffab00", "#ff6d00", "#ff3d00", "#5d4037", "#455a64"
-        ]
-        colors = (colors * ((len(self.paths_df) // len(colors)) + 1))
+        colors = (
+                AGENT_COLORS *
+                ((len(self.paths_df) // len(AGENT_COLORS)) + 1)
+        )
         train_colors = dict(zip(self.paths_df['trainID'].unique(), colors))
 
         for _, row in self.show_df.iterrows():
@@ -1603,12 +1602,10 @@ class PathListCanvas:
         self.canvas.pack(side='top', padx=self.x, pady=self.y, anchor='nw')
 
     def add_labels(self):
-        colors = [
-            "#d50000", "#c51162", "#aa00ff", "#6200ea", "#304ffe", "#2962ff",
-            "#0091ea", "#00b8d4", "#00bfa5", "#00c853", "#64dd17", "#aeea00",
-            "#ffd600", "#ffab00", "#ff6d00", "#ff3d00", "#5d4037", "#455a64"
-        ]
-        colors = (colors * ((len(self.train_data) // len(colors)) + 1))
+        colors = (
+                AGENT_COLORS *
+                ((len(self.train_data) // len(AGENT_COLORS)) + 1)
+        )
 
         for index, (idx, row) in enumerate(self.train_data.iterrows()):
             frame = tk.Frame(self.scroll_frame, bg=self.background_color)
