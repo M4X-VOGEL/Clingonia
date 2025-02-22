@@ -22,11 +22,10 @@ Example usage:
     )
 """
 
-from typing import Tuple, Dict
+import platform
 
 import numpy as np
 import pandas as pd
-import platform
 
 from code.custom_widgets import *
 from code.config import AGENT_COLORS

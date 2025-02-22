@@ -20,12 +20,13 @@ import shutil
 from tkinter import filedialog
 
 from code.build_png import create_custom_env, save_png
+from code.build_gif import render_gif
 from code.custom_canvas import *
 from code.files import save_env, delete_tmp_lp, delete_tmp_png, delete_tmp_gif, delete_tmp_frames
 from code.gen_png import gen_env, render_time_prediction
 from code.load_env import load_env
 from code.positions import position_df
-from code.build_gif import render_gif
+
 
 
 # Platform: 

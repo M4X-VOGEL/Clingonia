@@ -14,12 +14,12 @@ Example usage:
     )
 """
 
-from typing import Union, Tuple, Dict
-
+import warnings
 import tkinter as tk
 from tkinter import ttk
+from typing import Union, Tuple, Dict
+
 from PIL import Image, ImageTk, ImageDraw, ImageSequence
-import warnings
 
 
 class Window:
