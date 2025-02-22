@@ -13,14 +13,9 @@ from flatland.envs.agent_utils import SpeedCounter
 from flatland.envs.observations import GlobalObsForRailEnv
 from flatland.envs.timetable_utils import Line
 from code.build_png import calc_resolution, pil_config
+from code.config import TRACKS, DEAD_ENDS
 
 LAST_HINTS = None
-valid_tracks = {32800, 1025, 4608, 16386, 72, 2064,  # Track Type #1
-                37408, 17411, 32872, 3089, 49186, 1097, 34864, 5633,  # Track Type #2
-                33825,  # Track Type #3
-                38433, 50211, 33897, 35889,  # Track Type #4
-                38505, 52275,  # Track Type #5
-                20994, 16458, 2136, 6672}  # Track Type #6
 
 def create_agents_from_train_stations(hints, num_agents, np_random):
     """Generates agents out of station information from hints.
@@ -366,7 +361,7 @@ def extract_tracks(env):
 def validate_track(env, row, col):
     transition = env.rail.get_full_transitions(row, col)
     # Check for Dead-Ends
-    if transition in {8192, 4, 128, 256}:
+    if transition in DEAD_ENDS:
         print("> Dead-end at (" + str(row) + "," + str(col) + ") replaced.")
         if transition == 4 or transition == 256:
             transition = 1025
@@ -374,7 +369,7 @@ def validate_track(env, row, col):
             transition = 32800
     # Check for invalid Tracks
     elif transition != 0:
-        if transition not in valid_tracks:
+        if transition not in TRACKS:
             # Known problem cases
             if transition in {1285, 1281, 1029}:
                 transition = 1025

@@ -4,11 +4,10 @@ from flatland.envs.rail_generators import rail_from_grid_transition_map
 from flatland.envs.malfunction_generators import MalfunctionParameters, ParamMalfunctionGen
 from flatland.utils.rendertools import RenderTool
 from flatland.core.transition_map import GridTransitionMap
+from code.config import DIR_MAP
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-# Numeric directions
-DIR_MAP = {'n': 0, 'e': 1, 's': 2, 'w': 3}
 # Direction change for improperly positioned trains
 dir_replacement = {
     # Straights

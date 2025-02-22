@@ -1,17 +1,6 @@
 import os
 import pandas as pd
-
-valid_tracks = [
-    0,  # Type 0
-    32800, 1025, 4608, 16386, 72, 2064,  # Type 1
-    37408, 17411, 32872, 3089, 49186, 1097, 34864, 5633,  # Type 2
-    33825,  # Type 3
-    38433, 50211, 33897, 35889,  # Type 4
-    38505, 52275,  # Type 5
-    20994, 16458, 2136, 6672  # Type 6
-]
-
-dead_ends = [8192, 4, 128, 256]
+from code.config import TRACKS, DEAD_ENDS
 
 def load_env(lp_file):
     """Extracts a list of tracks and a DataFrame with train-info from a .lp-file.
@@ -75,7 +64,6 @@ def prep_tracks_and_trains(path):
 
 def add_cell(df_tracks, pred):
     # cell((X,Y), Track)
-    global valid_tracks
     # Extract variables
     params = pred[5:-1]
     cell = params.replace('(', '').replace(')', '').split(',')
@@ -88,10 +76,10 @@ def add_cell(df_tracks, pred):
             print(f"❌ Error: Negative coordinates are not allowed.")
             return -12  # Report cells with negative coordinates
         track = int(cell[2].strip())
-        if track in dead_ends:
+        if track in DEAD_ENDS:
             print(f"❌ cell(({y},{x}),_) Dead end is not allowed.")
             return -14  # Report dead end
-        elif track not in valid_tracks:
+        elif track not in TRACKS:
             track = 0  # Remove track and provide empty cell
             print(f"⚠️ cell(({y},{x}),_) Warning: Invalid track type was replaced by 0.")
     except ValueError:
@@ -138,6 +126,7 @@ def fill_tse(tse_list, pred):
 
     # end(ID, (X,Y), LatestArrival)
     elif pred.startswith("end"):
+        # Extract variables
         params = pred[4:-1].replace('(', '').replace(')', '')
         end = [p.strip() for p in params.split(',')]
         if len(end) != 4:

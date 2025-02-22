@@ -3,8 +3,8 @@ import imageio.v2 as imageio
 from flatland.utils.rendertools import RenderTool
 from PIL import Image, ImageDraw, ImageFont
 from code.build_png import create_custom_env, pil_config
+from code.config import DIR_MAP
 
-DIR_MAP = {'n': 0, 'e': 1, 's': 2, 'w': 3}
 images = []  # Frame list
 # Re-rendering parameters
 old_env_counter = 0
