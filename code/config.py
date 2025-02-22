@@ -14,3 +14,10 @@ TRACKS = {
 
 # Flatland Dead End IDs
 DEAD_ENDS = {8192, 4, 128, 256}
+
+# Flatland Agent Colors
+AGENT_COLORS = [
+    "#d50000", "#c51162", "#aa00ff", "#6200ea", "#304ffe", "#2962ff",
+    "#0091ea", "#00b8d4", "#00bfa5", "#00c853", "#64dd17", "#aeea00",
+    "#ffd600", "#ffab00", "#ff6d00", "#ff3d00", "#5d4037", "#455a64"
+]

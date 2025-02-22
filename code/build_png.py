@@ -1,12 +1,13 @@
+from warnings import filterwarnings
 import numpy as np
 from flatland.envs.rail_env import RailEnv
 from flatland.envs.rail_generators import rail_from_grid_transition_map
 from flatland.envs.malfunction_generators import MalfunctionParameters, ParamMalfunctionGen
 from flatland.utils.rendertools import RenderTool
 from flatland.core.transition_map import GridTransitionMap
-from code.config import DIR_MAP
-import warnings
-warnings.filterwarnings("ignore", category=RuntimeWarning)
+from code.config import DIR_MAP, AGENT_COLORS
+
+filterwarnings("ignore", category=RuntimeWarning)
 
 # Direction change for improperly positioned trains
 dir_replacement = {
@@ -50,26 +51,6 @@ class DummyLine:
         self.agent_directions = agent_directions
         self.agent_speeds = agent_speeds
 
-def dummy_line_generator(rail, num_agents, hints, *args, **kwargs):
-    """Custom Line-Generator for creating a DummyLine.
-
-    Args:
-        rail (RailEnv): Reference for track network.
-        num_agents (int): Number of agents.
-        hints (dict): Extra information.
-    """
-    if hints is None:  # Flatland may expect hints
-        hints = {}
-    hints['train_stations'] = []  # Empty for now
-
-    # Attribute placeholder
-    agent_positions = [None] * num_agents
-    agent_targets = [None] * num_agents
-    agent_directions = [None] * num_agents
-    agent_speeds = [1.0] * num_agents
-
-    return DummyLine(agent_positions, agent_targets, agent_directions, agent_speeds)
-
 
 class DummyObservationBuilder:
     """Observation-Builder with no actual observation expected by Flatland.
@@ -91,6 +72,187 @@ class DummyObservationBuilder:
         if handles is None:
             handles = []
         return {h: None for h in handles}
+
+
+def dummy_line_generator(rail, num_agents, hints, *args, **kwargs):
+    """Custom Line-Generator for creating a DummyLine.
+
+    Args:
+        rail (RailEnv): Reference for track network.
+        num_agents (int): Number of agents.
+        hints (dict): Extra information.
+    """
+    if hints is None:  # Flatland may expect hints
+        hints = {}
+    hints['train_stations'] = []  # Empty for now
+
+    # Attribute placeholder
+    agent_positions = [None] * num_agents
+    agent_targets = [None] * num_agents
+    agent_directions = [None] * num_agents
+    agent_speeds = [1.0] * num_agents
+
+    return DummyLine(agent_positions, agent_targets, agent_directions, agent_speeds)
+
+
+def calc_resolution(low_quality_mode, env):
+    if isinstance(env, list):  # tracks list
+        env_dim_max = max(len(env), len(env[0]))
+    else:  # RailEnv object
+        env_dim_max = max(env.height, env.width)
+    screen_res = env_dim_max  # Base value
+    if low_quality_mode:  # Low
+        if env_dim_max > 1000: screen_res = 6000
+        elif env_dim_max > 600: screen_res *= 6
+        elif env_dim_max > 160: screen_res *= 9
+        elif env_dim_max > 100: screen_res *= 12
+        elif env_dim_max > 50: screen_res *= 18
+        elif env_dim_max > 20: screen_res *= 30
+        elif env_dim_max > 10: screen_res *= 50
+        elif env_dim_max > 3: screen_res *= 100
+        else: screen_res *= 200
+    else:  # Automatic
+        if env_dim_max > 1000: screen_res = 9000
+        elif env_dim_max > 600: screen_res *= 9
+        elif env_dim_max > 400: screen_res *= 12
+        elif env_dim_max > 300: screen_res *= 15
+        elif env_dim_max > 200: screen_res *= 18
+        elif env_dim_max > 100: screen_res *= 30
+        elif env_dim_max > 80: screen_res *= 40
+        elif env_dim_max > 50: screen_res *= 50
+        elif env_dim_max > 30: screen_res *= 80
+        elif env_dim_max > 20: screen_res *= 100
+        elif env_dim_max > 10: screen_res *= 200
+        elif env_dim_max > 3: screen_res *= 300
+        else: screen_res *= 400
+    return screen_res
+
+
+def pil_setup():
+    try:
+        from flatland.core.transition_map import Grid4Transitions
+        if not hasattr(Grid4Transitions, "is_valid"):
+            def is_valid(self, cell_transition):
+                return cell_transition != 0
+            Grid4Transitions.is_valid = is_valid
+    except ImportError:
+        pass
+
+
+def pil_config(renderer):
+    def hex_to_rgb(hex_str):
+        hex_str = hex_str.lstrip('#')
+        return tuple(int(hex_str[i:i+2], 16) for i in (0, 2, 4))
+    custom_colors = [hex_to_rgb(c) for c in AGENT_COLORS]
+    renderer.gl.agent_colors = custom_colors
+    renderer.gl.n_agent_colors = len(custom_colors)
+    
+    # Custom colors for agents
+    def custom_get_cmap(name, lut):
+        def cmap(idx):
+            return custom_colors[idx % len(custom_colors)]
+        return cmap
+    renderer.gl.get_cmap = custom_get_cmap
+
+    # Remove elapsed time text
+    original_text = renderer.gl.text
+    def patched_text(x, y, text, *args, **kwargs):
+        if text.startswith("elapsed:"):
+            return
+        return original_text(x, y, text, *args, **kwargs)
+    renderer.gl.text = patched_text
+
+    # Center agents
+    original_plot_single_agent = renderer.renderer.plot_single_agent
+    def centered_plot_single_agent(self, position_row_col, direction, color="r", target=None, static=False, selected=False):
+        rt = self.__class__
+        pos = np.array(position_row_col)
+        if pos.ndim == 0 or pos.size == 0:
+            return
+        xyPos = np.matmul(pos, rt.row_col_to_xy) + rt.x_y_half
+        if static:
+            color = self.gl.adapt_color(color, lighten=True)
+        # Agent size
+        self.gl.scatter(*xyPos, color=color, layer=1, marker="o", s=16)
+        direction_row_col = rt.transitions_row_col[direction]
+        direction_xy = np.matmul(direction_row_col, rt.row_col_to_xy)
+        xy_dir_line = np.array([xyPos, xyPos + direction_xy / 2]).T
+        self.gl.plot(*xy_dir_line, color=color, layer=1, lw=5, ms=0, alpha=0.6)
+        if selected:
+            self._draw_square(xyPos, 1, color)
+        if target is not None:
+            target_row_col = np.array(target)
+            target_xy = np.matmul(target_row_col, rt.row_col_to_xy) + rt.x_y_half
+            self._draw_square(target_xy, 1/3, color, layer=1)
+    renderer.renderer.plot_single_agent = centered_plot_single_agent.__get__(renderer.renderer, renderer.renderer.__class__)
+
+    # Change color of cells with no track to canvas_color
+    original_scatter = renderer.gl.scatter
+    def patched_scatter(x, y, color, *args, **kwargs):
+        if color == "r" and kwargs.get("s", None) == 30:
+            color = "#313338"
+            kwargs["s"] = 0
+        return original_scatter(x, y, color, *args, **kwargs)
+    renderer.gl.scatter = patched_scatter
+
+
+def initial_render_test():
+    """Renders 1x1 environment with track, agent and station to validate the launch.
+    
+    Returns:
+        [int] 0 if okay, else -1.
+    """
+    # Parameters
+    tracks = [[1025]]
+    params = {
+        'rows': 1,
+        'cols': 1,
+        'agents': 1,
+        'malfunction': (0.0,),
+        'min': 1,
+        'max': 1,
+        'remove': False,
+        'seed': 1,
+    }
+    # Transition map
+    grid_map = GridTransitionMap(params['rows'], params['cols'])
+    grid_map.grid = np.array(tracks, dtype=np.uint16)
+    rail_generator = rail_from_grid_transition_map(grid_map)
+    # Malfunction
+    malfunction_params = MalfunctionParameters(
+        malfunction_rate=0.0,
+        min_duration=params['min'],
+        max_duration=params['max']
+    )
+    malfunction_generator = ParamMalfunctionGen(malfunction_params)
+    # Environment
+    env = RailEnv(
+        width=params['cols'],
+        height=params['rows'],
+        rail_generator=rail_generator,
+        line_generator=dummy_line_generator,
+        number_of_agents=params['agents'],
+        malfunction_generator=malfunction_generator,
+        remove_agents_at_target=params['remove'],
+        obs_builder_object=DummyObservationBuilder(),
+        random_seed=params['seed']
+    )
+    env.reset()
+    # Agent and station
+    agent = env.agents[0]
+    agent.initial_position = (0, 0)
+    agent.position = (0, 0)
+    agent.direction = DIR_MAP['e']
+    agent.initial_direction = agent.direction
+    agent.target = (0, 0)
+    # Test rendering
+    renderer = RenderTool(env, gl="PILSVG")
+    renderer.reset()
+    renderer.render_env(
+        show=True,
+        show_observations=False,
+        show_predictions=False
+    )
 
 
 def create_custom_env(tracks, trains, params):
@@ -177,65 +339,6 @@ def create_custom_env(tracks, trains, params):
     return env, trains, invalid_train, invalid_station
 
 
-def initial_render_test():
-    """Renders 1x1 environment with track, agent and station to validate the launch.
-    
-    Returns:
-        [int] 0 if okay, else -1.
-    """
-    # Parameters
-    tracks = [[1025]]
-    params = {
-        'rows': 1,
-        'cols': 1,
-        'agents': 1,
-        'malfunction': (0.0,),
-        'min': 1,
-        'max': 1,
-        'remove': False,
-        'seed': 1,
-    }
-    # Transition map
-    grid_map = GridTransitionMap(params['rows'], params['cols'])
-    grid_map.grid = np.array(tracks, dtype=np.uint16)
-    rail_generator = rail_from_grid_transition_map(grid_map)
-    # Malfunction
-    malfunction_params = MalfunctionParameters(
-        malfunction_rate=0.0,
-        min_duration=params['min'],
-        max_duration=params['max']
-    )
-    malfunction_generator = ParamMalfunctionGen(malfunction_params)
-    # Environment
-    env = RailEnv(
-        width=params['cols'],
-        height=params['rows'],
-        rail_generator=rail_generator,
-        line_generator=dummy_line_generator,
-        number_of_agents=params['agents'],
-        malfunction_generator=malfunction_generator,
-        remove_agents_at_target=params['remove'],
-        obs_builder_object=DummyObservationBuilder(),
-        random_seed=params['seed']
-    )
-    env.reset()
-    # Agent and station
-    agent = env.agents[0]
-    agent.initial_position = (0, 0)
-    agent.position = (0, 0)
-    agent.direction = DIR_MAP['e']
-    agent.initial_direction = agent.direction
-    agent.target = (0, 0)
-    # Test rendering
-    renderer = RenderTool(env, gl="PILSVG")
-    renderer.reset()
-    renderer.render_env(
-        show=True,
-        show_observations=False,
-        show_predictions=False
-    )
-
-
 def save_png(env, path="data/running_tmp.png", low_quality_mode=False):
     """Renders and saves the PNG-image.
     
@@ -271,111 +374,4 @@ def save_png(env, path="data/running_tmp.png", low_quality_mode=False):
     return 0
 
 
-def calc_resolution(low_quality_mode, env):
-    if isinstance(env, list):  # tracks list
-        env_dim_max = max(len(env), len(env[0]))
-    else:  # RailEnv object
-        env_dim_max = max(env.height, env.width)
-    screen_res = env_dim_max  # Base value
-    if low_quality_mode:  # Low
-        if env_dim_max > 1000: screen_res = 6000
-        elif env_dim_max > 600: screen_res *= 6
-        elif env_dim_max > 160: screen_res *= 9
-        elif env_dim_max > 100: screen_res *= 12
-        elif env_dim_max > 50: screen_res *= 18
-        elif env_dim_max > 20: screen_res *= 30
-        elif env_dim_max > 10: screen_res *= 50
-        elif env_dim_max > 3: screen_res *= 100
-        else: screen_res *= 200
-    else:  # Automatic
-        if env_dim_max > 1000: screen_res = 9000
-        elif env_dim_max > 600: screen_res *= 9
-        elif env_dim_max > 400: screen_res *= 12
-        elif env_dim_max > 300: screen_res *= 15
-        elif env_dim_max > 200: screen_res *= 18
-        elif env_dim_max > 100: screen_res *= 30
-        elif env_dim_max > 80: screen_res *= 40
-        elif env_dim_max > 50: screen_res *= 50
-        elif env_dim_max > 30: screen_res *= 80
-        elif env_dim_max > 20: screen_res *= 100
-        elif env_dim_max > 10: screen_res *= 200
-        elif env_dim_max > 3: screen_res *= 300
-        else: screen_res *= 400
-    return screen_res
-
-
-def pil_setup():
-    try:
-        from flatland.core.transition_map import Grid4Transitions
-        if not hasattr(Grid4Transitions, "is_valid"):
-            def is_valid(self, cell_transition):
-                return cell_transition != 0
-            Grid4Transitions.is_valid = is_valid
-    except ImportError:
-        pass
-
-
 pil_setup()
-
-def pil_config(renderer):
-    # Agent colors
-    colors = [
-        "#d50000", "#c51162", "#aa00ff", "#6200ea", "#304ffe", "#2962ff",
-        "#0091ea", "#00b8d4", "#00bfa5", "#00c853", "#64dd17", "#aeea00",
-        "#ffd600", "#ffab00", "#ff6d00", "#ff3d00", "#5d4037", "#455a64"
-    ]
-    def hex_to_rgb(hex_str):
-        hex_str = hex_str.lstrip('#')
-        return tuple(int(hex_str[i:i+2], 16) for i in (0, 2, 4))
-    custom_colors = [hex_to_rgb(c) for c in colors]
-    renderer.gl.agent_colors = custom_colors
-    renderer.gl.n_agent_colors = len(custom_colors)
-    
-    # Custom colors for agents
-    def custom_get_cmap(name, lut):
-        def cmap(idx):
-            return custom_colors[idx % len(custom_colors)]
-        return cmap
-    renderer.gl.get_cmap = custom_get_cmap
-
-    # Remove elapsed time text
-    original_text = renderer.gl.text
-    def patched_text(x, y, text, *args, **kwargs):
-        if text.startswith("elapsed:"):
-            return
-        return original_text(x, y, text, *args, **kwargs)
-    renderer.gl.text = patched_text
-
-    # Center agents
-    original_plot_single_agent = renderer.renderer.plot_single_agent
-    def centered_plot_single_agent(self, position_row_col, direction, color="r", target=None, static=False, selected=False):
-        import numpy as np
-        rt = self.__class__
-        pos = np.array(position_row_col)
-        if pos.ndim == 0 or pos.size == 0:
-            return
-        xyPos = np.matmul(pos, rt.row_col_to_xy) + rt.x_y_half
-        if static:
-            color = self.gl.adapt_color(color, lighten=True)
-        # Agent size
-        self.gl.scatter(*xyPos, color=color, layer=1, marker="o", s=16)
-        direction_row_col = rt.transitions_row_col[direction]
-        direction_xy = np.matmul(direction_row_col, rt.row_col_to_xy)
-        xy_dir_line = np.array([xyPos, xyPos + direction_xy / 2]).T
-        self.gl.plot(*xy_dir_line, color=color, layer=1, lw=5, ms=0, alpha=0.6)
-        if selected:
-            self._draw_square(xyPos, 1, color)
-        if target is not None:
-            target_row_col = np.array(target)
-            target_xy = np.matmul(target_row_col, rt.row_col_to_xy) + rt.x_y_half
-            self._draw_square(target_xy, 1/3, color, layer=1)
-    renderer.renderer.plot_single_agent = centered_plot_single_agent.__get__(renderer.renderer, renderer.renderer.__class__)
-
-    # Change color of cells with no track to canvas_color
-    original_scatter = renderer.gl.scatter
-    def patched_scatter(x, y, color, *args, **kwargs):
-        if color == "r" and kwargs.get("s", None) == 30:
-            color = "#313338"
-            kwargs["s"] = 0
-        return original_scatter(x, y, color, *args, **kwargs)
-    renderer.gl.scatter = patched_scatter
