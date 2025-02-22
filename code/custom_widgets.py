@@ -23,6 +23,28 @@ from PIL import Image, ImageTk, ImageDraw, ImageSequence
 
 
 class Window:
+    """A customized Tkinter Window class.
+
+    Attributes:
+        width (int):
+            specify the width of the window in pixel.
+        height (int):
+            specify the height of the window in pixel.
+        title (str):
+            title of th window. will also be displayed on the window border when
+            not in fullscreen.
+        background_color (str):
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        fullscreen (bool):
+            whether to display the window in fullscreen mode or not.
+        window (tk.Tk):
+            the actual tkinter window that is initialized internally with the
+            passed parameters.
+        screenwidth (int):
+            width of the screen the window is displayed on in pixel.
+        screenheight (int):
+            height of the screen the window is displayed on in pixel.
+    """
     def __init__(
             self,
             width: Union[int, None],
@@ -31,6 +53,25 @@ class Window:
             background_color: str,
             fullscreen: bool = False,
     ):
+        """Initialize a custom window with the passed parameters.
+
+        Creates a fullscreen window if called with fullscreen = True otherwise
+        creates a window with the specified width and height or with half the
+        screenwidth and screenheight if width and height are not specified.
+
+        Args:
+            width (int):
+                specify the width of the window in pixel.
+            height (int):
+                specify the height of the window in pixel.
+            title (str):
+                title of th window. will also be displayed on the window border when
+                not in fullscreen.
+            background_color (str):
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            fullscreen (bool):
+                whether to display the window in fullscreen mode or not.
+        """
         self.width = width
         self.height = height#
         self.title = title
@@ -45,35 +86,54 @@ class Window:
         self.screenheight = self.window.winfo_screenheight()
 
         if self.fullscreen:
+            # set window to fullscreen
             self.window.attributes("-fullscreen", self.fullscreen)
         elif self.width is None or self.height is None:
+            # if no width or height is given use half the screenwidth and height
             self.window.geometry(
-                f"{self.screenwidth//2}x{self.screenheight//2}"
+                f'{self.screenwidth//2}x{self.screenheight//2}'
             )
         else:
-            self.window.geometry(f"{self.width}x{self.height}")
+            # use specified width and height
+            self.window.geometry(f'{self.width}x{self.height}')
 
-    def create_window(self):
+    def create_window(self) -> tk.Tk:
+        """Initializes a tkinter window with the specified parameters.
+
+        Sets the title and background color on initialization.
+
+        Returns:
+            window (tk.TK): the handle of the tkinter window.
+        """
         window = tk.Tk()
         window.title(self.title)
         window.configure(bg=self.background_color)
         return window
 
     def close_window(self):
+        """Closes the window and all contained objects."""
         self.window.quit()
 
     def run(self):
+        """Start the main event loop of the window."""
         self.window.mainloop()
 
     def toggle_fullscreen(self):
+        """Toggle the state of the window between fullscreen and windowed mode.
+
+        For the windowed mode use either the width and height or screenwidth and
+        screenheight if one or both are unspecified.
+        """
         self.fullscreen = not self.fullscreen
         self.window.attributes("-fullscreen", self.fullscreen)
         if not self.fullscreen:
             if self.width is None or self.height is None:
+                # if no width or height is given use screenwidth and height
                 self.window.geometry(
                     f"{self.screenwidth // 2}x{self.screenheight // 2}"
                 )
             else:
+                # use specified width and height
                 self.window.geometry(f"{self.width}x{self.height}")
 
 
