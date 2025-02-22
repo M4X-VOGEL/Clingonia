@@ -1,3 +1,17 @@
+"""Provides several functions for the Clingonia graphical user interface.
+
+Provides functions to open and transition between vies and menus in Clingonia,
+as well as data management functions, such as file imports and environment
+generation.
+
+Example usage:
+    import views
+
+    views.build_flatland_window()
+    views.create_start_menu()
+    views.start_flatland()
+"""
+
 import os
 import re
 import ast

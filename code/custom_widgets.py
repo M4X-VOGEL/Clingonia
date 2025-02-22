@@ -1,3 +1,19 @@
+"""Provides custom variations of standard Tkinter classes.
+
+Includes custom variations of Window, Frame, Button, Label, Entry and Text.
+
+Example usage:
+    import custom_widgets
+
+    window = custom_widgets.Window(
+        width=10,
+        height=10,
+        title='Window',
+        background_color='#000000',
+        fullscreen=False
+    )
+"""
+
 from typing import Union, Tuple, Dict
 
 import tkinter as tk

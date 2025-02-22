@@ -1,3 +1,27 @@
+"""Provides custom variations of standard Tkinter canvases.
+
+Includes a custom EnvCanvas, BuildCanvas, TrainListCanvas, ResultCanvas and
+PathListCanvas.
+
+Example usage:
+    import custom_canvas
+
+    env_canvas = custom_canvas.EnvCanvas(
+        root=frame,
+        width=10,
+        height=10,
+        x=0,
+        y=0,
+        font=('Arial', 20),
+        background_color='#000000',
+        grid_color='#000000',
+        border_width=0,
+        image=path_to_image,
+        rows=10,
+        cols=10
+    )
+"""
+
 from typing import Tuple, Dict
 
 import numpy as np
