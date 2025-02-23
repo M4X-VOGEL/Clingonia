@@ -1,19 +1,5 @@
 import sys
 
-def main():
-    initial_import_authorization()
-    initial_render_authorization()
-    start_clingonia()
-
-
-def initial_import_authorization():
-    # Check, if all essential python modules are installed
-    from code.files import initial_import_test
-    missing_modules = initial_import_test()
-    if missing_modules:
-        import_error_handling(missing_modules)
-
-
 def import_error_handling(missing_modules):
     print('\n❌ Error: Essential python module missing.\n'
           'Make sure that you have all these modules installed:\n'
@@ -26,6 +12,14 @@ def import_error_handling(missing_modules):
         print(f'     pip install {module}')
     print()
     sys.exit()
+
+
+def initial_import_authorization():
+    # Check, if all essential python modules are installed
+    from code.files import initial_import_test
+    missing_modules = initial_import_test()
+    if missing_modules:
+        import_error_handling(missing_modules)
 
 
 def initial_render_authorization():
@@ -50,6 +44,12 @@ def start_clingonia():
     except Exception as e:
         print(f'❌ Error: Not able to boot up. Please try again.\n{e}')
         sys.exit()
+
+
+def main():
+    initial_import_authorization()
+    initial_render_authorization()
+    start_clingonia()
 
 
 if __name__ == "__main__":

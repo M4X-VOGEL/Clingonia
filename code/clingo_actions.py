@@ -28,37 +28,6 @@ clingo_finisher = {
     5: "Tracks laid, but what a ride! Victory's ours!"
 }
 
-
-def clingo_to_df(clingo_path="clingo", lp_files=[], answer_number=1):
-    """Runs clingo program and creates a DataFrame with the reduced output of the stated answer.
-    
-    Args:
-        clingo_path (str): Path to your clingo installation.
-        lp_files (list): Files with your ASP code.
-        answer_number (int): Number of the wanted answer from the clingo output (default is 1).
-    
-    Returns:
-        [pd.DataFrame]: Reduced output of the stated answer.
-    """
-    print("\nRun Simulation: START")
-    if len(lp_files) < 2:
-        print("❌ Error: No .lp files given.")
-        return -1  # no lp files
-    print("Running Clingo...")
-    if clingo_path != "clingo" and not os.path.isfile(f"{clingo_path}.exe"):
-        return -2  # invalid clingo path
-    output = run_clingo(clingo_path, lp_files, answer_number)
-    if output == -3:
-        return -3  # clingo error
-    answer = get_clingo_answer(output, answer_number)
-    if answer == -4 or answer == -5:
-        return answer  # invalid answer number
-    params = get_action_params(answer)
-    df_actions = create_df(params)
-    print("✅ Clingo done.")
-    return df_actions
-
-
 def run_clingo(clingo_path, lp_files, answer_number):
     """Gets clingo output by running input files.
     
@@ -195,4 +164,34 @@ def create_df(action_params):
     df_actions = pd.DataFrame(data, columns=["trainID", "action", "timestep"])
     # Sort by ID and Timestep
     df_actions = df_actions.sort_values(by=["trainID", "timestep"], ascending=[True, True])
+    return df_actions
+
+
+def clingo_to_df(clingo_path="clingo", lp_files=[], answer_number=1):
+    """Runs clingo program and creates a DataFrame with the reduced output of the stated answer.
+    
+    Args:
+        clingo_path (str): Path to your clingo installation.
+        lp_files (list): Files with your ASP code.
+        answer_number (int): Number of the wanted answer from the clingo output (default is 1).
+    
+    Returns:
+        [pd.DataFrame]: Reduced output of the stated answer.
+    """
+    print("\nRun Simulation: START")
+    if len(lp_files) < 2:
+        print("❌ Error: No .lp files given.")
+        return -1  # no lp files
+    print("Running Clingo...")
+    if clingo_path != "clingo" and not os.path.isfile(f"{clingo_path}.exe"):
+        return -2  # invalid clingo path
+    output = run_clingo(clingo_path, lp_files, answer_number)
+    if output == -3:
+        return -3  # clingo error
+    answer = get_clingo_answer(output, answer_number)
+    if answer == -4 or answer == -5:
+        return answer  # invalid answer number
+    params = get_action_params(answer)
+    df_actions = create_df(params)
+    print("✅ Clingo done.")
     return df_actions

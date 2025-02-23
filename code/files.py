@@ -2,6 +2,26 @@ import os
 import shutil
 import importlib
 
+def ensure_directory(d):
+    os.makedirs(d, exist_ok=True)
+
+
+def write_trains(trains, lp):
+    for _, row in trains.iterrows():
+        lp.write(
+            f"train({row['id']}).\n"
+            f"start({row['id']},({row['y']},{row['x']}),{row['e_dep']},{row['dir']}).\n"
+            f"end({row['id']},({row['y_end']},{row['x_end']}),{row['l_arr']}).\n\n"
+        )
+
+
+def write_tracks(tracks, lp):
+    for i, row in enumerate(tracks):
+        for j, track in enumerate(row):
+            lp.write(f"cell(({i},{j}),{track}).\n")
+        lp.write(f'\n')
+
+
 def save_env(tracks, trains, name="data/running_tmp.lp"):
     """Saves the env as a .lp file.
 
@@ -62,26 +82,6 @@ def delete_tmp_frames():
             shutil.rmtree(path)
         except OSError as e:
             print(f"Error: tmp_frames folder could not be deleted:\n{e}")
-
-
-def ensure_directory(d):
-    os.makedirs(d, exist_ok=True)
-
-
-def write_trains(trains, lp):
-    for _, row in trains.iterrows():
-        lp.write(
-            f"train({row['id']}).\n"
-            f"start({row['id']},({row['y']},{row['x']}),{row['e_dep']},{row['dir']}).\n"
-            f"end({row['id']},({row['y_end']},{row['x_end']}),{row['l_arr']}).\n\n"
-        )
-
-
-def write_tracks(tracks, lp):
-    for i, row in enumerate(tracks):
-        for j, track in enumerate(row):
-            lp.write(f"cell(({i},{j}),{track}).\n")
-        lp.write(f'\n')
 
 
 def initial_import_test():

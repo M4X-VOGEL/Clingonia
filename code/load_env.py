@@ -2,64 +2,8 @@ import os
 import pandas as pd
 from code.config import TRACKS, DEAD_ENDS
 
-def load_env(lp_file):
-    """Extracts a list of tracks and a DataFrame with train-info from a .lp-file.
-    
-    Args:
-        lp_file (str): Path to file with the environment encoded in ASP.
-    
-    Returns:
-        [list] 2D-list with track-types
-        [pd.DataFrame] Train-configuration
-    """
-    print(f"\nLoading environment {os.path.basename(lp_file)}...")
-    if not file_in_directory(lp_file):
-        print("❌ File Not Found Error: No environment loaded.")
-        return -1, -1  # FileNotFoundError -1
-    if not lp_file.endswith(".lp"):
-        print("❌ Load Error: Environment must be a .lp file.")
-        return -15, -15  # Report invalid file type
-    df_tracks, tse_list = prep_tracks_and_trains(lp_file)
-    if isinstance(df_tracks, int) or isinstance(tse_list, int):
-        print("❌ Load Error: No environment loaded.")
-        return df_tracks, tse_list  # Errors -2,-3,-4,-5,-11,-12
-    # Validation
-    rc = validate(tse_list, df_tracks)
-    if rc != 0:
-        print("❌ Validation Error: No environment loaded.")
-        return rc, rc  # Errors -6,-7,-8,-9,-10
-    tracks = create_list_of_tracks(df_tracks)
-    trains = create_df_of_trains(tse_list)
-    return tracks, trains
-
-
 def file_in_directory(path):
     return os.path.isfile(path)
-
-
-def prep_tracks_and_trains(path):
-    df_tracks = pd.DataFrame(columns=["x", "y", "track"])
-    tse_list = []  # list to collect train, start, end
-    with open(path, 'r') as lp:
-        for line in lp:
-            # Separate every predicate of the line
-            predicates = line.strip().split('.')
-            for pred in predicates:
-                pred = pred.strip()
-                # Empty line
-                if not pred: continue
-                # Comment
-                elif "%" in pred: break
-                # cell
-                elif pred.startswith("cell"):
-                    rc = add_cell(df_tracks, pred)
-                    if rc != 0: return rc, rc  # Error -2
-                # train, start, end
-                else:
-                    rc = fill_tse(tse_list, pred)
-                    if rc != 0: return rc, rc  # Error -3,-4,-5
-    df_tracks = df_tracks.sort_values(by=['y', 'x'], ascending=[True, True])
-    return df_tracks, tse_list
 
 
 def add_cell(df_tracks, pred):
@@ -144,6 +88,31 @@ def fill_tse(tse_list, pred):
     return 0
 
 
+def prep_tracks_and_trains(path):
+    df_tracks = pd.DataFrame(columns=["x", "y", "track"])
+    tse_list = []  # list to collect train, start, end
+    with open(path, 'r') as lp:
+        for line in lp:
+            # Separate every predicate of the line
+            predicates = line.strip().split('.')
+            for pred in predicates:
+                pred = pred.strip()
+                # Empty line
+                if not pred: continue
+                # Comment
+                elif "%" in pred: break
+                # cell
+                elif pred.startswith("cell"):
+                    rc = add_cell(df_tracks, pred)
+                    if rc != 0: return rc, rc  # Error -2
+                # train, start, end
+                else:
+                    rc = fill_tse(tse_list, pred)
+                    if rc != 0: return rc, rc  # Error -3,-4,-5
+    df_tracks = df_tracks.sort_values(by=['y', 'x'], ascending=[True, True])
+    return df_tracks, tse_list
+
+
 def create_list_of_tracks(df_tracks):
     tracks = []
     for _, row in df_tracks.iterrows():
@@ -191,12 +160,6 @@ def validate_direction(direction):
         return -6
     return 0
 
-
-def validate_cell_with_track_exists(x, y, df_tracks):
-    condition = (df_tracks['x'] == x) & (df_tracks['y'] == y) & (df_tracks['track'] != 0)
-    if not condition.any():
-        return -8
-    return 0
 
 def validate_cell_with_track_exists(x, y, df_tracks):
     # Check if cell with given x, y exists
@@ -272,7 +235,7 @@ def validate_grid_completeness(df_tracks):
 
 
 def validate(tse_list, df_tracks):
-    """Vadidates start directions, existence of requested cells and predicate consistency.
+    """Validates start directions, existence of requested cells and predicate consistency.
     """
     for pred in tse_list:
         if isinstance(pred, list):
@@ -301,3 +264,34 @@ def validate(tse_list, df_tracks):
     if rc_grid != 0:
         return rc_grid
     return 0
+
+
+def load_env(lp_file):
+    """Extracts a list of tracks and a DataFrame with train-info from a .lp-file.
+    
+    Args:
+        lp_file (str): Path to file with the environment encoded in ASP.
+    
+    Returns:
+        [list] 2D-list with track-types
+        [pd.DataFrame] Train-configuration
+    """
+    print(f"\nLoading environment {os.path.basename(lp_file)}...")
+    if not file_in_directory(lp_file):
+        print("❌ File Not Found Error: No environment loaded.")
+        return -1, -1  # FileNotFoundError -1
+    if not lp_file.endswith(".lp"):
+        print("❌ Load Error: Environment must be a .lp file.")
+        return -15, -15  # Report invalid file type
+    df_tracks, tse_list = prep_tracks_and_trains(lp_file)
+    if isinstance(df_tracks, int) or isinstance(tse_list, int):
+        print("❌ Load Error: No environment loaded.")
+        return df_tracks, tse_list  # Errors -2,-3,-4,-5,-11,-12
+    # Validation
+    rc = validate(tse_list, df_tracks)
+    if rc != 0:
+        print("❌ Validation Error: No environment loaded.")
+        return rc, rc  # Errors -6,-7,-8,-9,-10
+    tracks = create_list_of_tracks(df_tracks)
+    trains = create_df_of_trains(tse_list)
+    return tracks, trains

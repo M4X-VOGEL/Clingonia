@@ -1,17 +1,17 @@
-import warnings
+import math
 import random
+import warnings
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import math
 from flatland.envs.rail_env import RailEnv
 from flatland.envs.rail_generators import sparse_rail_generator
 from flatland.envs.line_generators import sparse_line_generator
 from flatland.envs.malfunction_generators import MalfunctionParameters, ParamMalfunctionGen
-from flatland.utils.rendertools import RenderTool
 from flatland.envs.agent_utils import SpeedCounter
 from flatland.envs.observations import GlobalObsForRailEnv
 from flatland.envs.timetable_utils import Line
+from flatland.utils.rendertools import RenderTool
 from code.build_png import calc_resolution, pil_config
 from code.config import TRACKS, DEAD_ENDS
 
@@ -129,6 +129,166 @@ def extract_trains_from_hints(hints, np_random, env_params):
     return df
 
 
+def fallback_reset(env):
+    print("Handling rail issues...")
+    if env.rail is None or env.rail.grid is None:
+        raise RuntimeError("Grid was empty.")
+    # Negative rails become 0
+    if np.any(env.rail.grid < 0):
+        env.rail.grid[env.rail.grid < 0] = 0
+    env.reset_agents()
+    env.agent_positions = np.zeros((env.height, env.width), dtype=int) - 1
+    env._update_agent_positions_map(ignore_old_positions=False)
+    env.obs_builder.reset()
+    env._elapsed_steps = 0
+    env.dones = dict.fromkeys(list(range(env.get_num_agents())) + ["__all__"], False)
+    obs = env._get_observations()
+    info = env.get_info_dict()
+    return obs, info
+
+
+def get_allowed_dirs(track):
+    # No track
+    if track == 0: return []
+    # List for allowed directions
+    allowed_dirs = []
+    # All tracks
+    tracks_to_n = [32800, 4608, 16386, 37408,
+                   17411, 32872, 49186, 34864,
+                   5633, 33825, 38433, 50211,
+                   33897, 35889, 38505, 52275,
+                   20994, 16458, 6672]
+    tracks_to_e = [1025, 4608, 2064, 37408,
+                   17411, 3089, 1097, 34864,
+                   5633, 33825, 38433, 50211,
+                   33897, 35889, 38505, 52275,
+                   20994, 2136, 6672]
+    tracks_to_s = [32800, 72, 2064, 37408,
+                   32872, 3089, 49186, 1097,
+                   34864, 33825, 38433, 50211,
+                   33897, 35889, 38505, 52275,
+                   16458, 2136, 6672]
+    tracks_to_w = [1025, 16386, 72, 17411,
+                   32872, 3089, 49186, 1097,
+                   5633, 33825, 38433, 50211,
+                   33897, 35889, 38505, 52275,
+                   20994, 16458, 2136]
+    # Fill allowed directions
+    if track in tracks_to_n: allowed_dirs.append(0)
+    if track in tracks_to_e: allowed_dirs.append(1)
+    if track in tracks_to_s: allowed_dirs.append(2)
+    if track in tracks_to_w: allowed_dirs.append(3)
+    return allowed_dirs
+
+
+def validate_track(env, row, col):
+    transition = env.rail.get_full_transitions(row, col)
+    # Check for Dead-Ends
+    if transition in DEAD_ENDS:
+        print("> Dead-end at (" + str(row) + "," + str(col) + ") replaced.")
+        if transition == 4 or transition == 256:
+            transition = 1025
+        else:
+            transition = 32800
+    # Check for invalid Tracks
+    elif transition != 0:
+        if transition not in TRACKS:
+            # Known problem cases
+            if transition in {1285, 1281, 1029}:
+                transition = 1025
+            elif transition in {41120, 40992, 32928}:
+                transition = 32800
+            elif transition in {40996}:
+                transition = 49186
+            elif transition in {32932}:
+                transition = 32872
+            elif transition in {32804}:
+                transition = 49186
+            elif transition in {9473}:
+                transition = 5633
+            elif transition in {9221}:
+                transition = 17411
+            else:
+                # Unknown problem cases
+                print(f"> UNKNOWN: {transition} at ({row},{col}) removed.")
+                transition = 0
+            print(f"> Invalid track at ({row},{col}) replaced.")
+    env.rail.grid[row, col] = transition
+    return int(transition)
+
+
+def extract_tracks(env):
+    tracks = []
+    for row in range(env.height):
+        track_row = []
+        for col in range(env.width):
+            track = validate_track(env, row, col)
+            track_row.append(track)
+        tracks.append(track_row)
+    return tracks
+
+
+def extract_trains(env):
+    trains_data = {
+        "id": [],
+        "x": [],
+        "y": [],
+        "dir": [],
+        "x_end": [],
+        "y_end": [],
+        "e_dep": [],
+        "l_arr": []
+    }
+    direction_map = {0: 'n', 1: 'e', 2: 's', 3: 'w'}
+    # Default for Lastest Arrival based on Dimensions and number of Agents
+    l_arr = math.ceil(2 * max(env.height, env.width)) + 2 * len(env.agents)
+    # Agents
+    for agent in env.agents:
+        if agent.position is not None:
+            trains_data["id"].append(agent.handle)
+            trains_data["x"].append(agent.position[0])
+            trains_data["y"].append(agent.position[1])
+            trains_data["dir"].append(direction_map.get(agent.direction, 'unknown'))
+            x_end, y_end = agent.target[0], agent.target[1]
+            trains_data["x_end"].append(x_end)
+            trains_data["y_end"].append(y_end)
+            trains_data["e_dep"].append(1)
+            trains_data["l_arr"].append(l_arr)
+    trains_df = pd.DataFrame(trains_data)
+    return trains_df
+
+
+def render_time_pred_str(seconds):
+    # Round up to full seconds
+    sec = math.ceil(seconds)
+    if sec < 60:
+        return f"{sec}s"
+    elif sec < 3600:
+        minutes = sec // 60
+        sec = sec % 60
+        return f"{minutes}m{sec}s"
+    else:
+        hours = sec // 3600
+        remainder = sec % 3600
+        minutes = remainder // 60
+        sec = remainder % 60
+        return f"{hours}h{minutes}m{sec}s"
+
+
+def render_time_prediction(timesteps, cells):
+    if cells < 30: sec = 1.2 * timesteps
+    elif cells < 50: sec = 1.3 * timesteps
+    elif cells < 80: sec = 1.4 * timesteps
+    elif cells < 1180:
+        # Runtime increases linearly from 80 to 1180
+        sec = (1.4 + (cells-80) * 0.3/1100) * timesteps
+    else:
+        # Benchmark: 2.25 seconds runtime for 2000 cells
+        # Runtime increases linearly by 25% every 1000 cells
+        sec = 2.25 * (1 + 0.25 * ((cells-2000)/1000)) * timesteps
+    return render_time_pred_str(sec)
+
+
 def create_env(env_params):
     """Creates environment based on parameters.
     
@@ -244,58 +404,6 @@ def create_env(env_params):
     return env
 
 
-def fallback_reset(env):
-    print("Handling rail issues...")
-    if env.rail is None or env.rail.grid is None:
-        raise RuntimeError("Grid was empty.")
-    # Negative rails become 0
-    if np.any(env.rail.grid < 0):
-        env.rail.grid[env.rail.grid < 0] = 0
-    env.reset_agents()
-    env.agent_positions = np.zeros((env.height, env.width), dtype=int) - 1
-    env._update_agent_positions_map(ignore_old_positions=False)
-    env.obs_builder.reset()
-    env._elapsed_steps = 0
-    env.dones = dict.fromkeys(list(range(env.get_num_agents())) + ["__all__"], False)
-    obs = env._get_observations()
-    info = env.get_info_dict()
-    return obs, info
-
-
-def get_allowed_dirs(track):
-    # No track
-    if track == 0: return []
-    # List for allowed directions
-    allowed_dirs = []
-    # All tracks
-    tracks_to_n = [32800, 4608, 16386, 37408,
-                   17411, 32872, 49186, 34864,
-                   5633, 33825, 38433, 50211,
-                   33897, 35889, 38505, 52275,
-                   20994, 16458, 6672]
-    tracks_to_e = [1025, 4608, 2064, 37408,
-                   17411, 3089, 1097, 34864,
-                   5633, 33825, 38433, 50211,
-                   33897, 35889, 38505, 52275,
-                   20994, 2136, 6672]
-    tracks_to_s = [32800, 72, 2064, 37408,
-                   32872, 3089, 49186, 1097,
-                   34864, 33825, 38433, 50211,
-                   33897, 35889, 38505, 52275,
-                   16458, 2136, 6672]
-    tracks_to_w = [1025, 16386, 72, 17411,
-                   32872, 3089, 49186, 1097,
-                   5633, 33825, 38433, 50211,
-                   33897, 35889, 38505, 52275,
-                   20994, 16458, 2136]
-    # Fill allowed directions
-    if track in tracks_to_n: allowed_dirs.append(0)
-    if track in tracks_to_e: allowed_dirs.append(1)
-    if track in tracks_to_s: allowed_dirs.append(2)
-    if track in tracks_to_w: allowed_dirs.append(3)
-    return allowed_dirs
-
-
 def gen_env(env_params):
     """Creates environment and corresponding png.
     
@@ -345,111 +453,3 @@ def gen_env(env_params):
             return -2, -2
 
     return tracks, trains
-
-
-def extract_tracks(env):
-    tracks = []
-    for row in range(env.height):
-        track_row = []
-        for col in range(env.width):
-            track = validate_track(env, row, col)
-            track_row.append(track)
-        tracks.append(track_row)
-    return tracks
-
-
-def validate_track(env, row, col):
-    transition = env.rail.get_full_transitions(row, col)
-    # Check for Dead-Ends
-    if transition in DEAD_ENDS:
-        print("> Dead-end at (" + str(row) + "," + str(col) + ") replaced.")
-        if transition == 4 or transition == 256:
-            transition = 1025
-        else:
-            transition = 32800
-    # Check for invalid Tracks
-    elif transition != 0:
-        if transition not in TRACKS:
-            # Known problem cases
-            if transition in {1285, 1281, 1029}:
-                transition = 1025
-            elif transition in {41120, 40992, 32928}:
-                transition = 32800
-            elif transition in {40996}:
-                transition = 49186
-            elif transition in {32932}:
-                transition = 32872
-            elif transition in {32804}:
-                transition = 49186
-            elif transition in {9473}:
-                transition = 5633
-            elif transition in {9221}:
-                transition = 17411
-            else:
-                # Unknown problem cases
-                print(f"> UNKNOWN: {transition} at ({row},{col}) removed.")
-                transition = 0
-            print(f"> Invalid track at ({row},{col}) replaced.")
-    env.rail.grid[row, col] = transition
-    return int(transition)
-
-
-def extract_trains(env):
-    trains_data = {
-        "id": [],
-        "x": [],
-        "y": [],
-        "dir": [],
-        "x_end": [],
-        "y_end": [],
-        "e_dep": [],
-        "l_arr": []
-    }
-    direction_map = {0: 'n', 1: 'e', 2: 's', 3: 'w'}
-    # Default for Lastest Arrival based on Dimensions and number of Agents
-    l_arr = math.ceil(2 * max(env.height, env.width)) + 2 * len(env.agents)
-    # Agents
-    for agent in env.agents:
-        if agent.position is not None:
-            trains_data["id"].append(agent.handle)
-            trains_data["x"].append(agent.position[0])
-            trains_data["y"].append(agent.position[1])
-            trains_data["dir"].append(direction_map.get(agent.direction, 'unknown'))
-            x_end, y_end = agent.target[0], agent.target[1]
-            trains_data["x_end"].append(x_end)
-            trains_data["y_end"].append(y_end)
-            trains_data["e_dep"].append(1)
-            trains_data["l_arr"].append(l_arr)
-    trains_df = pd.DataFrame(trains_data)
-    return trains_df
-
-
-def render_time_prediction(timesteps, cells):
-    if cells < 30: sec = 1.2 * timesteps
-    elif cells < 50: sec = 1.3 * timesteps
-    elif cells < 80: sec = 1.4 * timesteps
-    elif cells < 1180:
-        # Runtime increases linearly from 80 to 1180
-        sec = (1.4 + (cells-80) * 0.3/1100) * timesteps
-    else:
-        # Benchmark: 2.25 seconds runtime for 2000 cells
-        # Runtime increases linearly by 25% every 1000 cells
-        sec = 2.25 * (1 + 0.25 * ((cells-2000)/1000)) * timesteps
-    return render_time_pred_str(sec)
-
-
-def render_time_pred_str(seconds):
-    # Round up to full seconds
-    sec = math.ceil(seconds)
-    if sec < 60:
-        return f"{sec}s"
-    elif sec < 3600:
-        minutes = sec // 60
-        sec = sec % 60
-        return f"{minutes}m{sec}s"
-    else:
-        hours = sec // 3600
-        remainder = sec % 3600
-        minutes = remainder // 60
-        sec = remainder % 60
-        return f"{hours}h{minutes}m{sec}s"

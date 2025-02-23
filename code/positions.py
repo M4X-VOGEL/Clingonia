@@ -1,10 +1,11 @@
 import os
-import pandas as pd
 import platform
 import subprocess
+import pandas as pd
 from code.clingo_actions import clingo_to_df
 
 invalid_path = None
+
 # Directional changes - (DirIn, Type): DirOut
 fw_tracks = {
     # Curves
@@ -80,31 +81,58 @@ to_right_tracks = {
     ('e', 6672): 's'
 }
 
-def position_df(tracks, trains, clingo_path, lp_files, answer_number):
-    """
-    Creates a DataFrame of the x-y-position and direction for the trains at each timestep.
-    
-    Returns:
-        [pd.DataFrame] IDs, Positions, Directions, Timesteps
-    """
-    # Actions into DF
-    df_actions_original = clingo_to_df(clingo_path, lp_files, answer_number)
-    if isinstance(df_actions_original, int): return df_actions_original  # Error Handling
-    # Save original df_actions to provide a faulty list of action predicates, later.
-    df_actions = df_actions_original.copy(deep=True)
-    # Actions to positions
-    df_pos = build_df_pos(df_actions, trains, tracks)
-    # Adjust actions, if end position is incorrect
-    print("Valdidating actions...")
-    df_actions, df_pos = adjust_actions(df_pos, trains, df_actions, tracks)
-    # Put invalid action-predicate paths
-    write_act_err_txt(df_actions_original, df_actions, trains)
-    # Make sure that every train has a position
-    df_pos = ensure_train_spawns(df_pos, trains)
-    print("Run Simulation: DONE")
-    # Audio Feedback
-    beep_feedback()
-    return df_pos
+def pos_change(x, y, dir):
+    if dir == 'n': y -= 1
+    elif dir == 'e': x += 1
+    elif dir == 's': y += 1
+    elif dir == 'w': x -= 1
+    return x, y
+
+def dir_change(id, x, y, action, dir, tracks):
+    global invalid_path, fw_tracks, to_left_tracks, to_right_tracks
+    # Check, if coordinates are valid
+    if not (0 <= y < len(tracks) and 0 <= x < len(tracks[0])):
+        # Invalid: No dir change: path will be adjusted later
+        if invalid_path == None:
+            invalid_path = id
+        return dir
+
+    track = tracks[y][x]
+
+    # Check for the action type, if current track allows direction change
+    if action == "move_forward":
+        if (dir, track) in fw_tracks:
+            return fw_tracks[(dir, track)]
+    elif action == "move_left":
+        if (dir, track) in to_left_tracks:
+            return to_left_tracks[(dir, track)]
+        if invalid_path == None:
+            invalid_path = id
+    elif action == "move_right":
+        if (dir, track) in to_right_tracks:
+            return to_right_tracks[(dir, track)]
+        if invalid_path == None:
+            invalid_path = id
+    # If track does not allow the action: No dir change: path will be adjusted later
+    return dir
+
+
+def get_start_pos(id, trains):
+    x = trains.loc[trains["id"] == id, "x"].iloc[0]
+    y = trains.loc[trains["id"] == id, "y"].iloc[0]
+    dir = trains.loc[trains["id"] == id, "dir"].iloc[0]
+    return x, y, dir
+
+
+def next_pos(id, x, y, action, dir, tracks):
+    # Direction change
+    if action in ["move_forward", "move_left", "move_right"]:
+        dir_new = dir_change(id, x, y, action, dir, tracks)
+        x_new, y_new = pos_change(x, y, dir_new)
+        return x_new, y_new, dir_new
+    else:  # wait-action
+        return x, y, dir
+
 
 def build_df_pos(df_actions, trains, tracks):
     """Creates position DF based on action DF.
@@ -216,72 +244,6 @@ def ensure_train_spawns(df_pos, trains):
     return df_pos
 
 
-def beep_feedback():
-    sys_platform = platform.system()
-    if sys_platform == "Windows":
-        import winsound
-        winsound.Beep(600, 200)
-        winsound.Beep(800, 250)
-    elif sys_platform == "Darwin":  # macOS (system sound)
-        subprocess.run(["afplay", "/System/Library/Sounds/Glass.aiff"])
-    else:  # Linux and other
-        print('\a')
-
-
-def get_start_pos(id, trains):
-    x = trains.loc[trains["id"] == id, "x"].iloc[0]
-    y = trains.loc[trains["id"] == id, "y"].iloc[0]
-    dir = trains.loc[trains["id"] == id, "dir"].iloc[0]
-    return x, y, dir
-
-
-def next_pos(id, x, y, action, dir, tracks):
-    # Direction change
-    if action in ["move_forward", "move_left", "move_right"]:
-        dir_new = dir_change(id, x, y, action, dir, tracks)
-        x_new, y_new = pos_change(x, y, dir_new)
-        return x_new, y_new, dir_new
-    else:  # wait-action
-        return x, y, dir
-
-
-def dir_change(id, x, y, action, dir, tracks):
-    global invalid_path, fw_tracks, to_left_tracks, to_right_tracks
-    # Check, if coordinates are valid
-    if not (0 <= y < len(tracks) and 0 <= x < len(tracks[0])):
-        # Invalid: No dir change: path will be adjusted later
-        if invalid_path == None:
-            invalid_path = id
-        return dir
-
-    track = tracks[y][x]
-
-    # Check for the action type, if current track allows direction change
-    if action == "move_forward":
-        if (dir, track) in fw_tracks:
-            return fw_tracks[(dir, track)]
-    elif action == "move_left":
-        if (dir, track) in to_left_tracks:
-            return to_left_tracks[(dir, track)]
-        if invalid_path == None:
-            invalid_path = id
-    elif action == "move_right":
-        if (dir, track) in to_right_tracks:
-            return to_right_tracks[(dir, track)]
-        if invalid_path == None:
-            invalid_path = id
-    # If track does not allow the action: No dir change: path will be adjusted later
-    return dir
-
-
-def pos_change(x, y, dir):
-    if dir == 'n': y -= 1
-    elif dir == 'e': x += 1
-    elif dir == 's': y += 1
-    elif dir == 'w': x -= 1
-    return x, y
-
-
 def write_act_err_txt(original, adjusted, trains):
     # Identify trains with invalid path
     act_err_trains = set(original["trainID"]) - set(adjusted["trainID"])
@@ -373,3 +335,42 @@ def write_act_err_txt(original, adjusted, trains):
             else:
                 f.write(f"=== Train {id} has no missing timesteps.\n\n\n\n")
                 f_min.write(f"=== Train {id} has no missing timesteps.\n\n\n\n")
+
+
+def beep_feedback():
+    sys_platform = platform.system()
+    if sys_platform == "Windows":
+        import winsound
+        winsound.Beep(600, 200)
+        winsound.Beep(800, 250)
+    elif sys_platform == "Darwin":  # macOS (system sound)
+        subprocess.run(["afplay", "/System/Library/Sounds/Glass.aiff"])
+    else:  # Linux and other
+        print('\a')
+
+
+def position_df(tracks, trains, clingo_path, lp_files, answer_number):
+    """
+    Creates a DataFrame of the x-y-position and direction for the trains at each timestep.
+    
+    Returns:
+        [pd.DataFrame] IDs, Positions, Directions, Timesteps
+    """
+    # Actions into DF
+    df_actions_original = clingo_to_df(clingo_path, lp_files, answer_number)
+    if isinstance(df_actions_original, int): return df_actions_original  # Error Handling
+    # Save original df_actions to provide a faulty list of action predicates, later.
+    df_actions = df_actions_original.copy(deep=True)
+    # Actions to positions
+    df_pos = build_df_pos(df_actions, trains, tracks)
+    # Adjust actions, if end position is incorrect
+    print("Valdidating actions...")
+    df_actions, df_pos = adjust_actions(df_pos, trains, df_actions, tracks)
+    # Put invalid action-predicate paths
+    write_act_err_txt(df_actions_original, df_actions, trains)
+    # Make sure that every train has a position
+    df_pos = ensure_train_spawns(df_pos, trains)
+    print("Run Simulation: DONE")
+    # Audio Feedback
+    beep_feedback()
+    return df_pos

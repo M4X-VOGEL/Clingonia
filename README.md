@@ -13,11 +13,11 @@ Additionally, visualize your solutions as a numbered path, detailed timetable, o
 
 ## 🏡 Repository structure
 
-- 📁 `asp` is where YOU can put your asp files. Contains working `lp` files.
-- 📁 `code` contains python source codes.
-- 📁 `data` contains images, saved parameters, helper texts and runtime information.
+- 📁 `asp` is where YOU can put your `lp` files (working `lp` files included).
+- 📁 `code` contains Python source codes.
+- 📁 `data` contains images, saved parameters, helper texts, and runtime information.
 - 📁 `env` contains environment `lp` encodings.
-- 📝 `main.py` is pretty much the only file YOU have to care about. Its execution starts the program.
+- 📝 `main.py` is the primary file for launching the program.
 - 📝 `README.md` is what you are reading right now.
 
 <br>
@@ -77,7 +77,7 @@ git clone https://github.com/M4X-VOGEL/Clingonia.git
 
 We will provide all necessary resources to be able to use all features of Clingonia.
 
-If you want to use your own ASP encodings, make sure that they are capable of solving Flatland problems.  During the development phase, the `lp` representation of the environment may be beneficial for initial testing and debugging of the encoding or encodings.  Keep in mind that several encodings can be called simulatenously by clingo, for example:
+If you want to use your own ASP encodings, make sure that they are capable of solving Flatland problems.  During the development phase, the `lp` representation of the environment may be beneficial for initial testing and debugging of the encoding or encodings.  Keep in mind that several encodings can be called simultaneously by clingo, for example:
 ```
 clingo env.lp example1.lp example2.lp
 ```
@@ -130,6 +130,7 @@ If you encounter unexpected issues, please report them right away. Your input is
 
 ### ⚠️ Known issues
 
+- Panning is currently not supported for touchpads. Use zoom instead.
 - Users may experience decreased responsiveness when zooming in closely on environments.
 - Our example `ASP` code for solving environments is provided for reference and simple environments. It is not flawless. We recommend using your own implementation for optimal results.
 
