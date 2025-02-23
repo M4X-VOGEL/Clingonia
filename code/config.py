@@ -1,10 +1,10 @@
 """
 Configuration Constants for Flatland Simulation.
 
-- DIR_MAP: Mapping of cardinal directions to numeric values.
-- TRACKS: Set of Flatland track IDs grouped by type.
-- DEAD_ENDS: Set of Flatland dead end IDs.
-- AGENT_COLORS: List of Flatland agent hex color codes.
+- DIR_MAP (dict): Maps cardinal directions to numeric values.
+- TRACKS (set): Set of Flatland track IDs grouped by type.
+- DEAD_ENDS (set): Set of Flatland dead-end IDs.
+- AGENT_COLORS (list): List of hex color codes for Flatland agents.
 """
 
 DIR_MAP = {'n': 0, 'e': 1, 's': 2, 'w': 3}

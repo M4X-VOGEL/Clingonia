@@ -28,15 +28,15 @@ clingo_finisher = {
 }
 
 def run_clingo(clingo_path, lp_files, answer_number):
-    """Gets clingo output by running input files.
-    
+    """Runs Clingo on given ASP files and returns its output.
+
     Args:
-        clingo_path (str): Path to your clingo installation (default is "clingo").
-        lp_files (list): Files with your ASP code.
-        answer_number (int): Number of the wanted answer.
+        clingo_path (str): Path to Clingo installation.
+        lp_files (list[str]): List of ASP files.
+        answer_number (int): Desired answer number from Clingo.
 
     Returns:
-        [str]: Clingo output with its answers.
+        str: Clingo output with its answers, or an error code if Clingo fails.
     """
     timer_start = time.perf_counter()
     proc = subprocess.Popen(
@@ -92,14 +92,14 @@ def run_clingo(clingo_path, lp_files, answer_number):
 
 
 def get_clingo_answer(clingo_output, answer_number):
-    """Gets specific clingo answer.
+    """Extracts specific answer from Clingo output.
 
     Args:
-        clingo_output (str): Clingo output with its answers.
-        answer_number (int): Number of the wanted answer.
+        clingo_output (str): Full output from Clingo.
+        answer_number (int): Desired answer number.
 
     Returns:
-        [str]: Chosen clingo answer.
+        str: Chosen Clingo answer, or an error code if not found.
     """
     # Split Output String by Lines
     lines = clingo_output.split('\n')
@@ -122,13 +122,13 @@ def get_clingo_answer(clingo_output, answer_number):
 
 
 def get_action_params(clingo_answer):
-    """Gets list of all parameters for each action predicate.
+    """Extracts parameters for each action predicate from Clingo answer.
 
     Args:
-        clingo_answer (str): Chosen clingo answer
+        clingo_answer (str): Selected Clingo answer.
 
     Returns:
-        [list]: Parameters of all action predicates.
+        list[str]: List of parameter strings for each action predicate.
     """
     # Only consider Action Predicates
     actions = [s for s in clingo_answer.split() if "action" in s]
@@ -145,13 +145,13 @@ def get_action_params(clingo_answer):
 
 
 def create_df(action_params):
-    """Creates DataFrame with parameters of all action predicates.
-    
+    """Creates a DataFrame from action predicate parameters.
+
     Args:
-        action_params (list): Chosen clingo answer.
-    
+        action_params (list[str]): List of action parameter strings.
+
     Returns:
-        [pd.DataFrame]: parameters of action predicates (trainID, action, timestep).
+        pd.DataFrame: DataFrame containing columns trainID, action, and timestep.
     """
     data = []
     for i in range(len(action_params)):
@@ -166,15 +166,15 @@ def create_df(action_params):
 
 
 def clingo_to_df(clingo_path="clingo", lp_files=[], answer_number=1):
-    """Runs clingo program and creates a DataFrame with the reduced output of the stated answer.
-    
+    """Runs Clingo and converts its output to a DataFrame of action predicates.
+
     Args:
-        clingo_path (str): Path to your clingo installation.
-        lp_files (list): Files with your ASP code.
-        answer_number (int): Number of the wanted answer from the clingo output (default is 1).
-    
+        clingo_path (str): Path to Clingo installation.
+        lp_files (list[str]): List of ASP files.
+        answer_number (int): Desired answer number (default is 1).
+
     Returns:
-        [pd.DataFrame]: Reduced output of the stated answer.
+        pd.DataFrame: DataFrame containing reduced output of specified Clingo answer.
     """
     print("\nRun Simulation: START")
     if len(lp_files) < 2:

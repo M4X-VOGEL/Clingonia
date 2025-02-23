@@ -82,6 +82,16 @@ to_right_tracks = {
 }
 
 def pos_change(x, y, dir):
+    """Calculates new (x, y) coordinates based on given direction.
+
+    Args:
+        x (int): Current x-coordinate.
+        y (int): Current y-coordinate.
+        dir (str): Current direction.
+
+    Returns:
+        tuple[int, int]: Updated (x, y) coordinates.
+    """
     if dir == 'n': y -= 1
     elif dir == 'e': x += 1
     elif dir == 's': y += 1
@@ -90,6 +100,19 @@ def pos_change(x, y, dir):
 
 
 def dir_change(id, x, y, action, dir, tracks):
+    """Determines new direction for an agent based on its current position, action, and track type.
+
+    Args:
+        id (int): Identifier of the agent.
+        x (int): Current x-coordinate.
+        y (int): Current y-coordinate.
+        action (str): Action performed.
+        dir (str): Current direction.
+        tracks (list[list[int]]): 2D list representing the environment tracks.
+
+    Returns:
+        str: New direction after applying the action; unchanged if no valid change.
+    """
     global invalid_path, fw_tracks, to_left_tracks, to_right_tracks
     # Check, if coordinates are valid
     if not (0 <= y < len(tracks) and 0 <= x < len(tracks[0])):
@@ -119,6 +142,15 @@ def dir_change(id, x, y, action, dir, tracks):
 
 
 def get_start_pos(id, trains):
+    """Retrieves starting position and direction for a train.
+
+    Args:
+        id (int): Train identifier.
+        trains (pd.DataFrame): Train configuration.
+
+    Returns:
+        tuple[int, int, str]: Starting (x, y) coordinates, and direction.
+    """
     x = trains.loc[trains["id"] == id, "x"].iloc[0]
     y = trains.loc[trains["id"] == id, "y"].iloc[0]
     dir = trains.loc[trains["id"] == id, "dir"].iloc[0]
@@ -126,7 +158,19 @@ def get_start_pos(id, trains):
 
 
 def next_pos(id, x, y, action, dir, tracks):
-    # Direction change
+    """Calculates next position and direction for a train based on an action.
+
+    Args:
+        id (int): Train identifier.
+        x (int): Current x-coordinate.
+        y (int): Current y-coordinate.
+        action (str): Action performed.
+        dir (str): Current direction.
+        tracks (list[list[int]]): 2D list representing the environment tracks.
+
+    Returns:
+        tuple[int, int, str]: Updated (x, y) coordinates, and direction.
+    """
     if action in ["move_forward", "move_left", "move_right"]:
         dir_new = dir_change(id, x, y, action, dir, tracks)
         x_new, y_new = pos_change(x, y, dir_new)
@@ -136,7 +180,15 @@ def next_pos(id, x, y, action, dir, tracks):
 
 
 def build_df_pos(df_actions, trains, tracks):
-    """Creates position DF based on action DF.
+    """Creates a DataFrame of train positions based on the actions DataFrame.
+
+    Args:
+        df_actions (pd.DataFrame): Action predicates.
+        trains (pd.DataFrame): Train configuration.
+        tracks (list[list[int]]): 2D list representing the environment tracks.
+
+    Returns:
+        pd.DataFrame: DataFrame containing trainID, x, y, direction, and timestep.
     """
     df_pos = pd.DataFrame(columns=["trainID", "x", "y", "dir", "timestep"])
     train_ids = {}
@@ -162,7 +214,16 @@ def build_df_pos(df_actions, trains, tracks):
 
 
 def adjust_actions(df_pos, trains, df_actions, tracks):
-    """Adjusts the actions, such that the paths' last positions match the station position.
+    """Adjusts actions so that the final position of each train matches its station.
+
+    Args:
+        df_pos (pd.DataFrame): Train positions.
+        trains (pd.DataFrame): Train configuration.
+        df_actions (pd.DataFrame): Action predicates.
+        tracks (list[list[int]]): 2D list representing the environment tracks.
+
+    Returns:
+        tuple[pd.DataFrame, pd.DataFrame]: Updated action and position DataFrames.
     """
     global invalid_path
     changed = True
@@ -211,6 +272,15 @@ def adjust_actions(df_pos, trains, df_actions, tracks):
 
 
 def ensure_train_spawns(df_pos, trains):
+    """Ensures that every train has a starting position in the positions DataFrame.
+
+    Args:
+        df_pos (pd.DataFrame): Train positions.
+        trains (pd.DataFrame): Train configuration.
+
+    Returns:
+        pd.DataFrame: Updated positions DataFrame with missing train spawns added.
+    """
     is_incomplete = False
     # Get missing trainIDs in df_pos
     missing_trains = set(trains["id"]) - set(df_pos["trainID"])
@@ -247,6 +317,13 @@ def ensure_train_spawns(df_pos, trains):
 
 
 def write_act_err_txt(original, adjusted, trains):
+    """Writes a log of action errors for trains with invalid paths.
+
+    Args:
+        original (pd.DataFrame): Original action predicates.
+        adjusted (pd.DataFrame): Adjusted action predicates.
+        trains (pd.DataFrame): Train configuration.
+    """
     # Identify trains with invalid path
     act_err_trains = set(original["trainID"]) - set(adjusted["trainID"])
     if not act_err_trains:  # Empty ActErr log
@@ -340,6 +417,11 @@ def write_act_err_txt(original, adjusted, trains):
 
 
 def beep_feedback():
+    """Plays an audio signal based on the operating system.
+    
+    On Windows, plays two beeps. On macOS, plays a system sound.
+    On Linux or other systems, prints a bell character.
+    """
     sys_platform = platform.system()
     if sys_platform == "Windows":
         import winsound
@@ -352,11 +434,21 @@ def beep_feedback():
 
 
 def position_df(tracks, trains, clingo_path, lp_files, answer_number):
-    """
-    Creates a DataFrame of the x-y-position and direction for the trains at each timestep.
-    
+    """Creates a DataFrame of train positions and directions at each timestep.
+
+    Converts Clingo action predicates into a positions DataFrame,
+    adjusts actions to ensure correct final positions,
+    logs invalid action paths, and provides audio feedback.
+
+    Args:
+        tracks (list[list[int]]): 2D list of track types.
+        trains (pd.DataFrame): Train configuration.
+        clingo_path (str): Path to Clingo installation.
+        lp_files (list[str]): List of ASP files.
+        answer_number (int): Desired answer number from Clingo.
+
     Returns:
-        [pd.DataFrame] IDs, Positions, Directions, Timesteps
+        pd.DataFrame: DataFrame with trainID, x, y, direction, and timestep.
     """
     # Actions into DF
     df_actions_original = clingo_to_df(clingo_path, lp_files, answer_number)

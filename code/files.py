@@ -3,10 +3,21 @@ import shutil
 import importlib
 
 def ensure_directory(d):
+    """Creates the specified directory if it does not exist.
+
+    Args:
+        d (str): Directory path to create.
+    """
     os.makedirs(d, exist_ok=True)
 
 
 def write_trains(trains, lp):
+    """Writes train predicates to a specified .lp file.
+
+    Args:
+        trains (pd.DataFrame): Train configuration.
+        lp (file object): .lp file.
+    """
     for _, row in trains.iterrows():
         lp.write(
             f"train({row['id']}).\n"
@@ -16,6 +27,12 @@ def write_trains(trains, lp):
 
 
 def write_tracks(tracks, lp):
+    """Writes cell predicates for the tracks to a specified .lp file.
+
+    Args:
+        tracks (list[list[int]]): 2D list of track types.
+        lp (file object): .lp file.
+    """
     for i, row in enumerate(tracks):
         for j, track in enumerate(row):
             lp.write(f"cell(({i},{j}),{track}).\n")
@@ -23,12 +40,12 @@ def write_tracks(tracks, lp):
 
 
 def save_env(tracks, trains, name="data/running_tmp.lp"):
-    """Saves the env as a .lp file.
+    """Saves the environment as a .lp file.
 
     Args:
-        tracks (list): 2D-List of all tracks.
-        trains (pd.DataFrame): Train-configuration.
-        name (str): Name of the file.  
+        tracks (list[list[int]]): 2D list of all tracks.
+        trains (pd.DataFrame): Train configuration.
+        name (str): Path of .lp file.
     """
     ensure_directory("data")
     path = name
@@ -38,7 +55,7 @@ def save_env(tracks, trains, name="data/running_tmp.lp"):
 
 
 def delete_tmp_lp():
-    """Deletes the temporary file of the env.  
+    """Deletes the temporary .lp file of the environment.
     """
     ensure_directory("data")
     path = "data/running_tmp.lp"
@@ -50,7 +67,7 @@ def delete_tmp_lp():
 
 
 def delete_tmp_png():
-    """Deletes the temporary image of the env.  
+    """Deletes the temporary PNG of the environment.
     """
     ensure_directory("data")
     path = "data/running_tmp.png"
@@ -62,7 +79,7 @@ def delete_tmp_png():
 
 
 def delete_tmp_gif():
-    """Deletes the temporary image of the env.  
+    """Deletes the temporary GIF of the environment.
     """
     ensure_directory("data")
     path = "data/running_tmp.gif"
@@ -74,7 +91,7 @@ def delete_tmp_gif():
 
 
 def delete_tmp_frames():
-    """Deletes the temporary folder of the temporary gif frames.
+    """Deletes the temporary folder containing GIF frames.
     """
     path = "data/tmp_frames"
     if os.path.isdir(path):
@@ -85,6 +102,11 @@ def delete_tmp_frames():
 
 
 def initial_import_test():
+    """Checks for essential Python modules required by the program.
+
+    Returns:
+        list[str]: Missing module names.
+    """
     required_modules = [
         'flatland',
         'clingo',
@@ -109,6 +131,8 @@ def initial_import_test():
 
 
 def remove_data_remnants():
+    """Removes all temporary files and directories.
+    """
     delete_tmp_lp()
     delete_tmp_png()
     delete_tmp_gif()

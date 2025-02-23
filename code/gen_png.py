@@ -18,15 +18,15 @@ from code.config import TRACKS, DEAD_ENDS
 LAST_HINTS = None
 
 def create_agents_from_train_stations(hints, num_agents, np_random):
-    """Generates agents out of station information from hints.
-    
+    """Generates agent positions, directions, and targets from station hints.
+
     Args:
-        hints (dict): 'train_stations', 'city_positions' und 'city_orientations'.
-        num_agents (int): number of agents to be generated.
-        np_random (np.random.RandomState): for reproducability.
-    
+        hints (dict): Contains 'train_stations', 'city_positions', and 'city_orientations'.
+        num_agents (int): Number of agents to generate.
+        np_random (np.random.RandomState): Random state for reproducibility.
+
     Returns:
-        [tuple] Agent positions, directions und targets.
+        tuple: (agents_positions, agents_directions, agents_targets).
     """
     train_stations = hints['train_stations']
     
@@ -62,7 +62,14 @@ def create_agents_from_train_stations(hints, num_agents, np_random):
 
 
 def custom_sparse_line_generator(env_params, seed=1):
-    """Custom line generator to be able to generate agents.
+    """Creates a custom line generator for agent generation.
+
+    Args:
+        env_params (dict): Parameters for the environment.
+        seed (int, optional): Random seed. Default is 1.
+
+    Returns:
+        function: Custom line generator function.
     """
     base_line_gen = sparse_line_generator(env_params["speed"], seed)
 
@@ -99,16 +106,15 @@ def custom_sparse_line_generator(env_params, seed=1):
 
 
 def extract_trains_from_hints(hints, np_random, env_params):
-    """Creates trains DF with the hints.
-    
+    """Creates a DataFrame of train configuration using station hints.
+
     Args:
-        hints (dict).
-        num_agents (int).
-        np_random (np.random.RandomState).
-        env_params (dict): Parameters for environment.
-    
+        hints (dict): Station information.
+        np_random (np.random.RandomState): Random state for reproducibility.
+        env_params (dict): Environment parameters.
+
     Returns:
-        [pd.DataFrame] Agent configuration.
+        pd.DataFrame: Train configuration.
     """
     num_agents = env_params["agents"]
     agents_positions, agents_directions, agents_targets = create_agents_from_train_stations(hints, num_agents, np_random)
@@ -130,6 +136,14 @@ def extract_trains_from_hints(hints, np_random, env_params):
 
 
 def fallback_reset(env):
+    """Performs a fallback reset on the environment if rail generation fails.
+
+    Args:
+        env (RailEnv): Flatland environment.
+
+    Returns:
+        tuple: (obs, info) from reset.
+    """
     print("Handling rail issues...")
     if env.rail is None or env.rail.grid is None:
         raise RuntimeError("Grid was empty.")
@@ -148,6 +162,14 @@ def fallback_reset(env):
 
 
 def get_allowed_dirs(track):
+    """Determines allowed directions for a given track type.
+
+    Args:
+        track (int): Track type.
+
+    Returns:
+        list[int]: Allowed direction codes (0: 'n', 1: 'e', 2: 's', 3: 'w').
+    """
     # No track
     if track == 0: return []
     # List for allowed directions
@@ -182,6 +204,20 @@ def get_allowed_dirs(track):
 
 
 def validate_track(env, row, col):
+    """Validates and adjusts the track transition for a given cell.
+
+    Checks for dead-ends and known problematic track values.
+    Replaces invalid or unknown track transitions with appropriate defaults,
+    and updates the environment's grid accordingly.
+
+    Args:
+        env (RailEnv): Flatland environment.
+        row (int): Row index of cell.
+        col (int): Column index of cell.
+
+    Returns:
+        int: Validated track value.
+    """
     transition = env.rail.get_full_transitions(row, col)
     # Check for Dead-Ends
     if transition in DEAD_ENDS:
@@ -218,6 +254,14 @@ def validate_track(env, row, col):
 
 
 def extract_tracks(env):
+    """Extracts a 2D list of track types from the environment.
+
+    Args:
+        env (RailEnv): Flatland environment.
+
+    Returns:
+        list[list[int]]: 2D list representing track types for each cell.
+    """
     tracks = []
     for row in range(env.height):
         track_row = []
@@ -229,6 +273,14 @@ def extract_tracks(env):
 
 
 def extract_trains(env):
+    """Extracts train configuration from the environment.
+
+    Args:
+        env (RailEnv): Flatland environment.
+
+    Returns:
+        pd.DataFrame: DataFrame with columns ["id", "x", "y", "dir", "x_end", "y_end", "e_dep", "l_arr"].
+    """
     trains_data = {
         "id": [],
         "x": [],
@@ -259,6 +311,14 @@ def extract_trains(env):
 
 
 def render_time_pred_str(seconds):
+    """Converts seconds to a human-readable time string.
+
+    Args:
+        seconds (float): Time in seconds.
+
+    Returns:
+        str: Formatted time string.
+    """
     # Round up to full seconds
     sec = math.ceil(seconds)
     if sec < 60:
@@ -276,6 +336,15 @@ def render_time_pred_str(seconds):
 
 
 def render_time_prediction(timesteps, cells):
+    """Predicts rendering time based on timesteps and cell count.
+
+    Args:
+        timesteps (int): Number of timesteps.
+        cells (int): Total number of cells in environment.
+
+    Returns:
+        str: Estimated render time as a formatted string.
+    """
     if cells < 30: sec = 1.2 * timesteps
     elif cells < 50: sec = 1.3 * timesteps
     elif cells < 80: sec = 1.4 * timesteps
@@ -290,13 +359,13 @@ def render_time_prediction(timesteps, cells):
 
 
 def create_env(env_params):
-    """Creates environment based on parameters.
-    
+    """Creates a Flatland environment based on the provided parameters.
+
     Args:
-        env_params (dict): Parameters for environment.
-    
+        env_params (dict): Environment parameters.
+
     Returns:
-        [RailEnv] Environment.
+        RailEnv: Generated Flatland environment.
     """
     used_seed = env_params['seed']
     random.seed(used_seed)
@@ -405,15 +474,14 @@ def create_env(env_params):
 
 
 def gen_env(env_params):
-    """Creates environment and corresponding png.
-    
+    """Generates a Flatland environment and saves a PNG of it.
+
     Args:
         env_params (dict): Parameters for environment.
-        low_quality_mode (bool): Low image resolution setting.
-    
+
     Returns:
-        [list]: tracks
-        [pd.DataFrame]: trains
+        tuple: 2D list of track types and a DataFrame of train configuration,
+               or error codes if generation fails.
     """
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning)

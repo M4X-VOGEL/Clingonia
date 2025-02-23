@@ -42,7 +42,13 @@ dir_replacement = {
 }
 
 class DummyLine:
-    """Line-Object expected by Flatland for line-generation.
+    """A dummy line generator used by Flatland when no actual line generation is required.
+
+    Attributes:
+        agent_positions (list): Agent starting positions.
+        agent_targets (list): Agent target positions.
+        agent_directions (list): Agent directions.
+        agent_speeds (list): Agent speeds.
     """
     # Essential attributes for agents
     def __init__(self, agent_positions, agent_targets, agent_directions, agent_speeds):
@@ -53,21 +59,23 @@ class DummyLine:
 
 
 class DummyObservationBuilder:
-    """Observation-Builder with no actual observation expected by Flatland.
+    """A dummy observation builder that does not generate any observations.
+
+    Methods:
+        set_env(env): Placeholder for setting the environment.
+        reset(env=None): Placeholder for resetting the builder.
+        get(handle=0): Returns None.
+        get_many(handles=None): Returns a dict with None for each handle.
     """
-    # Setting environment (Not in use)
     def set_env(self, env):
         pass
 
-    # Resetting environment
     def reset(self, env=None): 
         pass
 
-    # Single observation for one agent "handle" (Not in use)
     def get(self, handle=0):
         return None
 
-    # For all observations at once (Not in use)
     def get_many(self, handles=None):
         if handles is None:
             handles = []
@@ -75,12 +83,15 @@ class DummyObservationBuilder:
 
 
 def dummy_line_generator(rail, num_agents, hints, *args, **kwargs):
-    """Custom Line-Generator for creating a DummyLine.
+    """Custom line generator that returns a DummyLine instance.
 
     Args:
-        rail (RailEnv): Reference for track network.
+        rail (RailEnv): Reference environment.
         num_agents (int): Number of agents.
-        hints (dict): Extra information.
+        hints (dict): Extra hints; if None, an empty train_stations list is used.
+
+    Returns:
+        DummyLine: A dummy line with placeholder attributes.
     """
     if hints is None:  # Flatland may expect hints
         hints = {}
@@ -96,6 +107,15 @@ def dummy_line_generator(rail, num_agents, hints, *args, **kwargs):
 
 
 def calc_resolution(low_quality_mode, env):
+    """Calculates the screen resolution for rendering based on environment size and quality mode.
+
+    Args:
+        low_quality_mode (bool): Flag to use low quality rendering.
+        env (RailEnv or list): Environment object or a 2D track list.
+
+    Returns:
+        int: Screen resolution.
+    """
     if isinstance(env, list):  # tracks list
         env_dim_max = max(len(env), len(env[0]))
     else:  # RailEnv object
@@ -129,6 +149,10 @@ def calc_resolution(low_quality_mode, env):
 
 
 def pil_setup():
+    """Applies a patch to Grid4Transitions if needed.
+
+    Imports Grid4Transitions and adds an is_valid method if it does not exist.
+    """
     try:
         from flatland.core.transition_map import Grid4Transitions
         if not hasattr(Grid4Transitions, "is_valid"):
@@ -140,6 +164,14 @@ def pil_setup():
 
 
 def pil_config(renderer):
+    """Configures the renderer for PIL rendering.
+
+    Sets agent colors, custom color mapping, removes elapsed time text, centers agents, 
+    and patches the scatter function for better visualization.
+
+    Args:
+        renderer: Renderer instance to configure.
+    """
     def hex_to_rgb(hex_str):
         hex_str = hex_str.lstrip('#')
         return tuple(int(hex_str[i:i+2], 16) for i in (0, 2, 4))
@@ -197,10 +229,10 @@ def pil_config(renderer):
 
 
 def initial_render_test():
-    """Renders 1x1 environment with track, agent and station to validate the launch.
-    
+    """Renders a minimal 1x1 environment to validate the rendering setup.
+
     Returns:
-        [int] 0 if okay, else -1.
+        int: 0 if successful; -1 on failure.
     """
     # Parameters
     tracks = [[1025]]
@@ -256,15 +288,15 @@ def initial_render_test():
 
 
 def create_custom_env(tracks, trains, params):
-    """Creates environment with specified tracks, trains and parameters for the PNG.
+    """Creates a Flatland environment for PNG generation.
 
     Args:
-        tracks (list): 2D-list of track-types.
-        trains (pd.DataFrame): Train-configuration.
+        tracks (list[list[int]]): 2D list of track types.
+        trains (pd.DataFrame): Train configuration.
         params (dict): Environment parameters.
-    
+
     Returns:
-        [RailEnv]: Environment.
+        RailEnv: Flatland environment.
     """
     invalid_train = None
     invalid_station = None
@@ -340,14 +372,15 @@ def create_custom_env(tracks, trains, params):
 
 
 def save_png(env, path="data/running_tmp.png", low_quality_mode=False):
-    """Renders and saves the PNG-image.
-    
+    """Renders and saves a PNG image of the environment.
+
     Args:
-        env (RailEnv): Environment.
-        path (str): Save location for the image.
-    
+        env (RailEnv): Flatland environment.
+        path (str): File path to save the PNG.
+        low_quality_mode (bool): Flag for low resolution rendering.
+
     Returns:
-        [int] if no error then 0, else 1.
+        int: 0 if successful; -1 if an error occurs.
     """
     print("Rendering image...")
     # Render image

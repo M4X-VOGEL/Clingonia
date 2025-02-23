@@ -12,12 +12,27 @@ old_env_counter = 0
 old_low_q = None
 
 def build_gif_from_frames(output_gif, fps):
+    """Saves the collected frames as a GIF.
+
+    Args:
+        output_gif (str): File path to save the GIF.
+        fps (float): Frames per second.
+    """
     global images
     ms_per_timestep = int(1000/fps)
     imageio.mimsave(output_gif, images, format='GIF', loop=0, duration=ms_per_timestep)
 
 
 def calc_gif_resolution(low_quality_mode, env):
+    """Calculates the screen resolution for GIF rendering based on environment size and quality mode.
+
+    Args:
+        low_quality_mode (bool): Flag to use low resolution settings.
+        env (RailEnv or list): Environment object or 2D list of tracks.
+
+    Returns:
+        int: Screen resolution.
+    """
     if isinstance(env, list):  # tracks list
         env_dim_max = max(len(env), len(env[0]))
     else:  # RailEnv object
@@ -46,6 +61,12 @@ def calc_gif_resolution(low_quality_mode, env):
 
 
 def draw_timestep(t, frame_filename):
+    """Draws the current timestep on a frame image.
+
+    Args:
+        t (int): Current timestep.
+        frame_filename (str): File path of the image frame to annotate.
+    """
     with Image.open(frame_filename) as img:
         draw = ImageDraw.Draw(img)
         text = f"{t}"
@@ -60,16 +81,20 @@ def draw_timestep(t, frame_filename):
 
 
 def render_gif(tracks, trains, df_pos, env_params, env_counter, output_gif='data/running_tmp.gif', fps=2, low_quality_mode=False):
-    """Creates the gif of the environment with a frame for every timestep.
-    
+    """Creates an animated GIF of the environment by rendering each timestep.
+
     Args:
-        tracks (list): environment 2D-list of the tracks.
-        trains (pd.DataFrame): train configuration.
-        df_pos (pd.DataFrame): train positions.
-        env_params (dict): user input parameters.
-        output_gif (str): path for gif.
-        fps (float): timesteps per second.
-        low_quality_mode (bool): False for auto resolution; True for low resolution.
+        tracks (list[list[int]]): 2D list of track types.
+        trains (pd.DataFrame): Train configuration.
+        df_pos (pd.DataFrame): Train positions.
+        env_params (dict): Environment parameters.
+        env_counter (int): Environment counter to detect changes.
+        output_gif (str): File path to save the GIF.
+        fps (float): Frames per second.
+        low_quality_mode (bool): Flag for low resolution rendering.
+
+    Returns:
+        None if successful, or returns early if caching applies.
     """
     global images, old_env_counter, old_low_q
     if images and old_env_counter == env_counter and old_low_q == low_quality_mode:

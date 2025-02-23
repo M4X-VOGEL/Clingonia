@@ -1,6 +1,11 @@
 import sys
 
 def import_error_handling(missing_modules):
+    """Handles missing module errors by printing instructions and exiting the program.
+
+    Args:
+        missing_modules (list[str]): List of missing module names.
+    """
     print('\n❌ Error: Essential python module missing.\n'
           'Make sure that you have all these modules installed:\n'
           'flatland-rl, clingo, imageio, pillow, numpy, pandas, matplotlib.\n'
@@ -15,7 +20,11 @@ def import_error_handling(missing_modules):
 
 
 def initial_import_authorization():
-    # Check, if all essential python modules are installed
+    """Checks that all essential Python modules are installed.
+
+    Imports and runs the initial_import_test from code.files.
+    If any modules are missing, calls import_error_handling.
+    """
     from code.files import initial_import_test
     missing_modules = initial_import_test()
     if missing_modules:
@@ -23,7 +32,11 @@ def initial_import_authorization():
 
 
 def initial_render_authorization():
-    # Check, if Flatland is able to render a simple image
+    """Ensures that Flatland can render a simple image.
+
+    Imports and runs initial_render_test from code.build_png.
+    Exits the program if an OverflowError is encountered.
+    """
     try:
         from code.build_png import initial_render_test
         initial_render_test()
@@ -33,7 +46,11 @@ def initial_render_authorization():
 
 
 def start_clingonia():
-    # Try to start the program
+    """Starts the Clingonia application.
+
+    Removes temporary data and initializes the Flatland window, start menu, and simulation.
+    Exits the program if an exception occurs.
+    """
     try:
         from code.views import build_flatland_window, create_start_menu, start_flatland
         from code.files import remove_data_remnants
@@ -47,6 +64,8 @@ def start_clingonia():
 
 
 def main():
+    """Performs initial authorizations and starts the application.
+    """
     initial_import_authorization()
     initial_render_authorization()
     start_clingonia()
