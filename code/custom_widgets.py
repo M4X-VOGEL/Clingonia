@@ -144,9 +144,9 @@ class Frame:
         root (tk.Tk):
             The parent container of this frame.
         width (int):
-            specify the width of the window in pixel.
+            specify the width of the frame in pixel.
         height (int):
-            specify the height of the window in pixel.
+            specify the height of the frame in pixel.
         grid_pos (tuple[int,int]): the position, as row and column, of the frame
             in the parent container.
         padding (Union[Tuple[int,int], Tuple[Tuple[int,int],Tuple[int,int]], Tuple[int,Tuple[int,int]], Tuple[Tuple[int,int],int]):
@@ -166,8 +166,8 @@ class Frame:
             specify the directions the frame should stick to. E.g. 'ew' will
             stretch the frame from east to west. Use cardinal directions.
         columnspan (int):
-            specify over how many grid columns this objects can be placed.
-        frame (tk.Tk):
+            specify over how many grid columns this object can be placed.
+        frame (tk.Frame):
             the actual tkinter frame that is initialized internally with the
             passed parameters.
     """
@@ -197,11 +197,11 @@ class Frame:
             root (tk.Tk):
                 The parent container of this frame.
             width (int):
-                specify the width of the window in pixel.
+                specify the width of the frame in pixel.
             height (int):
-                specify the height of the window in pixel.
-            grid_pos (tuple[int,int]): the position, as row and column, of the frame
-                in the parent container.
+                specify the height of the frame in pixel.
+            grid_pos (tuple[int,int]): the position, as row and column, of the
+                frame in the parent container.
             padding (Union[Tuple[int,int], Tuple[Tuple[int,int],Tuple[int,int]], Tuple[int,Tuple[int,int]], Tuple[Tuple[int,int],int]):
                 additional padding on the horizontal and vertical axis,
                 either a single int or a tuple of ints. A single int will
@@ -219,7 +219,7 @@ class Frame:
                 specify the directions the frame should stick to. E.g. 'ew' will
                 stretch the frame from east to west. Use cardinal directions.
             columnspan (int):
-                specify over how many grid columns this objects can be placed.
+                specify over how many grid columns this object can be placed.
         """
         self.root = root
         self.width = width
@@ -237,11 +237,11 @@ class Frame:
         if visibility:
             self.place_frame()
 
-    def create_frame(self):
+    def create_frame(self) -> tk.Frame:
         """Initializes a tkinter Frame with the current attribute values.
 
         Returns:
-            frame (tk.Tk):
+            frame (tk.Frame):
                 handle for the tkinter frame.
         """
         frame = tk.Frame(
@@ -296,14 +296,14 @@ class Button:
     """A custom tkinter Button.
 
     Attributes:
-        root (tk.Tk):
-            The parent container of this frame.
+        root (tk.Frame):
+            The parent container of this button.
         width (int):
-            specify the width of the window in pixel.
+            specify the width of the button in pixel.
         height (int):
-            specify the height of the window in pixel.
-        grid_pos (tuple[int,int]): the position, as row and column, of the frame
-            in the parent container.
+            specify the height of the button in pixel.
+        grid_pos (tuple[int,int]): the position, as row and column, of the
+            button in the parent container.
         padding (Union[Tuple[int,int], Tuple[Tuple[int,int],Tuple[int,int]], Tuple[int,Tuple[int,int]], Tuple[Tuple[int,int],int]):
             additional padding on the horizontal and vertical axis,
             either a single int or a tuple of ints. A single int will
@@ -318,14 +318,14 @@ class Button:
         background_color (str):
             hex color code e.g. '#00FF00' or a color name e.g. 'red'.
         border_width (int):
-            width of the border around the frame in pixel.
+            width of the border around the button in pixel.
         visibility (bool):
-            whether to display the frame on initialization or not.
+            whether to display the button on initialization or not.
         sticky (str):
-            specify the directions the frame should stick to. E.g. 'ew' will
-            stretch the frame from east to west. Use cardinal directions.
+            specify the directions the button should stick to. E.g. 'ew' will
+            stretch the button from east to west. Use cardinal directions.
         columnspan (int):
-            specify over how many grid columns this objects can be placed.
+            specify over how many grid columns this object can be placed.
         text (str):
             displayed on the button.
         font (Union[Tuple[str, int], Tuple[str, int, str]]):
@@ -381,14 +381,14 @@ class Button:
         Puts the button on the parent container if visibility is True.
 
         Attributes:
-            root (tk.Tk):
-                The parent container of this frame.
+            root (tk.Frame):
+                The parent container of this button.
             width (int):
-                specify the width of the window in pixel.
+                specify the width of the button in pixel.
             height (int):
-                specify the height of the window in pixel.
-            grid_pos (tuple[int,int]): the position, as row and column, of the frame
-                in the parent container.
+                specify the height of the button in pixel.
+            grid_pos (tuple[int,int]): the position, as row and column, of the
+                button in the parent container.
             padding (Union[Tuple[int,int], Tuple[Tuple[int,int],Tuple[int,int]], Tuple[int,Tuple[int,int]], Tuple[Tuple[int,int],int]):
                 additional padding on the horizontal and vertical axis,
                 either a single int or a tuple of ints. A single int will
@@ -403,14 +403,15 @@ class Button:
             background_color (str):
                 hex color code e.g. '#00FF00' or a color name e.g. 'red'.
             border_width (int):
-                width of the border around the frame in pixel.
+                width of the border around the button in pixel.
             visibility (bool):
-                whether to display the frame on initialization or not.
+                whether to display the button on initialization or not.
             sticky (str):
-                specify the directions the frame should stick to. E.g. 'ew' will
-                stretch the frame from east to west. Use cardinal directions.
+                specify the directions the button should stick to. E.g. 'ew'
+                will stretch the frame from east to west. Use cardinal
+                directions.
             columnspan (int):
-                specify over how many grid columns this objects can be placed.
+                specify over how many grid columns this object can be placed.
             text (str):
                 displayed on the button.
             font (Union[Tuple[str, int], Tuple[str, int, str]]):
@@ -574,6 +575,41 @@ class Button:
 
 
 class Label:
+    """A custom tkinter Label.
+
+    Attributes:
+        root (tk.Frame):
+            The parent container of this label.
+        grid_pos (tuple[int,int]): the position, as row and column, of the label
+            in the parent container.
+        padding (Union[Tuple[int,int], Tuple[Tuple[int,int],Tuple[int,int]], Tuple[int,Tuple[int,int]], Tuple[Tuple[int,int],int]):
+            additional padding on the horizontal and vertical axis,
+            either a single int or a tuple of ints. A single int will
+            be applied to both sides of the object while a tuple
+            allows for different a paddings on either side,
+            e.g ((5,10), 5) will add 5 pixel left 10 pixel right and
+            5 pixel above and below the object.
+        text (str):
+            displayed on the label.
+        font (Union[Tuple[str, int], Tuple[str, int, str]]):
+            applied to the text on the label. Can be font family and font size
+            or font family, font size, and font style.
+            E.g. ('Arial', 20, 'bold').
+        foreground_color (str):
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        background_color (str):
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        visibility (bool):
+            whether to display the label on initialization or not.
+        sticky (str):
+            specify the directions the label should stick to. E.g. 'ew' will
+            stretch the label from east to west. Use cardinal directions.
+        columnspan (int):
+            specify over how many grid columns this objects can be placed.
+        label (tk.Label):
+            the actual label that is initialized internally with the
+            passed parameters.
+    """
     def __init__(
             self,
             root,
@@ -595,6 +631,40 @@ class Label:
             sticky: Union[str, None] = None,
             columnspan: Union[int, None] = None,
     ):
+        """Initialize a custom tkinter Label.
+
+        Puts the label on the parent container if visibility is True.
+
+        Attributes:
+            root (tk.Frame):
+                The parent container of this label.
+            grid_pos (tuple[int,int]): the position, as row and column, of the
+                label in the parent container.
+            padding (Union[Tuple[int,int], Tuple[Tuple[int,int],Tuple[int,int]], Tuple[int,Tuple[int,int]], Tuple[Tuple[int,int],int]):
+                additional padding on the horizontal and vertical axis,
+                either a single int or a tuple of ints. A single int will
+                be applied to both sides of the object while a tuple
+                allows for different a paddings on either side,
+                e.g ((5,10), 5) will add 5 pixel left 10 pixel right and
+                5 pixel above and below the object.
+            text (str):
+                displayed on the label.
+            font (Union[Tuple[str, int], Tuple[str, int, str]]):
+                applied to the text on the label. Can be font family and font size
+                or font family, font size, and font style.
+                E.g. ('Arial', 20, 'bold').
+            foreground_color (str):
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            background_color (str):
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            visibility (bool):
+                whether to display the label on initialization or not.
+            sticky (str):
+                specify the directions the label should stick to. E.g. 'ew' will
+                stretch the label from east to west. Use cardinal directions.
+            columnspan (int):
+                specify over how many grid columns this objects can be placed.
+        """
         self.root = root
         self.grid_pos = grid_pos
         self.padding = padding
@@ -611,7 +681,13 @@ class Label:
         if visibility:
             self.place_label()
 
-    def create_label(self):
+    def create_label(self) -> tk.Label:
+        """Initializes a tkinter label with the current attribute values.
+
+        Returns:
+            label (tk.Label):
+                handle for the tkinter label.
+        """
         label = tk.Label(
             self.root,
             text=self.text, font=self.font,
@@ -620,6 +696,11 @@ class Label:
         return label
 
     def place_label(self):
+        """Places the label on the parent container at the specified position.
+
+        Sets the visibility attribute to true.
+        Uses current grid_pos, padding, sticky and columnspan attribute values.
+        """
         self.label.grid(
             row=self.grid_pos[0], column=self.grid_pos[1],
             padx=self.padding[0], pady=self.padding[1],
@@ -628,10 +709,16 @@ class Label:
         self.visibility = True
 
     def hide_label(self):
+        """Hides the label and sets the visibility attribute to False."""
         self.label.grid_forget()
         self.visibility = False
 
     def toggle_visibility(self):
+        """Places the label with the current attribute values or hides it.
+
+        Depends on current visibility value.
+        Sets visibility attribute to the opposite of its current value.
+        """
         if self.visibility:
             self.label.grid_forget()
             self.visibility = False
@@ -642,7 +729,6 @@ class Label:
                 sticky=self.sticky, columnspan=self.columnspan,
             )
             self.visibility = True
-        return
 
 
 class GIF:
