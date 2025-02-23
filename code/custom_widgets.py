@@ -98,9 +98,7 @@ class Window:
             self.window.geometry(f'{self.width}x{self.height}')
 
     def create_window(self) -> tk.Tk:
-        """Initializes a tkinter window with the specified parameters.
-
-        Sets the title and background color on initialization.
+        """Initializes a tkinter window with the current attribute values.
 
         Returns:
             window (tk.TK): the handle of the tkinter window.
@@ -121,6 +119,7 @@ class Window:
     def toggle_fullscreen(self):
         """Toggle the state of the window between fullscreen and windowed mode.
 
+        Sets the fullscreen attribute to the opposite of its current value.
         For the windowed mode use either the width and height or screenwidth and
         screenheight if one or both are unspecified.
         """
@@ -138,6 +137,38 @@ class Window:
 
 
 class Frame:
+    """A customized Tkinter Frame class.
+
+    Attributes:
+        root (tk.Tk): The parent container of this frame.
+        width (int):
+            specify the width of the window in pixel.
+        height (int):
+            specify the height of the window in pixel.
+        grid_pos (tuple[int,int]): the position, as row and column, of the frame
+            in the parent container.
+        padding (Union[Tuple[int,int], Tuple[Tuple[int,int],Tuple[int,int]], Tuple[int,Tuple[int,int]], Tuple[Tuple[int,int],int]):
+            additional padding on the horizontal and vertical axis,
+            either a single int or a tuple of ints. A single int will
+            be applied to both sides of the object while a tuple
+            allows for different a paddings on either side,
+            e.g ((5,10), 5) will add 5 pixel left 10 pixel right and
+            5 pixel above and below the object.
+        background_color (str):
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        border_width (int):
+            width of the border around the frame in pixel.
+        visibility (bool):
+            whether to display the frame on initialization or not.
+        sticky (str):
+            specify the directions the frame should stick to. E.g. 'ew' will
+            stretch the frame from east to west. Use cardinal directions.
+        columnspan (int):
+            specify over how many grid columns this objects can be placed.
+        frame (tk.Tk):
+            the actual tkinter frame that is initialized internally with the
+            passed parameters.
+    """
     def __init__(
             self,
             root: tk.Tk,
@@ -156,6 +187,37 @@ class Frame:
             sticky: Union[str, None] = None,
             columnspan: Union[int, None] = None,
     ):
+        """Initialize a custom frame with the passed parameters.
+
+        Puts the frame on the parent container if visibility is True.
+
+        Attributes:
+            root (tk.Tk): The parent container of this frame.
+            width (int):
+                specify the width of the window in pixel.
+            height (int):
+                specify the height of the window in pixel.
+            grid_pos (tuple[int,int]): the position, as row and column, of the frame
+                in the parent container.
+            padding (Union[Tuple[int,int], Tuple[Tuple[int,int],Tuple[int,int]], Tuple[int,Tuple[int,int]], Tuple[Tuple[int,int],int]):
+                additional padding on the horizontal and vertical axis,
+                either a single int or a tuple of ints. A single int will
+                be applied to both sides of the object while a tuple
+                allows for different a paddings on either side,
+                e.g ((5,10), 5) will add 5 pixel left 10 pixel right and
+                5 pixel above and below the object.
+            background_color (str):
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            border_width (int):
+                width of the border around the frame in pixel.
+            visibility (bool):
+                whether to display the frame on initialization or not.
+            sticky (str):
+                specify the directions the frame should stick to. E.g. 'ew' will
+                stretch the frame from east to west. Use cardinal directions.
+            columnspan (int):
+                specify over how many grid columns this objects can be placed.
+        """
         self.root = root
         self.width = width
         self.height = height
@@ -173,6 +235,11 @@ class Frame:
             self.place_frame()
 
     def create_frame(self):
+        """Initializes a tkinter Frame with the current attribute values.
+
+        Returns:
+            frame (tk.Tk): the handle for the tkinter frame.
+        """
         frame = tk.Frame(
             self.root,
             bg=self.background_color,
@@ -180,9 +247,14 @@ class Frame:
             width=self.width,
             height=self.height,
         )
-        return  frame
+        return frame
 
     def place_frame(self):
+        """Places the frame on the parent container at the specified position.
+
+        Sets the visibility attribute to true.
+        Uses current grid_pos, padding, sticky and columnspan attribute values.
+        """
         self.frame.grid(
             row=self.grid_pos[0], column=self.grid_pos[1],
             padx=self.padding[0], pady=self.padding[1],
@@ -190,15 +262,20 @@ class Frame:
         )
         self.visibility = True
 
-    def hide_frame(self):
-        self.frame.grid_forget()
-        self.visibility = False
-
     def destroy_frame(self):
+        """Destroys the tkinter frame object.
+
+        Sets the visibility attribute to False.
+        """
         self.visibility = False
         self.frame.destroy()
 
     def toggle_visibility(self):
+        """Places the frame with the current attribute values or hides it.
+
+        Depends on current visibility value.
+        Sets visibility attribute to the opposite of its current value.
+        """
         if self.visibility:
             self.frame.grid_forget()
             self.visibility = False
@@ -210,11 +287,6 @@ class Frame:
             )
             self.visibility = True
         return
-
-    def switch_to_frame(self, new_frame):
-        self.frame.destroy()
-        new_frame.place_frame()
-        new_frame.visibility = True
 
 
 class Button:
