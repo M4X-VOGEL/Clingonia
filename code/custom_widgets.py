@@ -23,7 +23,7 @@ from PIL import Image, ImageTk, ImageDraw, ImageSequence
 
 
 class Window:
-    """A customized Tkinter Window class.
+    """A customized Tkinter Window.
 
     Attributes:
         width (int):
@@ -101,7 +101,8 @@ class Window:
         """Initializes a tkinter window with the current attribute values.
 
         Returns:
-            window (tk.TK): the handle of the tkinter window.
+            window (tk.TK):
+                the handle of the tkinter window.
         """
         window = tk.Tk()
         window.title(self.title)
@@ -137,10 +138,11 @@ class Window:
 
 
 class Frame:
-    """A customized Tkinter Frame class.
+    """A customized Tkinter Frame.
 
     Attributes:
-        root (tk.Tk): The parent container of this frame.
+        root (tk.Tk):
+            The parent container of this frame.
         width (int):
             specify the width of the window in pixel.
         height (int):
@@ -192,7 +194,8 @@ class Frame:
         Puts the frame on the parent container if visibility is True.
 
         Attributes:
-            root (tk.Tk): The parent container of this frame.
+            root (tk.Tk):
+                The parent container of this frame.
             width (int):
                 specify the width of the window in pixel.
             height (int):
@@ -238,7 +241,8 @@ class Frame:
         """Initializes a tkinter Frame with the current attribute values.
 
         Returns:
-            frame (tk.Tk): the handle for the tkinter frame.
+            frame (tk.Tk):
+                handle for the tkinter frame.
         """
         frame = tk.Frame(
             self.root,
@@ -286,10 +290,62 @@ class Frame:
                 sticky=self.sticky, columnspan=self.columnspan,
             )
             self.visibility = True
-        return
 
 
 class Button:
+    """A custom tkinter Button.
+
+    Attributes:
+        root (tk.Tk):
+            The parent container of this frame.
+        width (int):
+            specify the width of the window in pixel.
+        height (int):
+            specify the height of the window in pixel.
+        grid_pos (tuple[int,int]): the position, as row and column, of the frame
+            in the parent container.
+        padding (Union[Tuple[int,int], Tuple[Tuple[int,int],Tuple[int,int]], Tuple[int,Tuple[int,int]], Tuple[Tuple[int,int],int]):
+            additional padding on the horizontal and vertical axis,
+            either a single int or a tuple of ints. A single int will
+            be applied to both sides of the object while a tuple
+            allows for different a paddings on either side,
+            e.g ((5,10), 5) will add 5 pixel left 10 pixel right and
+            5 pixel above and below the object.
+        command (callable):
+            executed on button press.
+        foreground_color (str):
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        background_color (str):
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        border_width (int):
+            width of the border around the frame in pixel.
+        visibility (bool):
+            whether to display the frame on initialization or not.
+        sticky (str):
+            specify the directions the frame should stick to. E.g. 'ew' will
+            stretch the frame from east to west. Use cardinal directions.
+        columnspan (int):
+            specify over how many grid columns this objects can be placed.
+        text (str):
+            displayed on the button.
+        font (Union[Tuple[str, int], Tuple[str, int, str]]):
+            applied to the text on the button. Can be font family and font size
+            or font family, font size, and font style.
+            E.g. ('Arial', 20, 'bold').
+        image (str):
+            path to an image file. Will be displayed on the button.
+        rotation (int):
+            rotation in degrees (0-360) of the image on the button.
+        style_config (Union[Dict[str, Union[str, int, Tuple]]]):
+            dictionary with ttk.Button style options that will be applied to
+            the button.
+        style_map_config (Union[Dict[str, list]]):
+            dictionary with ttk.Button style map options that will be applied to
+            the button.
+        button (ttk.Button):
+            the actual ttk.Button that is initialized internally with the
+            passed parameters.
+    """
     def __init__(
             self,
             root,
@@ -320,6 +376,58 @@ class Button:
             style: Union[Dict[str, Union[str, int, Tuple]], None] = None,
             style_map: Union[Dict[str, list], None] = None
     ):
+        """Initialize a custom button with the passed parameters.
+
+        Puts the button on the parent container if visibility is True.
+
+        Attributes:
+            root (tk.Tk):
+                The parent container of this frame.
+            width (int):
+                specify the width of the window in pixel.
+            height (int):
+                specify the height of the window in pixel.
+            grid_pos (tuple[int,int]): the position, as row and column, of the frame
+                in the parent container.
+            padding (Union[Tuple[int,int], Tuple[Tuple[int,int],Tuple[int,int]], Tuple[int,Tuple[int,int]], Tuple[Tuple[int,int],int]):
+                additional padding on the horizontal and vertical axis,
+                either a single int or a tuple of ints. A single int will
+                be applied to both sides of the object while a tuple
+                allows for different a paddings on either side,
+                e.g ((5,10), 5) will add 5 pixel left 10 pixel right and
+                5 pixel above and below the object.
+            command (callable):
+                executed on button press.
+            foreground_color (str):
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            background_color (str):
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            border_width (int):
+                width of the border around the frame in pixel.
+            visibility (bool):
+                whether to display the frame on initialization or not.
+            sticky (str):
+                specify the directions the frame should stick to. E.g. 'ew' will
+                stretch the frame from east to west. Use cardinal directions.
+            columnspan (int):
+                specify over how many grid columns this objects can be placed.
+            text (str):
+                displayed on the button.
+            font (Union[Tuple[str, int], Tuple[str, int, str]]):
+                applied to the text on the button. Can be font family and font size
+                or font family, font size, and font style.
+                E.g. ('Arial', 20, 'bold').
+            image (str):
+                path to an image file. Will be displayed on the button.
+            rotation (int):
+                rotation in degrees (0-360) of the image on the button.
+            style (Union[Dict[str, Union[str, int, Tuple]]]):
+                dictionary with ttk.Button style options that will be applied to
+                the button.
+            style_map (Union[Dict[str, list]]):
+                dictionary with ttk.Button style map options that will be applied to
+                the button.
+        """
         self.root = root
         self.width = width
         self.height = height
@@ -347,7 +455,14 @@ class Button:
         if visibility:
             self.place_button()
 
-    def create_button(self):
+    def create_button(self) -> ttk.Button:
+        """Initializes a tkinter ttk.Button with the current attribute values.
+
+        Returns:
+            button (ttk.Button):
+                handle for the ttk.button.
+        """
+        # Create a custom style for the button
         style = ttk.Style()
         style.theme_use('clam')
         style_name = f"Custom.TButton.{id(self)}"
@@ -359,15 +474,20 @@ class Button:
             borderwidth=self.border_width
         )
 
+        # Use style and style map to configure the button if they are given
         for key, value in self.style_config.items():
             style.configure(style_name, **{key: value})
 
         for key, value in self.style_map_config.items():
             style.map(style_name, **{key: value})
 
+        # Use the standard layout of the ttk.Button
         style.layout(style_name, style.layout("TButton"))
 
         if self.text:
+            # Text configuration
+
+            # apply font config if given
             if self.font:
                 style.configure(style_name, font=self.font)
 
@@ -383,6 +503,8 @@ class Button:
                 style=style_name
             )
         elif self.image:
+            # Image configuration
+
             button = ttk.Button(
                 self.root,
                 image=self.image,
@@ -390,11 +512,17 @@ class Button:
                 style=style_name
             )
         else:
+            # Raise a warning if neither image nor text is provided
             warnings.warn('No text or image given to Button', UserWarning)
             return None
         return button
 
     def place_button(self):
+        """Places the button on the parent container at the specified position.
+
+        Sets the visibility attribute to true.
+        Uses current grid_pos, padding, sticky and columnspan attribute values.
+        """
         self.button.grid(
             row=self.grid_pos[0],
             column=self.grid_pos[1],
@@ -405,12 +533,12 @@ class Button:
         )
         self.visibility = True
 
-    def hide_button(self):
-        if self.visibility:
-            self.button.grid_forget()
-            self.visibility = False
-
     def toggle_visibility(self):
+        """Places the button with the current attribute values or hides it.
+
+        Depends on current visibility value.
+        Sets visibility attribute to the opposite of its current value.
+        """
         if self.visibility:
             self.button.grid_forget()
             self.visibility = False
@@ -425,7 +553,19 @@ class Button:
             )
             self.visibility = True
 
-    def get_image(self, image_path):
+    def get_image(self, image_path) -> ImageTk.PhotoImage:
+        """Load an image and convert it to a format usable by tkinter.
+
+        Rotates and resizes the image to the button width and height.#
+
+        Args:
+            image_path (str):
+                file path to the image.
+
+        Returns:
+            image (ImageTk.PhotoImage):
+                processed image, formatted for use in Tkinter widgets.
+        """
         image = Image.open(image_path)
         image = image.resize(size=(self.width, self.height))
         image = image.rotate(angle=self.rotation)
