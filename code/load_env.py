@@ -233,7 +233,6 @@ def validate_grid_completeness(df_tracks):
     return 0
 
 
-
 def validate(tse_list, df_tracks):
     """Validates start directions, existence of requested cells and predicate consistency.
     """

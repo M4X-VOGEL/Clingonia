@@ -88,6 +88,7 @@ def pos_change(x, y, dir):
     elif dir == 'w': x -= 1
     return x, y
 
+
 def dir_change(id, x, y, action, dir, tracks):
     global invalid_path, fw_tracks, to_left_tracks, to_right_tracks
     # Check, if coordinates are valid
@@ -158,6 +159,7 @@ def build_df_pos(df_actions, trains, tracks):
         df_pos.loc[len(df_pos)] = [id, x_new, y_new, dir_new, t]
         train_ids[id] = (x_new, y_new, dir_new)
     return df_pos
+
 
 def adjust_actions(df_pos, trains, df_actions, tracks):
     """Adjusts the actions, such that the paths' last positions match the station position.

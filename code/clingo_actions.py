@@ -4,7 +4,6 @@ import threading
 import subprocess
 import pandas as pd
 
-
 clingo_frustration = {
     30:  "I'm lost in Flatland, again...",
     60:  "tracks won't align, damn it...",
@@ -90,7 +89,6 @@ def run_clingo(clingo_path, lp_files, answer_number):
             print(f"Clingo returned an error:\n{error_message}")
             return -3
     return stdout.strip()
-
 
 
 def get_clingo_answer(clingo_output, answer_number):
