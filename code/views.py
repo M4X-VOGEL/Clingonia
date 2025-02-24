@@ -1644,9 +1644,10 @@ def save_clingo_params() -> int:
             # register the error and display corresponding error message
             err_count += 1
             err = type(e)
-            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
-            labels[f'{key}_error_label'].place_label()
-            if err not in err_dict[key]:
+            if err in err_dict[key]:
+                labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+                labels[f'{key}_error_label'].place_label()
+            else:
                 print(e)
                 print(err)
                 print(data)
@@ -1671,7 +1672,9 @@ def save_clingo_params() -> int:
 def load_clingo_params():
     """Load the current user parameters onto the clingo para frame"""
     for field in entry_fields:
+        # get the key from every entry field in the global list
         key = field.split('_')[0]
+
         if key not in default_params:
             continue
         elif key not in ['answer', 'clingo']:
@@ -2665,6 +2668,7 @@ def random_gen_para_to_env():
     build_random_gen_env_menu()
 
 def build_random_gen_env_viewer():
+    """Builds random generation environment viewer frame."""
     frames['random_gen_env_viewer_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -2693,6 +2697,7 @@ def build_random_gen_env_viewer():
     )
 
 def build_random_gen_env_menu():
+    """Builds Random generation environment menu frame."""
     frames['random_gen_env_menu_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -2749,6 +2754,7 @@ def build_random_gen_env_menu():
     frames['random_gen_env_menu_frame'].frame.grid_propagate(False)
 
 def random_gen_toggle_advanced_para_options():
+    """Toggles the visibility of labels and entries in random gen para frame."""
     labels['grid_label'].toggle_visibility()
     entry_fields['grid_entry'].toggle_visibility()
     labels['intercity_label'].toggle_visibility()
@@ -2773,6 +2779,7 @@ def random_gen_toggle_advanced_para_options():
     return
 
 def toggle_random_gen_para_help():
+    """Open or hides the random generation parameter frame."""
     if 'random_gen_para_help_frame' in frames:
         frames['random_gen_para_help_frame'].toggle_visibility()
         frames['random_gen_para_help_frame'].frame.rowconfigure(0, weight=1)
@@ -2782,6 +2789,7 @@ def toggle_random_gen_para_help():
         build_random_gen_para_help_frame()
 
 def switch_random_gen_to_main():
+    """Destroys all random gen viewer menu frames and opens the main menu."""
     if 'random_gen_env_viewer_frame' in frames:
         frames['random_gen_env_viewer_frame'].destroy_frame()
         del frames['random_gen_env_viewer_frame']
@@ -2792,7 +2800,13 @@ def switch_random_gen_to_main():
     create_main_menu()
 
 def save_random_gen_env_params():
+    """Saves the parameters from the random generation parameter frame.
+
+    Returns:
+        int: -1 if there was an error with any input 0 otherwise.
+    """
     def str_to_bool(s):
+        """Helper function to transform boolean user entries to booleans."""
         if isinstance(s, str):
             s = s.lower()
             if s == "true" or s == 'tru' or s == 'yes' or s == 'y':
@@ -2804,12 +2818,14 @@ def save_random_gen_env_params():
     err_count = 0
 
     for field in entry_fields:
+        # get the key from every entry field in the global list
         key = field.split('_')[0]
         if key not in default_params:
             continue
         elif key in ['answer', 'clingo', 'lpFiles', 'frameRate']:
             continue
 
+        # get the data from the entry field
         data = entry_fields[field].entry_field.get()
 
         try:
@@ -2835,8 +2851,10 @@ def save_random_gen_env_params():
             else:
                 data = int(data)
 
+            # hide label if there was no problem with the data conversion
             labels[f'{key}_error_label'].hide_label()
         except Exception as e:
+            # register the error and display corresponding error message
             err = type(e)
             err_count += 1
             if err in err_dict[key]:
@@ -2849,7 +2867,7 @@ def save_random_gen_env_params():
                 print(data)
             continue
 
-        # input constraints
+        # check for additional constrains and display error when violated
         if key=='rows' and data < 10:
             err_count += 1
             err = 'tooFewRows'
@@ -2916,7 +2934,6 @@ def save_random_gen_env_params():
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
 
-
         if key=='speed':
             for k, v in data.items():
                 if not isinstance(k, float) or not isinstance(v, float):
@@ -2938,6 +2955,7 @@ def save_random_gen_env_params():
                         text=err_dict[key][err])
                     labels[f'{key}_error_label'].place_label()
 
+        # only save non string values as parameters except for the clingo path
         if type(data) is not str:
             user_params[key] = data
 
@@ -2947,8 +2965,11 @@ def save_random_gen_env_params():
         return 0
 
 def load_random_gen_env_params():
+    """Load the current user parameters onto the random gen para frame"""
     for field in entry_fields:
+        # get the key from every entry field in the global list
         key = field.split('_')[0]
+
         if key not in default_params:
             continue
         elif key in ['answer', 'clingo', 'lpFiles', 'frameRate']:
@@ -2975,7 +2996,32 @@ def load_random_gen_env_params():
 # builder
 
 def builder_change_to_start_or_main():
-    global first_mod_try, first_build_try, build_mode, user_params, current_array, current_df
+    """Wrapper function to change to start or main menu.
+
+    Loads the backup user parameters into the user parameters.
+    Also loads the backup current array and df into the current_array and
+    current_df.
+    Resets first build try and first mod try.
+    Resets the build_mode variable.
+
+    Opens start or main menu depending on last_menu.
+
+    Modifies:
+        user_params (dict):
+            hold the current user parameters.
+        first_build_try (bool):
+            global tracker for first environment generation and build try.
+        first_mod_try (bool):
+            global tracker for first modification try.
+        build_mode (str):
+            global tracker for the current mode in the builder view.
+        current_array (np.array):
+            holds a map representation of the current environment.
+        current_df (pd.DataFrame):
+            holds a train list of the current environment.
+    """
+    global first_mod_try, first_build_try, build_mode, user_params, \
+        current_array, current_df
 
     user_params = user_params_backup.copy()
 
@@ -2994,6 +3040,7 @@ def builder_change_to_start_or_main():
         builder_para_to_main()
 
 def open_builder_discard_changes_frame():
+    """Builds discard build mode changes frame."""
     frames['builder_discard_changes_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth,
@@ -3060,6 +3107,12 @@ def open_builder_discard_changes_frame():
     frames['builder_discard_changes_frame'].frame.grid_propagate(False)
 
 def builder_para_to_start():
+    """Destroys builder parameter frames and opens start menu.
+
+    Modifies:
+        build_mode (bool):
+            global tracker for the current mode in the builder view.
+    """
     global build_mode
 
     build_mode = None
@@ -3074,6 +3127,12 @@ def builder_para_to_start():
     create_start_menu()
 
 def builder_para_to_main():
+    """Destroys builder parameter frames and opens main menu.
+
+        Modifies:
+            build_mode (bool):
+                global tracker for the current mode in the builder view.
+        """
     global build_mode
 
     build_mode = None
@@ -3088,6 +3147,7 @@ def builder_para_to_main():
     create_main_menu()
 
 def build_builder_para_frame():
+    """Builds builder parameter frame."""
     frames['builder_para_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.7,
@@ -3508,6 +3568,7 @@ def build_builder_para_frame():
     windows['flatland_window'].window.update_idletasks()
 
 def build_builder_para_help_frame():
+    """Builds builder parameter help frame."""
     frames['builder_para_help_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.3,
@@ -3545,6 +3606,7 @@ def build_builder_para_help_frame():
     frames['builder_para_help_frame'].frame.grid_propagate(False)
 
 def toggle_builder_para_help():
+    """Opens or hides the builder parameter help frame."""
     if 'builder_para_help_frame' in frames:
         frames['builder_para_help_frame'].toggle_visibility()
         frames['builder_para_help_frame'].frame.rowconfigure(0, weight=1)
@@ -3554,14 +3616,63 @@ def toggle_builder_para_help():
         build_builder_para_help_frame()
 
 def builder_para_to_track_grid():
+    """Switches from builder parameter frame to the track builder view.
+
+    If the mode is 'modify' this will check if the current environment has to
+    many tiles in the array and will issue a warning.
+    Also checks if the new array created in the build mode is very large.
+
+    Saves teh current user params from the builder parameter frame.
+
+    Destroys the builder parameter frame.
+    Creates or, in modify mode, resizes the current environment to the new
+    parameter rows and columns.
+    Creates a backup of the current_array and current_df.
+    Opens the track builder menu view.
+
+    Modifies:
+        first_build_try (bool):
+            global tracker for first environment generation and build try.
+        first_mod_try (bool):
+            global tracker for first modification try.
+        build_mode (str):
+            global tracker for the current mode in the builder view.
+        current_img (str):
+            path to the image of the current environment.
+        current_df (pd.DataFrame):
+            holds a train list of the current environment.
+        current_array (np.array):
+            holds a layered map representation of the current environment.
+        current_builder_backup_df (pd.DataFrame):
+            holds a backup train list of the current environment for the build
+            mode.
+        current_modify_backup_df (pd.DataFrame):
+            holds a backup train list of the current environment for the modify
+            mode.
+        current_builder_backup_array (np.array):
+            holds a backup layered map representation of the current environment
+            for the build mode.
+        current_modify_backup_array (np.array):
+            holds a backup layered map representation of the current environment
+            for the modify mode.
+        env_counter:
+            tracks changes to the current environment.
+        user_params_backup (dict):
+            backup for the user parameters.
+    """
     global first_mod_try, first_build_try, build_mode, current_array, current_df, \
         current_builder_backup_array, current_builder_backup_df, \
         current_modify_backup_array, current_modify_backup_df
 
     if build_mode == 'modify' and sys_platform == 'Windows':
+
+        # get the count of objects in the current environment
+        # counts tracks, trains and stations.
+        # trains and station on the same cell only get counted once
         pic_count = np.count_nonzero(current_array)
 
         if pic_count > 4800:
+            # return with an error to the parameter view
             labels['build_para_status_label'].label.config(
                 text=f'Windows cannot render\n'
                      f'this many elements ({pic_count})\n '
@@ -3572,6 +3683,7 @@ def builder_para_to_track_grid():
             return
         elif pic_count > 4500:
             if first_mod_try:
+                # on the first try return with a warning to the parameter view
                 first_mod_try = False
                 labels['build_para_status_label'].label.config(
                     text=f'Warning: High element count ({pic_count})\n'
@@ -3582,12 +3694,14 @@ def builder_para_to_track_grid():
                 labels['build_para_status_label'].place_label()
                 return
             else:
+                # reset the first try on the second try and continue
                 first_mod_try = True
 
     if save_builder_env_params() == -1:
         return
 
     if first_build_try:
+        # on the first try return with a warning to the parameter view
         first_build_try = False
         if user_params['rows'] * user_params['cols'] > 1000000:
             labels['build_para_status_label'].label.config(
@@ -3599,6 +3713,7 @@ def builder_para_to_track_grid():
             labels['build_para_status_label'].place_label()
             return
     else:
+        # reset the first try on the second try and continue
         first_build_try = True
 
     if build_mode == 'modify':
@@ -3623,16 +3738,19 @@ def builder_para_to_track_grid():
         cols = default_params['cols']
 
     if build_mode == 'build':
+        # create a new empty environment and train list
         current_array = np.zeros((3, rows, cols), dtype=int)
         current_df = pd.DataFrame(
             columns=['start_pos', 'dir', 'end_pos', 'e_dep', 'l_arr']
         )
     else:
+        # get the shape of the current array
         current_rows, current_cols = current_array.shape[1:3]
 
         current_df.reset_index(drop=True, inplace=True)
 
         if (rows,cols) != (current_rows,current_cols):
+            # if the desired size is different from the current one: resize
             if current_rows < rows:
                 # add array rows
                 current_array = np.pad(
@@ -3684,6 +3802,15 @@ def builder_para_to_track_grid():
     build_builder_grid_frame()
 
 def builder_track_grid_to_para():
+    """Destroy the builder track view and open the parameter view.
+
+    If going back from the build menu in build mode open the parameter view in
+    modify mode to allow for retrospective modifications.
+
+    Modifies:
+        build_mode (str):
+            global tracker for the current mode in the builder view.
+    """
     global build_mode
 
     if 'track_builder_menu_frame' in frames:
@@ -3702,6 +3829,7 @@ def builder_track_grid_to_para():
     build_builder_para_frame()
 
 def build_builder_grid_frame():
+    """Build the builder grid canvas frame."""
     frames['builder_grid_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -3736,6 +3864,7 @@ def build_builder_grid_frame():
     frames['builder_grid_frame'].frame.grid_propagate(False)
 
 def build_track_builder_menu_frame():
+    """Build the track builder menu frame."""
     frames['track_builder_menu_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -4228,6 +4357,7 @@ def build_track_builder_menu_frame():
     frames['track_builder_menu_frame'].frame.grid_propagate(False)
 
 def build_builder_track_help_frame():
+    """Builds the track builder menu help frame."""
     frames['builder_track_help_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -4265,6 +4395,7 @@ def build_builder_track_help_frame():
     frames['builder_track_help_frame'].frame.grid_propagate(False)
 
 def toggle_builder_track_help():
+    """Opens or hide the track builder menu help frame."""
     if 'builder_track_help_frame' in frames:
         frames['builder_track_help_frame'].toggle_visibility()
         frames['builder_track_help_frame'].frame.rowconfigure(0, weight=1)
@@ -4274,6 +4405,10 @@ def toggle_builder_track_help():
         build_builder_track_help_frame()
 
 def builder_track_to_train():
+    """Destroys the track builder menu frame and open the train builder view
+
+    Resets the current selection for the builder grid.
+    """
     if 'track_builder_menu_frame' in frames:
         frames['track_builder_menu_frame'].destroy_frame()
         del frames['track_builder_menu_frame']
@@ -4286,6 +4421,10 @@ def builder_track_to_train():
     build_train_builder_menu_frame()
 
 def builder_train_to_track():
+    """Destroys the train builder menu frame and open the track builder view
+
+    Resets the current selection for the builder grid.
+    """
     if 'train_builder_menu_frame' in frames:
         frames['train_builder_menu_frame'].destroy_frame()
         del frames['train_builder_menu_frame']
@@ -4298,6 +4437,7 @@ def builder_train_to_track():
     build_track_builder_menu_frame()
 
 def build_train_builder_menu_frame():
+    """Builds the train builder menu frame."""
     frames['train_builder_menu_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -4532,10 +4672,18 @@ def build_train_builder_menu_frame():
     canvases['builder_grid_canvas'].train_list = canvases['train_config_list']
 
 def open_train_all_config_frame():
+    """Builds the all train config menu frame.
+
+    Resets the current selection for the builder grid.
+
+    Returns:
+        a warning if no trains are in the environment.
+    """
     if len(current_df):
         labels['configAll_status_label'].hide_label()
         canvases['builder_grid_canvas'].current_selection = None
     else:
+        # if no trains are in the environment
         labels['configAll_status_label'].label.config(
             text='No Trains Placed',
             fg=bad_status_color,
@@ -4690,9 +4838,26 @@ def open_train_all_config_frame():
     windows['flatland_window'].window.update_idletasks()
 
 def save_train_all_config(save):
+    """Saves the modified train parameters.
+
+    Checks if the entered parameters are valid.
+    If parameters are entered and valid it replaces the e_dep and l_arr
+    attributes of all trains in current_df.
+
+    Destroys the all config frame.
+
+    Modifies:
+        current_df (pd.DataFrame):
+            holds a train list of the current environment.
+
+    Returns:
+        int: -1 if an error was registered, otherwise 0.
+    """
     global current_df
 
     if not save:
+        # if returning via the back button of the frame
+        # just destroy the frame
         if 'all_eDep_entry' in entry_fields:
             del entry_fields['all_eDep_entry']
         if 'all_lArr_entry' in entry_fields:
@@ -4702,6 +4867,7 @@ def save_train_all_config(save):
             del frames['train_all_config_frame']
         return 0
 
+    # get the entred parameters
     ed = entry_fields['all_eDep_entry'].entry_field.get()
     la = entry_fields['all_lArr_entry'].entry_field.get()
 
@@ -4714,6 +4880,7 @@ def save_train_all_config(save):
             ed = int(ed)
             labels['eDep_error_label'].hide_label()
     except ValueError:
+        # register the error and print a error message
         labels['eDep_error_label'].label.config(
             text='needs int > 0',
             fg=bad_status_color,
@@ -4728,6 +4895,7 @@ def save_train_all_config(save):
             la = int(la)
             labels['lArr_error_label'].hide_label()
     except ValueError:
+        # register the error and print a error message
         labels['lArr_error_label'].label.config(
             text='needs int > 0',
             fg=bad_status_color,
@@ -4738,6 +4906,7 @@ def save_train_all_config(save):
     if err_count:
         return -1
 
+    # check for valid parameter values
     if ed is not None:
         if ed < 1:
             labels['eDep_error_label'].label.config(
@@ -4749,6 +4918,7 @@ def save_train_all_config(save):
         else:
             current_df['e_dep'] = [ed] * len(current_df['e_dep'])
 
+    # check for valid parameter values
     if la is not None:
         if la < 1:
             labels['lArr_error_label'].label.config(
@@ -4772,6 +4942,7 @@ def save_train_all_config(save):
         del frames['train_all_config_frame']
 
 def build_builder_train_help_frame():
+    """Builds the train builder menu help frame."""
     frames['builder_train_help_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -4809,6 +4980,7 @@ def build_builder_train_help_frame():
     frames['builder_train_help_frame'].frame.grid_propagate(False)
 
 def toggle_builder_train_help():
+    """Opens or hides the train builder menu help frame."""
     if 'builder_train_help_frame' in frames:
         frames['builder_train_help_frame'].toggle_visibility()
         frames['builder_train_help_frame'].frame.rowconfigure(0, weight=1)
@@ -4818,11 +4990,42 @@ def toggle_builder_train_help():
         build_builder_train_help_frame()
 
 def builder_train_grid_to_env():
+    """Switches from builder train menu frame to the builder environment viewer.
+
+    Checks if all trains have valid entries and returns with a warning
+    otherwise.
+
+    Generates an image of the created or modified environment.
+
+    Creates a backup of the current_array and current_df.
+    Opens the builder environment viewer.
+
+    Modifies:
+        current_img (str):
+            path to the image of the current environment.
+        current_df (pd.DataFrame):
+            holds a train list of the current environment.
+        current_builder_backup_df (pd.DataFrame):
+            holds a backup train list of the current environment for the build
+            mode.
+        current_modify_backup_df (pd.DataFrame):
+            holds a backup train list of the current environment for the modify
+            mode.
+        current_builder_backup_array (np.array):
+            holds a backup layered map representation of the current environment
+            for the build mode.
+        current_modify_backup_array (np.array):
+            holds a backup layered map representation of the current environment
+            for the modify mode.
+        env_counter:
+            tracks changes to the current environment.
+    """
     global current_img, current_builder_backup_array, current_builder_backup_df, \
         current_modify_backup_array, current_modify_backup_df, env_counter, \
         current_df
     print("\nBuilding environment...")
 
+    # check if there are trains in the environment
     if len(current_df) == 0:
         labels['builder_status_label'].label.config(
             text='No Trains Placed',
@@ -4844,7 +5047,10 @@ def builder_train_grid_to_env():
     prev_agent_count = user_params['agents']
     user_params['agents'] = len(trains)
 
+    # try to generate an image of the environment
     env, trains, invalid_train, invalid_station = create_custom_env(tracks, trains, user_params)
+
+    # handle possible errors from the image creation
     if invalid_train is not None:
         user_params['agents'] = prev_agent_count
         labels['builder_status_label'].label.config(
@@ -4898,7 +5104,8 @@ def builder_train_grid_to_env():
         'e_dep': trains['e_dep'],
         'l_arr': trains['l_arr']
     })
-    
+
+    # save the generated image for the runtime of the program
     delete_tmp_frames()
     env_counter += 1
     os.makedirs("data", exist_ok=True)
@@ -4932,6 +5139,7 @@ def builder_train_grid_to_env():
     build_builder_env_menu()
 
 def build_builder_env_viewer():
+    """Builds the builder environment viewer."""
     frames['builder_env_viewer_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -4964,6 +5172,7 @@ def build_builder_env_viewer():
     frames['builder_env_viewer_frame'].frame.grid_propagate(False)
 
 def build_builder_env_menu():
+    """Builds the environment viewer menu."""
     frames['builder_env_menu_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -5020,6 +5229,7 @@ def build_builder_env_menu():
     frames['builder_env_menu_frame'].frame.grid_propagate(False)
 
 def builder_toggle_advanced_para_options():
+    """Toggles the visibility of labels and entries in builder para frame."""
     labels['remove_label'].toggle_visibility()
     entry_fields['remove_entry'].toggle_visibility()
     labels['speed_label'].toggle_visibility()
@@ -5038,6 +5248,12 @@ def builder_toggle_advanced_para_options():
     return
 
 def switch_builder_to_main():
+    """Destroys all builder env viewer menu frames and opens the main menu.
+
+    Modifies:
+        build_mode (str):
+            global tracker for the current mode in the builder view.
+    """
     global build_mode
 
     build_mode = None
@@ -5052,7 +5268,13 @@ def switch_builder_to_main():
     create_main_menu()
 
 def save_builder_env_params():
+    """Saves the parameters from the builder parameter frame.
+
+    Returns:
+        int: -1 if there was an error with any input 0 otherwise.
+    """
     def str_to_bool(s):
+        """Helper function to transform boolean user entries to booleans."""
         if isinstance(s, str):
             s = s.lower()
             if s == "true" or s == 'tru' or s == 'yes' or s == 'y':
@@ -5064,6 +5286,7 @@ def save_builder_env_params():
     err_count = 0
 
     for field in entry_fields:
+        # get the key from every entry field in the global list
         key = field.split('_')[0]
         if key not in default_params:
             continue
@@ -5071,6 +5294,7 @@ def save_builder_env_params():
                    'grid', 'intercity', 'incity', 'frameRate']:
             continue
 
+        # get the data from the entry field
         data = entry_fields[field].entry_field.get()
 
         try:
@@ -5096,8 +5320,10 @@ def save_builder_env_params():
             else:
                 data = int(data)
 
+            # hide label if there was no problem with the data conversion
             labels[f'{key}_error_label'].hide_label()
         except Exception as e:
+            # register the error and display corresponding error message
             err = type(e)
             err_count += 1
             if err in err_dict[key]:
@@ -5110,7 +5336,7 @@ def save_builder_env_params():
                 print(data)
             continue
 
-        # input constraints
+        # check for additional constrains and display error when violated
         if key=='malfunction' and data[1] == 0:
             err_count += 1
             err = 'divByZero'
@@ -5158,6 +5384,7 @@ def save_builder_env_params():
                         text=err_dict[key][err])
                     labels[f'{key}_error_label'].place_label()
 
+        # only save non string values as parameters except for the clingo path
         if type(data) is not str:
             user_params[key] = data
 
@@ -5167,7 +5394,9 @@ def save_builder_env_params():
         return 0
 
 def load_builder_env_params():
+    """Load the current user parameters onto the random gen para frame"""
     for field in entry_fields:
+        # get the key from every entry field in the global list
         key = field.split('_')[0]
         if key not in default_params:
             continue
@@ -5190,6 +5419,7 @@ def load_builder_env_params():
             entry_fields[field].insert_string(str(user_params[key]))
 
 def open_reset_frame(parent_frame):
+    """Builds builder reset frame."""
     frames['reset_frame'] = Frame(
         root=parent_frame.root,
         width=screenwidth * 0.5,
@@ -5255,6 +5485,20 @@ def open_reset_frame(parent_frame):
     frames['reset_frame'].frame.grid_propagate(False)
 
 def reset_builder_grid():
+    """Reset current environment and return to track builder view.
+
+    Reset current environment to the backups made upon entering the build or
+    modify menu.
+
+    Destroys reset frame and current build menu view and builds the track
+    builder menu frame.
+
+    Modifies:
+        current_array (np.array):
+            holds a map representation of the current environment.
+        current_df (pd.DataFrame):
+            holds a train list of the current environment.
+    """
     global current_array, current_df
 
     if build_mode == 'build':
