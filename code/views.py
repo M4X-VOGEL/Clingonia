@@ -1786,6 +1786,19 @@ def close_exit_confirmation_frame():
 # random generation
 
 def random_gen_change_to_start_or_main():
+    """Wrapper function to change to start or main menu.
+
+    Loads the backup user parameters into the user parameters.
+    Resets first build try.
+
+    Opens start or main menu depending on last_menu.
+
+    Modifies:
+        user_params (dict):
+            hold the current user parameters.
+        first_build_try (bool):
+            global tracker for first environment generation and build try.
+    """
     global user_params, first_build_try
 
     user_params = user_params_backup.copy()
@@ -1798,6 +1811,7 @@ def random_gen_change_to_start_or_main():
         random_gen_para_to_main()
 
 def random_gen_para_to_start():
+    """Destroys random gen parameter frames and opens start menu."""
     if 'random_gen_para_frame' in frames:
         frames['random_gen_para_frame'].destroy_frame()
         del frames['random_gen_para_frame']
@@ -1808,6 +1822,7 @@ def random_gen_para_to_start():
     create_start_menu()
 
 def random_gen_para_to_main():
+    """Destroys random gen parameter frames and opens main menu."""
     if 'random_gen_para_frame' in frames:
         frames['random_gen_para_frame'].destroy_frame()
         del frames['random_gen_para_frame']
@@ -1818,6 +1833,7 @@ def random_gen_para_to_main():
     create_main_menu()
 
 def build_random_gen_para_frame():
+    """Builds random generation parameter frame."""
     frames['random_gen_para_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.7,
@@ -2478,6 +2494,7 @@ def build_random_gen_para_frame():
     windows['flatland_window'].window.update_idletasks()
 
 def build_random_gen_para_help_frame():
+    """Builds random generation parameter help frame."""
     frames['random_gen_para_help_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.3,
@@ -2515,6 +2532,30 @@ def build_random_gen_para_help_frame():
     frames['random_gen_para_help_frame'].frame.grid_propagate(False)
 
 def random_gen_para_to_env():
+    """Generates random environment.
+
+    Saves current user parameters entered in the random generation parameter
+    frame.
+
+    Generates a random environment with the current user parameters.
+    Saves data of the environment in the corresponding data structures.
+    Displays an error message on the random generation parameter frame if there
+    was an error during generation.
+
+    Modifies:
+        first_build_try (bool):
+            global tracker for first environment generation and build try.
+        current_img (str):
+            path to the image of the current environment.
+        current_df (pd.DataFrame):
+            holds a train list of the current environment.
+        current_array (np.array):
+            holds a layered map representation of the current environment.
+        env_counter:
+            tracks changes to the current environment.
+        user_params_backup (dict):
+            backup for the user parameters.
+    """
     global first_build_try, current_img, current_df, current_array, env_counter, \
         user_params_backup
 
