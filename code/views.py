@@ -5271,7 +5271,7 @@ def save_builder_env_params():
     """Saves the parameters from the builder parameter frame.
 
     Returns:
-        int: -1 if there was an error with any input 0 otherwise.
+        int: -1 if there was an error registered with any input 0 otherwise.
     """
     def str_to_bool(s):
         """Helper function to transform boolean user entries to booleans."""
@@ -5532,10 +5532,12 @@ def reset_builder_grid():
 # result menu
 
 def create_result_menu():
+    """Wrapper function to build the result view."""
     build_result_env_viewer()
     build_result_menu()
 
 def build_result_env_viewer():
+    """Builds the result environment viewer frame."""
     frames['result_viewer_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -5569,8 +5571,7 @@ def build_result_env_viewer():
     frames['result_viewer_frame'].frame.grid_propagate(False)
 
 def build_result_menu():
-    global pos_df
-
+    """Builds the result menu frame."""
     frames['result_menu_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -5825,6 +5826,7 @@ def build_result_menu():
     windows['flatland_window'].window.update_idletasks()
 
 def build_result_help_frame():
+    """Builds the result menu help frame."""
     frames['result_help_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -5862,6 +5864,7 @@ def build_result_help_frame():
     frames['result_help_frame'].frame.grid_propagate(False)
 
 def build_result_timetable_frame():
+    """Builds the result timetable frame."""
     frames['result_timetable_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -5899,6 +5902,7 @@ def build_result_timetable_frame():
     frames['result_timetable_frame'].frame.grid_propagate(False)
 
 def build_result_gif_frame():
+    """Builds the result GIF viewer frame."""
     frames['result_gif_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -5974,7 +5978,7 @@ def build_result_gif_frame():
     frames['result_gif_frame'].frame.grid_propagate(False)
 
 def build_timestep_viewer_frame():
-    global pos_df
+    """Builds the result timestep viewer frame."""
     min_timestep = int(pos_df['timestep'].min())
     timestep_file_format = str(min_timestep).zfill(4)
 
@@ -6069,6 +6073,11 @@ def build_timestep_viewer_frame():
     frames['timestep_viewer_frame'].frame.grid_propagate(False)
 
 def toggle_all_paths():
+    """Hides other frames if open and toggles all paths.
+
+    Calls the toggle all paths function of the result viewer canvas.
+    Will turn on or off paths of all trains in the environment.
+    """
     if ('result_timetable_frame' in frames and
             frames['result_timetable_frame'].visibility):
         frames['result_timetable_frame'].toggle_visibility()
@@ -6088,6 +6097,7 @@ def toggle_all_paths():
     canvases['path_list_canvas'].toggle_all_paths()
 
 def toggle_result_help():
+    """Hides all other frames and opens or closes the result help frame."""
     if ('result_timetable_frame' in frames and 
             frames['result_timetable_frame'].visibility):
         frames['result_timetable_frame'].toggle_visibility()
@@ -6109,6 +6119,7 @@ def toggle_result_help():
         build_result_help_frame()
 
 def toggle_result_timetable():
+    """Hides all other frames and opens or closes the result timetable frame."""
     if ('result_gif_frame' in frames and 
             frames['result_gif_frame'].visibility):
         frames['result_gif_frame'].toggle_visibility()
@@ -6130,17 +6141,32 @@ def toggle_result_timetable():
         build_result_timetable_frame()
 
 def toggle_result_gif():
+    """Hides all other frames and opens or closes the result gif frame.
+
+    Checks if entered frame rate parameter is valid.
+    If any of the parameters changed since the last GIF generation or if this
+    is the first generation generate the GIF.
+
+    Modifies:
+        first_build_try (bool):
+            global tracker for first environment generation and build try.
+
+    Returns:
+        int: -1 if there was an error registered with any input 0 otherwise.
+    """
     global first_build_try
 
     err_count = 0
 
     for field in entry_fields:
+        # get the key from every entry field in the global list
         key = field.split('_')[0]
         if key not in default_params:
             continue
         elif key != 'frameRate':
             continue
 
+        # get the data from the entry field
         data = entry_fields[field].entry_field.get()
 
         try:
@@ -6151,8 +6177,10 @@ def toggle_result_gif():
             else:
                 data = float(data)
 
+            # hide label if there was no problem with the data conversion
             labels[f'{key}_error_label'].hide_label()
         except Exception as e:
+            # register the error and display corresponding error message
             err = type(e)
             err_count += 1
             if err in err_dict[key]:
@@ -6165,7 +6193,7 @@ def toggle_result_gif():
                 print(data)
             continue
 
-        # input constraints
+        # check for additional constrains and display error when violated
         if key=='frameRate' and data <= 0:
             err_count += 1
             err = 'negativeFrameRate'
@@ -6177,12 +6205,14 @@ def toggle_result_gif():
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
 
+        # only save non string values as parameters except for the clingo path
         if type(data) is not str:
             user_params[key] = data
 
     if err_count:
         return -1
     else:
+        # hide label if there was no problem with the parameter checking
         labels['frameRate_error_label'].hide_label()
         frames['result_menu_frame'].frame.update()
 
@@ -6205,6 +6235,8 @@ def toggle_result_gif():
         frames['timestep_viewer_frame'].frame.columnconfigure(1, weight=1)
         frames['timestep_viewer_frame'].frame.grid_propagate(False)
 
+    # check if the parameters changed since the last generation
+    # or if this is the first generation with this environment
     if 'result_gif_frame' in frames and last_gif_params == current_gif_params:
         frames['result_gif_frame'].toggle_visibility()
         frames['result_gif_frame'].frame.rowconfigure(0, weight=1)
@@ -6212,6 +6244,7 @@ def toggle_result_gif():
         frames['result_gif_frame'].frame.grid_propagate(False)
     elif 'result_gif_frame' in frames and last_gif_params != current_gif_params:
         if first_build_try:
+            # on the first try return with a warning to the result menu
             first_build_try = False
             if user_params['rows'] * user_params['cols'] > 1000000:
                 labels['gif_status_label'].label.config(
@@ -6224,6 +6257,7 @@ def toggle_result_gif():
                 labels['gif_status_label'].place_label()
                 return
         else:
+            # reset the first try on the second try and continue
             first_build_try = True
 
         frames['result_gif_frame'].destroy_frame()
@@ -6242,6 +6276,7 @@ def toggle_result_gif():
         build_result_gif_frame()
     else:
         if first_build_try:
+            # on the first try return with a warning to the result menu
             first_build_try = False
             if user_params['rows'] * user_params['cols'] > 1000000:
                 labels['gif_status_label'].label.config(
@@ -6254,6 +6289,7 @@ def toggle_result_gif():
                 labels['gif_status_label'].place_label()
                 return
         else:
+            # reset the first try on the second try and continue
             first_build_try = True
 
         labels['gif_status_label'].label.config(
@@ -6271,6 +6307,7 @@ def toggle_result_gif():
     frames['result_menu_frame'].frame.update()
 
 def toggle_timestep_viewer():
+    """Opens or hides the result help frame."""
     if 'timestep_viewer_frame' in frames :
         frames['timestep_viewer_frame'].toggle_visibility()
         frames['timestep_viewer_frame'].frame.rowconfigure(0, weight=2)
@@ -6282,13 +6319,20 @@ def toggle_timestep_viewer():
         build_timestep_viewer_frame()
 
 def show_previous_timestep():
-    global current_timestep, pos_df
+    """Switch the image in timestep viewer to image of the previous timestep.
+
+    Modifies:
+        current_timestep (int):
+            global tracker of the current timestep in the result timestep view.
+    """
+    global current_timestep
 
     frame_list = []
 
     for file in os.listdir('data/tmp_frames'):
         frame_list.append(file)
 
+    # sort the list by the frame numbers
     frame_list = sorted(
         frame_list,
         key=lambda x: int(re.search(r'\d{4}', x).group())
@@ -6304,8 +6348,8 @@ def show_previous_timestep():
     else:
         current_timestep -= 1
 
+    # show the new timestep image and update the displayed timestep on the frame
     pic = f'data/tmp_frames/{frame_list[current_timestep-min_t]}'
-
     canvases['timestep_pic'].image = canvases['timestep_pic'].get_image(pic)
     canvases['timestep_pic'].draw_image()
     labels['current_timestep_label'].label.config(text=str(current_timestep))
@@ -6313,13 +6357,20 @@ def show_previous_timestep():
     return
 
 def show_next_timestep():
-    global current_timestep, pos_df
+    """Switch the image in timestep viewer to image of the next timestep.
+
+    Modifies:
+        current_timestep (int):
+            global tracker of the current timestep in the result timestep view.
+    """
+    global current_timestep
 
     frame_list = []
 
     for file in os.listdir('data/tmp_frames'):
         frame_list.append(file)
 
+    # sort the list by the frame numbers
     frame_list = sorted(
         frame_list,
         key=lambda x: int(re.search(r'\d{4}', x).group())
@@ -6334,8 +6385,8 @@ def show_next_timestep():
     else:
         current_timestep = min_t
 
+    # show the new timestep image and update the displayed timestep on the frame
     pic = f'data/tmp_frames/{frame_list[current_timestep-min_t]}'
-
     canvases['timestep_pic'].image = canvases['timestep_pic'].get_image(pic)
     canvases['timestep_pic'].draw_image()
     labels['current_timestep_label'].label.config(text=str(current_timestep))
@@ -6343,6 +6394,15 @@ def show_next_timestep():
     return
 
 def show_error_logs():
+    """Builds the result error log viewer.
+
+    Loads the full and minimized error log from data/act_err.txt or
+    data/act_err_min.txt
+
+    Modifies:
+        current_act_err_log (str):
+            global tracker to keep track of displayed error log type.
+    """
     global current_act_err_log
 
     frames['result_error_log_frame'] = Frame(
@@ -6457,6 +6517,12 @@ def show_error_logs():
     frames['result_error_log_frame'].frame.grid_propagate(False)
 
 def switch_error_logs():
+    """Hide one type of error log and show the other one.
+
+    Modifies:
+        current_act_err_log (str):
+            global tracker to keep track of displayed error log type.
+    """
     global current_act_err_log
 
     if current_act_err_log == 'min':
@@ -6477,6 +6543,7 @@ def switch_error_logs():
         current_act_err_log = 'min'
 
 def hide_error_logs():
+    """Opens or hides the result error log frame."""
     if 'result_error_log_frame' in frames:
         frames['result_error_log_frame'].toggle_visibility()
         frames['result_error_log_frame'].frame.rowconfigure(0, weight=1)
@@ -6487,6 +6554,14 @@ def hide_error_logs():
         show_error_logs()
 
 def switch_result_to_main():
+    """Destroy the result menu frames and build the main menu.
+
+    Resets the first_build_try tracker.
+
+    Modifies:
+        first_build_try (bool):
+            global tracker for first environment generation and build try.
+    """
     global first_build_try
 
     first_build_try = True
