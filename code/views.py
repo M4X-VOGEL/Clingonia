@@ -302,7 +302,18 @@ current_paths = pd.DataFrame()
 # start menu
 
 def build_flatland_window():
-    global screenwidth, screenheight, font_base_mod
+    """Loads user data from file and opens the program window.
+
+    Modifies:
+        screenwidth (int):
+            sets the global screenwidth of the screen where the
+            program is opened on.
+        screenheight (int):
+            sets the global screenheight of the screen where the
+            program is opened on.
+        Adjusts all global font layouts to the current window size.
+    """
+    global screenwidth, screenheight
 
     load_user_data_from_file()
 
@@ -324,6 +335,11 @@ def build_flatland_window():
     windows['flatland_window'].window.columnconfigure((0, 1), weight=1)
 
 def update_fonts():
+    """Updates all font layouts to the current window size
+
+    Modifies:
+        All global font_layouts and font_base_mod.
+    """
     global font_base_mod, base_font_layout, canvas_font_layout, \
         canvas_label_font_layout, err_font_layout, help_font_layout, \
         info_font_layout, title_font_layout
@@ -338,10 +354,17 @@ def update_fonts():
     title_font_layout = ('Arial', int(font_base_mod * frame_title_font_size), 'bold')
 
 def start_flatland():
+    """Starts the main event loop of the program"""
     print('Info: Launch was successful.')
     windows['flatland_window'].run()
 
 def create_start_menu():
+    """Wrapper function to create the start menu.
+
+    Modifies:
+        last_menu(str):
+            global tracker for the last opened menu.
+    """
     global last_menu
 
     last_menu = 'start'
@@ -350,6 +373,7 @@ def create_start_menu():
     build_start_menu_frame()
 
 def build_title_frame():
+    """Builds the title frame."""
     frames['title_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -389,6 +413,14 @@ def build_title_frame():
     frames['title_frame'].frame.grid_propagate(False)
 
 def title_frame_label(font, scale_fac):
+    """Adds the Title to the title frame.
+
+    Args:
+        font (str):
+            font family of the title label.
+        scale_fac (int):
+            scales the font size.
+    """
     # Necessary for macOS
     labels['title_label'] = Label(
         root=frames['title_frame'].frame,
@@ -403,6 +435,14 @@ def title_frame_label(font, scale_fac):
     )
 
 def title_frame_subtitle_label(font, scale_fac):
+    """Adds the subtitle to the title frame.
+
+    Args:
+        font (str):
+            font family of the subtitle label.
+        scale_fac (int):
+            scales the font size.
+    """
     # Necessary for macOS
     labels['sub_title_label'] = Label(
         root=frames['title_frame'].frame,
@@ -417,6 +457,7 @@ def title_frame_subtitle_label(font, scale_fac):
     )
 
 def build_start_menu_frame():
+    """Builds the start menu."""
     frames['start_menu_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -546,6 +587,7 @@ def build_start_menu_frame():
     frames['start_menu_frame'].frame.grid_propagate(False)
 
 def build_start_menu_help_frame():
+    """Builds the start menu help frame."""
     frames['start_menu_help_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -583,6 +625,7 @@ def build_start_menu_help_frame():
     frames['start_menu_help_frame'].frame.grid_propagate(False)
 
 def toggle_start_menu_help():
+    """Opens or hides the start menu help frame."""
     if 'start_menu_help_frame' in frames:
         frames['start_menu_help_frame'].toggle_visibility()
         frames['start_menu_help_frame'].frame.rowconfigure(0, weight=1)
@@ -592,6 +635,14 @@ def toggle_start_menu_help():
         build_start_menu_help_frame()
 
 def switch_start_to_random_gen():
+    """Destroys all start menu frames and opens the random generation para. view.
+
+    Saves a backup of the current user parameters.
+
+    Modifies:
+        user_params_backup (dict):
+            holds a backup of the user parameters.
+    """
     global user_params_backup
 
     user_params_backup = user_params.copy()
@@ -612,6 +663,12 @@ def switch_start_to_random_gen():
     build_random_gen_para_frame()
 
 def switch_start_to_builder():
+    """Destroys all start menu frames and opens the builder parameter view.
+
+    Modifies:
+        build_mode (str):
+            global tracker of the current build menu state.
+    """
     global build_mode
 
     build_mode = 'build'
@@ -632,6 +689,10 @@ def switch_start_to_builder():
     build_builder_para_frame()
 
 def switch_start_to_main():
+    """Destroys all start menu frames and opens the main menu.
+
+    Opens the main menu and the load info frame.
+    """
     if 'title_frame' in frames:
         frames['title_frame'].destroy_frame()
         del frames['title_frame']
@@ -655,6 +716,12 @@ def switch_start_to_main():
 # main menu
 
 def create_main_menu():
+    """Wrapper function to create the main menu.
+
+    Modifies:
+        last_menu(str):
+            global tracker for the last opened menu.
+    """
     global last_menu
 
     last_menu = 'main'
@@ -663,6 +730,7 @@ def create_main_menu():
     build_main_menu_env_viewer()
 
 def build_main_menu():
+    """Builds the main menu."""
     frames['main_menu_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
