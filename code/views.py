@@ -19,6 +19,8 @@ import json
 import shutil
 from tkinter import filedialog
 
+import pandas as pd
+
 from code.build_png import create_custom_env, save_png
 from code.build_gif import render_gif
 from code.custom_canvas import *
@@ -1798,7 +1800,7 @@ def random_gen_change_to_start_or_main():
 
     Modifies:
         user_params (dict):
-            hold the current user parameters.
+            holds the current user parameters.
         first_build_try (bool):
             global tracker for first environment generation and build try.
     """
@@ -6597,16 +6599,28 @@ def switch_result_to_main():
 # functions
 
 def change_low_quality_status():
+    """Changes the lowQuality parameter to the opposite"""
     user_params['lowQuality'] = not user_params['lowQuality']
 
 def change_low_quality_gif_status():
+    """Changes the lowQualityGIF parameter to the opposite"""
     user_params['lowQualityGIF'] = not user_params['lowQualityGIF']
 
 def change_save_image_status():
+    """Changes the saveImage parameter to the opposite"""
     user_params['saveImage'] = not user_params['saveImage']
 
 def create_gif():
-    global current_gif, last_gif_params, env_counter
+    """Calls a GIF render from the current environment.
+
+    Modifies:
+        current_gif (str):
+            holds teh path to the current GIF.
+        last_gif_params (tuple(float, bool)):
+            parameters at the time of the last GIF rendering.
+    """
+    global current_gif, last_gif_params
+
     tracks = current_array[0]
     trains = get_trains()
     current_gif = 'data/running_tmp.gif'
@@ -6616,6 +6630,7 @@ def create_gif():
     render_gif(tracks, trains, current_paths, user_params, env_counter, current_gif, fps, low_q)
 
 def save_gif():
+    """Opens file dialog and saves GIF in selected location."""
     file = filedialog.asksaveasfilename(
         title="Select GIF save file",
         initialdir='env',
@@ -6629,9 +6644,18 @@ def save_gif():
     shutil.copy2('data/running_tmp.gif', file)
 
 def df_to_timetable_text():
+    """Creates a timetable from the current environment.
+
+    Saves timetable in data/info_text.txt.
+
+    Modifies:
+        current_act_err_log (str):
+            global tracker to keep track of displayed error log type.
+    """
     global show_act_err_logs
 
-    def format_row(idx, line):
+    def format_row(idx, line) -> str:
+        """Helper function to format a timetable row."""
         new_line = (f"| {idx:>8} | {line['e_dep']:>8} | {line['a_dep']:>6} | "
                     f"{line['l_arr']:>6} | {line['a_arr']:>6} |")
         return new_line
@@ -6647,7 +6671,8 @@ def df_to_timetable_text():
         if row['start_pos'] == row['end_pos']:
             a_dep[index] = '--'
             a_arr[index] = '--'
-        if row['start_pos'] != row['end_pos'] and a_dep[index] == a_arr[index] and a_arr[index] == 0:
+        if (row['start_pos'] != row['end_pos'] and
+                a_dep[index] == a_arr[index]  and a_arr[index] == 0):
             a_dep[index] = 'ActErr'
             a_arr[index] = 'ActErr'
             show_act_err_logs = True
@@ -6671,7 +6696,12 @@ def df_to_timetable_text():
         file.writelines(new_row + "\n" for new_row in new_rows)
 
 def current_df_to_env_text(mode):
-    def format_row(index, row):
+    """Create a train list from the current_df.
+
+    Saves the train list in data/info_text.txt.
+    """
+    def format_row(index, row) -> str:
+        """Helper function to format a dataframe row"""
         new_line = (f"| {index:>8} | {str(row['start_pos']):>14} "
                     f"| {row['dir']:^3} | {str(row['end_pos']):>14} "
                     f"| {row['e_dep']:>7} | {row['l_arr']:>7} |")
@@ -6722,10 +6752,21 @@ def current_df_to_env_text(mode):
         file.write(table_divider + '\n')
 
 def save_user_data_to_file():
+    """Save teh user parameters in data/user_params.json."""
     with open('data/user_params.json', 'w') as file:
         json.dump(user_params, file, indent=4)
 
 def load_user_data_from_file():
+    """Load the user parameters from data/user_params.json.
+
+    Use default parameters if no user data is ave fora parameter.
+
+    Modifies:
+        user_params (dict):
+            holds the current user parameters.
+        user_params_backup (dict):
+            holds a backup of the current user parameters.
+    """
     global user_params, user_params_backup
 
     with open('data/user_params.json', 'r') as file:
@@ -6745,6 +6786,37 @@ def load_user_data_from_file():
             user_params[key] = default_params[key]
 
 def load_env_from_file():
+    """Load an environment from a .lp file.
+
+    Switches to main menu or reloads main menu environment viewer frame.
+    Opens main menu load info frame.
+
+    Display a status or error label in the start or main menu, determined by
+    the global last_menu value.
+
+    Modifies:
+        current_img (str):
+            path to the image of the current environment.
+        env_counter:
+            tracks changes to the current environment.
+        current_df (pd.DataFrame):
+            holds a train list of the current environment.
+        current_array (np.array):
+            holds a layered map representation of the current environment.
+        current_builder_backup_df (pd.DataFrame):
+            holds a backup train list of the current environment for the build
+            mode.
+        current_modify_backup_df (pd.DataFrame):
+            holds a backup train list of the current environment for the modify
+            mode.
+        current_builder_backup_array (np.array):
+            holds a backup layered map representation of the current environment
+            for the build mode.
+        current_modify_backup_array (np.array):
+            holds a backup layered map representation of the current environment
+            for the modify mode.
+
+    """
     global current_array, current_df, current_img, env_counter, \
         current_builder_backup_array, current_builder_backup_df, \
         current_modify_backup_array, current_modify_backup_df
@@ -6774,6 +6846,7 @@ def load_env_from_file():
 
     tracks, trains = load_env(file)
 
+    # check for possible error values
     if isinstance(tracks, int):
         if last_menu == 'start':
             labels['start_load_status_label'].label.config(
@@ -6801,7 +6874,6 @@ def load_env_from_file():
         'l_arr': trains['l_arr']
     }).set_index('')
 
-
     direction = {
         'n': 1,
         'e': 2,
@@ -6814,6 +6886,7 @@ def load_env_from_file():
     current_array[0] = tracks
 
     for _, row in current_df.iterrows():
+        # add all trains and stations to the current_array
         current_array[1][row['start_pos']] = direction[row['dir']]
         if row['end_pos'] != (-1, -1):
             current_array[2][row['end_pos']] = 5
@@ -6824,6 +6897,8 @@ def load_env_from_file():
 
     print("\nBuilding environment...")
     env,_,_,_ = create_custom_env(tracks, trains, user_params)
+
+    # save the png for the runtime of the program
     delete_tmp_frames()
     env_counter += 1
     os.makedirs("data", exist_ok=True)
@@ -6846,6 +6921,7 @@ def load_env_from_file():
 
     current_img = 'data/running_tmp.png'
 
+    # also copy to the backup data
     current_builder_backup_array = current_array.copy()
     current_builder_backup_df = current_df.copy()
     current_modify_backup_array = current_array.copy()
@@ -6863,6 +6939,10 @@ def load_env_from_file():
         build_main_menu_load_info_frame()
 
 def save_env_to_file():
+    """Save an environment into a .lp file.
+
+    Also saves a png if the saveImage user parameter is True.
+    """
     file = filedialog.asksaveasfilename(
         title="Select LP Environment File",
         initialdir='env',
@@ -6884,7 +6964,16 @@ def save_env_to_file():
             image_file = file + '.png'
         shutil.copy2(current_img, image_file)
 
-def run_simulation():
+def run_simulation() -> int:
+    """Call the clingo solver.
+
+    Modifies:
+        current_paths:
+            holds the paths displayed in the result viewer frame.
+
+    Returns:
+        int: 0 if no error occurred, otherwise a negative integer as error code.
+    """
     global current_paths
 
     tracks = current_array[0]
@@ -6904,7 +6993,23 @@ def run_simulation():
     delete_tmp_lp()
     return 0
 
-def calc_paths(tracks, trains):
+def calc_paths(tracks, trains) -> pd.DataFrame:
+    """Call the clingo solver.
+
+    Args:
+        tracks (np.array):
+            a map of the tracks in the environment.
+        trains (pd.DataFrame):
+            a list of trains in the environment.
+
+    Modifies:
+        pos_df:
+            holds the paths calculated by clingo.
+
+    Returns:
+        pos_df (pd.DataFrame):
+            if no error occurred, otherwise a negative integer as error code.
+    """
     global pos_df
     pos_df = position_df(
         tracks,
@@ -6915,7 +7020,13 @@ def calc_paths(tracks, trains):
     )
     return pos_df
 
-def get_trains():
+def get_trains() -> pd.DataFrame :
+    """Transform current_df into a different format for other functions.
+
+    Returns:
+        trains (pd.DataFrame):
+            a list of trains in the environment.
+    """
     x = [t[1] for t in current_df['start_pos']]
     y = [t[0] for t in current_df['start_pos']]
     x_end = [t[1] for t in current_df['end_pos']]
