@@ -635,7 +635,7 @@ def toggle_start_menu_help():
         build_start_menu_help_frame()
 
 def switch_start_to_random_gen():
-    """Destroys all start menu frames and opens the random generation para. view.
+    """Destroys all start menu frames and opens the random gen parameter view.
 
     Saves a backup of the current user parameters.
 
@@ -950,6 +950,7 @@ def build_main_menu():
     frames['main_menu_frame'].frame.grid_propagate(False)
 
 def build_main_menu_load_info_frame():
+    """Builds the load info frame."""
     get_load_info()
 
     frames['main_menu_load_info_frame'] = Frame(
@@ -1008,7 +1009,12 @@ def build_main_menu_load_info_frame():
     frames['main_menu_load_info_frame'].frame.grid_propagate(False)
 
 def get_load_info():
+    """Prepares the info of the loaded environment.
+
+    Saves the prepared info of the loaded environment in the data/info_text.txt
+    """
     def format_row(index, row):
+        """Formats a text line from the passed row and index."""
         new_line = (f"| {index:>8} | {str(row['start_pos']):>14} "
                     f"| {row['dir']:^3} | {str(row['end_pos']):>14} "
                     f"| {row['e_dep']:>7} | {row['l_arr']:>7} |")
@@ -1029,11 +1035,13 @@ def get_load_info():
         file.write(table_divider + '\n')
 
 def close_load_info():
+    """Destroys the load info frame."""
     if 'main_menu_load_info_frame' in frames:
         frames['main_menu_load_info_frame'].destroy_frame()
         del frames['main_menu_load_info_frame']
 
 def build_main_menu_help_frame():
+    """Builds the main menu help frame."""
     frames['main_menu_help_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -1071,6 +1079,7 @@ def build_main_menu_help_frame():
     frames['main_menu_help_frame'].frame.grid_propagate(False)
 
 def build_main_menu_env_viewer():
+    """Builds the main menu environment viewer frame."""
     frames['main_menu_env_viewer_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -1098,6 +1107,7 @@ def build_main_menu_env_viewer():
     )
 
 def build_clingo_para_frame():
+    """Builds the clingo parameter modification frame."""
     frames['clingo_para_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -1299,6 +1309,7 @@ def build_clingo_para_frame():
     windows['flatland_window'].window.update_idletasks()
 
 def build_clingo_help_frame():
+    """Builds the clingo parameter help frame."""
     frames['clingo_help_frame'] = Frame(
         root=windows['flatland_window'].window,
         width=screenwidth * 0.5,
@@ -1336,6 +1347,7 @@ def build_clingo_help_frame():
     frames['clingo_help_frame'].frame.grid_propagate(False)
 
 def toggle_main_menu_help():
+    """Opens or hides the main menu help frame."""
     if 'main_menu_help_frame' in frames:
         frames['main_menu_help_frame'].toggle_visibility()
         frames['main_menu_help_frame'].frame.rowconfigure(0, weight=1)
@@ -1345,6 +1357,7 @@ def toggle_main_menu_help():
         build_main_menu_help_frame()
 
 def toggle_clingo_help():
+    """Opens or hides the clingo parameter help frame."""
     if 'clingo_help_frame' in frames:
         frames['clingo_help_frame'].toggle_visibility()
         frames['clingo_help_frame'].frame.rowconfigure(0, weight=1)
@@ -1354,6 +1367,14 @@ def toggle_clingo_help():
         build_clingo_help_frame()
 
 def switch_main_to_random_gen():
+    """Destroys all main menu frames and opens the random gen parameter view.
+
+    Saves a backup of the current user parameters.
+
+    Modifies:
+        user_params_backup (dict):
+            holds a backup of the user parameters.
+    """
     global user_params_backup
 
     user_params_backup = user_params.copy()
@@ -1371,6 +1392,20 @@ def switch_main_to_random_gen():
     build_random_gen_para_frame()
 
 def switch_main_to_builder():
+    """Destroys all main menu frames and opens the builder parameter view.
+
+    Saves a backup of the current user parameters and environment data.
+
+    Modifies:
+        user_params_backup (dict):
+            holds a backup of the user parameters.
+        current_builder_backup_array (np.array):
+            holds a backup of the current environment map.
+        current_builder_backup_df (pd.Dataframe):
+            holds a backup of the current environment train list.
+        build_mode (str):
+            global tracker of the current build menu state.
+    """
     global build_mode, user_params_backup, \
         current_builder_backup_array, current_builder_backup_df
 
@@ -1393,6 +1428,20 @@ def switch_main_to_builder():
     build_builder_para_frame()
 
 def switch_main_to_modify():
+    """Destroys all main menu frames and opens the builder parameter view.
+
+    Saves a backup of the current user parameters and environment data.
+
+    Modifies:
+        user_params_backup (dict):
+            holds a backup of the user parameters.
+        current_builder_backup_array (np.array):
+            holds a backup of the current environment map.
+        current_builder_backup_df (pd.Dataframe):
+            holds a backup of the current environment train list.
+        build_mode (str):
+            global tracker of the current build menu state.
+    """
     global build_mode, user_params_backup, \
         current_modify_backup_array, current_modify_backup_df
 
@@ -1418,6 +1467,8 @@ def switch_main_to_modify():
     build_builder_para_frame()
 
 def switch_main_to_clingo_para():
+    """Destroys all main menu frames and opens the clingo parameter frame."""
+
     if 'main_menu_frame' in frames:
         frames['main_menu_frame'].destroy_frame()
         del frames['main_menu_frame']
@@ -1428,6 +1479,7 @@ def switch_main_to_clingo_para():
     build_clingo_para_frame()
 
 def switch_clingo_para_to_main():
+    """Destroys all clingo parameter frames and opens the main menu frame."""
     if save_clingo_params() == -1:
         return
 
@@ -1444,6 +1496,27 @@ def switch_clingo_para_to_main():
     create_main_menu()
 
 def switch_clingo_para_to_result():
+    """Switch from clingo parameter frames to result view.
+
+    Saves the clingo parameters.
+
+    If there were changes made to the environment or the parameters changed
+    since the last solve process the solver get called.
+
+    Destroys all clingo parameter frames.
+    Produces the timetable information from the solve results
+    Opens the result view.
+
+    Modifies:
+        last_solve_params (dict):
+            holds the last parameters used to solve an environment.
+        show_act_err_logs (bool):
+            holds a tracker for showing error logs in the result view.
+
+    Returns:
+        None (None):
+            an error is shown on the clingo parameter view if the solver fails.
+    """
     global last_solve_params, show_act_err_logs
 
     if save_clingo_params() == -1:
@@ -1502,6 +1575,7 @@ def switch_clingo_para_to_result():
     create_result_menu()
 
 def reload_main_env_viewer():
+    """Destroys the old main menu builder and rebuilds it."""
     if 'main_menu_env_viewer_frame' in frames:
         frames['main_menu_env_viewer_frame'].destroy_frame()
         del frames['main_menu_env_viewer_frame']
@@ -1509,6 +1583,10 @@ def reload_main_env_viewer():
     build_main_menu_env_viewer()
 
 def load_lp_files():
+    """Open a file dialog window and request a lp files to be selected.
+
+    Displays selected file paths on the clingo parameter frame.
+    """
     files = filedialog.askopenfilenames(
         title="Select LP Files",
         initialdir='asp',
@@ -1528,16 +1606,23 @@ def load_lp_files():
     if labels['clingo_status_label'].label.cget('text') == 'No .lp files given.':
         labels['clingo_status_label'].label.config(text='')
 
-def save_clingo_params():
+def save_clingo_params() -> int:
+    """Saves the clingo parameters from the clingo parameter view.
+
+    Returns:
+        int: -1 if there was an error with any input 0 otherwise.
+    """
     err_count = 0
 
     for field in entry_fields:
+        # get the key from every entry field in the global list
         key = field.split('_')[0]
         if key not in default_params:
             continue
         elif key not in ['answer', 'clingo']:
             continue
 
+        # get the data from the entry field
         data = entry_fields[field].entry_field.get()
 
         try:
@@ -1553,8 +1638,10 @@ def save_clingo_params():
             else:
                 data = int(data)
 
+            # hide label if there was no problem with the data conversion
             labels[f'{key}_error_label'].hide_label()
         except Exception as e:
+            # register the error and display corresponding error message
             err_count += 1
             err = type(e)
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
@@ -1565,12 +1652,14 @@ def save_clingo_params():
                 print(data)
             continue
 
+        # check for additional constrains and display error when violated
         if key == 'clingo' and not data.endswith('clingo'):
             err_count += 1
             err = 'noPathToClingo'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
 
+        # only save non string values as parameters except for the clingo path
         if type(data) is not str or key == 'clingo':
             user_params[key] = data
 
@@ -1580,6 +1669,7 @@ def save_clingo_params():
         return 0
 
 def load_clingo_params():
+    """Load the current user parameters onto the clingo para frame"""
     for field in entry_fields:
         key = field.split('_')[0]
         if key not in default_params:
@@ -1604,6 +1694,7 @@ def load_clingo_params():
 # exit confirmation
 
 def open_exit_confirmation_frame(event=None):
+    """Build confirmation frame for exiting the program."""
     if 'exit_confirmation_frame' in frames:
         return
 
@@ -1673,6 +1764,7 @@ def open_exit_confirmation_frame(event=None):
     frames['exit_confirmation_frame'].frame.grid_propagate(False)
 
 def exit_gui():
+    """Wrapper function to exit the program."""
     save_user_data_to_file()
     delete_tmp_lp()
     delete_tmp_png()
@@ -1682,6 +1774,7 @@ def exit_gui():
     windows['flatland_window'].close_window()
 
 def close_exit_confirmation_frame():
+    """Destroys the confirmation frame."""
     if 'exit_confirmation_frame' in frames:
         frames['exit_confirmation_frame'].destroy_frame()
         del frames['exit_confirmation_frame']
