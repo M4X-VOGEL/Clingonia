@@ -1184,6 +1184,82 @@ class BuildCanvas:
 
 
 class TrainListCanvas:
+    """A custom tkinter Canvas to display a list of trains.
+
+    Attributes:
+        root (tk.Frame):
+            The parent container of this canvas.
+        width (int):
+            specify the width of the canvas in pixel.
+        height (int):
+            specify the height of the canvas in pixel.
+        x (int):
+            specifies the x position of the canvas in the parent container.
+        y (int):
+            specifies the y position of the canvas in the parent container.
+        base_font_layout (tuple[str, int]):
+            applied to the train labels and other texts on the canvas.
+            Can be font family and font size. E.g. ('Arial', 20).
+        err_font_layout (tuple[str, int, str]):
+            applied to the error texts on the canvas.
+            Can be font family, font size and font style.
+            E.g. ('Arial', 20, 'bold').
+        title_font_layout (tuple[str, int, str]):
+            applied to the title texts on the canvas.
+            Can be font family, font size and font style.
+            E.g. ('Arial', 20, 'bold').
+        background_color (str):
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        label_color (str):
+            text color.
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        button_color (str):
+            background color of buttons
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        entry_color (str):
+            background color of entry fields.
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        input_color (str):
+            color of text entered in the entry field.
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        example_color (str):
+            color of example text in the entry field.
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        bad_status_color (str):
+            color of error texts and some button texts.
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        base_button_style_map (dict):
+            style map for normal buttons.
+        selector_button_style_map (dict):
+            style map for station selector buttons.
+        remove_button_style_map (dict):
+            style map for remove buttons.
+        border_width (int):
+            width of the border around the canvas in pixel.
+        grid (custom_canvas.BuildCanvas):
+            holds a reference to the builder grid.
+        train_data (pd.DataFrame):
+            dataframe with all trains in the environment.
+        windows (dict):
+            holds references to the program window.
+        frames (dict):
+            holds references to the frames inside the program window.
+        station_dict (dict):
+            holds references to station selector buttons for each train.
+        config_dict (dict):
+            holds references to config buttons for each train.
+        remove_dict (dict):
+            holds references to remove buttons for each train.
+        station_img (str):
+            path to the image for stations.
+        canvas (tk.Canvas):
+            the actual canvas that is initialized internally with the
+            passed parameters.
+        scrollbar (tk.Scrollbar):
+            the scrollbar of the list.
+        scroll_frame (tk.Frame):
+            this frame is made scrollable with the scrollbar.
+    """
     def __init__(
             self,
             root: tk.Tk,
@@ -1210,6 +1286,69 @@ class TrainListCanvas:
             windows: dict,
             frames: dict,
     ):
+        """Initializes a custom tkinter Canvas to display a list of trains.
+
+        Displays a list of train labels and buttons to modify the train list.
+
+        Args:
+            root (tk.Frame):
+                The parent container of this canvas.
+            width (int):
+                specify the width of the canvas in pixel.
+            height (int):
+                specify the height of the canvas in pixel.
+            x (int):
+                specifies the x position of the canvas in the parent container.
+            y (int):
+                specifies the y position of the canvas in the parent container.
+            base_font_layout (tuple[str, int]):
+                applied to the train labels and other texts on the canvas.
+                Can be font family and font size. E.g. ('Arial', 20).
+            err_font_layout (tuple[str, int, str]):
+                applied to the error texts on the canvas.
+                Can be font family, font size and font style.
+                E.g. ('Arial', 20, 'bold').
+            title_font_layout (tuple[str, int, str]):
+                applied to the title texts on the canvas.
+                Can be font family, font size and font style.
+                E.g. ('Arial', 20, 'bold').
+            background_color (str):
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            label_color (str):
+                text color.
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            button_color (str):
+                background color of buttons
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            entry_color (str):
+                background color of entry fields.
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            input_color (str):
+                color of text entered in the entry field.
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            example_color (str):
+                color of example text in the entry field.
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            bad_status_color (str):
+                color of error texts and some button texts.
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            base_button_style_map (dict):
+                style map for normal buttons.
+            selector_button_style_map (dict):
+                style map for station selector buttons.
+            remove_button_style_map (dict):
+                style map for remove buttons.
+            border_width (int):
+                width of the border around the canvas in pixel.
+            grid (custom_canvas.BuildCanvas):
+                holds a reference to the builder grid.
+            train_data (pd.DataFrame):
+                dataframe with all trains in the environment.
+            windows (dict):
+                holds references to the program window.
+            frames (dict):
+                holds references to the frames inside the program window.
+        """
         self.root = root
         self.width = width
         self.height = height
@@ -1262,7 +1401,13 @@ class TrainListCanvas:
 
         self.update_labels()
 
-    def create_canvas(self):
+    def create_canvas(self) -> tk.Canvas:
+        """Initializes a tkinter canvas with the current attribute values.
+
+        Returns:
+            canvas (tk.Canvas):
+                handle for the tkinter canvas.
+        """
         canvas = tk.Canvas(
             self.root,
             width=self.width, height=self.height,
@@ -1272,9 +1417,20 @@ class TrainListCanvas:
         return canvas
 
     def pack_canvas(self):  #
+        """Packs canvas on the parent container at the specified position."""
         self.canvas.pack(side='top', padx=self.x, pady=self.y, anchor='nw')
 
     def update_labels(self):
+        """Updates labels and buttons for each train.
+
+        Creates a new frame inside the scroll_frame for each train to hold its
+        buttons and labels.
+
+        Adds a station selection button for each train.
+        Adds a label for each train.
+        Adds a config button for each train.
+        Adds a remove button for each train.
+        """
         for widget in self.scroll_frame.winfo_children():
             widget.destroy()
 
@@ -1342,23 +1498,53 @@ class TrainListCanvas:
             )
 
     def on_frame_configure(self, event):
+        """Configure the scroll_frame for scrolling.
+
+        Args:
+            event (tk.Event):
+                event generated by the canvas when configured.
+        """
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
     def _bound_to_mousewheel(self, event):
+        """Bind scrolling to the train list when entering the canvas.
+
+        Args:
+            event (tk.Event):
+                event generated by the canvas when entering the train list.
+        """
         self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
 
     def _unbound_to_mousewheel(self, event):
+        """Unbind scrolling from the train list when exiting the canvas.
+
+        Args:
+            event (tk.Event):
+                event generated by the canvas when leaving the train list.
+        """
         self.canvas.unbind_all("<MouseWheel>")
 
     def _on_mousewheel(self, event):
+        """Scroll when using the mouse wheel.
+
+        Args:
+            event (tk.Event):
+                event generated by the canvas when scrolling with the
+                mousewheel.
+        """
         self.canvas.yview_scroll(
             int(-1 * (event.delta / 120)),
             "units"
         )
 
     def remove_train(self, index):
+        """Remove a train from the train list.
 
-        # get list of trains at the same position as the deleted one
+        Args:
+            index (int):
+                index of teh train to be removed.
+        """
+        # get list of trains at the same grid position as the one to be deleted
         df = self.train_data[
             self.train_data['start_pos'] ==
             self.train_data['start_pos'].iloc[index]
@@ -1382,6 +1568,7 @@ class TrainListCanvas:
                 self.train_data['start_pos'].iloc[index]
             ] = self.grid.dir[new_dir]
 
+        # if the train has a station placed
         if self.train_data['end_pos'].iloc[index] != (-1, -1):
             # get list of stations at the same position as the deleted one
             station_count = self.train_data[
@@ -1389,17 +1576,26 @@ class TrainListCanvas:
                 self.train_data['end_pos'].iloc[index]
                 ].count()
 
+            # if there are no other stations at the grid pos remove the image
             if station_count['end_pos'] == 1:
                 self.grid.array[2][self.train_data['end_pos'].iloc[index]] = 0
 
+        # update the train list
         self.train_data.drop(index, inplace=True)
         self.train_data.reset_index(drop=True, inplace=True)
         self.update_labels()
+
+        # update the train and station images on the builder grid
         self.grid.update_image_storage()
         self.grid.draw_trains()
-        return
 
     def open_train_config_frame(self, index):
+        """Builds the config frame for a single train.
+
+        Args:
+            index (int):
+                index of the train to be configured.
+        """
         config_frame = Frame(
             root=self.windows['flatland_window'].window,
             width=self.frames['train_builder_menu_frame'].width,
@@ -1452,6 +1648,8 @@ class TrainListCanvas:
             border_width=0,
             visibility=True,
         )
+
+        # if there is already a earliest departure load the current value
         if self.train_data.loc[index, 'e_dep'] != -1:
             ed_entry.insert_string(str(self.train_data.loc[index, 'e_dep']))
 
@@ -1494,6 +1692,8 @@ class TrainListCanvas:
             border_width=0,
             visibility=True,
         )
+
+        # if there is already a latest arrival load the current value
         if self.train_data.loc[index, 'l_arr'] != -1:
             la_entry.insert_string(str(self.train_data.loc[index, 'l_arr']))
 
@@ -1552,11 +1752,33 @@ class TrainListCanvas:
             config_frame,
             save
     ):
+        """save the data entered in the config frame.
+
+        Args:
+            index (int):
+                index of the configured train.
+            ed_entry (custom_widgets.EntryField):
+                reference to the entry field for earliest departure.
+            la_entry (custom_widgets.EntryField):
+                reference to the entry field for latest arrival.
+            ed_err_label (custom_widgets.Label):
+                reference to the label for earliest departure errors.
+            la_err_label (custom_widgets.Label):
+                reference to the label for latest arrival errors.
+            config_frame (custom_widgets.Frame):
+                reference to the config_frame.
+            save (bool):
+                whether to save the entered parameters
+
+        Returns:
+            int: -1 if an error was registered, otherwise 0.
+        """
 
         if not save:
             config_frame.destroy_frame()
             return 0
 
+        # get the data from the entry field
         ed = ed_entry.entry_field.get()
         la = la_entry.entry_field.get()
 
@@ -1567,8 +1789,11 @@ class TrainListCanvas:
                 ed = None
             else:
                 ed = int(ed)
-                ed_err_label.hide_label()
+
+            # hide label if there was no problem with the data conversion
+            ed_err_label.hide_label()
         except ValueError:
+            # register the error and display corresponding error message
             ed_err_label.label.config(
                 text='needs int > 0',
                 fg=self.bad_status_color,
@@ -1581,8 +1806,11 @@ class TrainListCanvas:
                 la = None
             else:
                 la = int(la)
-                la_err_label.hide_label()
+
+            # hide label if there was no problem with the data conversion
+            la_err_label.hide_label()
         except ValueError:
+            # register the error and display corresponding error message
             la_err_label.label.config(
                 text='needs int > 0',
                 fg=self.bad_status_color,
@@ -1594,6 +1822,7 @@ class TrainListCanvas:
             return -1
 
         if ed is not None:
+            # check for additional constrains and display error when violated
             if ed < 1:
                 ed_err_label.label.config(
                     text='needs int > 0',
@@ -1607,6 +1836,7 @@ class TrainListCanvas:
             self.train_data.loc[index, 'e_dep'] = -1
 
         if la is not None:
+            # check for additional constrains and display error when violated
             if la < 1:
                 la_err_label.label.config(
                     text='needs int > 0',
@@ -1681,8 +1911,8 @@ class ResultCanvas:
             dataframe holding the locations of each train at each time step.
         show_df (pd.DataFrame):
             subset dataframe of paths_df holding only the trains to be shown.
-        show_list (list(int)):
-            list of train ids to be shown.
+        show_list (list(bool)):
+            keeps track which trains to show.
     """
     def __init__(
             self,
@@ -2100,6 +2330,57 @@ class ResultCanvas:
 
 
 class PathListCanvas:
+    """A custom tkinter Canvas to display a list of trains.
+
+    Attributes:
+        root (tk.Frame):
+            The parent container of this canvas.
+        width (int):
+            specify the width of the canvas in pixel.
+        height (int):
+            specify the height of the canvas in pixel.
+        x (int):
+            specifies the x position of the canvas in the parent container.
+        y (int):
+            specifies the y position of the canvas in the parent container.
+        font (tuple[str, int]):
+            applied to the train labels and other texts on the canvas.
+            Can be font family and font size. E.g. ('Arial', 20).
+        background_color (str):
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        on_color (str):
+            on color for switch
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        off_color (str):
+            off color for switch.
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        handle_color (str):
+            handle color for the switch.
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        label_color (str):
+            text color.
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        border_width (int):
+            width of the border around the canvas in pixel.
+        train_data (pd.DataFrame):
+            dataframe with all trains in the environment.
+        grid (custom_canvas.ResultCanvas):
+            holds a reference to the result grid.
+        show_button_dict (dict):
+            holds references to switches for each train to show or hide their
+            paths.
+        show_list (list(bool)):
+            keeps track which trains to show.
+        current_all (bool):
+            determines if to show or hide all trains when toggle all is called.
+        canvas (tk.Canvas):
+            the actual canvas that is initialized internally with the
+            passed parameters.
+        scrollbar (tk.Scrollbar):
+            the scrollbar of the list.
+        scroll_frame (tk.Frame):
+            this frame is made scrollable with the scrollbar.
+    """
     def __init__(
             self,
             root: tk.Tk,
@@ -2117,6 +2398,46 @@ class PathListCanvas:
             train_data: pd.DataFrame,
             grid: ResultCanvas,
     ):
+        """Initializes a custom tkinter Canvas to display a list of trains.
+
+        Displays a list of train labels and buttons to show their paths on the
+        Result canvas.
+
+        Args:
+            root (tk.Frame):
+                The parent container of this canvas.
+            width (int):
+                specify the width of the canvas in pixel.
+            height (int):
+                specify the height of the canvas in pixel.
+            x (int):
+                specifies the x position of the canvas in the parent container.
+            y (int):
+                specifies the y position of the canvas in the parent container.
+            font (tuple[str, int]):
+                applied to the train labels and other texts on the canvas.
+                Can be font family and font size. E.g. ('Arial', 20).
+            background_color (str):
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            on_color (str):
+                on color for switch
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            off_color (str):
+                off color for switch.
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            handle_color (str):
+                handle color for the switch.
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            label_color (str):
+                text color.
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            border_width (int):
+                width of the border around the canvas in pixel.
+            train_data (pd.DataFrame):
+                dataframe with all trains in the environment.
+            grid (custom_canvas.ResultCanvas):
+                holds a reference to the result grid.
+        """
         self.root = root
         self.width = width
         self.height = height
@@ -2157,7 +2478,13 @@ class PathListCanvas:
 
         self.add_labels()
 
-    def create_canvas(self):
+    def create_canvas(self) -> tk.Canvas:
+        """Initializes a tkinter canvas with the current attribute values.
+
+        Returns:
+            canvas (tk.Canvas):
+                handle for the tkinter canvas.
+        """
         canvas = tk.Canvas(
             self.root,
             width=self.width, height=self.height,
@@ -2167,9 +2494,18 @@ class PathListCanvas:
         return canvas
 
     def pack_canvas(self):  #
+        """Packs canvas on the parent container at the specified position."""
         self.canvas.pack(side='top', padx=self.x, pady=self.y, anchor='nw')
 
     def add_labels(self):
+        """Updates labels and switches for each train.
+
+        Creates a new frame inside the scroll_frame for each train to hold its
+        label and switch.
+
+        Adds a label for each train.
+        Adds a switch for each train.
+        """
         colors = (
                 AGENT_COLORS *
                 ((len(self.train_data) // len(AGENT_COLORS)) + 1)
@@ -2199,21 +2535,50 @@ class PathListCanvas:
             label.pack(side='left', padx=10)
 
     def on_frame_configure(self, event):
+        """Configure the scroll_frame for scrolling.
+
+        Args:
+            event (tk.Event):
+                event generated by the canvas when configured.
+        """
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
     def _bound_to_mousewheel(self, event):
+        """Bind scrolling to the train list when entering the canvas.
+
+        Args:
+            event (tk.Event):
+                event generated by the canvas when entering the train list.
+        """
         self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
 
     def _unbound_to_mousewheel(self, event):
+        """Unbind scrolling from the train list when exiting the canvas.
+
+        Args:
+            event (tk.Event):
+                event generated by the canvas when leaving the train list.
+        """
         self.canvas.unbind_all("<MouseWheel>")
 
     def _on_mousewheel(self, event):
+        """Scroll when using the mouse wheel.
+
+        Args:
+            event (tk.Event):
+                event generated by the canvas when scrolling with the
+                mousewheel.
+        """
         self.canvas.yview_scroll(
             int(-1 * (event.delta / 120)),
             "units"
         )
 
     def toggle_all_paths(self):
+        """Toggle all paths according to current_all.
+
+        Update show_list and the paths in the result canvas.
+        """
         if len(self.show_list) == 0:
             return
 
@@ -2222,11 +2587,13 @@ class PathListCanvas:
         if self.current_all:
             for i in self.show_button_dict:
                 self.show_list = [False] * len(self.show_list)
+                # set all switches to false
                 self.show_button_dict[i].set_state(False)
             self.current_all = False
         else:
             for i in self.show_button_dict:
                 self.show_list = [True] * len(self.show_list)
+                # set all switches to true
                 self.show_button_dict[i].set_state(True)
             self.current_all = True
 
@@ -2234,6 +2601,14 @@ class PathListCanvas:
         self.grid.update_paths()
 
     def toggle_path(self, index):
+        """Toggle a single train path.
+
+        Update show_list and the paths in the result canvas.
+
+        Args:
+            index (int):
+                the index of the train whose path to show.
+        """
         if self.show_list[index]:
             self.show_list[index] = False
         else:
