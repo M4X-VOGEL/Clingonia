@@ -36,6 +36,56 @@ sys_platform = platform.system()
 
 
 class EnvCanvas:
+    """A custom tkinter Canvas to display created environments.
+
+    Attributes:
+        root (tk.Frame):
+            The parent container of this entry field.
+        width (int):
+            specify the width of the entry field in pixel.
+        height (int):
+            specify the height of the entry field in pixel.
+        x (int):
+            specifies the x position of the canvas in the parent container.
+        y (int):
+            specifies the y position of the canvas in the parent container.
+        font (Union[Tuple[str, int], Tuple[str, int, str]]):
+            applied to the text on the entry field. Can be font family and
+            font size or font family, font size, and font style.
+            E.g. ('Arial', 20, 'bold').
+        background_color (str):
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        grid_color (str):
+            is applied t o the grid lines and if enabled the grid labels.
+            hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+        border_width (int):
+            width of the border around the entry field in pixel.
+        image (str):
+            path to an image file. Will be displayed on the canvas.
+        display_image (ImageTk.PhotoImage):
+            holds the image that is displayed on the canvas.
+        canvas_image (int):
+            holds the object id of the image on the canvas.
+        canvas (tk.Canvas):
+            the actual canvas that is initialized internally with the
+            passed parameters.
+        rows (int):
+            specifies how many rows the grid should have.
+        cols (int):
+            specifies how many columns the grid should have.
+        pan_start (tuple(int,int)):
+            holds the initial mouse position when panning.
+        x_offset (int):
+            grid and image offset in x direction on the canvas.
+        y_offset (int):
+            grid and image offset in y direction on the canvas.
+        cell_size (int):
+            holds the current cell_size of the grid.
+        scale (float):
+            holds the current zoom level.
+        text_label (int):
+            holds the object id of the mouse coordinates text.
+    """
     def __init__(
             self,
             root: tk.Tk,
@@ -51,6 +101,39 @@ class EnvCanvas:
             rows: int,
             cols: int,
     ):
+        """Initializes a custom tkinter Canvas to display created environments.
+
+        Draws the grid and environment image on the inital position
+
+        Args:
+            root (tk.Frame):
+                The parent container of this entry field.
+            width (int):
+                specify the width of the entry field in pixel.
+            height (int):
+                specify the height of the entry field in pixel.
+            x (int):
+                specifies the x position of the canvas in the parent container.
+            y (int):
+                specifies the y position of the canvas in the parent container.
+            font (Union[Tuple[str, int], Tuple[str, int, str]]):
+                applied to the text on the entry field. Can be font family and
+                font size or font family, font size, and font style.
+                E.g. ('Arial', 20, 'bold').
+            background_color (str):
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            grid_color (str):
+                is applied t o the grid lines and if enabled the grid labels.
+                hex color code e.g. '#00FF00' or a color name e.g. 'red'.
+            border_width (int):
+                width of the border around the entry field in pixel.
+            image (str):
+                path to an image file. Will be displayed on the canvas.
+            rows (int):
+                specifies how many rows the grid should have.
+            cols (int):
+                specifies how many columns the grid should have.
+        """
         self.root = root
         self.width = width
         self.height = height
@@ -86,7 +169,13 @@ class EnvCanvas:
 
         self.root.after(100, self.initial_zoom)
 
-    def create_canvas(self):
+    def create_canvas(self) -> tk.Canvas:
+        """Initializes a tkinter canvas with the current attribute values.
+
+        Returns:
+            canvas (tk.Canvas):
+                handle for the tkinter canvas.
+        """
         canvas = tk.Canvas(
             self.root,
             width=self.width, height=self.height,
@@ -96,39 +185,66 @@ class EnvCanvas:
         return canvas
 
     def place_canvas(self):#
+        """Places canvas on the parent container at the specified position."""
         self.canvas.place(x=self.x, y=self.y)
 
     @staticmethod
-    def get_image(image_path):
+    def get_image(image_path) -> Image.Image:
+        """Load an image and convert it to a format usable by tkinter.
+
+        Crops out the white border created automatically by Flatland.
+
+        Args:
+            image_path (str):
+                file path to the image.
+
+        Returns:
+            image (Image.Image):
+                processed image, formatted for use in Tkinter widgets.
+        """
         image = Image.open(image_path)
         crop_box = (0, 0, image.width - 4, image.height - 4)
         image = image.crop(crop_box)
         return image
 
     def zoom(self, event):
+        """Calculate new scale and offset.
+
+        Args:
+            event (tk.Event):
+                the event generated by the canvas when zoomed.
+        """
         scale_factor = 1.1 if event.delta > 0 else 0.9
         new_scale = self.scale * scale_factor
 
-        # Prevent too much zoom
         new_scale  = max(0.1, min(new_scale, 10))
 
-        # Calculate the point in the grid where the mouse is
         grid_mouse_x = (event.x - self.x_offset) / self.scale
         grid_mouse_y = (event.y - self.y_offset) / self.scale
 
-        # Update offsets to keep the grid under the mouse stable
         self.x_offset -= (grid_mouse_x * new_scale - grid_mouse_x * self.scale)
         self.y_offset -= (grid_mouse_y * new_scale - grid_mouse_y * self.scale)
 
-        # Apply the new scale
         self.scale = new_scale
 
         self.draw_image()
 
     def start_pan(self, event):
+        """Get the initial mouse position when panning.
+
+         Args:
+            event (tk.Event):
+                the event generated by the canvas when zoomed.
+        """
         self.pan_start = (event.x, event.y)
 
     def pan(self, event):
+        """Calculate new offset and moves the grid and image.
+
+        Args:
+            event (tk.Event):
+                the event generated by the canvas when zoomed.
+        """
         dx = event.x - self.pan_start[0]
         dy = event.y - self.pan_start[1]
 
@@ -141,40 +257,58 @@ class EnvCanvas:
         self.canvas.move("grid_label", dx, dy)
 
     def draw_mouse_symbols(self, event):
+        """Draw the coordinates of the current grid cell next tot the cursor.
+
+        Args:
+            event (tk.Event):
+                the event generated by the canvas when zoomed.
+        """
+        # get current position of the muse cursor
         adjusted_x = (event.x - self.x_offset) / self.scale
         adjusted_y = (event.y - self.y_offset) / self.scale
+        # get the current grid cell
         grid_width = self.cols * self.cell_size
         grid_height = self.rows * self.cell_size
 
+        # if inside the grid place the text next to the cursor
         if 0 <= adjusted_x < grid_width and 0 <= adjusted_y < grid_height:
             row = int(adjusted_y / self.cell_size )
             col = int(adjusted_x / self.cell_size )
             coords_text = f"[{row}, {col}]"
 
+            # place or move the text label
             if self.text_label is None:
                 self.text_label = self.canvas.create_text(
-                    event.x + 10, event.y + 10,  # Position next to the cursor
+                    event.x + 10, event.y + 10,
                     text=coords_text,
                     font=self.font,
-                    fill="#000000",  # Text color
+                    fill="#000000",
                     anchor="nw"
                 )
             else:
                 self.canvas.itemconfig(self.text_label, text=coords_text)
                 self.canvas.coords(self.text_label, event.x + 10, event.y + 10)
         else:
+            # remove teh coordinates on leaving the canvas
             self.canvas.delete(self.text_label)
             self.text_label = None
 
     def remove_mouse_symbols(self, event):
-        """Clear the coordinates label when the mouse leaves the canvas."""
+        """Clear the coordinates label when the mouse leaves the canvas.
+
+        Args:
+            event (tk.Event):
+                the event generated by the canvas when zoomed.
+        """
         self.canvas.delete(self.text_label)
         self.text_label = None
 
     def draw_image(self):
+        """Display the image on the canvas and adjust to the current scale."""
         width = int(self.cols * self.cell_size * self.scale)
         height = int(self.rows * self.cell_size * self.scale)
 
+        # recall initial_zoom calculation if the image is not yet loaded
         if width <= 0 or height <= 0:
             self.root.after(100, self.initial_zoom)
             return
@@ -183,6 +317,7 @@ class EnvCanvas:
             self.image.resize((width, height))
         )
 
+        # place the image or move it.
         if self.canvas_image is None:
             self.x_offset = (self.canvas.winfo_width() - width) // 2
             self.y_offset = (self.canvas.winfo_height() - height) // 2
@@ -200,9 +335,9 @@ class EnvCanvas:
 
         self.canvas.config(scrollregion=(0, 0, width, height))
         self.draw_grid()
-        return
 
     def draw_grid(self):
+        """Draw the grid lines on the canvas."""
         self.canvas.delete("grid_line")
         adjusted_cell_size = self.cell_size * self.scale
 
@@ -235,6 +370,7 @@ class EnvCanvas:
         # self.draw_grid_labels()
 
     def draw_grid_labels(self):
+        """Draw the row and column labels next to the grid."""
         self.canvas.delete("grid_label")
         adjusted_cell_size = self.cell_size * self.scale
 
@@ -264,6 +400,7 @@ class EnvCanvas:
             )
 
     def initial_zoom(self):
+        """Calculate the initial position of the image centred on the canvas."""
         if self.rows > self.cols:
             self.cell_size = (self.canvas.winfo_height() * 0.8) / self.rows
             width = self.cell_size * self.cols
