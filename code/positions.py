@@ -114,7 +114,7 @@ def dir_change(id, x, y, action, dir, tracks):
         str: New direction after applying the action; unchanged if no valid change.
     """
     global invalid_path, fw_tracks, to_left_tracks, to_right_tracks
-    # Check, if coordinates are valid
+    # Validate that the coordinates are within grid boundaries
     if not (0 <= y < len(tracks) and 0 <= x < len(tracks[0])):
         # Invalid: No dir change: path will be adjusted later
         if invalid_path == None:
@@ -123,7 +123,7 @@ def dir_change(id, x, y, action, dir, tracks):
 
     track = tracks[y][x]
 
-    # Check for the action type, if current track allows direction change
+    # Determine new direction based on action and track
     if action == "move_forward":
         if (dir, track) in fw_tracks:
             return fw_tracks[(dir, track)]
@@ -200,7 +200,7 @@ def build_df_pos(df_actions, trains, tracks):
         # Set start position
         if id not in train_ids:
             x, y, dir = get_start_pos(id, trains)
-            # Set start at timestep t-1
+            # Insert starting position at timestep one less than current timestep
             df_pos.loc[len(df_pos)] = [id, x, y, dir, t-1]
             train_ids[id] = (x, y, dir)
         else:
@@ -209,6 +209,7 @@ def build_df_pos(df_actions, trains, tracks):
         # Calculate next positions
         x_new, y_new, dir_new = next_pos(id, x, y, action, dir, tracks)
         df_pos.loc[len(df_pos)] = [id, x_new, y_new, dir_new, t]
+        # Update position
         train_ids[id] = (x_new, y_new, dir_new)
     return df_pos
 
@@ -216,6 +217,8 @@ def build_df_pos(df_actions, trains, tracks):
 def adjust_actions(df_pos, trains, df_actions, tracks):
     """Adjusts actions so that the final position of each train matches its station.
 
+    This function iteratively drops the first action for a train until its final position matches the target.
+    
     Args:
         df_pos (pd.DataFrame): Train positions.
         trains (pd.DataFrame): Train configuration.
@@ -229,12 +232,14 @@ def adjust_actions(df_pos, trains, df_actions, tracks):
     changed = True
     last_train_for_print = None
     first_run = True
+    # Loop until no adjustments are needed
     while changed:
         changed = False
+        # Iterate over each unique train ID
         for train in df_actions['trainID'].unique():
             df_pos_train = df_pos[df_pos['trainID'] == train]
             if df_pos_train.empty:
-                continue  # Jump to next ID
+                continue  # Skip if no positions exist for this train
             last_pos = df_pos_train.iloc[-1]
             x_last, y_last = last_pos['x'], last_pos['y']
             
@@ -245,14 +250,17 @@ def adjust_actions(df_pos, trains, df_actions, tracks):
             x_end = train_row['x_end'].iloc[0]
             y_end = train_row['y_end'].iloc[0]
             
-            # Check if an adjustment is needed
+            # Check if final position does not match station, or if train's path is marked invalid
             if not (x_last == x_end and y_last == y_end) or invalid_path == train:
                 invalid_path = None
+                # Identify the index of the first action for this train
                 idxs = df_actions[df_actions['trainID'] == train].index
                 idx_to_drop = idxs[0]
+                # Remove the first action for this train
                 df_actions.drop(index=idx_to_drop, inplace=True)
+                # Reset DataFrame indices
                 df_actions.reset_index(drop=True, inplace=True)
-                changed = True
+                changed = True  # Mark that a change was made
                 # Print progress
                 if last_train_for_print != train:
                     if first_run:
@@ -282,7 +290,7 @@ def ensure_train_spawns(df_pos, trains):
         pd.DataFrame: Updated positions DataFrame with missing train spawns added.
     """
     is_incomplete = False
-    # Get missing trainIDs in df_pos
+    # Determine which IDs are missing in df_pos
     missing_trains = set(trains["id"]) - set(df_pos["trainID"])
     for id in missing_trains:
         # Get info of missing train
@@ -290,6 +298,7 @@ def ensure_train_spawns(df_pos, trains):
         x = train_row["x"]
         y = train_row["y"]
         dir_val = train_row["dir"]
+        # Create row for the missing train at timestep 0
         new_row = {
             "trainID": id,
             "x": x,
@@ -299,6 +308,7 @@ def ensure_train_spawns(df_pos, trains):
         }
         x_end = train_row["x_end"]
         y_end = train_row["y_end"]
+        # If starting position is different from target, mark as incomplete
         if x != x_end or y != y_end:
             is_incomplete = True
         # Add new row to df_pos
@@ -326,12 +336,13 @@ def write_act_err_txt(original, adjusted, trains):
     """
     # Identify trains with invalid path
     act_err_trains = set(original["trainID"]) - set(adjusted["trainID"])
-    if not act_err_trains:  # Empty ActErr log
+    if not act_err_trains:
+        # If no errors, clear existing log files
         with open("data/act_err.txt", "w") as f, open("data/act_err_min.txt", "w") as f_min:
             f.write("")
             f_min.write("")
         return
-    # Filter original actions for trains with invalid path with sorting
+    # Filter original actions for trains with errors and sort them
     df_act_err = original[original["trainID"].isin(act_err_trains)]
     df_act_err = df_act_err.sort_values(by=["trainID", "timestep"])
     # Write DF to act_err.txt
@@ -365,6 +376,7 @@ def write_act_err_txt(original, adjusted, trains):
         f_min.write(header)
         f_min.write(f_min_additional_header)
         
+        # Process each train with an invalid path and write its log
         for id in sorted(act_err_trains):
             # Train header information
             e_dep = trains.loc[trains["id"] == id, "e_dep"].iloc[0]
@@ -379,16 +391,16 @@ def write_act_err_txt(original, adjusted, trains):
             f.write(f"=== Train {id} log:\n=== start({id},({y},{x}),{e_dep},{dir}) -> end({id},({y_end},{x_end}),{l_arr})\n")
             f_min.write(f"=== Train {id} log:\n=== ({y},{x},{dir}) -> ({y_end},{x_end})\n")
             
-            # Filter for trainID
+            # Filter the actions for the train
             df_train_actions = df_act_err[df_act_err["trainID"] == id]
-            # Writing preparation
+            # Vars to track missing timesteps and wait-action interruptions
             wait_interruption = False
             prev_t = None
             missing_t = []
             for _, row in df_train_actions.iterrows():
                 action = row["action"]
                 t = row["timestep"]
-                # Identify missing timesteps
+                # Check for gaps in timesteps between actions
                 if prev_t != t-1 and prev_t is not None:
                     # Intervall of missing timesteps
                     gap = list(range(prev_t + 1, t))
@@ -406,7 +418,7 @@ def write_act_err_txt(original, adjusted, trains):
                 elif not wait_interruption:
                     wait_interruption = True
                     f_min.write(f"...\n")
-            # Write list of missing timesteps
+            # Write missing timestep information if any
             if missing_t:
                 missing_str = "[" + ", ".join(str(x) for x in missing_t) + "]"
                 f.write(f"=== Train {id} - Missing Timesteps: {missing_str}\n\n\n\n")
@@ -457,7 +469,7 @@ def position_df(tracks, trains, clingo_path, lp_files, answer_number):
     df_actions = df_actions_original.copy(deep=True)
     # Actions to positions
     df_pos = build_df_pos(df_actions, trains, tracks)
-    # Adjust actions, if end position is incorrect
+    # Adjust actions iteratively until final positions match the train targets
     print("Validating actions...")
     df_actions, df_pos = adjust_actions(df_pos, trains, df_actions, tracks)
     # Put invalid action-predicate paths

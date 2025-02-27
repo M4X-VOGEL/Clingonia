@@ -19,6 +19,7 @@ def write_trains(trains, lp):
         lp (file object): .lp file.
     """
     for _, row in trains.iterrows():
+        # Write train, start and end predicates
         lp.write(
             f"train({row['id']}).\n"
             f"start({row['id']},({row['y']},{row['x']}),{row['e_dep']},{row['dir']}).\n"
@@ -36,6 +37,7 @@ def write_tracks(tracks, lp):
     for i, row in enumerate(tracks):
         for j, track in enumerate(row):
             lp.write(f"cell(({i},{j}),{track}).\n")
+        # Write an extra line after each env row for readability
         lp.write(f'\n')
 
 
@@ -50,6 +52,7 @@ def save_env(tracks, trains, name="data/running_tmp.lp"):
     ensure_directory("data")
     path = name
     with open(path, 'w') as lp:
+        # Write train and track predicates to the file
         write_trains(trains, lp)
         write_tracks(tracks, lp)
 
@@ -96,6 +99,7 @@ def delete_tmp_frames():
     path = "data/tmp_frames"
     if os.path.isdir(path):
         try:
+            # Recursively delete the directory and its contents
             shutil.rmtree(path)
         except OSError as e:
             print(f"Error: tmp_frames folder could not be deleted:\n{e}")
@@ -117,6 +121,7 @@ def initial_import_test():
         'matplotlib'
     ]
     missing_modules = []
+    # Iterate over each required module and try to import it
     for module in required_modules:
         try:
             importlib.import_module(module)

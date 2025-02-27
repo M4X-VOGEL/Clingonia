@@ -31,6 +31,7 @@ def add_cell(df_tracks, pred):
     cell = params.replace('(', '').replace(')', '').split(',')
     if len(cell) != 3:
         return -2  # Report invalid cells
+    
     # Add row to DF
     try:
         y, x = int(cell[0].strip()), int(cell[1].strip())
@@ -38,14 +39,17 @@ def add_cell(df_tracks, pred):
             print(f"❌ Error: Negative coordinates are not allowed.")
             return -12  # Report cells with negative coordinates
         track = int(cell[2].strip())
+        # Check if track is a dead-end
         if track in DEAD_ENDS:
             print(f"❌ cell(({y},{x}),_) Dead end is not allowed.")
             return -14  # Report dead end
+        # Check if track is invalid
         elif track not in TRACKS:
             track = 0  # Remove track and provide empty cell
             print(f"⚠️ cell(({y},{x}),_) Warning: Invalid track type was replaced by 0.")
     except ValueError:
         return -2  # Report invalid cells
+    # Add cell data to DF
     df_tracks.loc[len(df_tracks)] = [x, y, track]
     return 0
 
@@ -78,6 +82,7 @@ def fill_tse(tse_list, pred):
                 return -11  # Report invalid Train ID
         except ValueError:
             return -3  # Report invalid trains
+        # Add ID to tse_list
         tse_list.append(id)
 
     elif pred.startswith("start"):
@@ -96,6 +101,7 @@ def fill_tse(tse_list, pred):
                 e_dep = 1
         except ValueError:
             return -4  # Report invalid start
+        # Add start predicate to tse_list
         tse_list.append(["start", id, x, y, e_dep, dir])
 
     elif pred.startswith("end"):
@@ -113,6 +119,7 @@ def fill_tse(tse_list, pred):
                 return -13  # Report invalid LatestArrival
         except ValueError:
             return -5  # Report invalid end
+        # Add end predicate to tse_list
         tse_list.append(["end", id, x_end, y_end, l_arr])
     return 0
 
@@ -138,10 +145,8 @@ def prep_tracks_and_trains(path):
             predicates = line.strip().split('.')
             for pred in predicates:
                 pred = pred.strip()
-                # Empty line
-                if not pred: continue
-                # Comment
-                elif "%" in pred: break
+                if not pred: continue  # Skip empty lines
+                elif "%" in pred: break  # Skip comments
                 # cell
                 elif pred.startswith("cell"):
                     rc = add_cell(df_tracks, pred)
@@ -150,6 +155,7 @@ def prep_tracks_and_trains(path):
                 else:
                     rc = fill_tse(tse_list, pred)
                     if rc != 0: return rc, rc  # Error -3,-4,-5
+    # Sort by y, then x in ascending order
     df_tracks = df_tracks.sort_values(by=['y', 'x'], ascending=[True, True])
     return df_tracks, tse_list
 
@@ -193,11 +199,12 @@ def create_df_of_trains(tse_list):
                 start_dict[p[1]] = p
             elif p[0] == 'end':
                 end_dict[p[1]] = p
+    
     trains = pd.DataFrame(columns=["id", "x", "y", "dir", "x_end", "y_end", "e_dep", "l_arr"])
+    # For each ID, add it if both start and end exist
     for id in train_ids:
-        # trains that do not have a start and/or end
         if id not in start_dict or id not in end_dict:
-            continue
+            continue  # Skip trains without start and/or end
         # start variables
         s = start_dict[id]
         x, y = s[2], s[3]
@@ -241,7 +248,7 @@ def validate_cell_with_track_exists(x, y, df_tracks):
     condition = (df_tracks['x'] == x) & (df_tracks['y'] == y)
     if not condition.any():
         return -8  # Report non-existant cell
-    # Check for track
+    # Extract track
     track = df_tracks.loc[condition, 'track'].iloc[0]
     if track == 0:
         print(f"⚠️ cell({y},{x},{track}) Warning: Train or Station not on a track.")
@@ -260,6 +267,8 @@ def validate_train_consistency(tse_list):
     train_ids = set()
     start_dict = {}
     end_dict = {}
+
+    # Process each predicate
     for pred in tse_list:
         if isinstance(pred, int):  # train
             train_ids.add(pred)
@@ -276,6 +285,8 @@ def validate_train_consistency(tse_list):
                     print("⚠️ Warning: There is an end(ID,...) without train(ID).")
                     continue
                 end_dict[pred[1]] = pred
+    
+    # Check that every train has both start and end predicate
     for id in train_ids:
         # Every train needs start and end
         if id not in start_dict or id not in end_dict:
@@ -298,15 +309,15 @@ def validate_grid_completeness(df_tracks):
         print("⚠️ Warning: Grid is empty.")
         return -10
 
-    # Dimensions
+    # Determine the grid boundaries based on cell coordinates
     min_x = df_tracks['x'].min()
     max_x = df_tracks['x'].max()
     min_y = df_tracks['y'].min()
     max_y = df_tracks['y'].max()
 
+    # Check for missing cells
     for y in range(min_y, max_y + 1):
         for x in range(min_x, max_x + 1):
-            # Check, if any cell is missing
             if not ((df_tracks['x'] == x) & (df_tracks['y'] == y)).any():
                 print(f"⚠️ Warning: cell({y},{x},_) missing.")
                 return -10
@@ -323,6 +334,7 @@ def validate(tse_list, df_tracks):
     Returns:
         int: 0 if valid; negative error code if invalid.
     """
+    # For each predicate
     for pred in tse_list:
         if isinstance(pred, list):
             # Check start direction and coordinates
@@ -345,7 +357,7 @@ def validate(tse_list, df_tracks):
     rc = validate_train_consistency(tse_list)
     if rc != 0:
         return rc
-    # Validate consistency of cell predicates
+    # Validate grid completeness
     rc_grid = validate_grid_completeness(df_tracks)
     if rc_grid != 0:
         return rc_grid
@@ -366,9 +378,11 @@ def load_env(lp_file):
     if not file_in_directory(lp_file):
         print("❌ File Not Found Error: No environment loaded.")
         return -1, -1  # FileNotFoundError -1
+    # Ensure the file has correct extension
     if not lp_file.endswith(".lp"):
         print("❌ Load Error: Environment must be a .lp file.")
         return -15, -15  # Report invalid file type
+    # Assemble tracks DF and predicate list
     df_tracks, tse_list = prep_tracks_and_trains(lp_file)
     if isinstance(df_tracks, int) or isinstance(tse_list, int):
         print("❌ Load Error: No environment loaded.")
@@ -378,6 +392,7 @@ def load_env(lp_file):
     if rc != 0:
         print("❌ Validation Error: No environment loaded.")
         return rc, rc  # Errors -6,-7,-8,-9,-10
+    # Convert df_tracks into a 2D list and tse_list into a DF
     tracks = create_list_of_tracks(df_tracks)
     trains = create_df_of_trains(tse_list)
     return tracks, trains

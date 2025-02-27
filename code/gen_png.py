@@ -34,18 +34,20 @@ def create_agents_from_train_stations(hints, num_agents, np_random):
     agents_directions = []
     agents_targets = []
     
-    for agent_idx in range(num_agents):
-        # Randomly select two different cities from the available ones.
+    # Loop over agents to assign start and target stations
+    for agent in range(num_agents):
         num_cities = len(train_stations)
+        # City to start from
         start_city = np_random.randint(0, num_cities)
+        # Target city
         possible_targets = list(range(num_cities))
         possible_targets.remove(start_city)
         target_city = np_random.choice(possible_targets)
 
-        # Choose a random station within each selected city
+        # Choose a station within both cities
         start_station_idx = np_random.randint(0, len(train_stations[start_city]))
         target_station_idx = np_random.randint(0, len(train_stations[target_city]))
-
+        # Station information
         start_station = train_stations[start_city][start_station_idx]
         target_station = train_stations[target_city][target_station_idx]
         
@@ -53,7 +55,7 @@ def create_agents_from_train_stations(hints, num_agents, np_random):
         start_position, base_direction = start_station
         target_position, _ = target_station
         
-        # np.int64 to int
+        # Convert coordinates from np.int64 to int.
         agents_positions.append((int(start_position[0]), int(start_position[1])))
         agents_directions.append(base_direction)
         agents_targets.append((int(target_position[0]), int(target_position[1])))
@@ -76,7 +78,7 @@ def custom_sparse_line_generator(env_params, seed=1):
     def generator(rail, num_agents, hints, num_resets, np_random):
         global LAST_HINTS
         
-        # When there are no hint, generate dummy hints.
+        # When there are no hints, generate dummy hints.
         if hints is None or 'train_stations' not in hints or 'city_positions' not in hints or 'city_orientations' not in hints:
             hints = {
                 'train_stations': [
@@ -88,7 +90,7 @@ def custom_sparse_line_generator(env_params, seed=1):
             }
         LAST_HINTS = hints  # Save for DF
 
-        # Agent generation based on stations
+        # Attempt to generate agents based on the provided hints.
         try:
             agents_positions, agents_directions, agents_targets = create_agents_from_train_stations(hints, num_agents, np_random)
             speeds = [1.0] * num_agents
@@ -121,6 +123,7 @@ def extract_trains_from_hints(hints, np_random, env_params):
     direction_map = {0: 'n', 1: 'e', 2: 's', 3: 'w'}
     # Default for Lastest Arrival based on Dimensions and number of Agents
     l_arr = math.ceil(2 * max(env_params['rows'], env_params['cols'])) + 2 * num_agents
+    # Construct a dictionary for DF columns.
     data = {
         "id": list(range(num_agents)),
         "x": [pos[0] for pos in agents_positions],
@@ -138,6 +141,8 @@ def extract_trains_from_hints(hints, np_random, env_params):
 def fallback_reset(env):
     """Performs a fallback reset on the environment if rail generation fails.
 
+    Resets various environment internals to recover from grid errors.
+
     Args:
         env (RailEnv): Flatland environment.
 
@@ -145,17 +150,21 @@ def fallback_reset(env):
         tuple: (obs, info) from reset.
     """
     print("Handling rail issues...")
+    # Check if rail grid is missing
     if env.rail is None or env.rail.grid is None:
         raise RuntimeError("Grid was empty.")
-    # Negative rails become 0
+    # Replace any negative values in the grid with 0
     if np.any(env.rail.grid < 0):
         env.rail.grid[env.rail.grid < 0] = 0
+    # Reset agents
     env.reset_agents()
     env.agent_positions = np.zeros((env.height, env.width), dtype=int) - 1
     env._update_agent_positions_map(ignore_old_positions=False)
+    # Reset information
     env.obs_builder.reset()
     env._elapsed_steps = 0
     env.dones = dict.fromkeys(list(range(env.get_num_agents())) + ["__all__"], False)
+    # Get observations and environment information
     obs = env._get_observations()
     info = env.get_info_dict()
     return obs, info
@@ -170,11 +179,11 @@ def get_allowed_dirs(track):
     Returns:
         list[int]: Allowed direction codes (0: 'n', 1: 'e', 2: 's', 3: 'w').
     """
-    # No track
+    # If there is no track, return an empty list
     if track == 0: return []
     # List for allowed directions
     allowed_dirs = []
-    # All tracks
+    # Define track IDs that allow movement in each direction
     tracks_to_n = [32800, 4608, 16386, 37408,
                    17411, 32872, 49186, 34864,
                    5633, 33825, 38433, 50211,
@@ -195,7 +204,7 @@ def get_allowed_dirs(track):
                    5633, 33825, 38433, 50211,
                    33897, 35889, 38505, 52275,
                    20994, 16458, 2136]
-    # Fill allowed directions
+    # Append numeric direction if track is in corresponding list
     if track in tracks_to_n: allowed_dirs.append(0)
     if track in tracks_to_e: allowed_dirs.append(1)
     if track in tracks_to_s: allowed_dirs.append(2)
@@ -219,14 +228,14 @@ def validate_track(env, row, col):
         int: Validated track value.
     """
     transition = env.rail.get_full_transitions(row, col)
-    # Check for Dead-Ends
+    # If track is a dead-end, replace it with a straight track
     if transition in DEAD_ENDS:
         print("> Dead-end at (" + str(row) + "," + str(col) + ") replaced.")
         if transition == 4 or transition == 256:
             transition = 1025
         else:
             transition = 32800
-    # Check for invalid Tracks
+    # If the transition is non-zero but invalid, fix it
     elif transition != 0:
         if transition not in TRACKS:
             # Known problem cases
@@ -249,6 +258,7 @@ def validate_track(env, row, col):
                 print(f"> UNKNOWN: {transition} at ({row},{col}) removed.")
                 transition = 0
             print(f"> Invalid track at ({row},{col}) replaced.")
+    # Update env with validated transition
     env.rail.grid[row, col] = transition
     return int(transition)
 
@@ -266,8 +276,10 @@ def extract_tracks(env):
     for row in range(env.height):
         track_row = []
         for col in range(env.width):
+            # Validate track and add it to the row
             track = validate_track(env, row, col)
             track_row.append(track)
+        # Append the row to the tracks list
         tracks.append(track_row)
     return tracks
 
@@ -306,6 +318,7 @@ def extract_trains(env):
             trains_data["y_end"].append(y_end)
             trains_data["e_dep"].append(1)
             trains_data["l_arr"].append(l_arr)
+    # Create DF from train data
     trains_df = pd.DataFrame(trains_data)
     return trains_df
 
@@ -345,6 +358,7 @@ def render_time_prediction(timesteps, cells):
     Returns:
         str: Estimated render time as a formatted string.
     """
+    # Estimate rendering time based on the total number of cells
     if cells < 30: sec = 1.2 * timesteps
     elif cells < 50: sec = 1.3 * timesteps
     elif cells < 80: sec = 1.4 * timesteps
@@ -355,6 +369,7 @@ def render_time_prediction(timesteps, cells):
         # Benchmark: 2.25 seconds runtime for 2000 cells
         # Runtime increases linearly by 25% every 1000 cells
         sec = 2.25 * (1 + 0.25 * ((cells-2000)/1000)) * timesteps
+    # Convert estimated time to a formatted string
     return render_time_pred_str(sec)
 
 
@@ -382,12 +397,12 @@ def create_env(env_params):
     
     def rail_gen_test(width, height, number_of_agents, num_resets, np_random):
         try:
-            # Test if the original rail generator works
+            # Attempt to generate rails using the original generator
             rail, optionals = rail_gen_original(width, height, number_of_agents, num_resets, np_random)
             return rail, optionals
         except Exception as e:
             print("Handling rail generator issues...")
-            # If necessary, increase size up to +5 to make generation possible
+            # If rail generation fails, incrementally increase the grid size.
             max_attempts = 5
             for i in range(1, max_attempts + 1):
                 new_width = width + i
@@ -397,8 +412,8 @@ def create_env(env_params):
                     break
                 except Exception as e2:
                     if i == max_attempts:
-                        raise e2
-            # Trim afterwards
+                        raise e2  # Raise exception if all attempts fail
+            # Trim the rail grid back to desired dimensions
             cropped_grid = rail.grid[:width, :height]
             rail.grid = cropped_grid
             return rail, optionals
@@ -420,6 +435,7 @@ def create_env(env_params):
 
     observation_builder = GlobalObsForRailEnv()
     
+    # Environment
     env = RailEnv(
         width=env_params['cols'],
         height=env_params['rows'],
@@ -430,10 +446,12 @@ def create_env(env_params):
         malfunction_generator=malfunction_gen,
         remove_agents_at_target=False
     )
+
     try:
         obs, info = env.reset()
     except Exception as e:
         obs, info = fallback_reset(env)
+    
     # Ensure that all agents have positions
     if any(agent.position is None or agent.position[0] < 0 or agent.position[1] < 0 for agent in env.agents):
         np_random = np.random.RandomState(seed=env_params['seed'])
@@ -457,9 +475,10 @@ def create_env(env_params):
             # Set direction
             if allowed_dirs:
                 if agent.direction not in allowed_dirs:
+                    # Randomly assign a valid direction if current one is invalid
                     agent.direction = allowed_dirs[random.randint(0, len(allowed_dirs)-1)]
-            # No allowed directions: get city orientation
             else:
+                # If no allowed directions, adjust using city orientation hints
                 pos = (row, col)
                 for city_idx, stations in enumerate(LAST_HINTS.get('train_stations', [])):
                     # Get station coordinates
@@ -483,6 +502,7 @@ def gen_env(env_params):
         tuple: 2D list of track types and a DataFrame of train configuration,
                or error codes if generation fails.
     """
+    # Suppress specific warnings during generation
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning)
         print("\nGenerating environment...")
@@ -491,19 +511,19 @@ def gen_env(env_params):
             env = create_env(env_params)
             tracks = extract_tracks(env)
             trains = extract_trains(env)
+            # If no trains are generated, use hints to extract trains
             if trains.empty:
-                # Use hints to place agents
                 np_random = np.random.RandomState(seed=env_params['seed'])
                 trains = extract_trains_from_hints(LAST_HINTS, np_random, env_params)
             # Render image
             est_render_time = render_time_prediction(1, env.height*env.width)
             print(f"Rendering image (~{est_render_time})...")
             if env.width * env.height > 1000000:
-                low_quality_mode = True
+                low_quality_mode = True  # Force low quality on large environments
             else:
                 low_quality_mode = env_params['lowQuality']
             screen_res = calc_resolution(low_quality_mode, tracks)
-            graphics_lib = "PIL" if low_quality_mode else "PILSVG"
+            graphics_lib = "PIL" if low_quality_mode else "PILSVG"  # Rendering lib based on quality
             renderer = RenderTool(env, gl=graphics_lib, screen_height=screen_res, screen_width=screen_res)
             if graphics_lib == "PIL":
                 pil_config(renderer)

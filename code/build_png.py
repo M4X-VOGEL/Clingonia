@@ -9,7 +9,7 @@ from code.config import DIR_MAP, AGENT_COLORS
 
 filterwarnings("ignore", category=RuntimeWarning)
 
-# Direction change for improperly positioned trains
+# Dictionary for replacing invalid agent orientations based on track type
 dir_replacement = {
     # Straights
     ('e', 32800):  's',
@@ -42,7 +42,7 @@ dir_replacement = {
 }
 
 class DummyLine:
-    """A dummy line generator used by Flatland when no actual line generation is required.
+    """Serves as a placeholder for line generation when no actual line generation is required.
 
     Attributes:
         agent_positions (list): Agent starting positions.
@@ -50,7 +50,7 @@ class DummyLine:
         agent_directions (list): Agent directions.
         agent_speeds (list): Agent speeds.
     """
-    # Essential attributes for agents
+    # Essential agents attributes
     def __init__(self, agent_positions, agent_targets, agent_directions, agent_speeds):
         self.agent_positions = agent_positions
         self.agent_targets = agent_targets
@@ -59,12 +59,12 @@ class DummyLine:
 
 
 class DummyObservationBuilder:
-    """A dummy observation builder that does not generate any observations.
+    """A dummy observation builder that does not generate any observations, and all its methods are placeholders.
 
     Methods:
-        set_env(env): Placeholder for setting the environment.
-        reset(env=None): Placeholder for resetting the builder.
-        get(handle=0): Returns None.
+        set_env(env): Setting the environment.
+        reset(env=None): Resetting the builder.
+        get(handle=0): Returns None since no observation is generated.
         get_many(handles=None): Returns a dict with None for each handle.
     """
     def set_env(self, env):
@@ -83,7 +83,7 @@ class DummyObservationBuilder:
 
 
 def dummy_line_generator(rail, num_agents, hints, *args, **kwargs):
-    """Custom line generator that returns a DummyLine instance.
+    """Custom line generator that returns a DummyLine instance, which provides placeholder attributes for agents.
 
     Args:
         rail (RailEnv): Reference environment.
@@ -95,13 +95,13 @@ def dummy_line_generator(rail, num_agents, hints, *args, **kwargs):
     """
     if hints is None:  # Flatland may expect hints
         hints = {}
-    hints['train_stations'] = []  # Empty for now
+    hints['train_stations'] = []  # Ensure train_stations key exists
 
-    # Attribute placeholder
+    # Create placeholder lists for agent attributes
     agent_positions = [None] * num_agents
     agent_targets = [None] * num_agents
     agent_directions = [None] * num_agents
-    agent_speeds = [1.0] * num_agents
+    agent_speeds = [1.0] * num_agents  # Default speed
 
     return DummyLine(agent_positions, agent_targets, agent_directions, agent_speeds)
 
@@ -116,11 +116,12 @@ def calc_resolution(low_quality_mode, env):
     Returns:
         int: Screen resolution.
     """
+    # Determine env dimensions based on input
     if isinstance(env, list):  # tracks list
         env_dim_max = max(len(env), len(env[0]))
     else:  # RailEnv object
         env_dim_max = max(env.height, env.width)
-    screen_res = env_dim_max  # Base value
+    screen_res = env_dim_max  # Base value is maximum dimension
     if low_quality_mode:  # Low
         if env_dim_max > 1000: screen_res = 6000
         elif env_dim_max > 600: screen_res *= 6
@@ -155,12 +156,13 @@ def pil_setup():
     """
     try:
         from flatland.core.transition_map import Grid4Transitions
+        # If the is_valid method is missing, add it as a patch
         if not hasattr(Grid4Transitions, "is_valid"):
             def is_valid(self, cell_transition):
                 return cell_transition != 0
             Grid4Transitions.is_valid = is_valid
     except ImportError:
-        pass
+        pass  # If import fails, do nothing
 
 
 def pil_config(renderer):
@@ -172,6 +174,7 @@ def pil_config(renderer):
     Args:
         renderer: Renderer instance to configure.
     """
+    # Convert hex color strings to RGB tuples and set them in the renderer
     def hex_to_rgb(hex_str):
         hex_str = hex_str.lstrip('#')
         return tuple(int(hex_str[i:i+2], 16) for i in (0, 2, 4))
@@ -186,7 +189,7 @@ def pil_config(renderer):
         return cmap
     renderer.gl.get_cmap = custom_get_cmap
 
-    # Remove elapsed time text
+    # Remove elapsed time text from rendering
     original_text = renderer.gl.text
     def patched_text(x, y, text, *args, **kwargs):
         if text.startswith("elapsed:"):
@@ -194,28 +197,32 @@ def pil_config(renderer):
         return original_text(x, y, text, *args, **kwargs)
     renderer.gl.text = patched_text
 
-    # Center agents
+    # Center agents and add custom visualization
     original_plot_single_agent = renderer.renderer.plot_single_agent
     def centered_plot_single_agent(self, position_row_col, direction, color="r", target=None, static=False, selected=False):
         rt = self.__class__
         pos = np.array(position_row_col)
         if pos.ndim == 0 or pos.size == 0:
-            return
+            return  # Skip if position data is invalid
+        # Calc center position
         xyPos = np.matmul(pos, rt.row_col_to_xy) + rt.x_y_half
         if static:
             color = self.gl.adapt_color(color, lighten=True)
-        # Agent size
+        # Draw agent as a scatter plot point
         self.gl.scatter(*xyPos, color=color, layer=1, marker="o", s=16)
+        # Calc and draw direction vector
         direction_row_col = rt.transitions_row_col[direction]
         direction_xy = np.matmul(direction_row_col, rt.row_col_to_xy)
         xy_dir_line = np.array([xyPos, xyPos + direction_xy / 2]).T
         self.gl.plot(*xy_dir_line, color=color, layer=1, lw=5, ms=0, alpha=0.6)
         if selected:
             self._draw_square(xyPos, 1, color)
+        # Draw target
         if target is not None:
             target_row_col = np.array(target)
             target_xy = np.matmul(target_row_col, rt.row_col_to_xy) + rt.x_y_half
             self._draw_square(target_xy, 1/3, color, layer=1)
+    # Replace plot_single_agent with patched version
     renderer.renderer.plot_single_agent = centered_plot_single_agent.__get__(renderer.renderer, renderer.renderer.__class__)
 
     # Change color of cells with no track to canvas_color
@@ -229,12 +236,12 @@ def pil_config(renderer):
 
 
 def initial_render_test():
-    """Renders a minimal 1x1 environment to validate the rendering setup.
+    """Renders a minimal 1x1 environment to verify that the rendering pipeline is operational.
 
     Returns:
         int: 0 if successful; -1 on failure.
     """
-    # Parameters
+    # Set up minimal env with a horizontal track
     tracks = [[1025]]
     params = {
         'rows': 1,
@@ -277,7 +284,7 @@ def initial_render_test():
     agent.direction = DIR_MAP['e']
     agent.initial_direction = agent.direction
     agent.target = (0, 0)
-    # Test rendering
+    # Test Renderer using PILSVG graphics
     renderer = RenderTool(env, gl="PILSVG")
     renderer.reset()
     renderer.render_env(
@@ -297,6 +304,9 @@ def create_custom_env(tracks, trains, params):
 
     Returns:
         RailEnv: Flatland environment.
+        pd.DataFrame: Train configuration.
+        int or None: Invalid train.
+        int or None: Invalid station.
     """
     invalid_train = None
     invalid_station = None
@@ -336,7 +346,7 @@ def create_custom_env(tracks, trains, params):
     # Trains and stations
     for i, agent in enumerate(env.agents):
         id = trains.loc[i, 'id']
-        # Train
+        # Starting position
         row_start = trains.loc[i, 'y']
         col_start = trains.loc[i, 'x']
         agent.initial_position = (row_start, col_start)
@@ -380,15 +390,15 @@ def save_png(env, path="data/running_tmp.png", low_quality_mode=False):
         low_quality_mode (bool): Flag for low resolution rendering.
 
     Returns:
-        int: 0 if successful; -1 if an error occurs.
+        int: 0 if successful; -1 if an OverflowError occurs.
     """
     print("Rendering image...")
     # Render image
     try:
         if env.width * env.height > 1000000:
-            low_quality_mode = True
+            low_quality_mode = True  # Force low quality on large environments
         screen_res = calc_resolution(low_quality_mode, env)
-        graphics_lib = "PIL" if low_quality_mode else "PILSVG"
+        graphics_lib = "PIL" if low_quality_mode else "PILSVG"  # Rendering lib based on quality
         renderer = RenderTool(env, gl=graphics_lib, screen_height=screen_res, screen_width=screen_res)
         renderer.reset()
         pil_config(renderer)
@@ -407,4 +417,5 @@ def save_png(env, path="data/running_tmp.png", low_quality_mode=False):
     return 0
 
 
+# Apply the PIL patch
 pil_setup()

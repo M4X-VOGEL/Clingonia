@@ -36,9 +36,11 @@ def run_clingo(clingo_path, lp_files, answer_number):
         answer_number (int): Desired answer number from Clingo.
 
     Returns:
-        str: Clingo output with its answers, or an error code if Clingo fails.
+        str: Clingo output with its answers, or -3 if Clingo returns an error.
     """
-    timer_start = time.perf_counter()
+    timer_start = time.perf_counter()  # Timer for Clingo execution time
+
+    # Run Clingo as a subprocess
     proc = subprocess.Popen(
         [clingo_path] + lp_files + [str(answer_number)],
         stdout=subprocess.PIPE,
@@ -46,15 +48,17 @@ def run_clingo(clingo_path, lp_files, answer_number):
         text=True,
         bufsize=1
     )
-    # Timer-Thread for status updates while Clingo runs.
+    # Timer-Thread to provide status updates while Clingo runs.
     def timer():
-        counter, frustration = 30, 30
+        counter, frustration = 30, 30  # Counters
+        # Loop until the Clingo process terminates
         while proc.poll() is None:
-            time.sleep(0.1)
+            time.sleep(0.1)  # Sleep briefly to avoid busy waiting
             elapsed = int(time.perf_counter() - timer_start)
             if elapsed == counter:
                 # Clingo updates
                 print(f"Clingo: \'{clingo_frustration[frustration]}\'")
+                # Increase counters
                 counter += 30
                 frustration += 30
                 if frustration > 360:
@@ -74,17 +78,18 @@ def run_clingo(clingo_path, lp_files, answer_number):
         else:
             print(f"Clingo: '{clingo_finisher.get(5, '')}'")
         print(f"🕓 Clingo ran for {execution_time:.2f}s.", flush=True)
-    # Initialize Timer Thread
+    # Start timer thread to output periodic updates
     timer_thread = threading.Thread(target=timer)
     timer_thread.daemon = True  # Preventing thread from blocking exit
     timer_thread.start()
     # Capture Clingo's output
     stdout, stderr = proc.communicate()
-    # End of Thread
+    # End thread
     timer_thread.join(timeout=1)
-    # Error Handling
+    # Check for Clingo error
     if proc.returncode != 0:
         error_message = stderr.strip()
+        # If error is not a warning, print it and return error code
         if error_message and "Warn" not in error_message:
             print(f"Clingo returned an error:\n{error_message}")
             return -3
@@ -99,11 +104,11 @@ def get_clingo_answer(clingo_output, answer_number):
         answer_number (int): Desired answer number.
 
     Returns:
-        str: Chosen Clingo answer, or an error code if not found.
+        str: Chosen Clingo answer, or an error code.
     """
-    # Split Output String by Lines
+    # Split the Clingo output into individual lines
     lines = clingo_output.split('\n')
-    # Search for defined Answer
+    # Iterate over each line to find desired Answer
     for i, line in enumerate(lines):
         # Check for Answer
         if line.strip() == f'Answer: {answer_number}':
@@ -130,10 +135,10 @@ def get_action_params(clingo_answer):
     Returns:
         list[str]: List of parameter strings for each action predicate.
     """
-    # Only consider Action Predicates
+    # Split the answer and filter for "action"
     actions = [s for s in clingo_answer.split() if "action" in s]
-    # Trim Action Predicates
     action_params = []
+    # Trim each action string
     for action in actions:
         # Remove redundant Characters
         params = action.replace("action(train(", "")
@@ -154,13 +159,15 @@ def create_df(action_params):
         pd.DataFrame: DataFrame containing columns trainID, action, and timestep.
     """
     data = []
+    # Process each parameter string
     for i in range(len(action_params)):
         row = action_params[i].split(',')
         # Ensure correct data type
         row[0], row[2] = int(row[0]), int(row[2])
         data.append(row)
+    # Create DF with data
     df_actions = pd.DataFrame(data, columns=["trainID", "action", "timestep"])
-    # Sort by ID and Timestep
+    # Sort DF by ID and Timestep
     df_actions = df_actions.sort_values(by=["trainID", "timestep"], ascending=[True, True])
     return df_actions
 
@@ -174,22 +181,28 @@ def clingo_to_df(clingo_path="clingo", lp_files=[], answer_number=1):
         answer_number (int): Desired answer number (default is 1).
 
     Returns:
-        pd.DataFrame: DataFrame containing reduced output of specified Clingo answer.
+        pd.DataFrame: DataFrame containing reduced output of specified Clingo answer or an error code.
     """
     print("\nRun Simulation: START")
+    # Check if there are lp files for solving the env
     if len(lp_files) < 2:
         print("❌ Error: No .lp files given.")
         return -1  # no lp files
     print("Running Clingo...")
+    # Check if clingo_path is valid
     if clingo_path != "clingo" and not os.path.isfile(f"{clingo_path}.exe"):
         return -2  # invalid clingo path
+    # Run Clingo and capture its output
     output = run_clingo(clingo_path, lp_files, answer_number)
     if output == -3:
         return -3  # clingo error
+    # Extract desired answer
     answer = get_clingo_answer(output, answer_number)
     if answer == -4 or answer == -5:
         return answer  # invalid answer number
+    # Extract action parameters
     params = get_action_params(answer)
+    # Create the DataFrame
     df_actions = create_df(params)
     print("✅ Clingo done.")
     return df_actions
