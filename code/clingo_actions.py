@@ -27,6 +27,29 @@ clingo_finisher = {
     5: "Tracks laid, but what a ride! Victory's ours!"
 }
 
+def seconds_to_str(s):
+    """Converts seconds to a human-readable time string.
+
+    Args:
+        s (int): Time in seconds.
+
+    Returns:
+        str: Formatted time string.
+    """
+    if s < 60:
+        return f"{s}s"
+    elif s < 3600:
+        minutes = s // 60
+        s = s % 60
+        return f"{minutes}m{s}s" if s != 0 else f"{minutes}m"
+    else:
+        hours = s // 3600
+        remainder = s % 3600
+        minutes = remainder // 60
+        s = remainder % 60
+        return f"{hours}h{minutes}m{s}s" if s != 0 else f"{hours}h{minutes}m"
+
+
 def run_clingo(clingo_path, lp_files, answer_number):
     """Runs Clingo on given ASP files and returns its output.
 
@@ -57,7 +80,8 @@ def run_clingo(clingo_path, lp_files, answer_number):
             elapsed = int(time.perf_counter() - timer_start)
             if elapsed == counter:
                 # Clingo updates
-                print(f"Clingo: \'{clingo_frustration[frustration]}\'")
+                t = seconds_to_str(counter)
+                print(f"Clingo: \'{clingo_frustration[frustration]}\' ({t})")
                 # Increase counters
                 counter += 30
                 frustration += 30

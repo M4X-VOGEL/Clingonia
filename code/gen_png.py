@@ -323,7 +323,7 @@ def extract_trains(env):
     return trains_df
 
 
-def render_time_pred_str(seconds):
+def seconds_to_str(seconds):
     """Converts seconds to a human-readable time string.
 
     Args:
@@ -370,7 +370,7 @@ def render_time_prediction(timesteps, cells):
         # Runtime increases linearly by 25% every 1000 cells
         sec = 2.25 * (1 + 0.25 * ((cells-2000)/1000)) * timesteps
     # Convert estimated time to a formatted string
-    return render_time_pred_str(sec)
+    return seconds_to_str(sec)
 
 
 def create_env(env_params):

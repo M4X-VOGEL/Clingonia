@@ -319,7 +319,8 @@ def ensure_train_spawns(df_pos, trains):
         print("⚠️ Validation warning:\n"
               "The actions fail to guide all agents to their target.\n"
               "The afflicted agents will only spawn.\n"
-              "Please inspect their actions in the \'ActErr Log\'."
+              "Please inspect their actions in the \'ActErr Log\'.\n"
+              "(if no actions show, ensure \'#show action/3.\' is used)\n"
         )
     else:
         print("✅ Validation done.")
