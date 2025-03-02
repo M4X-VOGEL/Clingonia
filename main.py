@@ -13,9 +13,11 @@ def import_error_handling(missing_modules):
           '     pip show [NAME]\n'
     )
     print('Pip commands for missing packages:\n')
+    # For each missing module, print pip install command
     for module in missing_modules:
         print(f'     pip install {module}')
     print()
+    # Exit the program as required modules are not present
     sys.exit()
 
 
@@ -41,6 +43,7 @@ def initial_render_authorization():
         from code.build_png import initial_render_test
         initial_render_test()
     except OverflowError as e:
+        # If rendering fails, print error and exit
         print(f'❌ Error: Launch abnormal. Please try again.\n{e}')
         sys.exit()
 
@@ -59,6 +62,7 @@ def start_clingonia():
         create_start_menu()
         start_flatland()
     except Exception as e:
+        # If any error occurs during startup, print error and exit
         print(f'❌ Error: Not able to boot up. Please try again.\n{e}')
         sys.exit()
 
@@ -66,8 +70,8 @@ def start_clingonia():
 def main():
     """Performs initial authorizations and starts the application.
     """
-    initial_import_authorization()
-    initial_render_authorization()
+    initial_import_authorization()  # Check for required Python modules
+    initial_render_authorization()  # Test that rendering pipeline is functional
     start_clingonia()
 
 
