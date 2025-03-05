@@ -122,7 +122,7 @@ def extract_trains_from_hints(hints, np_random, env_params):
     agents_positions, agents_directions, agents_targets = create_agents_from_train_stations(hints, num_agents, np_random)
     direction_map = {0: 'n', 1: 'e', 2: 's', 3: 'w'}
     # Default for Lastest Arrival based on Dimensions and number of Agents
-    l_arr = math.ceil(2 * max(env_params['rows'], env_params['cols'])) + 2 * num_agents
+    l_arr = math.ceil(3 * max(env_params['rows'], env_params['cols'])) + 2 * num_agents
     # Construct a dictionary for DF columns.
     data = {
         "id": list(range(num_agents)),
@@ -305,7 +305,7 @@ def extract_trains(env):
     }
     direction_map = {0: 'n', 1: 'e', 2: 's', 3: 'w'}
     # Default for Lastest Arrival based on Dimensions and number of Agents
-    l_arr = math.ceil(2 * max(env.height, env.width)) + 2 * len(env.agents)
+    l_arr = math.ceil(3 * max(env.height, env.width)) + 2 * len(env.agents)
     # Agents
     for agent in env.agents:
         if agent.position is not None:

@@ -10,6 +10,7 @@ images = []  # Frame list for GIF
 # Re-rendering parameters
 old_env_counter = 0  # Detector for environment change
 old_low_q = None  # Detector for quality change
+old_answer = None  # Detector for answer change
 
 def build_gif_from_frames(output_gif, fps):
     """Saves the collected frames as a GIF.
@@ -99,9 +100,10 @@ def render_gif(tracks, trains, df_pos, env_params, env_counter, output_gif='data
     Returns:
         None if successful, or returns early if caching applies.
     """
-    global images, old_env_counter, old_low_q
+    global images, old_env_counter, old_low_q, old_answer
+    answer = env_params["answer"]
     # Check if env and quality stayed the same since last render
-    if images and old_env_counter == env_counter and old_low_q == low_quality_mode:
+    if images and old_env_counter == env_counter and old_low_q == low_quality_mode and old_answer == answer:
         # No re-render needed: reuse cached frames
         build_gif_from_frames(output_gif, fps)
         return
@@ -172,4 +174,5 @@ def render_gif(tracks, trains, df_pos, env_params, env_counter, output_gif='data
     # Update caching parameters
     old_env_counter = env_counter
     old_low_q = low_quality_mode
+    old_answer = answer
     print(f"\n✅ Animation done.")
