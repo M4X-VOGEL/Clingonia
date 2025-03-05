@@ -115,7 +115,7 @@ def run_clingo(clingo_path, lp_files, answer_number):
         error_message = stderr.strip()
         # If error is not a warning, print it and return error code
         if error_message and "Warn" not in error_message:
-            print(f"Clingo returned an error:\n{error_message}")
+            print(f"❌ Clingo returned an error:\n{error_message}")
             return -3
     return stdout.strip()
 
@@ -186,6 +186,10 @@ def create_df(action_params):
     # Process each parameter string
     for i in range(len(action_params)):
         row = action_params[i].split(',')
+        # Ensure action/3.
+        if len(row) != 3:
+            print(f"❌ Clingo returned invalid actions.")
+            return -6
         # Ensure correct data type
         row[0], row[2] = int(row[0]), int(row[2])
         data.append(row)
@@ -212,6 +216,9 @@ def clingo_to_df(clingo_path="clingo", lp_files=[], answer_number=1):
     if len(lp_files) < 2:
         print("❌ Error: No .lp files given.")
         return -1  # no lp files
+    if answer_number < 1:
+        print(f"❌ Invalid answer to display: {answer_number}.")
+        return -5
     print("Running Clingo...")
     # Check if clingo_path is valid
     if clingo_path != "clingo" and not os.path.isfile(f"{clingo_path}.exe"):
@@ -228,5 +235,7 @@ def clingo_to_df(clingo_path="clingo", lp_files=[], answer_number=1):
     params = get_action_params(answer)
     # Create the DataFrame
     df_actions = create_df(params)
-    print("✅ Clingo done.")
+    if isinstance(df_actions, int):
+        return -6  # invalid actions
+    print(f"✅ Clingo done.\n> Answer {answer_number} extracted.")
     return df_actions

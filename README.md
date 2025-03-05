@@ -130,7 +130,7 @@ If you encounter unexpected issues, please report them right away. Your input is
 
 ### ⚠️ Known issues
 
-- Panning is currently not supported for touchpads. Use zoom instead.
+- Panning is currently not supported for touchpads. To zoom, place the cursor and swipe up or down with two fingers.
 - Users may experience decreased responsiveness when zooming in closely on environments.
 - Our example `ASP` code for solving environments is provided for reference and simple environments. It is not flawless. We recommend using your own implementation for optimal results.
 

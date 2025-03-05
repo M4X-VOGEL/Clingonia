@@ -270,6 +270,7 @@ clingo_err_dict = {
     -3: 'Clingo returned an error.',
     -4: 'Clingo returns UNSATISFIABLE.',
     -5: f'Clingo did not provide the requested Answer: ',
+    -6: 'Invalid actions. Ensure to use #show action/3.'
 }
 
 
@@ -1543,6 +1544,13 @@ def switch_clingo_para_to_result():
     )
 
     if last_solve_params != current_solve_params or isinstance(current_paths, int):
+        if user_params['answer'] == 0:
+            # Reset Simulation
+            user_params['answer'] = 1
+            current_solve_params = (
+                env_counter, user_params['answer'], user_params['lpFiles']
+            )
+            print(f'\n🌱 Simulation Reset successful: Going for Answer 1.')
         show_act_err_logs = False
         last_solve_params = current_solve_params
         sim_result = run_simulation()
@@ -1562,6 +1570,8 @@ def switch_clingo_para_to_result():
                 )
             frames['clingo_para_frame'].frame.update()
             return
+    else:
+        print('\n🔄 Simulation skipped: No changes in parameters (answer, files, env).\n - If you changed the encoding in your selected files, choose Answer 0 to force a run.')
 
     if 'clingo_para_frame' in frames:
         frames['clingo_para_frame'].destroy_frame()
