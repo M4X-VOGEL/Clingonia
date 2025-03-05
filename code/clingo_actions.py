@@ -237,5 +237,6 @@ def clingo_to_df(clingo_path="clingo", lp_files=[], answer_number=1):
     df_actions = create_df(params)
     if isinstance(df_actions, int):
         return -6  # invalid actions
-    print(f"✅ Clingo done.\n> Answer {answer_number} extracted.")
+    print("✅ Clingo done.")
+    print(f"\n===\nAnswer: {answer_number}\n{answer}\n===\n")
     return df_actions
