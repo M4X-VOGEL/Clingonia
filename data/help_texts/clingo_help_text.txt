@@ -14,6 +14,7 @@ Once all parameters are set, you can run the simulation.
 -----------
 Clingo Path
 -----------
+
 Enter the full path to your clingo.exe or simply use "clingo" if it is included in your system's PATH.
 
 
@@ -21,6 +22,7 @@ Enter the full path to your clingo.exe or simply use "clingo" if it is included 
 -----------------
 Answer to display
 -----------------
+
 Choose which answer set from Clingo should be visualized
 (default is 1).
 
@@ -29,6 +31,7 @@ Choose which answer set from Clingo should be visualized
 -------------------------------
 Select Problem-Solving LP Files
 -------------------------------
+
 Browse and select your ASP encoding files via the file explorer. These files should only contain the ASP code for solving the environment.
 
 (!) Please do not include the environment encoding here.
@@ -38,15 +41,34 @@ Browse and select your ASP encoding files via the file explorer. These files sho
 --------------
 Run Simulation
 --------------
+
 Once the parameters are set, click this button to execute Clingo and visualize the solution based on the answer set.
 
 (!) Please note that the simulation may range from a few seconds to several minutes, depending on the complexity of the problem. During extended load times, we recommend checking the terminal to monitor your progress.
 
 
 
+---------------------------------
+Extra: Options for Clingo Command
+---------------------------------
+
+This feature was not originally planned,
+but you can enable additional options
+like --stats for further analysis.
+
+Simply add them to the "clingo_options" list
+at the beginning of code/clingo_actions.py.
+
+Note that Clingonia must restart
+to apply the changes, so consider
+saving your environment.
+
+
+
 -----------------
 Don't Derail Now!
 -----------------
+
 However, when you've enjoyed the ride,
 it's time to pull the brakes.
 At any time, you may exit the program

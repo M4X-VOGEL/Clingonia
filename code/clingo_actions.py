@@ -4,6 +4,10 @@ import threading
 import subprocess
 import pandas as pd
 
+# HERE YOU CAN ADD OPTIONS FOR THE CLINGO COMMAND LIKE "--stats" TO THE LIST.
+clingo_options = []
+# Be aware that some options may cause the program to malfunction.
+
 clingo_frustration = {
     30:  "I'm lost in Flatland, again...",
     60:  "tracks won't align, damn it...",
@@ -65,7 +69,7 @@ def run_clingo(clingo_path, lp_files, answer_number):
 
     # Run Clingo as a subprocess
     proc = subprocess.Popen(
-        [clingo_path] + lp_files + [str(answer_number)],
+        [clingo_path] + clingo_options + lp_files + [str(answer_number)],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
@@ -238,5 +242,5 @@ def clingo_to_df(clingo_path="clingo", lp_files=[], answer_number=1):
     if isinstance(df_actions, int):
         return -6  # invalid actions
     print("✅ Clingo done.")
-    print(f"\n===\nAnswer: {answer_number}\n{answer}\n===\n")
+    print(f"\n===\nOutput:\n{output}\n===\n")
     return df_actions
