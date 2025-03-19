@@ -166,14 +166,23 @@ def get_action_params(clingo_answer):
     # Split the answer and filter for "action"
     actions = [s for s in clingo_answer.split() if "action" in s]
     action_params = []
+    is_format = True
     # Trim each action string
     for action in actions:
         # Remove redundant Characters
-        params = action.replace("action(train(", "")
+        if "train" in action:
+            # This is the common case: action(train(ID), ...)
+            params = action.replace("action(train(", "")
+        else:
+            # This case tolerates: action(ID, ...)
+            is_format = False
+            params = action.replace("action(", "")
         params = params[:-1]
         params = params.replace("),", ",")
         # Save trimmed Version
         action_params.append(params)
+    if not is_format:
+        print("⚠️ Use the common fact format: action(train(ID), Action, Timestep).")
     return action_params
 
 
