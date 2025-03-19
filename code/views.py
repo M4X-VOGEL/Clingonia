@@ -270,7 +270,8 @@ clingo_err_dict = {
     -3: 'Clingo returned an error.',
     -4: 'Clingo returns UNSATISFIABLE.',
     -5: f'Clingo did not provide the requested Answer: ',
-    -6: 'Invalid actions. Ensure to use #show action/3.'
+    -6: 'Invalid actions. Ensure to use #show action/3.',
+    -7: 'Invalid action format. Ensure action(train(ID), Action, Timestep).'
 }
 
 

@@ -44,6 +44,12 @@ Run Simulation
 
 Once the parameters are set, click this button to execute Clingo and visualize the solution based on the answer set.
 
+Ensure the following action format:
+- action(train(ID), Action, Timestep),
+where ID and Timestep are integers, and
+Action must be one of the following:
+move_forward, move_left, move_right or wait.
+
 (!) Please note that the simulation may range from a few seconds to several minutes, depending on the complexity of the problem. During extended load times, we recommend checking the terminal to monitor your progress.
 
 

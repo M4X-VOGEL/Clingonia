@@ -1,4 +1,5 @@
 import os
+import re
 import time
 import threading
 import subprocess
@@ -163,12 +164,18 @@ def get_action_params(clingo_answer):
     Returns:
         list[str]: List of parameter strings for each action predicate.
     """
+    act_format = re.compile(
+        r"^action\((?:train\((-?\d+)\)|(-?\d+)),\s*([A-Za-z_]+),\s*(-?\d+)\)$"
+    )
     # Split the answer and filter for "action"
     actions = [s for s in clingo_answer.split() if "action" in s]
     action_params = []
     is_format = True
     # Trim each action string
     for action in actions:
+        if not act_format.match(action):
+            print(f"❌ Invalid action format. Ensure action(train(ID), Action, Timestep).\n> See the help page for more information.")
+            return -7  # Report invalid action format
         # Remove redundant Characters
         if "train" in action:
             # This is the common case: action(train(ID), ...)
@@ -246,6 +253,8 @@ def clingo_to_df(clingo_path="clingo", lp_files=[], answer_number=1):
         return answer  # invalid answer number
     # Extract action parameters
     params = get_action_params(answer)
+    if isinstance(params, int):
+        return -7  # invalid action format
     # Create the DataFrame
     df_actions = create_df(params)
     if isinstance(df_actions, int):
