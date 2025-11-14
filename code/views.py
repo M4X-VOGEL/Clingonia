@@ -3734,9 +3734,9 @@ def builder_para_to_track_grid():
         # reset the first try on the second try and continue
         first_build_try = True
 
-    if build_mode == 'modify':
-        current_modify_backup_array = current_array.copy()
-        current_modify_backup_df = current_df.copy()
+    # if build_mode == 'modify':
+    current_modify_backup_array = current_array.copy()
+    current_modify_backup_df = current_df.copy()
 
     if 'builder_para_frame' in frames:
         frames['builder_para_frame'].destroy_frame()
