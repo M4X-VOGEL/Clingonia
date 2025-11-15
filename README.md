@@ -43,7 +43,7 @@ conda create python=3.11 --name flatland
 conda activate flatland
 ```
 
-📦 Then, install the stable release of Flatland:
+📦 Then, install the stable release of Flatland (Version 4.2.2 recommended):
 ```
 pip install flatland-rl
 ```
