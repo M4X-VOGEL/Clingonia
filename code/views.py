@@ -380,7 +380,7 @@ def build_title_frame():
     """Builds the title frame."""
     frames['title_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
@@ -464,7 +464,7 @@ def build_start_menu_frame():
     """Builds the start menu."""
     frames['start_menu_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 1),
         padding=(0, 0),
@@ -594,7 +594,7 @@ def build_start_menu_help_frame():
     """Builds the start menu help frame."""
     frames['start_menu_help_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
@@ -737,7 +737,7 @@ def build_main_menu():
     """Builds the main menu."""
     frames['main_menu_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 1),
         padding=(0, 0),
@@ -959,7 +959,7 @@ def build_main_menu_load_info_frame():
 
     frames['main_menu_load_info_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 1),
         padding=(0, 0),
@@ -1048,7 +1048,7 @@ def build_main_menu_help_frame():
     """Builds the main menu help frame."""
     frames['main_menu_help_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
@@ -1086,7 +1086,7 @@ def build_main_menu_env_viewer():
     """Builds the main menu environment viewer frame."""
     frames['main_menu_env_viewer_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
@@ -1114,7 +1114,7 @@ def build_clingo_para_frame():
     """Builds the clingo parameter modification frame."""
     frames['clingo_para_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 1),
         padding=(0, 0),
@@ -1316,7 +1316,7 @@ def build_clingo_help_frame():
     """Builds the clingo parameter help frame."""
     frames['clingo_help_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
@@ -1857,7 +1857,7 @@ def build_random_gen_para_frame():
     """Builds random generation parameter frame."""
     frames['random_gen_para_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.7,
+        width=int(screenwidth * 0.7),
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
@@ -2504,7 +2504,7 @@ def build_random_gen_para_help_frame():
     """Builds random generation parameter help frame."""
     frames['random_gen_para_help_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.3,
+        width=int(screenwidth * 0.3),
         height=screenheight,
         grid_pos=(0, 1),
         padding=(0, 0),
@@ -2675,7 +2675,7 @@ def build_random_gen_env_viewer():
     """Builds random generation environment viewer frame."""
     frames['random_gen_env_viewer_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
@@ -2704,7 +2704,7 @@ def build_random_gen_env_menu():
     """Builds Random generation environment menu frame."""
     frames['random_gen_env_menu_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 1),
         padding=(0, 0),
@@ -3160,7 +3160,7 @@ def build_builder_para_frame():
     """Builds builder parameter frame."""
     frames['builder_para_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.7,
+        width=int(screenwidth * 0.7),
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
@@ -3574,7 +3574,7 @@ def build_builder_para_help_frame():
     """Builds builder parameter help frame."""
     frames['builder_para_help_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.3,
+        width=int(screenwidth * 0.3),
         height=screenheight,
         grid_pos=(0, 1),
         padding=(0, 0),
@@ -3835,7 +3835,7 @@ def build_builder_grid_frame():
     """Build the builder grid canvas frame."""
     frames['builder_grid_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
@@ -3870,7 +3870,7 @@ def build_track_builder_menu_frame():
     """Build the track builder menu frame."""
     frames['track_builder_menu_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 1),
         padding=(0, 0),
@@ -4363,7 +4363,7 @@ def build_builder_track_help_frame():
     """Builds the track builder menu help frame."""
     frames['builder_track_help_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
@@ -4443,7 +4443,7 @@ def build_train_builder_menu_frame():
     """Builds the train builder menu frame."""
     frames['train_builder_menu_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 1),
         padding=(0, 0),
@@ -4696,7 +4696,7 @@ def open_train_all_config_frame():
 
     frames['train_all_config_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 1),
         padding=(0, 0),
@@ -4948,7 +4948,7 @@ def build_builder_train_help_frame():
     """Builds the train builder menu help frame."""
     frames['builder_train_help_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
@@ -5145,7 +5145,7 @@ def build_builder_env_viewer():
     """Builds the builder environment viewer."""
     frames['builder_env_viewer_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
@@ -5178,7 +5178,7 @@ def build_builder_env_menu():
     """Builds the environment viewer menu."""
     frames['builder_env_menu_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 1),
         padding=(0, 0),
@@ -5428,7 +5428,7 @@ def open_reset_frame(parent_frame):
     """Builds builder reset frame."""
     frames['reset_frame'] = Frame(
         root=parent_frame.root,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 1),
         padding=(0, 0),
@@ -5546,7 +5546,7 @@ def build_result_env_viewer():
     """Builds the result environment viewer frame."""
     frames['result_viewer_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
@@ -5580,7 +5580,7 @@ def build_result_menu():
     """Builds the result menu frame."""
     frames['result_menu_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 1),
         padding=(0, 0),
@@ -5835,7 +5835,7 @@ def build_result_help_frame():
     """Builds the result menu help frame."""
     frames['result_help_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
@@ -5873,7 +5873,7 @@ def build_result_timetable_frame():
     """Builds the result timetable frame."""
     frames['result_timetable_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
@@ -5911,7 +5911,7 @@ def build_result_gif_frame():
     """Builds the result GIF viewer frame."""
     frames['result_gif_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 0),
         padding=(0, 0),
@@ -6413,7 +6413,7 @@ def show_error_logs():
 
     frames['result_error_log_frame'] = Frame(
         root=windows['flatland_window'].window,
-        width=screenwidth * 0.5,
+        width=int(screenwidth * 0.5),
         height=screenheight,
         grid_pos=(0, 1),
         padding=(0, 0),
