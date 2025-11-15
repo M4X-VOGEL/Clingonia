@@ -2123,21 +2123,14 @@ def build_random_gen_para_frame():
         visibility=False,
     )
 
-    entry_fields['grid_entry'] = EntryField(
+    buttons['grid_button'] = ToggleSwitch(
         root=frames['random_gen_para_frame'].frame,
-        width=10,
-        height=1,
-        grid_pos=(6, 3),
-        padding=(0, 0),
-        sticky='nw',
-        text=f'e.g. {default_params["grid"]}',
-        font=base_font_layout,
-        foreground_color=input_color,
-        background_color=entry_color,
-        example_color=example_color,
-        border_width=0,
-        visibility=False,
+        width=70, height=30,
+        on_color=switch_on_color, off_color=switch_off_color,
+        handle_color=input_color, background_color=background_color,
+        command=change_grid_status,
     )
+    buttons['grid_button'].set_state(user_params['grid'])
 
     labels['grid_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
@@ -2243,21 +2236,14 @@ def build_random_gen_para_frame():
         visibility=False,
     )
 
-    entry_fields['remove_entry'] = EntryField(
+    buttons['remove_button'] = ToggleSwitch(
         root=frames['random_gen_para_frame'].frame,
-        width=10,
-        height=1,
-        grid_pos=(9, 3),
-        padding=(0, 0),
-        sticky='nw',
-        text=f'e.g. {default_params["remove"]}',
-        font=base_font_layout,
-        foreground_color=input_color,
-        background_color=entry_color,
-        example_color=example_color,
-        border_width=0,
-        visibility=False,
+        width=70, height=30,
+        on_color=switch_on_color, off_color=switch_off_color,
+        handle_color=input_color, background_color=background_color,
+        command=change_remove_status,
     )
+    buttons['remove_button'].set_state(user_params['remove'])
 
     labels['remove_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
@@ -2774,13 +2760,19 @@ def build_random_gen_env_menu():
 def random_gen_toggle_advanced_para_options():
     """Toggles the visibility of labels and entries in random gen para frame."""
     labels['grid_label'].toggle_visibility()
-    entry_fields['grid_entry'].toggle_visibility()
+    if buttons['grid_button'].winfo_ismapped():
+        buttons['grid_button'].grid_forget()
+    else:
+        buttons['grid_button'].grid(row=6, column=3, sticky='n')
     labels['intercity_label'].toggle_visibility()
     entry_fields['intercity_entry'].toggle_visibility()
     labels['incity_label'].toggle_visibility()
     entry_fields['incity_entry'].toggle_visibility()
     labels['remove_label'].toggle_visibility()
-    entry_fields['remove_entry'].toggle_visibility()
+    if buttons['remove_button'].winfo_ismapped():
+        buttons['remove_button'].grid_forget()
+    else:
+        buttons['remove_button'].grid(row=9, column=3, sticky='n')
     labels['speed_label'].toggle_visibility()
     entry_fields['speed_entry'].toggle_visibility()
     labels['malfunction_label'].toggle_visibility()
@@ -3314,21 +3306,14 @@ def build_builder_para_frame():
         visibility=False,
     )
 
-    entry_fields['remove_entry'] = EntryField(
+    buttons['remove_button'] = ToggleSwitch(
         root=frames['builder_para_frame'].frame,
-        width=10,
-        height=1,
-        grid_pos=(3, 3),
-        padding=(0, 0),
-        sticky='nw',
-        text=f'e.g. {default_params["remove"]}',
-        font=base_font_layout,
-        foreground_color=input_color,
-        background_color=entry_color,
-        example_color=example_color,
-        border_width=0,
-        visibility=False,
+        width=70, height=30,
+        on_color=switch_on_color, off_color=switch_off_color,
+        handle_color=input_color, background_color=background_color,
+        command=change_remove_status,
     )
+    buttons['remove_button'].set_state(user_params['remove'])
 
     labels['remove_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
@@ -5249,7 +5234,10 @@ def build_builder_env_menu():
 def builder_toggle_advanced_para_options():
     """Toggles the visibility of labels and entries in builder para frame."""
     labels['remove_label'].toggle_visibility()
-    entry_fields['remove_entry'].toggle_visibility()
+    if buttons['remove_button'].winfo_ismapped():
+        buttons['remove_button'].grid_forget()
+    else:
+        buttons['remove_button'].grid(row=3, column=3, sticky='n')
     labels['speed_label'].toggle_visibility()
     entry_fields['speed_entry'].toggle_visibility()
     labels['malfunction_label'].toggle_visibility()
@@ -6613,6 +6601,14 @@ def switch_result_to_main():
 
 
 # functions
+
+def change_grid_status():
+    """Changes the grid parameter to the opposite"""
+    user_params['grid'] = not user_params['grid']
+
+def change_remove_status():
+     """Changes the remove parameter to the opposite"""
+     user_params['remove'] = not user_params['remove']
 
 def change_low_quality_status():
     """Changes the lowQuality parameter to the opposite"""
