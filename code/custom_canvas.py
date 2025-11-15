@@ -855,6 +855,21 @@ class BuildCanvas:
             )
             self.canvas_images[(layer, row, col)] = canvas_img
             self.image_refs[(layer, row, col)] = image
+        self.restack_cell(row, col)
+
+    def restack_cell(self, row, col):
+        # get all layers present at this cell
+        layers = sorted(
+            [layer for (layer, r, c) in self.canvas_images.keys()
+             if r == row and c == col]
+        )
+
+        for layer in layers:
+            item_id = self.canvas_images[(layer, row, col)]
+            self.canvas.tag_raise(item_id)
+
+        self.draw_id_labels()
+        return
 
     def update_image_storage(self):
         """Check the references are still valid."""
