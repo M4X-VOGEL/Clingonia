@@ -12,6 +12,15 @@ This page always opens with the "Toggle All Paths" View.
 
 
 
+----------------------
+Grid Canvas Navigation
+----------------------
+
+- Pan Canvas:   RMB
+- Zoom in/out:  Scroll Wheel
+
+
+
 ----------
 Time Table
 ----------
