@@ -5,6 +5,8 @@ from flatland.envs.rail_generators import rail_from_grid_transition_map
 from flatland.envs.malfunction_generators import MalfunctionParameters, ParamMalfunctionGen
 from flatland.utils.rendertools import RenderTool
 from flatland.core.transition_map import GridTransitionMap
+from flatland.core.grid.grid4 import Grid4TransitionsEnum
+from flatland.envs.rail_trainrun_data_structures import Waypoint
 from code.config import DIR_MAP, AGENT_COLORS
 
 filterwarnings("ignore", category=RuntimeWarning)
@@ -103,7 +105,18 @@ def dummy_line_generator(rail, num_agents, hints, *args, **kwargs):
     agent_directions = [None] * num_agents
     agent_speeds = [1.0] * num_agents  # Default speed
 
-    return DummyLine(agent_positions, agent_targets, agent_directions, agent_speeds)
+    # Create necessary waypoints
+    dir = Grid4TransitionsEnum.EAST
+    agent_waypoints = []
+    for _ in range(num_agents):
+        start_wp = Waypoint(position=(0, 0), direction=dir)
+        end_wp = Waypoint(position=(0, 0), direction=None)
+        agent_waypoints.append([[start_wp, end_wp]])
+    
+    line = DummyLine(agent_positions, agent_targets, agent_directions, agent_speeds)
+    line.agent_waypoints = agent_waypoints
+
+    return line
 
 
 def calc_resolution(low_quality_mode, env):
