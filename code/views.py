@@ -3133,6 +3133,9 @@ def builder_para_to_start():
     if 'builder_para_help_frame' in frames:
         frames['builder_para_help_frame'].destroy_frame()
         del frames['builder_para_help_frame']
+    if 'builder_discard_changes_frame' in frames:
+        frames['builder_discard_changes_frame'].destroy_frame()
+        del frames['builder_discard_changes_frame']
 
     create_start_menu()
 
@@ -3153,6 +3156,9 @@ def builder_para_to_main():
     if 'builder_para_help_frame' in frames:
         frames['builder_para_help_frame'].destroy_frame()
         del frames['builder_para_help_frame']
+    if 'builder_discard_changes_frame' in frames:
+        frames['builder_discard_changes_frame'].destroy_frame()
+        del frames['builder_discard_changes_frame']
 
     create_main_menu()
 
