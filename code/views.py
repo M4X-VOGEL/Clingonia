@@ -2618,7 +2618,8 @@ def random_gen_para_to_env():
         labels['random_gen_status_label'].label.config(
             text='No environment generated.\n'
                  'Try different parameters;\n'
-                 'perhaps another seed.',
+                 'Perhaps larger dimensions\n'
+                 'or another seed.',
             fg=bad_status_color,
             anchor="w",
             justify="left",

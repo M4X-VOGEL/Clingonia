@@ -11,6 +11,7 @@ from flatland.envs.malfunction_generators import MalfunctionParameters, ParamMal
 from flatland.envs.agent_utils import SpeedCounter
 from flatland.envs.observations import GlobalObsForRailEnv
 from flatland.envs.timetable_utils import Line
+from flatland.envs.rail_trainrun_data_structures import Waypoint
 from flatland.utils.rendertools import RenderTool
 from code.build_png import calc_resolution, pil_config
 from code.config import TRACKS, DEAD_ENDS
@@ -93,10 +94,15 @@ def custom_sparse_line_generator(env_params, seed=1):
         # Attempt to generate agents based on the provided hints.
         try:
             agents_positions, agents_directions, agents_targets = create_agents_from_train_stations(hints, num_agents, np_random)
+            # Conversion to waypoints
+            waypoints = []
+            for pos, dir, target in zip(agents_positions, agents_directions, agents_targets):
+                start_wp = Waypoint(position=pos, direction=dir)
+                end_wp = Waypoint(position=target, direction=None)
+                waypoints.append([[start_wp, end_wp]])
+            
             speeds = [1.0] * num_agents
-            line = Line(agent_positions=agents_positions,
-                        agent_directions=agents_directions,
-                        agent_targets=agents_targets,
+            line = Line(agent_waypoints=waypoints,
                         agent_speeds=speeds)
             return line
         except Exception as e:
