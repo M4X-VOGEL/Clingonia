@@ -62,7 +62,13 @@ based on all parameters.
 A generation starting number
 that allows you to reproduce
 the environment.
-=== 
+===
+
+
+=== Global Time Limit:
+An upper limit on how long
+the environment can run.
+===
 
 
 

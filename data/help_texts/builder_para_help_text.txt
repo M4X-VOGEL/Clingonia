@@ -39,7 +39,13 @@ The height of the rail map.
 === Environment columns:
 The width of the rail map.
 (Y-axis in Flatland)
-===  
+===
+
+
+=== Global Time Limit:
+An upper limit on how long
+the environment can run.
+===
 
 
 
