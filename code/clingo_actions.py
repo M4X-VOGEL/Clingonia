@@ -1,6 +1,6 @@
-import os
 import re
 import time
+import clingo
 import threading
 import subprocess
 import pandas as pd
@@ -55,38 +55,27 @@ def seconds_to_str(s):
         return f"{hours}h{minutes}m{s}s" if s != 0 else f"{hours}h{minutes}m"
 
 
-def run_clingo(clingo_path, lp_files, answer_number):
-    """Runs Clingo on given ASP files and returns its output.
-
+def run_timer_thread(is_running, timer_start):
+    """Runs Thread to provide status updates while Clingo runs.
+    
     Args:
-        clingo_path (str): Path to Clingo installation.
-        lp_files (list[str]): List of ASP files.
-        answer_number (int): Desired answer number from Clingo.
-
+        is_running (bool method): Condition for process termination of Clingo.
+        timer_start (float): Start time for the timer.
+    
     Returns:
-        str: Clingo output with its answers, or -3 if Clingo returns an error.
+        Thread: Timer-Thread.
     """
-    timer_start = time.perf_counter()  # Timer for Clingo execution time
-
-    # Run Clingo as a subprocess
-    proc = subprocess.Popen(
-        [clingo_path] + clingo_options + lp_files + [str(answer_number)],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        bufsize=1
-    )
     # Timer-Thread to provide status updates while Clingo runs.
     def timer():
         counter, frustration = 30, 30  # Counters
         # Loop until the Clingo process terminates
-        while proc.poll() is None:
+        while is_running():
             time.sleep(0.1)  # Sleep briefly to avoid busy waiting
             elapsed = int(time.perf_counter() - timer_start)
             if elapsed == counter:
                 # Clingo updates
                 t = seconds_to_str(counter)
-                print(f"Clingo: \'{clingo_frustration[frustration]}\' ({t})")
+                print(f"Clingo: '{clingo_frustration[frustration]}' ({t})")
                 # Increase counters
                 counter += 30
                 frustration += 30
@@ -108,21 +97,122 @@ def run_clingo(clingo_path, lp_files, answer_number):
             print(f"Clingo: '{clingo_finisher.get(5, '')}'")
         print(f"🕓 Clingo ran for {execution_time:.2f}s.", flush=True)
     # Start timer thread to output periodic updates
-    timer_thread = threading.Thread(target=timer)
-    timer_thread.daemon = True  # Preventing thread from blocking exit
-    timer_thread.start()
+    t = threading.Thread(target=timer)
+    t.daemon = True  # Preventing thread from blocking exit
+    t.start()
+    return t
+
+
+def run_clingo(clingo_path, lp_files, answer_number):
+    """Runs Clingo on given ASP files and returns its output.
+
+    Args:
+        clingo_path (str): Path to Clingo installation.
+        lp_files (list[str]): List of ASP files.
+        answer_number (int): Desired answer number from Clingo.
+
+    Returns:
+        str: Clingo output with its answers, or -3 if Clingo returns an error.
+    """
+    timer_start = time.perf_counter() # Timer for Clingo execution time
+    try:
+        # Run Clingo as a subprocess
+        proc = subprocess.Popen(
+            [clingo_path] + clingo_options + lp_files + [str(answer_number)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1
+        )
+    except FileNotFoundError:
+        # Fallback to Clingo-API
+        print("⚠️ No clingo.exe found: Switching to Clingo-API...")
+        return run_clingo_api(lp_files, answer_number)
+    # Thread for periodic updates
+    timer_thread = run_timer_thread(lambda: proc.poll() is None, timer_start)
     # Capture Clingo's output
     stdout, stderr = proc.communicate()
     # End thread
     timer_thread.join(timeout=1)
     # Check for Clingo error
     if proc.returncode != 0:
-        error_message = stderr.strip()
+        error_message = (stderr or "").strip()  # "".strip if stderr is None
         # If error is not a warning, print it and return error code
         if error_message and "Warn" not in error_message:
             print(f"❌ Clingo returned an error:\n{error_message}")
             return -3
     return stdout.strip()
+
+
+def run_clingo_api(lp_files, answer_number):
+    """Runs Clingo via Python API and returns a CLI-like output string.
+    
+    Args:
+        lp_files (list[str]): List of ASP files.
+        answer_number (int): Desired answer number from Clingo.
+    
+    Returns:
+        str: Clingo output with its answers.
+    """
+    timer_start = time.perf_counter()  # Timer for Clingo execution time
+    # Flag indicating, if process is finished
+    termination_flag = threading.Event()
+    # Thread for periodic updates
+    timer_thread = run_timer_thread(lambda: not termination_flag.is_set(), timer_start)
+
+    # Control instance to load, ground and solve
+    ctl = clingo.Control()
+    ctl.configuration.solve.models = answer_number
+    # Load & Ground
+    for f in lp_files:
+        ctl.load(f)
+    ctl.ground([("base", [])])
+
+    output = []
+    # Output header
+    output.append(f"clingo version {clingo.__version__}")
+    output.append(f"Reading from {lp_files[0]} ...")
+    output.append("Solving...")
+
+    ans_count = 0
+    cost = None  # Optimization costs
+
+    def on_model(model: "clingo.Model"):
+        # Function gets called on every model
+        nonlocal ans_count, cost
+        ans_count += 1
+        # Like CLI, only show atoms that are marked with #show
+        atoms = sorted(model.symbols(shown=True), key=str)
+        output.append(f"Answer: {ans_count}")
+        output.append(" ".join(str(a) for a in atoms))
+        # If optimization, then get costs
+        try:
+            cost = model.cost  # List of optimization costs
+        except Exception:
+            cost = None
+
+    # Solve
+    res = ctl.solve(on_model=on_model)
+    # End process and thread
+    termination_flag.set()
+    timer_thread.join(timeout=1)
+
+    # Output optimization
+    if cost is not None and len(cost) > 0:
+        output.append(f"Optimization: {' '.join(map(str, cost))}")
+        if getattr(res, "optimality_proven", False):
+            output.append("OPTIMUM FOUND")
+
+    # Output footnote
+    elapsed = time.perf_counter() - timer_start
+    output.append("")
+    output.append(f"Models       : {ans_count}")
+    if cost is not None:
+        output.append(f"Optimization : {' '.join(map(str, cost))}")
+    output.append("Calls        : 1")
+    output.append(f"Time         : {elapsed:.3f}s")
+
+    return "\n".join(output).strip()
 
 
 def get_clingo_answer(clingo_output, answer_number):
@@ -239,17 +329,15 @@ def clingo_to_df(clingo_path="clingo", lp_files=[], answer_number=1):
     if answer_number < 1:
         print(f"❌ Invalid answer to display: {answer_number}.")
         return -5
+
     print("Running Clingo...")
-    # Check if clingo_path is valid
-    if clingo_path != "clingo" and not os.path.isfile(f"{clingo_path}.exe"):
-        return -2  # invalid clingo path
     # Run Clingo and capture its output
     output = run_clingo(clingo_path, lp_files, answer_number)
     if output == -3:
         return -3  # clingo error
     # Extract desired answer
     answer = get_clingo_answer(output, answer_number)
-    if answer == -4 or answer == -5:
+    if answer in (-4, -5):
         return answer  # invalid answer number
     # Extract action parameters
     params = get_action_params(answer)
