@@ -141,6 +141,7 @@ default_params = {
     'agents': 4,
     'cities': 4,
     'seed': 1,
+    'globalTimeLimit': 40,
     'grid': False,
     'intercity': 2,
     'incity': 2,
@@ -163,6 +164,7 @@ user_params = {
     'agents': None,
     'cities': None,
     'seed': None,
+    'globalTimeLimit': None,
     'grid': None,
     'intercity': None,
     'incity': None,
@@ -204,6 +206,7 @@ err_dict = {
         'tooBigSeed': 'seed is too big',
         'negativeValue': 'needs Seed >= 0',
     },
+    'globalTimeLimit': {ValueError: 'needs int > 0'},
     'grid': {ValueError: 'needs true or false'},
     'intercity': {
         ValueError: 'needs int > 0',
@@ -2111,9 +2114,49 @@ def build_random_gen_para_frame():
         visibility=False,
     )
 
-    labels['grid_label'] = Label(
+    labels['globalTimeLimit_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
         grid_pos=(6, 2),
+        padding=(0, 0),
+        sticky='nw',
+        text='Global Time Limit:',
+        font=base_font_layout,
+        foreground_color=label_color,
+        background_color=background_color,
+        visibility=True,
+    )
+
+    entry_fields['globalTimeLimit_entry'] = EntryField(
+        root=frames['random_gen_para_frame'].frame,
+        width=10,
+        height=1,
+        grid_pos=(6, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text=f'e.g. {default_params["globalTimeLimit"]}',
+        font=base_font_layout,
+        foreground_color=input_color,
+        background_color=entry_color,
+        example_color=example_color,
+        border_width=0,
+        visibility=True,
+    )
+
+    labels['globalTimeLimit_error_label'] = Label(
+        root=frames['random_gen_para_frame'].frame,
+        grid_pos=(6, 4),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=err_font_layout,
+        foreground_color=bad_status_color,
+        background_color=background_color,
+        visibility=False,
+    )
+
+    labels['grid_label'] = Label(
+        root=frames['random_gen_para_frame'].frame,
+        grid_pos=(7, 2),
         padding=(0, 0),
         sticky='nw',
         text='Use grid mode:',
@@ -2134,7 +2177,7 @@ def build_random_gen_para_frame():
 
     labels['grid_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(6, 4),
+        grid_pos=(7, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -2146,7 +2189,7 @@ def build_random_gen_para_frame():
 
     labels['intercity_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(7, 2),
+        grid_pos=(8, 2),
         padding=(0, 0),
         sticky='nw',
         text='Max. number of rails between cities:',
@@ -2160,7 +2203,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(7, 3),
+        grid_pos=(8, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["intercity"]}',
@@ -2174,7 +2217,7 @@ def build_random_gen_para_frame():
 
     labels['intercity_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(7, 4),
+        grid_pos=(8, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -2186,7 +2229,7 @@ def build_random_gen_para_frame():
 
     labels['incity_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(8, 2),
+        grid_pos=(9, 2),
         padding=(0, 0),
         sticky='nw',
         text='Max. number of rail pairs in cities:',
@@ -2200,7 +2243,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(8, 3),
+        grid_pos=(9, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["incity"]}',
@@ -2214,7 +2257,7 @@ def build_random_gen_para_frame():
 
     labels['incity_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(8, 4),
+        grid_pos=(9, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -2226,7 +2269,7 @@ def build_random_gen_para_frame():
 
     labels['remove_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(9, 2),
+        grid_pos=(10, 2),
         padding=(0, 0),
         sticky='nw',
         text='Remove agents on arrival:',
@@ -2247,7 +2290,7 @@ def build_random_gen_para_frame():
 
     labels['remove_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(9, 4),
+        grid_pos=(10, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -2259,7 +2302,7 @@ def build_random_gen_para_frame():
 
     labels['speed_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(10, 2),
+        grid_pos=(11, 2),
         padding=(0, 0),
         sticky='nw',
         text='Speed ratio map for trains:',
@@ -2273,7 +2316,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(10, 3),
+        grid_pos=(11, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {str(default_params["speed"]).strip("{}")}',
@@ -2287,7 +2330,7 @@ def build_random_gen_para_frame():
 
     labels['speed_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(10, 4),
+        grid_pos=(11, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -2299,7 +2342,7 @@ def build_random_gen_para_frame():
 
     labels['malfunction_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(11, 2),
+        grid_pos=(12, 2),
         padding=(0, 0),
         sticky='nw',
         text='Malfunction rate:',
@@ -2313,7 +2356,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(11, 3),
+        grid_pos=(12, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["malfunction"][0]}/'
@@ -2328,7 +2371,7 @@ def build_random_gen_para_frame():
 
     labels['malfunction_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(11, 4),
+        grid_pos=(12, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -2340,7 +2383,7 @@ def build_random_gen_para_frame():
 
     labels['min_duration_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(12, 2),
+        grid_pos=(13, 2),
         padding=(0, 0),
         sticky='nw',
         text='Min. duration for malfunctions:',
@@ -2354,7 +2397,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(12, 3),
+        grid_pos=(13, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["min"]}',
@@ -2368,7 +2411,7 @@ def build_random_gen_para_frame():
 
     labels['min_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(12, 4),
+        grid_pos=(13, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -2380,7 +2423,7 @@ def build_random_gen_para_frame():
 
     labels['max_duration_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(13, 2),
+        grid_pos=(14, 2),
         padding=(0, 0),
         sticky='nw',
         text='Max. duration for malfunctions:',
@@ -2394,7 +2437,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(13, 3),
+        grid_pos=(14, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["max"]}',
@@ -2408,7 +2451,7 @@ def build_random_gen_para_frame():
 
     labels['max_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(13, 4),
+        grid_pos=(14, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -2420,7 +2463,7 @@ def build_random_gen_para_frame():
 
     labels['lowQuality_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(14, 2),
+        grid_pos=(15, 2),
         padding=(0, 0),
         sticky='nw',
         text='Low quality mode:',
@@ -2443,7 +2486,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=15,
         height=1,
-        grid_pos=(15, 2),
+        grid_pos=(16, 2),
         padding=(0, 0),
         sticky='nw',
         command=random_gen_toggle_advanced_para_options,
@@ -2460,7 +2503,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=9,
         height=1,
-        grid_pos=(15, 3),
+        grid_pos=(16, 3),
         padding=(0, 0),
         sticky='nw',
         command=random_gen_para_to_env,
@@ -2475,7 +2518,7 @@ def build_random_gen_para_frame():
 
     labels['random_gen_status_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(15, 4),
+        grid_pos=(16, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -2487,7 +2530,7 @@ def build_random_gen_para_frame():
 
     frames['random_gen_para_frame'].frame.rowconfigure(0, weight=1)
     frames['random_gen_para_frame'].frame.rowconfigure(
-        tuple(range(1,16)), weight=2
+        tuple(range(1,17)), weight=2
     )
     frames['random_gen_para_frame'].frame.columnconfigure(0, weight=1)
     frames['random_gen_para_frame'].frame.columnconfigure(1, weight=1)
@@ -2764,7 +2807,7 @@ def random_gen_toggle_advanced_para_options():
     if buttons['grid_button'].winfo_ismapped():
         buttons['grid_button'].grid_forget()
     else:
-        buttons['grid_button'].grid(row=6, column=3, sticky='n')
+        buttons['grid_button'].grid(row=7, column=3, sticky='n')
     labels['intercity_label'].toggle_visibility()
     entry_fields['intercity_entry'].toggle_visibility()
     labels['incity_label'].toggle_visibility()
@@ -2773,7 +2816,7 @@ def random_gen_toggle_advanced_para_options():
     if buttons['remove_button'].winfo_ismapped():
         buttons['remove_button'].grid_forget()
     else:
-        buttons['remove_button'].grid(row=9, column=3, sticky='n')
+        buttons['remove_button'].grid(row=10, column=3, sticky='n')
     labels['speed_label'].toggle_visibility()
     entry_fields['speed_entry'].toggle_visibility()
     labels['malfunction_label'].toggle_visibility()
@@ -2786,7 +2829,7 @@ def random_gen_toggle_advanced_para_options():
     if buttons['lowQuality_button'].winfo_ismapped():
         buttons['lowQuality_button'].grid_forget()
     else:
-        buttons['lowQuality_button'].grid(row=14, column=3, sticky='n')
+        buttons['lowQuality_button'].grid(row=15, column=3, sticky='n')
     return
 
 def toggle_random_gen_para_help():
@@ -2816,16 +2859,6 @@ def save_random_gen_env_params():
     Returns:
         int: -1 if there was an error with any input 0 otherwise.
     """
-    def str_to_bool(s):
-        """Helper function to transform boolean user entries to booleans."""
-        if isinstance(s, str):
-            s = s.lower()
-            if s == "true" or s == 'tru' or s == 'yes' or s == 'y':
-                return True
-            elif s == "false" or s == 'no' or s == 'n':
-                return False
-        raise ValueError(f"Invalid boolean string: {s}")
-
     err_count = 0
 
     for field in entry_fields:
@@ -2833,7 +2866,8 @@ def save_random_gen_env_params():
         key = field.split('_')[0]
         if key not in default_params:
             continue
-        elif key in ['answer', 'clingo', 'lpFiles', 'frameRate']:
+        elif key not in ['rows','cols','agents','cities','seed','globalTimeLimit',
+                         'intercity','incity','speed','malfunction','min','max']:
             continue
 
         # get the data from the entry field
@@ -2848,8 +2882,6 @@ def save_random_gen_env_params():
                 data = None
                 user_params[key] = data
                 continue
-            elif key == 'grid' or key == 'remove':
-                data = str_to_bool(data)
             elif key == 'speed':
                 if ":" not in data:
                     raise ValueError
@@ -2983,7 +3015,8 @@ def load_random_gen_env_params():
 
         if key not in default_params:
             continue
-        elif key in ['answer', 'clingo', 'lpFiles', 'frameRate']:
+        elif key not in ['rows','cols','agents','cities','seed','globalTimeLimit',
+                         'intercity','incity','speed','malfunction','min','max']:
             continue
         elif user_params[key] is None:
             continue
@@ -3301,9 +3334,50 @@ def build_builder_para_frame():
         visibility=False,
     )
 
-    labels['remove_label'] = Label(
+
+    labels['globalTimeLimit_label'] = Label(
         root=frames['builder_para_frame'].frame,
         grid_pos=(3, 2),
+        padding=(0, 0),
+        sticky='nw',
+        text='Global Time Limit:',
+        font=base_font_layout,
+        foreground_color=label_color,
+        background_color=background_color,
+        visibility=True,
+    )
+
+    entry_fields['globalTimeLimit_entry'] = EntryField(
+        root=frames['builder_para_frame'].frame,
+        width=10,
+        height=1,
+        grid_pos=(3, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text=f'e.g. {default_params["globalTimeLimit"]}',
+        font=base_font_layout,
+        foreground_color=input_color,
+        background_color=entry_color,
+        example_color=example_color,
+        border_width=0,
+        visibility=True,
+    )
+
+    labels['globalTimeLimit_error_label'] = Label(
+        root=frames['builder_para_frame'].frame,
+        grid_pos=(3, 4),
+        padding=(0, 0),
+        sticky='nw',
+        text='',
+        font=err_font_layout,
+        foreground_color=bad_status_color,
+        background_color=background_color,
+        visibility=False,
+    )
+
+    labels['remove_label'] = Label(
+        root=frames['builder_para_frame'].frame,
+        grid_pos=(4, 2),
         padding=(0, 0),
         sticky='nw',
         text='Remove agents on arrival:',
@@ -3324,7 +3398,7 @@ def build_builder_para_frame():
 
     labels['remove_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(3, 4),
+        grid_pos=(4, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -3336,7 +3410,7 @@ def build_builder_para_frame():
 
     labels['speed_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(4, 2),
+        grid_pos=(5, 2),
         padding=(0, 0),
         sticky='nw',
         text='Speed ratio map for trains:',
@@ -3350,7 +3424,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(4, 3),
+        grid_pos=(5, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {str(default_params["speed"]).strip("{}")}',
@@ -3364,7 +3438,7 @@ def build_builder_para_frame():
 
     labels['speed_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(4, 4),
+        grid_pos=(5, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -3376,7 +3450,7 @@ def build_builder_para_frame():
 
     labels['malfunction_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(5, 2),
+        grid_pos=(6, 2),
         padding=(0, 0),
         sticky='nw',
         text='Malfunction rate:',
@@ -3390,7 +3464,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(5, 3),
+        grid_pos=(6, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["malfunction"][0]}/'
@@ -3405,7 +3479,7 @@ def build_builder_para_frame():
 
     labels['malfunction_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(5, 4),
+        grid_pos=(6, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -3417,7 +3491,7 @@ def build_builder_para_frame():
 
     labels['min_duration_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(6, 2),
+        grid_pos=(7, 2),
         padding=(0, 0),
         sticky='nw',
         text='Min. duration for malfunctions:',
@@ -3431,7 +3505,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(6, 3),
+        grid_pos=(7, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["min"]}',
@@ -3445,7 +3519,7 @@ def build_builder_para_frame():
 
     labels['min_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(6, 4),
+        grid_pos=(7, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -3457,7 +3531,7 @@ def build_builder_para_frame():
 
     labels['max_duration_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(7, 2),
+        grid_pos=(8, 2),
         padding=(0, 0),
         sticky='nw',
         text='Max. duration for malfunctions:',
@@ -3471,7 +3545,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(7, 3),
+        grid_pos=(8, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["max"]}',
@@ -3485,7 +3559,7 @@ def build_builder_para_frame():
 
     labels['max_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(7, 4),
+        grid_pos=(8, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -3497,7 +3571,7 @@ def build_builder_para_frame():
 
     labels['lowQuality_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(8, 2),
+        grid_pos=(9, 2),
         padding=(0, 0),
         sticky='nw',
         text='Low quality mode:',
@@ -3520,7 +3594,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=15,
         height=1,
-        grid_pos=(9, 2),
+        grid_pos=(10, 2),
         padding=(0, 0),
         sticky='nw',
         command=builder_toggle_advanced_para_options,
@@ -3537,7 +3611,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=9,
         height=1,
-        grid_pos=(9, 3),
+        grid_pos=(10, 3),
         padding=(0, 0),
         sticky='nw',
         command=builder_para_to_track_grid,
@@ -3552,7 +3626,7 @@ def build_builder_para_frame():
 
     labels['build_para_status_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(9, 4),
+        grid_pos=(10, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -3564,7 +3638,7 @@ def build_builder_para_frame():
 
     frames['builder_para_frame'].frame.rowconfigure(0, weight=1)
     frames['builder_para_frame'].frame.rowconfigure(
-        tuple(range(1,10)), weight=2
+        tuple(range(1,11)), weight=2
     )
     frames['builder_para_frame'].frame.columnconfigure(0, weight=1)
     frames['builder_para_frame'].frame.columnconfigure(1, weight=1)
@@ -5244,7 +5318,7 @@ def builder_toggle_advanced_para_options():
     if buttons['remove_button'].winfo_ismapped():
         buttons['remove_button'].grid_forget()
     else:
-        buttons['remove_button'].grid(row=3, column=3, sticky='n')
+        buttons['remove_button'].grid(row=4, column=3, sticky='n')
     labels['speed_label'].toggle_visibility()
     entry_fields['speed_entry'].toggle_visibility()
     labels['malfunction_label'].toggle_visibility()
@@ -5257,7 +5331,7 @@ def builder_toggle_advanced_para_options():
     if buttons['lowQuality_button'].winfo_ismapped():
         buttons['lowQuality_button'].grid_forget()
     else:
-        buttons['lowQuality_button'].grid(row=8, column=3, sticky='n')
+        buttons['lowQuality_button'].grid(row=9, column=3, sticky='n')
     return
 
 def switch_builder_to_main():
@@ -5286,16 +5360,6 @@ def save_builder_env_params():
     Returns:
         int: -1 if there was an error registered with any input 0 otherwise.
     """
-    def str_to_bool(s):
-        """Helper function to transform boolean user entries to booleans."""
-        if isinstance(s, str):
-            s = s.lower()
-            if s == "true" or s == 'tru' or s == 'yes' or s == 'y':
-                return True
-            elif s == "false" or s == 'no' or s == 'n':
-                return False
-        raise ValueError(f"Invalid boolean string: {s}")
-
     err_count = 0
 
     for field in entry_fields:
@@ -5303,8 +5367,7 @@ def save_builder_env_params():
         key = field.split('_')[0]
         if key not in default_params:
             continue
-        if key in ['answer', 'clingo', 'lpFiles', 'agents', 'cities', 'seed',
-                   'grid', 'intercity', 'incity', 'frameRate']:
+        if key not in ['rows','cols','globalTimeLimit','speed','malfunction','min','max']:
             continue
 
         # get the data from the entry field
@@ -5319,8 +5382,6 @@ def save_builder_env_params():
                 data = None
                 user_params[key] = data
                 continue
-            elif key == 'grid' or key == 'remove':
-                data = str_to_bool(data)
             elif key == 'speed':
                 if ":" not in data:
                     raise ValueError
@@ -5413,8 +5474,7 @@ def load_builder_env_params():
         key = field.split('_')[0]
         if key not in default_params:
             continue
-        elif key in ['answer', 'clingo', 'lpFiles', 'agents', 'cities', 'seed',
-                     'grid', 'intercity', 'incity', 'frameRate']:
+        elif key not in ['rows','cols','globalTimeLimit','speed','malfunction','min','max']:
             continue
         elif user_params[key] is None:
             continue
@@ -6730,6 +6790,7 @@ def current_df_to_env_text(mode):
     param_divider = '|------------|'
 
     gen_param_text = [
+        f'|-Environment Time Limit: {user_params["globalTimeLimit"]}',
         f'|-Environment Seed: {user_params["seed"]}',
         f'|-Grid Mode: {user_params["grid"]}',
         f'|-Remove agents on arrival: {user_params["remove"]}',
@@ -6741,6 +6802,7 @@ def current_df_to_env_text(mode):
     ]
     build_param_text = [
         f'|-Remove agents on arrival: {user_params["remove"]}',
+        f'|-Environment Time Limit: {user_params["globalTimeLimit"]}',
         f'|-Speeds of Trains: {user_params["speed"]}',
         f'|-Malfunction rate: '
         f'{user_params["malfunction"][0]}/{user_params["malfunction"][1]}',
