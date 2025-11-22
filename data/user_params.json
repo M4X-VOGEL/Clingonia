@@ -4,6 +4,7 @@
     "agents": null,
     "cities": null,
     "seed": null,
+    "globalTimeLimit": null,
     "grid": null,
     "intercity": null,
     "incity": null,
