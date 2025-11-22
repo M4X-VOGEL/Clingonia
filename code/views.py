@@ -2833,7 +2833,8 @@ def save_random_gen_env_params():
         key = field.split('_')[0]
         if key not in default_params:
             continue
-        elif key in ['answer', 'clingo', 'lpFiles', 'frameRate']:
+        elif key not in ['rows', 'cols', 'agents', 'cities','seed','intercity',
+                         'incity','speed','malfunction','min','max']:
             continue
 
         # get the data from the entry field
@@ -2848,8 +2849,6 @@ def save_random_gen_env_params():
                 data = None
                 user_params[key] = data
                 continue
-            elif key == 'grid' or key == 'remove':
-                data = str_to_bool(data)
             elif key == 'speed':
                 if ":" not in data:
                     raise ValueError
@@ -2983,7 +2982,8 @@ def load_random_gen_env_params():
 
         if key not in default_params:
             continue
-        elif key in ['answer', 'clingo', 'lpFiles', 'frameRate']:
+        elif key not in ['rows', 'cols', 'agents', 'cities','seed','intercity',
+                         'incity','speed','malfunction','min','max']:
             continue
         elif user_params[key] is None:
             continue
@@ -5286,16 +5286,6 @@ def save_builder_env_params():
     Returns:
         int: -1 if there was an error registered with any input 0 otherwise.
     """
-    def str_to_bool(s):
-        """Helper function to transform boolean user entries to booleans."""
-        if isinstance(s, str):
-            s = s.lower()
-            if s == "true" or s == 'tru' or s == 'yes' or s == 'y':
-                return True
-            elif s == "false" or s == 'no' or s == 'n':
-                return False
-        raise ValueError(f"Invalid boolean string: {s}")
-
     err_count = 0
 
     for field in entry_fields:
@@ -5303,8 +5293,7 @@ def save_builder_env_params():
         key = field.split('_')[0]
         if key not in default_params:
             continue
-        if key in ['answer', 'clingo', 'lpFiles', 'agents', 'cities', 'seed',
-                   'grid', 'intercity', 'incity', 'frameRate']:
+        if key not in ['rows','cols','speed','malfunction','min','max']:
             continue
 
         # get the data from the entry field
@@ -5319,8 +5308,6 @@ def save_builder_env_params():
                 data = None
                 user_params[key] = data
                 continue
-            elif key == 'grid' or key == 'remove':
-                data = str_to_bool(data)
             elif key == 'speed':
                 if ":" not in data:
                     raise ValueError
@@ -5413,8 +5400,7 @@ def load_builder_env_params():
         key = field.split('_')[0]
         if key not in default_params:
             continue
-        elif key in ['answer', 'clingo', 'lpFiles', 'agents', 'cities', 'seed',
-                     'grid', 'intercity', 'incity', 'frameRate']:
+        elif key not in ['rows','cols','speed','malfunction','min','max']:
             continue
         elif user_params[key] is None:
             continue
