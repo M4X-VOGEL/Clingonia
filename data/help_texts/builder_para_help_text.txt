@@ -42,12 +42,6 @@ The width of the rail map.
 ===
 
 
-=== Global Time Limit:
-An upper limit on how long
-the environment can run.
-===
-
-
 
 ----------------
 Advanced Options
@@ -82,6 +76,12 @@ environments over 1000x1000.
 -----------------------------
 Parameters (no Clingo impact)
 -----------------------------
+
+=== Global Time Limit:
+An upper limit on how long
+the environment can run.
+===
+
 
 === Speed ratio map for trains:
 Distribution of train speeds.

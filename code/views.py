@@ -141,7 +141,7 @@ default_params = {
     'agents': 4,
     'cities': 4,
     'seed': 1,
-    'globalTimeLimit': 40,
+    'globalTimeLimit': 100,
     'grid': False,
     'intercity': 2,
     'incity': 2,
@@ -206,7 +206,10 @@ err_dict = {
         'tooBigSeed': 'seed is too big',
         'negativeValue': 'needs Seed >= 0',
     },
-    'globalTimeLimit': {ValueError: 'needs int > 0'},
+    'globalTimeLimit': {
+        ValueError: 'needs int > 0',
+        'notEnoughTime': 'needs at least Time >= 1',
+    },
     'grid': {ValueError: 'needs true or false'},
     'intercity': {
         ValueError: 'needs int > 0',
@@ -2941,6 +2944,11 @@ def save_random_gen_env_params():
             err = 'negativeValue'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
+        elif key == 'globalTimeLimit' and data < 1:
+            err_count += 1
+            err = 'notEnoughTime'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
         elif key=='intercity' and data < 1:
             err_count += 1
             err = 'tooFewRails'
@@ -5411,7 +5419,12 @@ def save_builder_env_params():
             continue
 
         # check for additional constrains and display error when violated
-        if key=='malfunction' and data[1] == 0:
+        if key == 'globalTimeLimit' and data < 1:
+            err_count += 1
+            err = 'notEnoughTime'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        elif key=='malfunction' and data[1] == 0:
             err_count += 1
             err = 'divByZero'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
