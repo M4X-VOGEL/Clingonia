@@ -146,7 +146,7 @@ default_params = {
     'intercity': 2,
     'incity': 2,
     'remove': True,
-    'speed': {1.0 : 1.0},
+    'speedMap': {1.0 : 1.0},
     'malfunction': (0, 30),
     'min': 2,
     'max': 6,
@@ -169,7 +169,7 @@ user_params = {
     'intercity': None,
     'incity': None,
     'remove': None,
-    'speed': None,
+    'speedMap': None,
     'malfunction': None,
     'min': None,
     'max': None,
@@ -220,7 +220,7 @@ err_dict = {
         'tooFewRails': 'needs at least 1 rail pair in the cities'
     },
     'remove': {ValueError: 'needs true or false'},
-    'speed': {
+    'speedMap': {
         ValueError: 'needs dictionary: float: float,... , 0 <= float <= 1',
         SyntaxError: 'needs dictionary: float: float,... , 0 <= float <= 1',
         'negativeValue': 'needs dictionary float: float,... , 0 <= float <= 1',
@@ -2303,7 +2303,7 @@ def build_random_gen_para_frame():
         visibility=False,
     )
 
-    labels['speed_label'] = Label(
+    labels['speedMap_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
         grid_pos=(11, 2),
         padding=(0, 0),
@@ -2315,14 +2315,14 @@ def build_random_gen_para_frame():
         visibility=False,
     )
 
-    entry_fields['speed_entry'] = EntryField(
+    entry_fields['speedMap_entry'] = EntryField(
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
         grid_pos=(11, 3),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {str(default_params["speed"]).strip("{}")}',
+        text=f'e.g. {str(default_params["speedMap"]).strip("{}")}',
         font=base_font_layout,
         foreground_color=input_color,
         background_color=entry_color,
@@ -2331,7 +2331,7 @@ def build_random_gen_para_frame():
         visibility=False,
     )
 
-    labels['speed_error_label'] = Label(
+    labels['speedMap_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
         grid_pos=(11, 4),
         padding=(0, 0),
@@ -2820,8 +2820,8 @@ def random_gen_toggle_advanced_para_options():
         buttons['remove_button'].grid_forget()
     else:
         buttons['remove_button'].grid(row=10, column=3, sticky='n')
-    labels['speed_label'].toggle_visibility()
-    entry_fields['speed_entry'].toggle_visibility()
+    labels['speedMap_label'].toggle_visibility()
+    entry_fields['speedMap_entry'].toggle_visibility()
     labels['malfunction_label'].toggle_visibility()
     entry_fields['malfunction_entry'].toggle_visibility()
     labels['min_duration_label'].toggle_visibility()
@@ -2870,7 +2870,7 @@ def save_random_gen_env_params():
         if key not in default_params:
             continue
         elif key not in ['rows','cols','agents','cities','seed','globalTimeLimit',
-                         'intercity','incity','speed','malfunction','min','max']:
+                         'intercity','incity','speedMap','malfunction','min','max']:
             continue
 
         # get the data from the entry field
@@ -2881,7 +2881,7 @@ def save_random_gen_env_params():
                 raise ValueError
             elif data == '':
                 raise ValueError
-            elif key == 'speed':
+            elif key == 'speedMap':
                 if ":" not in data:
                     raise ValueError
                 data = '{' + data + '}'
@@ -2981,7 +2981,7 @@ def save_random_gen_env_params():
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
 
-        if key=='speed':
+        if key=='speedMap':
             for k, v in data.items():
                 if not isinstance(k, float) or not isinstance(v, float):
                     err_count += 1
@@ -3020,13 +3020,13 @@ def load_random_gen_env_params():
         if key not in default_params:
             continue
         elif key not in ['rows','cols','agents','cities','seed','globalTimeLimit',
-                         'intercity','incity','speed','malfunction','min','max']:
+                         'intercity','incity','speedMap','malfunction','min','max']:
             continue
         elif user_params[key] is None:
             continue
-        elif key == 'speed':
+        elif key == 'speedMap':
             string = ''
-            for k, v in user_params['speed'].items():
+            for k, v in user_params['speedMap'].items():
                 string = string + f'{k}: {v}, '
             entry_fields[field].insert_string(string[:-2])
         elif key == 'malfunction':
@@ -3412,7 +3412,7 @@ def build_builder_para_frame():
         visibility=False,
     )
 
-    labels['speed_label'] = Label(
+    labels['speedMap_label'] = Label(
         root=frames['builder_para_frame'].frame,
         grid_pos=(5, 2),
         padding=(0, 0),
@@ -3424,14 +3424,14 @@ def build_builder_para_frame():
         visibility=False,
     )
 
-    entry_fields['speed_entry'] = EntryField(
+    entry_fields['speedMap_entry'] = EntryField(
         root=frames['builder_para_frame'].frame,
         width=10,
         height=1,
         grid_pos=(5, 3),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {str(default_params["speed"]).strip("{}")}',
+        text=f'e.g. {str(default_params["speedMap"]).strip("{}")}',
         font=base_font_layout,
         foreground_color=input_color,
         background_color=entry_color,
@@ -3440,7 +3440,7 @@ def build_builder_para_frame():
         visibility=False,
     )
 
-    labels['speed_error_label'] = Label(
+    labels['speedMap_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
         grid_pos=(5, 4),
         padding=(0, 0),
@@ -5323,8 +5323,8 @@ def builder_toggle_advanced_para_options():
         buttons['remove_button'].grid_forget()
     else:
         buttons['remove_button'].grid(row=4, column=3, sticky='n')
-    labels['speed_label'].toggle_visibility()
-    entry_fields['speed_entry'].toggle_visibility()
+    labels['speedMap_label'].toggle_visibility()
+    entry_fields['speedMap_entry'].toggle_visibility()
     labels['malfunction_label'].toggle_visibility()
     entry_fields['malfunction_entry'].toggle_visibility()
     labels['min_duration_label'].toggle_visibility()
@@ -5371,7 +5371,7 @@ def save_builder_env_params():
         key = field.split('_')[0]
         if key not in default_params:
             continue
-        if key not in ['rows','cols','globalTimeLimit','speed','malfunction','min','max']:
+        if key not in ['rows','cols','globalTimeLimit','speedMap','malfunction','min','max']:
             continue
 
         # get the data from the entry field
@@ -5382,7 +5382,7 @@ def save_builder_env_params():
                 raise ValueError
             elif data == '':
                 raise ValueError
-            elif key == 'speed':
+            elif key == 'speedMap':
                 if ":" not in data:
                     raise ValueError
                 data = '{' + data + '}'
@@ -5442,7 +5442,7 @@ def save_builder_env_params():
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
 
-        if key=='speed':
+        if key=='speedMap':
             for k, v in data.items():
                 if not isinstance(k, float) or not isinstance(v, float):
                     err_count += 1
@@ -5479,13 +5479,13 @@ def load_builder_env_params():
         key = field.split('_')[0]
         if key not in default_params:
             continue
-        elif key not in ['rows','cols','globalTimeLimit','speed','malfunction','min','max']:
+        elif key not in ['rows','cols','globalTimeLimit','speedMap','malfunction','min','max']:
             continue
         elif user_params[key] is None:
             continue
-        elif key == 'speed':
+        elif key == 'speedMap':
             string = ''
-            for k, v in user_params['speed'].items():
+            for k, v in user_params['speedMap'].items():
                 string = string + f'{k}: {v}, '
             entry_fields[field].insert_string(string[:-2])
         elif key == 'malfunction':
@@ -6799,7 +6799,7 @@ def current_df_to_env_text(mode):
         f'|-Environment Seed: {user_params["seed"]}',
         f'|-Grid Mode: {user_params["grid"]}',
         f'|-Remove agents on arrival: {user_params["remove"]}',
-        f'|-Speeds of Trains: {user_params["speed"]}',
+        f'|-Speeds of Trains: {user_params["speedMap"]}',
         f'|-Malfunction rate: '
         f'{user_params["malfunction"][0]}/{user_params["malfunction"][1]}',
         f'|-Minimum Duration of Malfunctions: {user_params["min"]}',
@@ -6808,7 +6808,7 @@ def current_df_to_env_text(mode):
     build_param_text = [
         f'|-Remove agents on arrival: {user_params["remove"]}',
         f'|-Environment Time Limit: {user_params["globalTimeLimit"]}',
-        f'|-Speeds of Trains: {user_params["speed"]}',
+        f'|-Speeds of Trains: {user_params["speedMap"]}',
         f'|-Malfunction rate: '
         f'{user_params["malfunction"][0]}/{user_params["malfunction"][1]}',
         f'|-Minimum Duration of Malfunctions: {user_params["min"]}',
@@ -6858,8 +6858,8 @@ def load_user_data_from_file():
     with open('data/user_params.json', 'r') as file:
         data = json.load(file)
 
-    if data['speed'] is not None:
-        data['speed'] = {float(k): float(v) for k, v in data['speed'].items()}
+    if data['speedMap'] is not None:
+        data['speedMap'] = {float(k): float(v) for k, v in data['speedMap'].items()}
     if data['malfunction'] is not None:
         data['malfunction'] = (data['malfunction'][0], data['malfunction'][1])
 
