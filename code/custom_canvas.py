@@ -726,6 +726,7 @@ class BuildCanvas:
                         'end_pos': (-1, -1),
                         'e_dep': -1,
                         'l_arr': -1,
+                        'speed': -1,
                     }
                     self.train_data.loc[len(self.train_data)] = data
                     # replace all trains
@@ -1664,7 +1665,7 @@ class TrainListCanvas:
             visibility=True,
         )
 
-        # if there is already a earliest departure load the current value
+        # if there is already an earliest departure load the current value
         if self.train_data.loc[index, 'e_dep'] != -1:
             ed_entry.insert_string(str(self.train_data.loc[index, 'e_dep']))
 
@@ -1724,11 +1725,55 @@ class TrainListCanvas:
             visibility=True,
         )
 
+        Label(
+            root=config_frame.frame,
+            grid_pos=(3, 0),
+            padding=(100, (0,20)),
+            sticky='w',
+            text=f'Speed:',
+            font=self.base_font_layout,
+            foreground_color=self.label_color,
+            background_color=self.background_color,
+            visibility=True,
+        )
+
+        speed_entry = EntryField(
+            root=config_frame.frame,
+            width=10,
+            height=1,
+            grid_pos=(3, 0),
+            padding=(0, (0,20)),
+            sticky='e',
+            text=f'e.g. 1',
+            font=self.base_font_layout,
+            foreground_color=self.input_color,
+            background_color=self.entry_color,
+            example_color=self.example_color,
+            border_width=0,
+            visibility=True,
+        )
+
+        # if there is already a speed load the current value
+        if self.train_data.loc[index, 'speed'] != -1:
+            speed_entry.insert_string(str(self.train_data.loc[index, 'speed']))
+
+        speed_err_label = Label(
+            root=config_frame.frame,
+            grid_pos=(3, 1),
+            padding=((50, 0), (0,20)),
+            sticky='w',
+            text='',
+            font=self.err_font_layout,
+            foreground_color=self.bad_status_color,
+            background_color=self.background_color,
+            visibility=True,
+        )
+
         Button(
             root=config_frame.frame,
             width=20,
             height=1,
-            grid_pos=(3, 0),
+            grid_pos=(4, 0),
             padding=(100, 40),
             sticky='nw',
             columnspan=2,
@@ -1736,8 +1781,10 @@ class TrainListCanvas:
                 index,
                 ed_entry,
                 la_entry,
+                speed_entry,
                 ed_err_label,
                 la_err_label,
+                speed_err_label,
                 config_frame,
                 True
             ),
@@ -1750,7 +1797,7 @@ class TrainListCanvas:
             style_map=self.base_button_style_map,
         )
 
-        config_frame.frame.rowconfigure((0, 3),weight=10)
+        config_frame.frame.rowconfigure((0, 4),weight=10)
         config_frame.frame.rowconfigure((1, 2), weight=1)
         config_frame.frame.columnconfigure((0, 1),weight=1)
         config_frame.frame.grid_propagate(False)
@@ -1762,8 +1809,10 @@ class TrainListCanvas:
             index,
             ed_entry,
             la_entry,
+            speed_entry,
             ed_err_label,
             la_err_label,
+            speed_err_label,
             config_frame,
             save
     ):
@@ -1776,10 +1825,14 @@ class TrainListCanvas:
                 reference to the entry field for earliest departure.
             la_entry (custom_widgets.EntryField):
                 reference to the entry field for latest arrival.
+            speed_entry (custom_widgets.EntryField):
+                reference to the entry field for speed.
             ed_err_label (custom_widgets.Label):
                 reference to the label for earliest departure errors.
             la_err_label (custom_widgets.Label):
                 reference to the label for latest arrival errors.
+            speed_err_label (custom_widgets.Label):
+                reference to the label for speed errors.
             config_frame (custom_widgets.Frame):
                 reference to the config_frame.
             save (bool):
@@ -1796,6 +1849,7 @@ class TrainListCanvas:
         # get the data from the entry field
         ed = ed_entry.entry_field.get()
         la = la_entry.entry_field.get()
+        speed = speed_entry.entry_field.get()
 
         err_count = 0
 
@@ -1833,6 +1887,23 @@ class TrainListCanvas:
             la_err_label.place_label()
             err_count += 1
 
+        try:
+            if speed.startswith('e.g.') or speed == '' or speed is None:
+                speed = None
+            else:
+                speed = int(speed)
+
+            # hide label if there was no problem with the data conversion
+            speed_err_label.hide_label()
+        except ValueError:
+            # register the error and display corresponding error message
+            speed_err_label.label.config(
+                text='needs int > 0',
+                fg=self.bad_status_color,
+            )
+            speed_err_label.place_label()
+            err_count += 1
+
         if err_count:
             return -1
 
@@ -1863,6 +1934,20 @@ class TrainListCanvas:
                 self.train_data.loc[index, 'l_arr'] = la
         else:
             self.train_data.loc[index, 'l_arr'] = -1
+
+        if speed is not None:
+            # check for additional constrains and display error when violated
+            if speed < 1:
+                speed_err_label.label.config(
+                    text='needs int > 0',
+                    fg=self.bad_status_color,
+                )
+                speed_err_label.place_label()
+                err_count += 1
+            else:
+                self.train_data.loc[index, 'speed'] = speed
+        else:
+            self.train_data.loc[index, 'speed'] = -1
 
         if err_count:
             return -1
