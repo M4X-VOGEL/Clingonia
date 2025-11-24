@@ -2878,13 +2878,9 @@ def save_random_gen_env_params():
 
         try:
             if data.startswith('e.g.'):
-                data = None
-                user_params[key] = data
-                continue
+                raise ValueError
             elif data == '':
-                data = None
-                user_params[key] = data
-                continue
+                raise ValueError
             elif key == 'speed':
                 if ":" not in data:
                     raise ValueError
@@ -5383,13 +5379,9 @@ def save_builder_env_params():
 
         try:
             if data.startswith('e.g.'):
-                data = None
-                user_params[key] = data
-                continue
+                raise ValueError
             elif data == '':
-                data = None
-                user_params[key] = data
-                continue
+                raise ValueError
             elif key == 'speed':
                 if ":" not in data:
                     raise ValueError
