@@ -3412,49 +3412,9 @@ def build_builder_para_frame():
         visibility=False,
     )
 
-    labels['speedMap_label'] = Label(
-        root=frames['builder_para_frame'].frame,
-        grid_pos=(5, 2),
-        padding=(0, 0),
-        sticky='nw',
-        text='Speed ratio map for trains:',
-        font=base_font_layout,
-        foreground_color=label_color,
-        background_color=background_color,
-        visibility=False,
-    )
-
-    entry_fields['speedMap_entry'] = EntryField(
-        root=frames['builder_para_frame'].frame,
-        width=10,
-        height=1,
-        grid_pos=(5, 3),
-        padding=(0, 0),
-        sticky='nw',
-        text=f'e.g. {str(default_params["speedMap"]).strip("{}")}',
-        font=base_font_layout,
-        foreground_color=input_color,
-        background_color=entry_color,
-        example_color=example_color,
-        border_width=0,
-        visibility=False,
-    )
-
-    labels['speedMap_error_label'] = Label(
-        root=frames['builder_para_frame'].frame,
-        grid_pos=(5, 4),
-        padding=(0, 0),
-        sticky='nw',
-        text='',
-        font=err_font_layout,
-        foreground_color=bad_status_color,
-        background_color=background_color,
-        visibility=False,
-    )
-
     labels['malfunction_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(6, 2),
+        grid_pos=(5, 2),
         padding=(0, 0),
         sticky='nw',
         text='Malfunction rate:',
@@ -3468,7 +3428,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(6, 3),
+        grid_pos=(5, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["malfunction"][0]}/'
@@ -3483,7 +3443,7 @@ def build_builder_para_frame():
 
     labels['malfunction_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(6, 4),
+        grid_pos=(5, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -3495,7 +3455,7 @@ def build_builder_para_frame():
 
     labels['min_duration_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(7, 2),
+        grid_pos=(6, 2),
         padding=(0, 0),
         sticky='nw',
         text='Min. duration for malfunctions:',
@@ -3509,7 +3469,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(7, 3),
+        grid_pos=(6, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["min"]}',
@@ -3523,7 +3483,7 @@ def build_builder_para_frame():
 
     labels['min_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(7, 4),
+        grid_pos=(6, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -3535,7 +3495,7 @@ def build_builder_para_frame():
 
     labels['max_duration_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(8, 2),
+        grid_pos=(7, 2),
         padding=(0, 0),
         sticky='nw',
         text='Max. duration for malfunctions:',
@@ -3549,7 +3509,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(8, 3),
+        grid_pos=(7, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["max"]}',
@@ -3563,7 +3523,7 @@ def build_builder_para_frame():
 
     labels['max_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(8, 4),
+        grid_pos=(7, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -3575,7 +3535,7 @@ def build_builder_para_frame():
 
     labels['lowQuality_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(9, 2),
+        grid_pos=(8, 2),
         padding=(0, 0),
         sticky='nw',
         text='Low quality mode:',
@@ -3598,7 +3558,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=15,
         height=1,
-        grid_pos=(10, 2),
+        grid_pos=(9, 2),
         padding=(0, 0),
         sticky='nw',
         command=builder_toggle_advanced_para_options,
@@ -3615,7 +3575,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=9,
         height=1,
-        grid_pos=(10, 3),
+        grid_pos=(9, 3),
         padding=(0, 0),
         sticky='nw',
         command=builder_para_to_track_grid,
@@ -3630,7 +3590,7 @@ def build_builder_para_frame():
 
     labels['build_para_status_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(10, 4),
+        grid_pos=(9, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -3642,7 +3602,7 @@ def build_builder_para_frame():
 
     frames['builder_para_frame'].frame.rowconfigure(0, weight=1)
     frames['builder_para_frame'].frame.rowconfigure(
-        tuple(range(1,11)), weight=2
+        tuple(range(1,10)), weight=2
     )
     frames['builder_para_frame'].frame.columnconfigure(0, weight=1)
     frames['builder_para_frame'].frame.columnconfigure(1, weight=1)
@@ -5323,8 +5283,6 @@ def builder_toggle_advanced_para_options():
         buttons['remove_button'].grid_forget()
     else:
         buttons['remove_button'].grid(row=4, column=3, sticky='n')
-    labels['speedMap_label'].toggle_visibility()
-    entry_fields['speedMap_entry'].toggle_visibility()
     labels['malfunction_label'].toggle_visibility()
     entry_fields['malfunction_entry'].toggle_visibility()
     labels['min_duration_label'].toggle_visibility()
@@ -5335,7 +5293,7 @@ def builder_toggle_advanced_para_options():
     if buttons['lowQuality_button'].winfo_ismapped():
         buttons['lowQuality_button'].grid_forget()
     else:
-        buttons['lowQuality_button'].grid(row=9, column=3, sticky='n')
+        buttons['lowQuality_button'].grid(row=8, column=3, sticky='n')
     return
 
 def switch_builder_to_main():
@@ -5371,7 +5329,7 @@ def save_builder_env_params():
         key = field.split('_')[0]
         if key not in default_params:
             continue
-        if key not in ['rows','cols','globalTimeLimit','speedMap','malfunction','min','max']:
+        if key not in ['rows','cols','globalTimeLimit','malfunction','min','max']:
             continue
 
         # get the data from the entry field
@@ -5382,11 +5340,6 @@ def save_builder_env_params():
                 raise ValueError
             elif data == '':
                 raise ValueError
-            elif key == 'speedMap':
-                if ":" not in data:
-                    raise ValueError
-                data = '{' + data + '}'
-                data = ast.literal_eval(data)
             elif key == 'malfunction':
                 if data.count("/") > 1:
                     raise ValueError
@@ -5442,27 +5395,6 @@ def save_builder_env_params():
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
 
-        if key=='speedMap':
-            for k, v in data.items():
-                if not isinstance(k, float) or not isinstance(v, float):
-                    err_count += 1
-                    err = 'notFloat'
-                    labels[f'{key}_error_label'].label.config(
-                        text=err_dict[key][err])
-                    labels[f'{key}_error_label'].place_label()
-                if k < 0 or v < 0:
-                    err_count += 1
-                    err = 'negativeValue'
-                    labels[f'{key}_error_label'].label.config(
-                        text=err_dict[key][err])
-                    labels[f'{key}_error_label'].place_label()
-                if k > 1 or v > 1:
-                    err_count += 1
-                    err = 'tooBigSpeed'
-                    labels[f'{key}_error_label'].label.config(
-                        text=err_dict[key][err])
-                    labels[f'{key}_error_label'].place_label()
-
         # only save non string values as parameters except for the clingo path
         if type(data) is not str:
             user_params[key] = data
@@ -5479,15 +5411,10 @@ def load_builder_env_params():
         key = field.split('_')[0]
         if key not in default_params:
             continue
-        elif key not in ['rows','cols','globalTimeLimit','speedMap','malfunction','min','max']:
+        elif key not in ['rows','cols','globalTimeLimit','malfunction','min','max']:
             continue
         elif user_params[key] is None:
             continue
-        elif key == 'speedMap':
-            string = ''
-            for k, v in user_params['speedMap'].items():
-                string = string + f'{k}: {v}, '
-            entry_fields[field].insert_string(string[:-2])
         elif key == 'malfunction':
             entry_fields[field].insert_string(
                 f'{user_params["malfunction"][0]}/'
@@ -6808,7 +6735,6 @@ def current_df_to_env_text(mode):
     build_param_text = [
         f'|-Remove agents on arrival: {user_params["remove"]}',
         f'|-Environment Time Limit: {user_params["globalTimeLimit"]}',
-        f'|-Speeds of Trains: {user_params["speedMap"]}',
         f'|-Malfunction rate: '
         f'{user_params["malfunction"][0]}/{user_params["malfunction"][1]}',
         f'|-Minimum Duration of Malfunctions: {user_params["min"]}',
