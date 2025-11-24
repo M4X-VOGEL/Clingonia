@@ -146,7 +146,7 @@ default_params = {
     'intercity': 2,
     'incity': 2,
     'remove': True,
-    'speed': {1.0 : 1.0},
+    'speedMap': {1.0 : 1.0},
     'malfunction': (0, 30),
     'min': 2,
     'max': 6,
@@ -169,7 +169,7 @@ user_params = {
     'intercity': None,
     'incity': None,
     'remove': None,
-    'speed': None,
+    'speedMap': None,
     'malfunction': None,
     'min': None,
     'max': None,
@@ -220,7 +220,7 @@ err_dict = {
         'tooFewRails': 'needs at least 1 rail pair in the cities'
     },
     'remove': {ValueError: 'needs true or false'},
-    'speed': {
+    'speedMap': {
         ValueError: 'needs dictionary: float: float,... , 0 <= float <= 1',
         SyntaxError: 'needs dictionary: float: float,... , 0 <= float <= 1',
         'negativeValue': 'needs dictionary float: float,... , 0 <= float <= 1',
@@ -293,7 +293,7 @@ pos_df = pd.DataFrame(
 
 # Trains Dataframe
 current_df = pd.DataFrame(
-    columns=['start_pos', 'dir', 'end_pos', 'e_dep', 'l_arr']
+    columns=['start_pos', 'dir', 'end_pos', 'e_dep', 'l_arr', 'speed']
 )
 current_builder_backup_df = current_df.copy()
 current_modify_backup_df = current_df.copy()
@@ -1027,13 +1027,13 @@ def get_load_info():
         """Formats a text line from the passed row and index."""
         new_line = (f"| {index:>8} | {str(row['start_pos']):>14} "
                     f"| {row['dir']:^3} | {str(row['end_pos']):>14} "
-                    f"| {row['e_dep']:>7} | {row['l_arr']:>7} |")
+                    f"| {row['e_dep']:>7} | {row['l_arr']:>7} | {row['speed']:>7} |")
         return new_line
 
     table_header = ("| Train ID | Start Position | Dir |   "
-                    "End Position |   E Dep |   L Arr |")
+                    "End Position |   E Dep |   L Arr |   Speed |")
     table_divider = ("|----------|----------------|-----|"
-                     "----------------|---------|---------|")
+                     "----------------|---------|---------|---------|")
 
     new_rows = [format_row(index, row) for index, row in current_df.iterrows()]
 
@@ -2303,7 +2303,7 @@ def build_random_gen_para_frame():
         visibility=False,
     )
 
-    labels['speed_label'] = Label(
+    labels['speedMap_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
         grid_pos=(11, 2),
         padding=(0, 0),
@@ -2315,14 +2315,14 @@ def build_random_gen_para_frame():
         visibility=False,
     )
 
-    entry_fields['speed_entry'] = EntryField(
+    entry_fields['speedMap_entry'] = EntryField(
         root=frames['random_gen_para_frame'].frame,
         width=10,
         height=1,
         grid_pos=(11, 3),
         padding=(0, 0),
         sticky='nw',
-        text=f'e.g. {str(default_params["speed"]).strip("{}")}',
+        text=f'e.g. {str(default_params["speedMap"]).strip("{}")}',
         font=base_font_layout,
         foreground_color=input_color,
         background_color=entry_color,
@@ -2331,7 +2331,7 @@ def build_random_gen_para_frame():
         visibility=False,
     )
 
-    labels['speed_error_label'] = Label(
+    labels['speedMap_error_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
         grid_pos=(11, 4),
         padding=(0, 0),
@@ -2673,6 +2673,9 @@ def random_gen_para_to_env():
         frames['random_gen_para_frame'].frame.update()
         return
 
+    # TODO: remove once gen_env outputs trains with speed.
+    trains["speed"] = 1
+
     if len(trains):
         start_pos = list(zip(trains['x'], trains['y']))
         end_pos = list(zip(trains['x_end'], trains['y_end']))
@@ -2682,11 +2685,12 @@ def random_gen_para_to_env():
             'dir': trains['dir'],
             'end_pos': end_pos,
             'e_dep': trains['e_dep'],
-            'l_arr': trains['l_arr']
+            'l_arr': trains['l_arr'],
+            'speed': trains['speed'],
         })
     else:
         current_df = pd.DataFrame(
-            columns=['start_pos', 'dir', 'end_pos', 'e_dep', 'l_arr']
+            columns=['start_pos', 'dir', 'end_pos', 'e_dep', 'l_arr', 'speed']
         )
 
     direction = {
@@ -2820,8 +2824,8 @@ def random_gen_toggle_advanced_para_options():
         buttons['remove_button'].grid_forget()
     else:
         buttons['remove_button'].grid(row=10, column=3, sticky='n')
-    labels['speed_label'].toggle_visibility()
-    entry_fields['speed_entry'].toggle_visibility()
+    labels['speedMap_label'].toggle_visibility()
+    entry_fields['speedMap_entry'].toggle_visibility()
     labels['malfunction_label'].toggle_visibility()
     entry_fields['malfunction_entry'].toggle_visibility()
     labels['min_duration_label'].toggle_visibility()
@@ -2870,7 +2874,7 @@ def save_random_gen_env_params():
         if key not in default_params:
             continue
         elif key not in ['rows','cols','agents','cities','seed','globalTimeLimit',
-                         'intercity','incity','speed','malfunction','min','max']:
+                         'intercity','incity','speedMap','malfunction','min','max']:
             continue
 
         # get the data from the entry field
@@ -2881,7 +2885,7 @@ def save_random_gen_env_params():
                 raise ValueError
             elif data == '':
                 raise ValueError
-            elif key == 'speed':
+            elif key == 'speedMap':
                 if ":" not in data:
                     raise ValueError
                 data = '{' + data + '}'
@@ -2981,7 +2985,7 @@ def save_random_gen_env_params():
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
 
-        if key=='speed':
+        if key=='speedMap':
             for k, v in data.items():
                 if not isinstance(k, float) or not isinstance(v, float):
                     err_count += 1
@@ -3020,13 +3024,13 @@ def load_random_gen_env_params():
         if key not in default_params:
             continue
         elif key not in ['rows','cols','agents','cities','seed','globalTimeLimit',
-                         'intercity','incity','speed','malfunction','min','max']:
+                         'intercity','incity','speedMap','malfunction','min','max']:
             continue
         elif user_params[key] is None:
             continue
-        elif key == 'speed':
+        elif key == 'speedMap':
             string = ''
-            for k, v in user_params['speed'].items():
+            for k, v in user_params['speedMap'].items():
                 string = string + f'{k}: {v}, '
             entry_fields[field].insert_string(string[:-2])
         elif key == 'malfunction':
@@ -3412,49 +3416,9 @@ def build_builder_para_frame():
         visibility=False,
     )
 
-    labels['speed_label'] = Label(
-        root=frames['builder_para_frame'].frame,
-        grid_pos=(5, 2),
-        padding=(0, 0),
-        sticky='nw',
-        text='Speed ratio map for trains:',
-        font=base_font_layout,
-        foreground_color=label_color,
-        background_color=background_color,
-        visibility=False,
-    )
-
-    entry_fields['speed_entry'] = EntryField(
-        root=frames['builder_para_frame'].frame,
-        width=10,
-        height=1,
-        grid_pos=(5, 3),
-        padding=(0, 0),
-        sticky='nw',
-        text=f'e.g. {str(default_params["speed"]).strip("{}")}',
-        font=base_font_layout,
-        foreground_color=input_color,
-        background_color=entry_color,
-        example_color=example_color,
-        border_width=0,
-        visibility=False,
-    )
-
-    labels['speed_error_label'] = Label(
-        root=frames['builder_para_frame'].frame,
-        grid_pos=(5, 4),
-        padding=(0, 0),
-        sticky='nw',
-        text='',
-        font=err_font_layout,
-        foreground_color=bad_status_color,
-        background_color=background_color,
-        visibility=False,
-    )
-
     labels['malfunction_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(6, 2),
+        grid_pos=(5, 2),
         padding=(0, 0),
         sticky='nw',
         text='Malfunction rate:',
@@ -3468,7 +3432,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(6, 3),
+        grid_pos=(5, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["malfunction"][0]}/'
@@ -3483,7 +3447,7 @@ def build_builder_para_frame():
 
     labels['malfunction_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(6, 4),
+        grid_pos=(5, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -3495,7 +3459,7 @@ def build_builder_para_frame():
 
     labels['min_duration_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(7, 2),
+        grid_pos=(6, 2),
         padding=(0, 0),
         sticky='nw',
         text='Min. duration for malfunctions:',
@@ -3509,7 +3473,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(7, 3),
+        grid_pos=(6, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["min"]}',
@@ -3523,7 +3487,7 @@ def build_builder_para_frame():
 
     labels['min_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(7, 4),
+        grid_pos=(6, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -3535,7 +3499,7 @@ def build_builder_para_frame():
 
     labels['max_duration_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(8, 2),
+        grid_pos=(7, 2),
         padding=(0, 0),
         sticky='nw',
         text='Max. duration for malfunctions:',
@@ -3549,7 +3513,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(8, 3),
+        grid_pos=(7, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["max"]}',
@@ -3563,7 +3527,7 @@ def build_builder_para_frame():
 
     labels['max_error_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(8, 4),
+        grid_pos=(7, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -3575,7 +3539,7 @@ def build_builder_para_frame():
 
     labels['lowQuality_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(9, 2),
+        grid_pos=(8, 2),
         padding=(0, 0),
         sticky='nw',
         text='Low quality mode:',
@@ -3598,7 +3562,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=15,
         height=1,
-        grid_pos=(10, 2),
+        grid_pos=(9, 2),
         padding=(0, 0),
         sticky='nw',
         command=builder_toggle_advanced_para_options,
@@ -3615,7 +3579,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=9,
         height=1,
-        grid_pos=(10, 3),
+        grid_pos=(9, 3),
         padding=(0, 0),
         sticky='nw',
         command=builder_para_to_track_grid,
@@ -3630,7 +3594,7 @@ def build_builder_para_frame():
 
     labels['build_para_status_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(10, 4),
+        grid_pos=(9, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -3642,7 +3606,7 @@ def build_builder_para_frame():
 
     frames['builder_para_frame'].frame.rowconfigure(0, weight=1)
     frames['builder_para_frame'].frame.rowconfigure(
-        tuple(range(1,11)), weight=2
+        tuple(range(1,10)), weight=2
     )
     frames['builder_para_frame'].frame.columnconfigure(0, weight=1)
     frames['builder_para_frame'].frame.columnconfigure(1, weight=1)
@@ -3829,7 +3793,7 @@ def builder_para_to_track_grid():
         # create a new empty environment and train list
         current_array = np.zeros((3, rows, cols), dtype=int)
         current_df = pd.DataFrame(
-            columns=['start_pos', 'dir', 'end_pos', 'e_dep', 'l_arr']
+            columns=['start_pos', 'dir', 'end_pos', 'e_dep', 'l_arr', 'speed']
         )
     else:
         # get the shape of the current array
@@ -4832,7 +4796,7 @@ def open_train_all_config_frame():
         visibility=True,
     )
 
-    entry_fields['all_eDep_entry'] = EntryField(
+    entry_fields['eDep_entry'] = EntryField(
         root=frames['train_all_config_frame'].frame,
         width=10,
         height=1,
@@ -4860,7 +4824,6 @@ def open_train_all_config_frame():
         visibility=True,
     )
 
-
     labels['lArr_label'] = Label(
         root=frames['train_all_config_frame'].frame,
         grid_pos=(3,0),
@@ -4873,7 +4836,7 @@ def open_train_all_config_frame():
         visibility=True,
     )
 
-    entry_fields['all_lArr_entry'] = EntryField(
+    entry_fields['lArr_entry'] = EntryField(
         root=frames['train_all_config_frame'].frame,
         width=10,
         height=1,
@@ -4901,11 +4864,51 @@ def open_train_all_config_frame():
         visibility=True,
     )
 
+    labels['speed_label'] = Label(
+        root=frames['train_all_config_frame'].frame,
+        grid_pos=(4,0),
+        padding=(100,(0,20)),
+        sticky='sw',
+        text=f'Speed All Trains:',
+        font=base_font_layout,
+        foreground_color=label_color,
+        background_color=background_color,
+        visibility=True,
+    )
+
+    entry_fields['speed_entry'] = EntryField(
+        root=frames['train_all_config_frame'].frame,
+        width=10,
+        height=1,
+        grid_pos=(4, 1),
+        padding=(0, (0,20)),
+        sticky='s',
+        text=f'e.g. 1',
+        font=base_font_layout,
+        foreground_color=input_color,
+        background_color=entry_color,
+        example_color=example_color,
+        border_width=0,
+        visibility=True,
+    )
+
+    labels['speed_error_label'] = Label(
+        root=frames['train_all_config_frame'].frame,
+        grid_pos=(4,2),
+        padding=((0,50),(0,20)),
+        sticky='s',
+        text='',
+        font=err_font_layout,
+        foreground_color=bad_status_color,
+        background_color=background_color,
+        visibility=True,
+    )
+
     buttons['save_all_config_button'] = Button(
         root=frames['train_all_config_frame'].frame,
         width=20,
         height=1,
-        grid_pos=(4, 0),
+        grid_pos=(5, 0),
         padding=(100, 40),
         sticky='sw',
         columnspan=2,
@@ -4919,7 +4922,7 @@ def open_train_all_config_frame():
         style_map=base_button_style_map,
     )
 
-    frames['train_builder_menu_frame'].frame.rowconfigure((0,1,2,3,4), weight=1)
+    frames['train_builder_menu_frame'].frame.rowconfigure((0,1,2,3,4,5), weight=1)
     frames['train_builder_menu_frame'].frame.columnconfigure((0,1,2), weight=1)
     frames['train_builder_menu_frame'].frame.grid_propagate(False)
 
@@ -4946,18 +4949,21 @@ def save_train_all_config(save):
     if not save:
         # if returning via the back button of the frame
         # just destroy the frame
-        if 'all_eDep_entry' in entry_fields:
-            del entry_fields['all_eDep_entry']
-        if 'all_lArr_entry' in entry_fields:
-            del entry_fields['all_lArr_entry']
+        if 'eDep_entry' in entry_fields:
+            del entry_fields['eDep_entry']
+        if 'lArr_entry' in entry_fields:
+            del entry_fields['lArr_entry']
+        if 'speed_entry' in entry_fields:
+            del entry_fields['speed_entry']
         if 'train_all_config_frame' in frames:
             frames['train_all_config_frame'].destroy_frame()
             del frames['train_all_config_frame']
         return 0
 
     # get the entered parameters
-    ed = entry_fields['all_eDep_entry'].entry_field.get()
-    la = entry_fields['all_lArr_entry'].entry_field.get()
+    ed = entry_fields['eDep_entry'].entry_field.get()
+    la = entry_fields['lArr_entry'].entry_field.get()
+    speed = entry_fields['speed_entry'].entry_field.get()
 
     err_count = 0
 
@@ -4968,7 +4974,7 @@ def save_train_all_config(save):
             ed = int(ed)
             labels['eDep_error_label'].hide_label()
     except ValueError:
-        # register the error and print a error message
+        # register the error and print an error message
         labels['eDep_error_label'].label.config(
             text='needs int > 0',
             fg=bad_status_color,
@@ -4983,12 +4989,27 @@ def save_train_all_config(save):
             la = int(la)
             labels['lArr_error_label'].hide_label()
     except ValueError:
-        # register the error and print a error message
+        # register the error and print an error message
         labels['lArr_error_label'].label.config(
             text='needs int > 0',
             fg=bad_status_color,
         )
         labels[f'lArr_error_label'].place_label()
+        err_count += 1
+
+    try:
+        if speed.startswith('e.g.') or speed == '' or speed is None:
+            speed = None
+        else:
+            speed = int(speed)
+            labels['speed_error_label'].hide_label()
+    except ValueError:
+        # register the error and print an error message
+        labels['speed_error_label'].label.config(
+            text='needs int > 0',
+            fg=bad_status_color,
+        )
+        labels[f'speed_error_label'].place_label()
         err_count += 1
 
     if err_count:
@@ -5006,7 +5027,6 @@ def save_train_all_config(save):
         else:
             current_df['e_dep'] = [ed] * len(current_df['e_dep'])
 
-    # check for valid parameter values
     if la is not None:
         if la < 1:
             labels['lArr_error_label'].label.config(
@@ -5018,13 +5038,26 @@ def save_train_all_config(save):
         else:
             current_df['l_arr'] = [la] * len(current_df['l_arr'])
 
+    if speed is not None:
+        if speed < 1:
+            labels['speed_error_label'].label.config(
+                text='needs int > 0',
+                fg=bad_status_color,
+            )
+            labels['speed_error_label'].place_label()
+            err_count += 1
+        else:
+            current_df['speed'] = [speed] * len(current_df['speed'])
+
     if err_count:
         return -1
 
-    if 'all_eDep_entry' in entry_fields:
-        del entry_fields['all_eDep_entry']
-    if 'all_lArr_entry' in entry_fields:
-        del entry_fields['all_lArr_entry']
+    if 'eDep_entry' in entry_fields:
+        del entry_fields['eDep_entry']
+    if 'lArr_entry' in entry_fields:
+        del entry_fields['lArr_entry']
+    if 'speed_entry' in entry_fields:
+        del entry_fields['speed_entry']
     if 'train_all_config_frame' in frames:
         frames['train_all_config_frame'].destroy_frame()
         del frames['train_all_config_frame']
@@ -5164,6 +5197,8 @@ def builder_train_grid_to_env():
             )
             frames['train_builder_menu_frame'].frame.update()
             return
+
+    # check if trains have necessary parameters
     if current_df['e_dep'].isin([-1]).any():
         user_params['agents'] = prev_agent_count
         labels['builder_status_label'].label.config(
@@ -5181,6 +5216,14 @@ def builder_train_grid_to_env():
         )
         frames['train_builder_menu_frame'].frame.update()
         return
+    elif current_df['speed'].isin([-1]).any():
+        user_params['agents'] = prev_agent_count
+        labels['builder_status_label'].label.config(
+            text='A train has no speed',
+            fg=bad_status_color,
+        )
+        frames['train_builder_menu_frame'].frame.update()
+        return
 
     start_pos = list(zip(trains['y'], trains['x']))
     end_pos = list(zip(trains['y_end'], trains['x_end']))
@@ -5190,7 +5233,8 @@ def builder_train_grid_to_env():
         'dir': trains['dir'],
         'end_pos': end_pos,
         'e_dep': trains['e_dep'],
-        'l_arr': trains['l_arr']
+        'l_arr': trains['l_arr'],
+        'speed': trains['speed'],
     })
 
     # save the generated image for the runtime of the program
@@ -5323,8 +5367,6 @@ def builder_toggle_advanced_para_options():
         buttons['remove_button'].grid_forget()
     else:
         buttons['remove_button'].grid(row=4, column=3, sticky='n')
-    labels['speed_label'].toggle_visibility()
-    entry_fields['speed_entry'].toggle_visibility()
     labels['malfunction_label'].toggle_visibility()
     entry_fields['malfunction_entry'].toggle_visibility()
     labels['min_duration_label'].toggle_visibility()
@@ -5335,7 +5377,7 @@ def builder_toggle_advanced_para_options():
     if buttons['lowQuality_button'].winfo_ismapped():
         buttons['lowQuality_button'].grid_forget()
     else:
-        buttons['lowQuality_button'].grid(row=9, column=3, sticky='n')
+        buttons['lowQuality_button'].grid(row=8, column=3, sticky='n')
     return
 
 def switch_builder_to_main():
@@ -5371,7 +5413,7 @@ def save_builder_env_params():
         key = field.split('_')[0]
         if key not in default_params:
             continue
-        if key not in ['rows','cols','globalTimeLimit','speed','malfunction','min','max']:
+        if key not in ['rows','cols','globalTimeLimit','malfunction','min','max']:
             continue
 
         # get the data from the entry field
@@ -5382,11 +5424,6 @@ def save_builder_env_params():
                 raise ValueError
             elif data == '':
                 raise ValueError
-            elif key == 'speed':
-                if ":" not in data:
-                    raise ValueError
-                data = '{' + data + '}'
-                data = ast.literal_eval(data)
             elif key == 'malfunction':
                 if data.count("/") > 1:
                     raise ValueError
@@ -5442,27 +5479,6 @@ def save_builder_env_params():
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
 
-        if key=='speed':
-            for k, v in data.items():
-                if not isinstance(k, float) or not isinstance(v, float):
-                    err_count += 1
-                    err = 'notFloat'
-                    labels[f'{key}_error_label'].label.config(
-                        text=err_dict[key][err])
-                    labels[f'{key}_error_label'].place_label()
-                if k < 0 or v < 0:
-                    err_count += 1
-                    err = 'negativeValue'
-                    labels[f'{key}_error_label'].label.config(
-                        text=err_dict[key][err])
-                    labels[f'{key}_error_label'].place_label()
-                if k > 1 or v > 1:
-                    err_count += 1
-                    err = 'tooBigSpeed'
-                    labels[f'{key}_error_label'].label.config(
-                        text=err_dict[key][err])
-                    labels[f'{key}_error_label'].place_label()
-
         # only save non string values as parameters except for the clingo path
         if type(data) is not str:
             user_params[key] = data
@@ -5479,15 +5495,10 @@ def load_builder_env_params():
         key = field.split('_')[0]
         if key not in default_params:
             continue
-        elif key not in ['rows','cols','globalTimeLimit','speed','malfunction','min','max']:
+        elif key not in ['rows','cols','globalTimeLimit','malfunction','min','max']:
             continue
         elif user_params[key] is None:
             continue
-        elif key == 'speed':
-            string = ''
-            for k, v in user_params['speed'].items():
-                string = string + f'{k}: {v}, '
-            entry_fields[field].insert_string(string[:-2])
         elif key == 'malfunction':
             entry_fields[field].insert_string(
                 f'{user_params["malfunction"][0]}/'
@@ -6788,7 +6799,7 @@ def current_df_to_env_text(mode):
         """Helper function to format a dataframe row"""
         new_line = (f"| {index:>8} | {str(row['start_pos']):>14} "
                     f"| {row['dir']:^3} | {str(row['end_pos']):>14} "
-                    f"| {row['e_dep']:>7} | {row['l_arr']:>7} |")
+                    f"| {row['e_dep']:>7} | {row['l_arr']:>7} | {row['speed']:>7} |")
         return new_line
 
     param_header = '| Parameters |'
@@ -6799,7 +6810,7 @@ def current_df_to_env_text(mode):
         f'|-Environment Seed: {user_params["seed"]}',
         f'|-Grid Mode: {user_params["grid"]}',
         f'|-Remove agents on arrival: {user_params["remove"]}',
-        f'|-Speeds of Trains: {user_params["speed"]}',
+        f'|-Speeds of Trains: {user_params["speedMap"]}',
         f'|-Malfunction rate: '
         f'{user_params["malfunction"][0]}/{user_params["malfunction"][1]}',
         f'|-Minimum Duration of Malfunctions: {user_params["min"]}',
@@ -6808,7 +6819,6 @@ def current_df_to_env_text(mode):
     build_param_text = [
         f'|-Remove agents on arrival: {user_params["remove"]}',
         f'|-Environment Time Limit: {user_params["globalTimeLimit"]}',
-        f'|-Speeds of Trains: {user_params["speed"]}',
         f'|-Malfunction rate: '
         f'{user_params["malfunction"][0]}/{user_params["malfunction"][1]}',
         f'|-Minimum Duration of Malfunctions: {user_params["min"]}',
@@ -6818,9 +6828,9 @@ def current_df_to_env_text(mode):
     spacing = '|\n|'
 
     table_header = ("| Train ID | Start Position | Dir |   "
-                    "End Position |   E Dep |   L Arr |")
+                    "End Position |   E Dep |   L Arr |   Speed |")
     table_divider = ("|----------|----------------|-----|"
-                     "----------------|---------|---------|")
+                     "----------------|---------|---------|---------|")
 
     new_rows = [format_row(index, row) for index, (_, row) in enumerate(current_df.iterrows())]
 
@@ -6858,8 +6868,8 @@ def load_user_data_from_file():
     with open('data/user_params.json', 'r') as file:
         data = json.load(file)
 
-    if data['speed'] is not None:
-        data['speed'] = {float(k): float(v) for k, v in data['speed'].items()}
+    if data['speedMap'] is not None:
+        data['speedMap'] = {float(k): float(v) for k, v in data['speedMap'].items()}
     if data['malfunction'] is not None:
         data['malfunction'] = (data['malfunction'][0], data['malfunction'][1])
 
@@ -6951,13 +6961,17 @@ def load_env_from_file():
     start_pos = list(zip(trains['y'], trains['x']))
     end_pos = list(zip(trains['y_end'], trains['x_end']))
 
+    # TODO: remove once load_env outputs trains with speed.
+    trains["speed"] = 1
+
     current_df = pd.DataFrame({
         '': trains['id'],
         'start_pos': start_pos,
         'dir': trains['dir'],
         'end_pos': end_pos,
         'e_dep': trains['e_dep'],
-        'l_arr': trains['l_arr']
+        'l_arr': trains['l_arr'],
+        'speed': trains['speed'],
     }).set_index('')
 
     direction = {
@@ -7126,6 +7140,7 @@ def get_trains() -> pd.DataFrame :
         "x_end": x_end,
         "y_end": y_end,
         "e_dep": current_df['e_dep'],
-        "l_arr": current_df['l_arr']
+        "l_arr": current_df['l_arr'],
+        "speed": current_df['speed'],
     }).reset_index(drop=True)
     return trains

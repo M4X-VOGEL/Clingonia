@@ -74,7 +74,7 @@ def custom_sparse_line_generator(env_params, seed=1):
     Returns:
         function: Custom line generator function.
     """
-    base_line_gen = sparse_line_generator(env_params["speed"], seed)
+    base_line_gen = sparse_line_generator(env_params["speedMap"], seed)
 
     def generator(rail, num_agents, hints, num_resets, np_random):
         global LAST_HINTS
@@ -468,7 +468,7 @@ def create_env(env_params):
             agent.target = agents_targets[idx]
     # Speed
     for idx, agent in enumerate(env.agents):
-        agent_speed = float(env_params['speed'].get(idx, 1.0))
+        agent_speed = float(env_params['speedMap'].get(idx, 1.0))
         agent.speed_counter = SpeedCounter(speed=agent_speed)
     # Validate that initial agent direction matches with track
     for agent in env.agents:
