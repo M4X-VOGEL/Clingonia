@@ -726,7 +726,7 @@ class BuildCanvas:
                         'end_pos': (-1, -1),
                         'e_dep': -1,
                         'l_arr': -1,
-                        'speed': -1,
+                        'speed': 1,
                     }
                     self.train_data.loc[len(self.train_data)] = data
                     # replace all trains
