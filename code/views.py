@@ -1672,7 +1672,7 @@ def save_clingo_params() -> int:
             continue
 
         # check for additional constrains and display error when violated
-        if key == 'clingo' and not data.endswith('clingo'):
+        if key == 'clingo' and not (data.endswith('clingo') or data.lower() == 'api'):
             err_count += 1
             err = 'noPathToClingo'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])

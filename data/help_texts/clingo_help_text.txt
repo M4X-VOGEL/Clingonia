@@ -17,6 +17,8 @@ Clingo Path
 
 Enter the full path to your clingo.exe or simply use "clingo" if it is included in your system's PATH.
 
+API:   To use clingo's python API, enter "API".
+
 
 
 -----------------
