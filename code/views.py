@@ -1026,13 +1026,13 @@ def get_load_info():
         """Formats a text line from the passed row and index."""
         new_line = (f"| {index:>8} | {str(row['start_pos']):>14} "
                     f"| {row['dir']:^3} | {str(row['end_pos']):>14} "
-                    f"| {row['e_dep']:>7} | {row['l_arr']:>7} | {row['speed']:>7} |")
+                    f"| {row['e_dep']:>5} | {row['l_arr']:>5} | {row['speed']:>5} |")
         return new_line
 
     table_header = ("| Train ID | Start Position | Dir |   "
-                    "End Position |   E Dep |   L Arr |   Speed |")
+                    "End Position | E Dep | L Arr | Speed |")
     table_divider = ("|----------|----------------|-----|"
-                     "----------------|---------|---------|---------|")
+                     "----------------|-------|-------|-------|")
 
     new_rows = [format_row(index, row) for index, row in current_df.iterrows()]
 
@@ -6798,7 +6798,7 @@ def current_df_to_env_text(mode):
         """Helper function to format a dataframe row"""
         new_line = (f"| {index:>8} | {str(row['start_pos']):>14} "
                     f"| {row['dir']:^3} | {str(row['end_pos']):>14} "
-                    f"| {row['e_dep']:>7} | {row['l_arr']:>7} | {row['speed']:>7} |")
+                    f"| {row['e_dep']:>5} | {row['l_arr']:>5} | {row['speed']:>5} |")
         return new_line
 
     param_header = '| Parameters |'
@@ -6827,9 +6827,9 @@ def current_df_to_env_text(mode):
     spacing = '|\n|'
 
     table_header = ("| Train ID | Start Position | Dir |   "
-                    "End Position |   E Dep |   L Arr |   Speed |")
+                    "End Position | E Dep | L Arr | Speed |")
     table_divider = ("|----------|----------------|-----|"
-                     "----------------|---------|---------|---------|")
+                     "----------------|-------|-------|-------|")
 
     new_rows = [format_row(index, row) for index, (_, row) in enumerate(current_df.iterrows())]
 
