@@ -115,19 +115,24 @@ def run_clingo(clingo_path, lp_files, answer_number):
         str: Clingo output with its answers, or -2 if Clingo returns an error.
     """
     timer_start = time.perf_counter() # Timer for Clingo execution time
-    try:
-        # Run Clingo as a subprocess
-        proc = subprocess.Popen(
-            [clingo_path] + clingo_options + lp_files + [str(answer_number)],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            bufsize=1
-        )
-    except FileNotFoundError:
-        # Fallback to Clingo-API
-        print("⚠️ No clingo.exe found: Switching to Clingo-API...")
+    if clingo_path.lower() == "api":
+        # Using clingo's python API, not the clingo.exe CLI
+        print("Activating Clingo-API...")
         return run_clingo_api(lp_files, answer_number)
+    else:
+        try:
+            # Run Clingo as a subprocess
+            proc = subprocess.Popen(
+                [clingo_path] + clingo_options + lp_files + [str(answer_number)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1
+            )
+        except FileNotFoundError:
+            # Fallback to Clingo-API
+            print("⚠️ No clingo.exe found: Switching to Clingo-API...")
+            return run_clingo_api(lp_files, answer_number)
     # Thread for periodic updates
     timer_thread = run_timer_thread(lambda: proc.poll() is None, timer_start)
     # Capture Clingo's output
