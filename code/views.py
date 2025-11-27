@@ -272,12 +272,11 @@ loading_err_dict = {
 }
 clingo_err_dict = {
     -1: 'No .lp files given.',
-    -2: 'Invalid clingo path.',
-    -3: 'Clingo returned an error.',
-    -4: 'Clingo returns UNSATISFIABLE.',
-    -5: f'Clingo did not provide the requested Answer: ',
-    -6: 'Invalid actions. Ensure to use #show action/3.',
-    -7: 'Invalid action format. Ensure action(train(ID), Action, Timestep).'
+    -2: 'Clingo returned an error.',
+    -3: 'Clingo returns UNSATISFIABLE.',
+    -4: 'Clingo did not provide the requested Answer: ',
+    -5: 'Invalid actions. Ensure to use #show action/3.',
+    -6: 'Invalid action format. Ensure action(train(ID), Action, Timestep).'
 }
 
 
@@ -1563,7 +1562,7 @@ def switch_clingo_para_to_result():
         sim_result = run_simulation()
 
         if sim_result:
-            if sim_result == -5:
+            if sim_result == -4:
                 answer_err = (clingo_err_dict[sim_result] +
                                                f'{user_params["answer"]}')
                 labels['clingo_status_label'].label.config(

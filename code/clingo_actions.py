@@ -112,7 +112,7 @@ def run_clingo(clingo_path, lp_files, answer_number):
         answer_number (int): Desired answer number from Clingo.
 
     Returns:
-        str: Clingo output with its answers, or -3 if Clingo returns an error.
+        str: Clingo output with its answers, or -2 if Clingo returns an error.
     """
     timer_start = time.perf_counter() # Timer for Clingo execution time
     try:
@@ -140,7 +140,7 @@ def run_clingo(clingo_path, lp_files, answer_number):
         # If error is not a warning, print it and return error code
         if error_message and "Warn" not in error_message:
             print(f"❌ Clingo returned an error:\n{error_message}")
-            return -3
+            return -2
     return stdout.strip()
 
 
@@ -240,9 +240,9 @@ def get_clingo_answer(clingo_output, answer_number):
     except UnboundLocalError:
         if answer_number == 1:
             print(f"❌ Clingo returns UNSATISFIABLE")
-            return -4
+            return -3
         print(f"❌ Clingo did not provide the requested Answer: {answer_number}.")
-        return -5
+        return -4
 
 
 def get_action_params(clingo_answer):
@@ -265,7 +265,7 @@ def get_action_params(clingo_answer):
     for action in actions:
         if not act_format.match(action):
             print(f"❌ Invalid action format. Ensure action(train(ID), Action, Timestep).\n> See the help page for more information.")
-            return -7  # Report invalid action format
+            return -6  # Report invalid action format
         # Remove redundant Characters
         if "train" in action:
             # This is the common case: action(train(ID), ...)
@@ -299,7 +299,7 @@ def create_df(action_params):
         # Ensure action/3.
         if len(row) != 3:
             print(f"❌ Clingo returned invalid actions.")
-            return -6
+            return -5
         # Ensure correct data type
         row[0], row[2] = int(row[0]), int(row[2])
         data.append(row)
@@ -328,25 +328,25 @@ def clingo_to_df(clingo_path="clingo", lp_files=[], answer_number=1):
         return -1  # no lp files
     if answer_number < 1:
         print(f"❌ Invalid answer to display: {answer_number}.")
-        return -5
+        return -4
 
     print("Running Clingo...")
     # Run Clingo and capture its output
     output = run_clingo(clingo_path, lp_files, answer_number)
-    if output == -3:
-        return -3  # clingo error
+    if output == -2:
+        return -2  # clingo error
     # Extract desired answer
     answer = get_clingo_answer(output, answer_number)
-    if answer in (-4, -5):
+    if answer in (-3, -4):
         return answer  # invalid answer number
     # Extract action parameters
     params = get_action_params(answer)
     if isinstance(params, int):
-        return -7  # invalid action format
+        return -6  # invalid action format
     # Create the DataFrame
     df_actions = create_df(params)
     if isinstance(df_actions, int):
-        return -6  # invalid actions
+        return -5  # invalid actions
     print("✅ Clingo done.")
     print(f"\n===\nOutput:\n{output}\n===\n")
     return df_actions
