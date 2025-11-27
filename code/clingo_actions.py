@@ -107,7 +107,7 @@ def run_clingo(clingo_path, lp_files, answer_number):
     """Runs Clingo on given ASP files and returns its output.
 
     Args:
-        clingo_path (str): Path to Clingo installation.
+        clingo_path (str): Path to Clingo installation or "API".
         lp_files (list[str]): List of ASP files.
         answer_number (int): Desired answer number from Clingo.
 

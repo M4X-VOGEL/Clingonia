@@ -124,7 +124,7 @@ last_menu = None
 current_act_err_log = None
 show_act_err_logs = False
 last_gif_params = (None, None)
-last_solve_params = (None, None, [])
+last_solve_params = (None, None, None, [])
 env_counter = 0
 
 
@@ -1546,7 +1546,7 @@ def switch_clingo_para_to_result():
         return
 
     current_solve_params = (
-        env_counter, user_params['answer'], user_params['lpFiles']
+        env_counter, user_params['clingo'], user_params['answer'], user_params['lpFiles']
     )
 
     if last_solve_params != current_solve_params or isinstance(current_paths, int):
@@ -1554,7 +1554,7 @@ def switch_clingo_para_to_result():
             # Reset Simulation
             user_params['answer'] = 1
             current_solve_params = (
-                env_counter, user_params['answer'], user_params['lpFiles']
+                env_counter, user_params['clingo'], user_params['answer'], user_params['lpFiles']
             )
             print(f'\n🌱 Simulation Reset successful: Going for Answer 1.')
         show_act_err_logs = False
