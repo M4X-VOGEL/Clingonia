@@ -3082,8 +3082,10 @@ def builder_change_to_start_or_main():
     first_mod_try = True
     first_build_try = True
 
-    current_array = current_modify_backup_array.copy()
-    current_df = current_modify_backup_df.copy()
+    # only overwrite if exiting para from modify - to not overwrite with default empty array when coming from build
+    if build_mode == 'modify':
+        current_array = current_modify_backup_array.copy()
+        current_df = current_modify_backup_df.copy()
 
     if last_menu == 'start':
         builder_para_to_start()
