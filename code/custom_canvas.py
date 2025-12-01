@@ -475,6 +475,8 @@ class BuildCanvas:
             holds the object id of the mouse image of the current selection.
         image_refs (dict):
             holds image references to prevent garbage collection.
+        resized_cache (dict):
+            holds resized images.
         canvas_images (dict):
             hold object ids for images displayed in the grid cells.
         image_cache (dict):
@@ -591,6 +593,7 @@ class BuildCanvas:
         self.canvas.bind("<Motion>", self.draw_mouse_symbols)
 
         self.image_refs = {}
+        self.resized_cache = {}
         self.canvas_images = {}
         self.image_cache = {}
         self.image_dict = self.set_img_dict()
@@ -897,6 +900,7 @@ class BuildCanvas:
             self.y_offset = (self.canvas.winfo_height() - height) // 2
 
         self.draw_grid()
+        self.resize_images()
         self.draw_images()
 
     def modify_array(self, event):
@@ -992,6 +996,14 @@ class BuildCanvas:
         self.put_img_on_canvas(self.current_selection, 0, row, col)
         return
 
+    def resize_images(self):
+        """Resize the images according to the current zoom level."""
+        adjusted_cell_size = int(self.cell_size * self.scale)
+
+        for value, img in self.image_cache.items():
+            resized = img.resize((adjusted_cell_size, adjusted_cell_size))
+            self.resized_cache[value] = ImageTk.PhotoImage(resized)
+
     def put_img_on_canvas(self, value, layer, row, col):
         """Place a single image in the grid.
 
@@ -1007,17 +1019,14 @@ class BuildCanvas:
         """
         adjusted_cell_size = self.cell_size * self.scale
 
-        image = self.image_cache[value].resize(
-            (int(adjusted_cell_size), int(adjusted_cell_size))
-        )
-        image = ImageTk.PhotoImage(image)
+        image = self.resized_cache[value]
 
         x = self.x_offset + col * adjusted_cell_size
         y = self.y_offset + row * adjusted_cell_size
 
         # if there is an image already at that position modify it
         if (layer, row, col) in self.canvas_images:
-            # if there is a different image change the image to teh current one
+            # if there is a different image change the image to the current one
             if self.image_refs.get((layer, row, col)) != image:
                 self.image_refs[(layer, row, col)] = image
             self.canvas.itemconfig(
@@ -1262,6 +1271,7 @@ class BuildCanvas:
         self.scale = new_scale
 
         self.draw_grid()
+        self.resize_images()
         self.draw_images()
 
 
