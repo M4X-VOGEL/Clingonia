@@ -26,6 +26,8 @@ import platform
 
 import numpy as np
 import pandas as pd
+import threading
+import time
 
 from code.custom_widgets import *
 from code.config import AGENT_COLORS
@@ -881,24 +883,21 @@ class BuildCanvas:
         if max(self.rows, self.cols) > 50:
             self.x_offset = 50
             self.y_offset = 50
-            self.draw_grid()
-            self.draw_images()
         elif self.rows > self.cols:
             self.cell_size = (self.canvas.winfo_height() * 0.8) / self.rows
             width = self.cell_size * self.cols
             height = self.cell_size * self.rows
             self.x_offset = (self.canvas.winfo_width() - width) // 2
             self.y_offset = (self.canvas.winfo_height() - height) // 2
-            self.draw_grid()
-            self.draw_images()
         else:
             self.cell_size = (self.canvas.winfo_width() * 0.8) / self.cols
             width = self.cell_size * self.cols
             height = self.cell_size * self.rows
             self.x_offset = (self.canvas.winfo_width() - width) // 2
             self.y_offset = (self.canvas.winfo_height() - height) // 2
-            self.draw_grid()
-            self.draw_images()
+
+        self.draw_grid()
+        self.draw_images()
 
     def modify_array(self, event):
         """Modify the environment with the current selection.
@@ -993,11 +992,6 @@ class BuildCanvas:
         self.put_img_on_canvas(self.current_selection, 0, row, col)
         return
 
-    def draw_images(self):
-        """Place all images in the grid."""
-        self.draw_tracks()
-        self.draw_trains()
-
     def put_img_on_canvas(self, value, layer, row, col):
         """Place a single image in the grid.
 
@@ -1041,6 +1035,14 @@ class BuildCanvas:
         self.restack_cell(row, col)
 
     def restack_cell(self, row, col):
+        """Redraw all trains and station in the grid.
+
+        Args:
+            row (int):
+                row index of the cell to reorder.
+            col (int):
+                col index of the cell to reorder.
+        """
         # get all layers present at this cell
         layers = sorted(
             [layer for (layer, r, c) in self.canvas_images.keys()
@@ -1077,36 +1079,13 @@ class BuildCanvas:
                (layer == 2 and (row, col) in ends)
         }
 
-    def draw_tracks(self):
-        """Redraw all tracks in the grid."""
-        for row in range(self.rows):
-            for col in range(self.cols):
-                value = self.array[0][row, col]
-                if value == 0:
-                    continue
-                else:
-                    self.put_img_on_canvas(value, 0, row, col)
-
-    def draw_trains(self):
-        for _, row in self.train_data.iterrows():
-            self.put_img_on_canvas(
-                value=self.dir[row['dir']],
-                layer=1,
-                row=row['start_pos'][0],
-                col=row['start_pos'][1]
-            )
-
-            if row['end_pos'] != (-1, -1):
-                self.put_img_on_canvas(
-                    5,
-                    2,
-                    row=row['end_pos'][0],
-                    col=row['end_pos'][1]
-                )
-        self.draw_id_labels()
-
     def draw_train(self, index):
-        """Redraw all trains and station in the grid."""
+        """Redraw all trains and station in the grid.
+
+        Args:
+            index (int):
+                index of the train to draw.
+        """
         row = self.train_data.iloc[index]
         self.put_img_on_canvas(
             value=self.dir[row['dir']],
@@ -1117,7 +1096,12 @@ class BuildCanvas:
         self.draw_id_labels()
 
     def draw_station(self, index):
-        """Redraw all trains and station in the grid."""
+        """Redraw all trains and station in the grid.
+
+        Args:
+            index (int):
+                index of the station to draw.
+        """
         row = self.train_data.iloc[index]
         if row['end_pos'] != (-1, -1):
             self.put_img_on_canvas(
@@ -1215,6 +1199,46 @@ class BuildCanvas:
                     ),
                     fill=self.station_color,
                     tags="id_labels"
+                )
+
+    def draw_images(self):
+        """Place all images in the grid and measure timing."""
+        self.draw_tracks()
+        self.draw_trains()
+        self.draw_stations()
+        self.draw_id_labels()
+
+    def draw_tracks(self):
+        """Draw all tracks in the grid."""
+        for row in range(self.rows):
+            for col in range(self.cols):
+                value = self.array[0][row, col]
+                if value == 0:
+                    continue
+                else:
+                    self.put_img_on_canvas(value, 0, row, col)
+
+    def draw_trains(self):
+        """Draw all unique train positions in the grid."""
+        unique_rows = self.train_data.drop_duplicates(subset='start_pos')
+        for _, row in unique_rows.iterrows():
+            self.put_img_on_canvas(
+                value=self.dir[row['dir']],
+                layer=1,
+                row=row['start_pos'][0],
+                col=row['start_pos'][1]
+            )
+
+    def draw_stations(self):
+        """Draw all unique station positions in the grid."""
+        unique_rows = self.train_data.drop_duplicates(subset='end_pos')
+        for _, row in unique_rows.iterrows():
+            if row['end_pos'] != (-1, -1):
+                self.put_img_on_canvas(
+                    5,
+                    2,
+                    row=row['end_pos'][0],
+                    col=row['end_pos'][1]
                 )
 
     def zoom(self, event):
