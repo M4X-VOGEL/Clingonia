@@ -994,6 +994,7 @@ class BuildCanvas:
         # place track
         self.array[0][row, col] = self.current_selection
         self.put_img_on_canvas(self.current_selection, 0, row, col)
+        self.restack_cell(row, col)
         return
 
     def resize_images(self):
@@ -1041,7 +1042,6 @@ class BuildCanvas:
             )
             self.canvas_images[(layer, row, col)] = canvas_img
             self.image_refs[(layer, row, col)] = image
-        self.restack_cell(row, col)
 
     def restack_cell(self, row, col):
         """Redraw all trains and station in the grid.
@@ -1070,23 +1070,25 @@ class BuildCanvas:
         starts = set(self.train_data['start_pos'])
         ends = set(self.train_data['end_pos'])
 
-        # check if the objects in canvas images still exist in the train list
-        self.canvas_images = {
-            (layer, row, col): v
-            for (layer, row, col), v in self.canvas_images.items()
-            if (layer == 0 and self.array[0][row, col] != 0) or
-               (layer == 1 and (row, col) in starts) or
-               (layer == 2 and (row, col) in ends)
-        }
+        new_canvas_images = {}
+        new_image_refs = {}
 
-        # check if the objects in image refs still exist in the train list
-        self.image_refs = {
-            (layer, row, col): v
-            for (layer, row, col), v in self.image_refs.items()
-            if (layer == 0 and self.array[0][row, col] != 0) or
-               (layer == 1 and (row, col) in starts) or
-               (layer == 2 and (row, col) in ends)
-        }
+        # check if the objects in canvas images still exist in the train list
+        for (layer, row, col), item_id in self.canvas_images.items():
+            keep = (
+                    (layer == 0 and self.array[0][row, col] != 0) or
+                    (layer == 1 and (row, col) in starts) or
+                    (layer == 2 and (row, col) in ends)
+            )
+
+            if keep:
+                new_canvas_images[(layer, row, col)] = item_id
+                new_image_refs[(layer, row, col)] = self.image_refs[(layer, row, col)]
+            else:
+                self.canvas.delete(item_id)
+
+        self.canvas_images = new_canvas_images
+        self.image_refs = new_image_refs
 
     def draw_train(self, index):
         """Redraw all trains and station in the grid.
@@ -1102,6 +1104,7 @@ class BuildCanvas:
             row=row['start_pos'][0],
             col=row['start_pos'][1]
         )
+        self.restack_cell(row['start_pos'][0], row['start_pos'][1])
         self.draw_id_labels()
 
     def draw_station(self, index):
@@ -1119,6 +1122,7 @@ class BuildCanvas:
                 row=row['end_pos'][0],
                 col=row['end_pos'][1]
             )
+        self.restack_cell(row['end_pos'][0], row['end_pos'][1])
         self.draw_id_labels()
 
     def draw_id_labels(self):
