@@ -6241,7 +6241,7 @@ def toggle_result_gif():
     Returns:
         int: -1 if there was an error registered with any input 0 otherwise.
     """
-    global first_build_try
+    global first_build_try, current_timestep
 
     err_count = 0
 
@@ -6360,6 +6360,7 @@ def toggle_result_gif():
         )
         frames['result_menu_frame'].frame.update()
         create_gif()
+        current_timestep = 0
         build_result_gif_frame()
     else:
         if first_build_try:
@@ -6385,6 +6386,7 @@ def toggle_result_gif():
         )
         frames['result_menu_frame'].frame.update()
         create_gif()
+        current_timestep = 0
         build_result_gif_frame()
 
     labels['gif_status_label'].label.config(
