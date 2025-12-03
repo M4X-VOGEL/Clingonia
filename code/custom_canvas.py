@@ -26,8 +26,6 @@ import platform
 
 import numpy as np
 import pandas as pd
-import threading
-import time
 
 from code.custom_widgets import *
 from code.config import AGENT_COLORS
@@ -1660,39 +1658,6 @@ class TrainListCanvas:
             style_map=self.remove_button_style_map,
         )
 
-    def remove_widget_row(self, index):
-        # not working as of now
-        # might replace parts of update_widget_rows in remove_train()
-        # need to reconfigure the buttons as well i.e overwrite the commands with the correct/new index
-
-        raise NotImplementedError("This feature is not correctly implemented yet.")
-
-        # if index not in self.train_frames:
-        #     return
-        #
-        # self.train_frames[index].destroy()
-        # # del self.train_frames[index]
-        # # del self.station_dict[index]
-        # # del self.config_dict[index]
-        # # del self.remove_dict[index]
-        #
-        # x = len(self.station_dict)
-        #
-        # for i in range(index+1, x):
-        #     self.train_frames[i-1] = self.train_frames.pop(i)
-        # need to reconfigure the buttons as well i.e overwrite the commands with the correct/new index
-        #     self.station_dict[i-1] = self.station_dict.pop(i)
-        #     self.config_dict[i-1] = self.config_dict.pop(i)
-        #     self.remove_dict[i-1] = self.remove_dict.pop(i)
-        #
-        #     label = self.label_dict.pop(i)
-        #     label.label.config(
-        #         text=f'Train {i - 1}: '
-        #              f'{self.train_data["start_pos"].iloc[i - 1]}, '
-        #              f'{self.train_data["dir"].iloc[i - 1]}',
-        #         fg=self.label_color,
-        #     )
-        #     self.label_dict[i - 1] = label
 
     def on_frame_configure(self, event):
         """Configure the scroll_frame for scrolling.
