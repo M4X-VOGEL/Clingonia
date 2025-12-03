@@ -6360,7 +6360,7 @@ def toggle_result_gif():
         )
         frames['result_menu_frame'].frame.update()
         create_gif()
-        current_timestep = 0
+        current_timestep = int(pos_df['timestep'].min())
         build_result_gif_frame()
     else:
         if first_build_try:
@@ -6386,7 +6386,7 @@ def toggle_result_gif():
         )
         frames['result_menu_frame'].frame.update()
         create_gif()
-        current_timestep = 0
+        current_timestep = int(pos_df['timestep'].min())
         build_result_gif_frame()
 
     labels['gif_status_label'].label.config(
