@@ -2540,6 +2540,21 @@ class ResultCanvas:
         )
         train_colors = dict(zip(self.paths_df['trainID'].unique(), colors))
 
+        count = len(self.show_df['trainID'].unique())
+
+        if count == 1:
+            font = (
+                self.path_label_font[0],
+                int(self.path_label_font[1] * (adjusted_cell_size / 100)),
+                self.path_label_font[2]
+            )
+        else:
+            font = (
+                self.path_label_font[0],
+                int(self.path_label_font[1] * (adjusted_cell_size / 100) * (2/3)),
+                self.path_label_font[2]
+            )
+
         # draw each train position for each timestep
         for _, row in self.show_df.iterrows():
             self.canvas.create_text(
@@ -2549,11 +2564,7 @@ class ResultCanvas:
                  offset_dict[row['cell_offset']][1]),
                 text=row['timestep'],
                 anchor="center",
-                font=(
-                    self.path_label_font[0],
-                    int(self.path_label_font[1] * (adjusted_cell_size/100)),
-                    self.path_label_font[2]
-                ),
+                font=font,
                 fill=train_colors[row['trainID']],
                 tags="path_labels"
             )
