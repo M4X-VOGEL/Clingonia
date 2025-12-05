@@ -1170,7 +1170,8 @@ class BuildCanvas:
             return chosen
 
         font = self.id_label_font.copy()
-        font.config(size=int(self.id_label_font.cget("size") * (adjusted_cell_size / 100)))
+        sysmod = 2 if sys_platform == 'Darwin' else 1
+        font.config(size=int(self.id_label_font.cget("size") * (adjusted_cell_size / 100) * sysmod))
 
         # draw the ids on all trains and their stations
         for index, row in self.train_data.iterrows():
