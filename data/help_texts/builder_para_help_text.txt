@@ -42,6 +42,13 @@ The width of the rail map.
 ===
 
 
+=== Global Time Limit:
+An upper limit on how long
+the environment can run.
+Predicate global(MaxTime).
+===
+
+
 
 ----------------
 Advanced Options
@@ -76,12 +83,6 @@ environments over 1000x1000.
 -----------------------------
 Parameters (no Clingo impact)
 -----------------------------
-
-=== Global Time Limit:
-An upper limit on how long
-the environment can run.
-===
-
 
 === Malfunction rate:
 Fraction A/B represents the

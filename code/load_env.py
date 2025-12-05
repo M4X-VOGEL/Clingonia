@@ -14,6 +14,30 @@ def file_in_directory(path):
     return os.path.isfile(path)
 
 
+def add_global(pred):
+    """Parses the global predicate and returns its MaxTime.
+
+    Predicate format: global(MaxTime)
+
+    Args:
+        pred (str): Predicate string from the .lp file.
+
+    Returns:
+        int: passed maximum time or 100 if an error occurs.
+    """
+    # Extract maximum time number
+    max_time = pred[7:-1]
+    try:
+        max_time = int(max_time)
+        if max_time < 1:
+            raise ValueError()
+    except ValueError:
+        print(f"⚠️ global(MaxTime) Warning: MaxTime must be a single integer greater than 0.")
+        print(f"> automatically replaced by global(100).")
+        max_time = 100
+    return max_time
+
+
 def add_cell(df_tracks, pred):
     """Parses a cell predicate and adds it as a row in the tracks DataFrame.
 
@@ -135,10 +159,12 @@ def prep_tracks_and_trains(path):
         path (str): Path to .lp file.
 
     Returns:
-        tuple: (df_tracks, tse_list) if successful, or (error_code, error_code) on error.
+        triple: (df_tracks, tse_list, global_max_time) if successful,
+                or (error_code, error_code) on error.
     """
     df_tracks = pd.DataFrame(columns=["x", "y", "track"])
     tse_list = []  # list to collect train, start, end
+    global_max_time = 100  # Default value for global(MaxTime)
     with open(path, 'r') as lp:
         for line in lp:
             # Separate every predicate of the line
@@ -147,6 +173,9 @@ def prep_tracks_and_trains(path):
                 pred = pred.strip()
                 if not pred: continue  # Skip empty lines
                 elif "%" in pred: break  # Skip comments
+                # global
+                elif pred.startswith("global"):
+                    global_max_time = add_global(pred)
                 # cell
                 elif pred.startswith("cell"):
                     rc = add_cell(df_tracks, pred)
@@ -157,7 +186,7 @@ def prep_tracks_and_trains(path):
                     if rc != 0: return rc, rc  # Error -3,-4,-5
     # Sort by y, then x in ascending order
     df_tracks = df_tracks.sort_values(by=['y', 'x'], ascending=[True, True])
-    return df_tracks, tse_list
+    return df_tracks, tse_list, global_max_time
 
 
 def create_list_of_tracks(df_tracks):
@@ -371,7 +400,7 @@ def load_env(lp_file):
         lp_file (str): Path to .lp file containing ASP-encoded environment.
 
     Returns:
-        tuple: A 2D list of track types and a DataFrame with train configuration,
+        triple: 2D list of track types, DataFrame with train configuration and global(MaxTime),
                or error codes if loading fails.
     """
     print(f"\nLoading environment {os.path.basename(lp_file)}...")
@@ -383,7 +412,7 @@ def load_env(lp_file):
         print("❌ Load Error: Environment must be a .lp file.")
         return -15, -15  # Report invalid file type
     # Assemble tracks DF and predicate list
-    df_tracks, tse_list = prep_tracks_and_trains(lp_file)
+    df_tracks, tse_list, global_max_time = prep_tracks_and_trains(lp_file)
     if isinstance(df_tracks, int) or isinstance(tse_list, int):
         print("❌ Load Error: No environment loaded.")
         return df_tracks, tse_list  # Errors -2,-3,-4,-5,-11,-12
@@ -395,4 +424,4 @@ def load_env(lp_file):
     # Convert df_tracks into a 2D list and tse_list into a DF
     tracks = create_list_of_tracks(df_tracks)
     trains = create_df_of_trains(tse_list)
-    return tracks, trains
+    return tracks, trains, global_max_time

@@ -11,6 +11,17 @@ def ensure_directory(d):
     os.makedirs(d, exist_ok=True)
 
 
+def write_globals(user_params, lp):
+    """Writes global predicates to a specified .lp file.
+
+    Args:
+        user_params (dict): User parameters.
+        lp (file object): .lp file.
+    """
+    # Write global(MaxTime) predicate
+    lp.write(f"global({user_params['globalTimeLimit']}).\n\n")
+
+
 def write_trains(trains, lp):
     """Writes train predicates to a specified .lp file.
 
@@ -41,18 +52,20 @@ def write_tracks(tracks, lp):
         lp.write(f'\n')
 
 
-def save_env(tracks, trains, name="data/running_tmp.lp"):
+def save_env(tracks, trains, user_params, name="data/running_tmp.lp"):
     """Saves the environment as a .lp file.
 
     Args:
         tracks (list[list[int]]): 2D list of all tracks.
         trains (pd.DataFrame): Train configuration.
+        user_params (dict): User parameters.
         name (str): Path of .lp file.
     """
     ensure_directory("data")
     path = name
     with open(path, 'w') as lp:
-        # Write train and track predicates to the file
+        # Write global, train and track predicates to the file
+        write_globals(user_params, lp)
         write_trains(trains, lp)
         write_tracks(tracks, lp)
 

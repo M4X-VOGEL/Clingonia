@@ -65,6 +65,13 @@ the environment.
 ===
 
 
+=== Global Time Limit:
+An upper limit on how long
+the environment can run.
+Predicate global(MaxTime).
+===
+
+
 
 ----------------
 Advanced Options
@@ -127,12 +134,6 @@ environments over 1000x1000.
 -----------------------------
 Parameters (no Clingo impact)
 -----------------------------
-
-=== Global Time Limit:
-An upper limit on how long
-the environment can run.
-===
-
 
 === Speed ratio map for trains:
 Distribution of train speeds.

@@ -6940,7 +6940,7 @@ def load_env_from_file():
         )
         frames['main_menu_frame'].frame.update()
 
-    tracks, trains = load_env(file)
+    tracks, trains, user_params['globalTimeLimit'] = load_env(file)
 
     # check for possible error values
     if isinstance(tracks, int):
@@ -7056,7 +7056,7 @@ def save_env_to_file():
     tracks = current_array[0]
     trains = get_trains()
 
-    save_env(tracks, trains, name=file)
+    save_env(tracks, trains, user_params, name=file)
     if user_params['saveImage']:
         if file.endswith('.lp'):
             image_file = file[:-2] + 'png'
@@ -7079,7 +7079,7 @@ def run_simulation() -> int:
     tracks = current_array[0]
     trains = get_trains()
 
-    save_env(tracks, trains)
+    save_env(tracks, trains, user_params)
 
     current_paths = calc_paths(tracks, trains)
     try:
