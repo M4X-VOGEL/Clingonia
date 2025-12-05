@@ -43,12 +43,12 @@ conda create python=3.11 --name flatland
 conda activate flatland
 ```
 
-📦 Then, install the stable release of Flatland (Version 4.2.2 recommended):
+📦 Then, install the stable release of Flatland (Version 4.2.2 or newer):
 ```
-pip install flatland-rl
+pip install flatland-rl==4.2.2
 ```
 
-📦 To have access to clingo, install the required clingo package:
+📦 To use the clingo CLI (optional), install the required clingo package:
 ```
 conda install -c potassco clingo
 ```
@@ -98,6 +98,7 @@ Once an encoding or set of encodings has been developed that produces valid path
 ### 🗺️ Custom environment encodings
 
 Valid predicates are:
+- `global(MaxTime).`
 - `train(ID).`
 - `start(ID,(X,Y),Earliest_Dep,Dir).`
 - `end(ID,(X,Y),Latest_Arr).`
