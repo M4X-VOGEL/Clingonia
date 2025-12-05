@@ -41,7 +41,7 @@ screenwidth, screenheight = 1920, 1080
 
 # font styling
 base_font_size = 20
-info_text_font_size = 15
+info_text_font_size = 18 if sys_platform == 'Darwin' else 14
 frame_title_font_size = 50
 font_base_mod = 1
 font_path_mod = 0.5
