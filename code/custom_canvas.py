@@ -2540,20 +2540,13 @@ class ResultCanvas:
         )
         train_colors = dict(zip(self.paths_df['trainID'].unique(), colors))
 
-        count = len(self.show_df['trainID'].unique())
+        font = self.path_label_font.copy()
+        sysmod = 2 if sys_platform == 'Darwin' else 1
 
-        if count == 1:
-            font = (
-                self.path_label_font[0],
-                int(self.path_label_font[1] * (adjusted_cell_size / 100)),
-                self.path_label_font[2]
-            )
+        if len(self.show_df['trainID'].unique()):
+            font.config(size=int(self.path_label_font.cget("size") * (adjusted_cell_size / 100) * sysmod))
         else:
-            font = (
-                self.path_label_font[0],
-                int(self.path_label_font[1] * (adjusted_cell_size / 100) * (2/3)),
-                self.path_label_font[2]
-            )
+            font.config(size=int(self.path_label_font.cget("size") * (adjusted_cell_size / 100) * (2/3) * sysmod))
 
         # draw each train position for each timestep
         for _, row in self.show_df.iterrows():

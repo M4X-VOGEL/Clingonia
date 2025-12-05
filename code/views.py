@@ -17,7 +17,7 @@ import re
 import ast
 import json
 import shutil
-from tkinter import filedialog
+from tkinter import filedialog, font
 
 import pandas as pd
 
@@ -335,8 +335,8 @@ def build_flatland_window():
     )
     windows['flatland_window'].window.bind('<Escape>', open_exit_confirmation_frame)
 
-    screenwidth = windows['flatland_window'].window.winfo_screenwidth()
-    screenheight = windows['flatland_window'].window.winfo_screenheight()
+    screenwidth = windows['flatland_window'].screenwidth
+    screenheight = windows['flatland_window'].screenheight
 
     update_fonts()
 
@@ -350,17 +350,20 @@ def update_fonts():
         All global font_layouts and font_base_mod.
     """
     global font_base_mod, base_font_layout, canvas_font_layout, \
-        canvas_label_font_layout, err_font_layout, help_font_layout, \
+        canvas_label_font_layout, save_font_layout, path_font_layout,\
+        err_font_layout, help_font_layout, \
         info_font_layout, title_font_layout
 
     font_base_mod = ((screenwidth / 1920) ** 0.6) * ((screenheight / 1080) ** 0.4)
-    base_font_layout = ('Arial', int(font_base_mod * base_font_size), 'bold')
-    canvas_font_layout = ('Arial', int(font_base_mod * base_font_size))
-    canvas_label_font_layout = ('Arial', int(font_base_mod * base_font_size), 'bold')
-    err_font_layout = ('Arial', int(font_base_mod * font_err_mod * base_font_size), 'bold')
-    help_font_layout = ('Courier', int(font_base_mod * base_font_size))
-    info_font_layout = ('Courier', int(font_base_mod * info_text_font_size))
-    title_font_layout = ('Arial', int(font_base_mod * frame_title_font_size), 'bold')
+    base_font_layout = font.Font(family='Arial', size=int(font_base_mod * base_font_size), weight='bold')
+    canvas_font_layout = font.Font(family='Arial', size=int(font_base_mod * base_font_size))
+    canvas_label_font_layout = font.Font(family='Arial', size=int(font_base_mod * base_font_size), weight='bold')
+    save_font_layout = font.Font(family='Arial', size=int(font_base_mod * base_font_size), slant='italic')
+    path_font_layout = font.Font(family='Arial', size=int(font_base_mod * base_font_size * font_path_mod), weight='bold')
+    err_font_layout = font.Font(family='Arial', size=int(font_base_mod * font_err_mod * base_font_size), weight='bold')
+    help_font_layout = font.Font(family='Courier', size=int(font_base_mod * base_font_size))
+    info_font_layout = font.Font(family='Courier', size=int(font_base_mod * info_text_font_size))
+    title_font_layout = font.Font(family='Arial', size=int(font_base_mod * frame_title_font_size), weight='bold')
 
 def start_flatland():
     """Starts the main event loop of the program"""
