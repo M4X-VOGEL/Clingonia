@@ -1169,6 +1169,9 @@ class BuildCanvas:
             used[pos][chosen] += 1
             return chosen
 
+        font = self.id_label_font.copy()
+        font.config(size=int(self.id_label_font.cget("size") * (adjusted_cell_size / 100)))
+
         # draw the ids on all trains and their stations
         for index, row in self.train_data.iterrows():
             train_pos = row['start_pos']
@@ -1181,11 +1184,7 @@ class BuildCanvas:
                     0] * adjusted_cell_size),
                 text=str(index),
                 anchor="center",
-                font=(
-                    self.id_label_font[0],
-                    int(self.id_label_font[1] * (adjusted_cell_size / 100)),
-                    self.id_label_font[2]
-                ),
+                font=font,
                 fill=self.train_color,
                 tags="id_labels"
             )
@@ -1203,11 +1202,7 @@ class BuildCanvas:
                      station_pos[0] * adjusted_cell_size),
                     text=str(index),
                     anchor="center",
-                    font=(
-                        self.id_label_font[0],
-                        int(self.id_label_font[1] * (adjusted_cell_size / 100)),
-                        self.id_label_font[2]
-                    ),
+                    font=font,
                     fill=self.station_color,
                     tags="id_labels"
                 )
