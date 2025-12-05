@@ -1020,32 +1020,6 @@ def build_main_menu_load_info_frame():
     frames['main_menu_load_info_frame'].frame.columnconfigure((0,1), weight=1)
     frames['main_menu_load_info_frame'].frame.grid_propagate(False)
 
-def get_load_info():
-    """Prepares the info of the loaded environment.
-
-    Saves the prepared info of the loaded environment in the data/info_text.txt
-    """
-    def format_row(index, row):
-        """Formats a text line from the passed row and index."""
-        new_line = (f"| {index:>8} | {str(row['start_pos']):>14} "
-                    f"| {row['dir']:^3} | {str(row['end_pos']):>14} "
-                    f"| {row['e_dep']:>5} | {row['l_arr']:>5} | {row['speed']:>5} |")
-        return new_line
-
-    table_header = ("| Train ID | Start Position | Dir |   "
-                    "End Position | E Dep | L Arr | Speed |")
-    table_divider = ("|----------|----------------|-----|"
-                     "----------------|-------|-------|-------|")
-
-    new_rows = [format_row(index, row) for index, row in current_df.iterrows()]
-
-    with open('data/info_text.txt', "w") as file:
-        file.write(table_divider + '\n')
-        file.write(table_header + '\n')
-        file.write(table_divider + '\n')
-        file.writelines(row + '\n' for row in new_rows)
-        file.write(table_divider + '\n')
-
 def close_load_info():
     """Destroys the load info frame."""
     if 'main_menu_load_info_frame' in frames:
@@ -6793,6 +6767,47 @@ def df_to_timetable_text():
         file.write(divider + "\n")
         file.writelines(new_row + "\n" for new_row in new_rows)
 
+def get_load_info():
+    """Prepares the info of the loaded environment.
+
+    Saves the prepared info of the loaded environment in the data/info_text.txt
+    """
+    def format_row(index, row):
+        """Formats a text line from the passed row and index."""
+        new_line = (f"| {index:>8} | {str(row['start_pos']):>14} "
+                    f"| {row['dir']:^3} | {str(row['end_pos']):>14} "
+                    f"| {row['e_dep']:>5} | {row['l_arr']:>5} | {row['speed']:>5} |")
+        return new_line
+
+    param_header = '| Parameters |'
+    param_divider = '|------------|'
+
+    load_param_text = [
+        f'|-Global Time Limit: {user_params["globalTimeLimit"]}',
+    ]
+
+    spacing = '|\n|'
+
+    table_header = ("| Train ID | Start Position | Dir |   "
+                    "End Position | E Dep | L Arr | Speed |")
+    table_divider = ("|----------|----------------|-----|"
+                     "----------------|-------|-------|-------|")
+
+    new_rows = [format_row(index, row) for index, row in current_df.iterrows()]
+
+    with open('data/info_text.txt', "w") as file:
+        file.write(param_divider + '\n')
+        file.write(param_header + '\n')
+        file.write(param_divider + '\n')
+        for row in load_param_text:
+            file.write(row + '\n')
+        file.write(spacing + '\n')
+        file.write(table_divider + '\n')
+        file.write(table_header + '\n')
+        file.write(table_divider + '\n')
+        file.writelines(row + '\n' for row in new_rows)
+        file.write(table_divider + '\n')
+
 def current_df_to_env_text(mode):
     """Create a train list from the current_df.
 
@@ -6809,8 +6824,8 @@ def current_df_to_env_text(mode):
     param_divider = '|------------|'
 
     gen_param_text = [
-        f'|-Environment Time Limit: {user_params["globalTimeLimit"]}',
         f'|-Environment Seed: {user_params["seed"]}',
+        f'|-Global Time Limit: {user_params["globalTimeLimit"]}',
         f'|-Grid Mode: {user_params["grid"]}',
         f'|-Remove agents on arrival: {user_params["remove"]}',
         f'|-Speeds of Trains: {user_params["speedMap"]}',
@@ -6820,6 +6835,7 @@ def current_df_to_env_text(mode):
         f'|-Maximum Duration of Malfunctions: {user_params["max"]}',
     ]
     build_param_text = [
+        f'|-Global Time Limit: {user_params["globalTimeLimit"]}',
         f'|-Remove agents on arrival: {user_params["remove"]}',
         f'|-Environment Time Limit: {user_params["globalTimeLimit"]}',
         f'|-Malfunction rate: '
