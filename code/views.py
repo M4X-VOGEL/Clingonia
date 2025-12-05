@@ -17,7 +17,7 @@ import re
 import ast
 import json
 import shutil
-from tkinter import filedialog
+from tkinter import filedialog, font
 
 import pandas as pd
 
@@ -41,7 +41,7 @@ screenwidth, screenheight = 1920, 1080
 
 # font styling
 base_font_size = 20
-info_text_font_size = 15
+info_text_font_size = 18 if sys_platform == 'Darwin' else 14
 frame_title_font_size = 50
 font_base_mod = 1
 font_path_mod = 0.5
@@ -335,8 +335,8 @@ def build_flatland_window():
     )
     windows['flatland_window'].window.bind('<Escape>', open_exit_confirmation_frame)
 
-    screenwidth = windows['flatland_window'].window.winfo_screenwidth()
-    screenheight = windows['flatland_window'].window.winfo_screenheight()
+    screenwidth = windows['flatland_window'].screenwidth
+    screenheight = windows['flatland_window'].screenheight
 
     update_fonts()
 
@@ -350,17 +350,20 @@ def update_fonts():
         All global font_layouts and font_base_mod.
     """
     global font_base_mod, base_font_layout, canvas_font_layout, \
-        canvas_label_font_layout, err_font_layout, help_font_layout, \
+        canvas_label_font_layout, save_font_layout, path_font_layout,\
+        err_font_layout, help_font_layout, \
         info_font_layout, title_font_layout
 
     font_base_mod = ((screenwidth / 1920) ** 0.6) * ((screenheight / 1080) ** 0.4)
-    base_font_layout = ('Arial', int(font_base_mod * base_font_size), 'bold')
-    canvas_font_layout = ('Arial', int(font_base_mod * base_font_size))
-    canvas_label_font_layout = ('Arial', int(font_base_mod * base_font_size), 'bold')
-    err_font_layout = ('Arial', int(font_base_mod * font_err_mod * base_font_size), 'bold')
-    help_font_layout = ('Courier', int(font_base_mod * base_font_size))
-    info_font_layout = ('Courier', int(font_base_mod * info_text_font_size))
-    title_font_layout = ('Arial', int(font_base_mod * frame_title_font_size), 'bold')
+    base_font_layout = font.Font(family='Arial', size=int(font_base_mod * base_font_size), weight='bold')
+    canvas_font_layout = font.Font(family='Arial', size=int(font_base_mod * base_font_size))
+    canvas_label_font_layout = font.Font(family='Arial', size=int(font_base_mod * base_font_size), weight='bold')
+    save_font_layout = font.Font(family='Arial', size=int(font_base_mod * base_font_size), slant='italic')
+    path_font_layout = font.Font(family='Arial', size=int(font_base_mod * base_font_size * font_path_mod), weight='bold')
+    err_font_layout = font.Font(family='Arial', size=int(font_base_mod * font_err_mod * base_font_size), weight='bold')
+    help_font_layout = font.Font(family='Courier', size=int(font_base_mod * base_font_size))
+    info_font_layout = font.Font(family='Courier', size=int(font_base_mod * info_text_font_size))
+    title_font_layout = font.Font(family='Arial', size=int(font_base_mod * frame_title_font_size), weight='bold')
 
 def start_flatland():
     """Starts the main event loop of the program"""
@@ -1016,32 +1019,6 @@ def build_main_menu_load_info_frame():
     frames['main_menu_load_info_frame'].frame.rowconfigure(1, weight=1)
     frames['main_menu_load_info_frame'].frame.columnconfigure((0,1), weight=1)
     frames['main_menu_load_info_frame'].frame.grid_propagate(False)
-
-def get_load_info():
-    """Prepares the info of the loaded environment.
-
-    Saves the prepared info of the loaded environment in the data/info_text.txt
-    """
-    def format_row(index, row):
-        """Formats a text line from the passed row and index."""
-        new_line = (f"| {index:>8} | {str(row['start_pos']):>14} "
-                    f"| {row['dir']:^3} | {str(row['end_pos']):>14} "
-                    f"| {row['e_dep']:>5} | {row['l_arr']:>5} | {row['speed']:>5} |")
-        return new_line
-
-    table_header = ("| Train ID | Start Position | Dir |   "
-                    "End Position | E Dep | L Arr | Speed |")
-    table_divider = ("|----------|----------------|-----|"
-                     "----------------|-------|-------|-------|")
-
-    new_rows = [format_row(index, row) for index, row in current_df.iterrows()]
-
-    with open('data/info_text.txt', "w") as file:
-        file.write(table_divider + '\n')
-        file.write(table_header + '\n')
-        file.write(table_divider + '\n')
-        file.writelines(row + '\n' for row in new_rows)
-        file.write(table_divider + '\n')
 
 def close_load_info():
     """Destroys the load info frame."""
@@ -6790,6 +6767,47 @@ def df_to_timetable_text():
         file.write(divider + "\n")
         file.writelines(new_row + "\n" for new_row in new_rows)
 
+def get_load_info():
+    """Prepares the info of the loaded environment.
+
+    Saves the prepared info of the loaded environment in the data/info_text.txt
+    """
+    def format_row(index, row):
+        """Formats a text line from the passed row and index."""
+        new_line = (f"| {index:>8} | {str(row['start_pos']):>14} "
+                    f"| {row['dir']:^3} | {str(row['end_pos']):>14} "
+                    f"| {row['e_dep']:>5} | {row['l_arr']:>5} | {row['speed']:>5} |")
+        return new_line
+
+    param_header = '| Parameters |'
+    param_divider = '|------------|'
+
+    load_param_text = [
+        f'|-Global Time Limit: {user_params["globalTimeLimit"]}',
+    ]
+
+    spacing = '|\n|'
+
+    table_header = ("| Train ID | Start Position | Dir |   "
+                    "End Position | E Dep | L Arr | Speed |")
+    table_divider = ("|----------|----------------|-----|"
+                     "----------------|-------|-------|-------|")
+
+    new_rows = [format_row(index, row) for index, row in current_df.iterrows()]
+
+    with open('data/info_text.txt', "w") as file:
+        file.write(param_divider + '\n')
+        file.write(param_header + '\n')
+        file.write(param_divider + '\n')
+        for row in load_param_text:
+            file.write(row + '\n')
+        file.write(spacing + '\n')
+        file.write(table_divider + '\n')
+        file.write(table_header + '\n')
+        file.write(table_divider + '\n')
+        file.writelines(row + '\n' for row in new_rows)
+        file.write(table_divider + '\n')
+
 def current_df_to_env_text(mode):
     """Create a train list from the current_df.
 
@@ -6806,8 +6824,8 @@ def current_df_to_env_text(mode):
     param_divider = '|------------|'
 
     gen_param_text = [
-        f'|-Environment Time Limit: {user_params["globalTimeLimit"]}',
         f'|-Environment Seed: {user_params["seed"]}',
+        f'|-Global Time Limit: {user_params["globalTimeLimit"]}',
         f'|-Grid Mode: {user_params["grid"]}',
         f'|-Remove agents on arrival: {user_params["remove"]}',
         f'|-Speeds of Trains: {user_params["speedMap"]}',
@@ -6817,6 +6835,7 @@ def current_df_to_env_text(mode):
         f'|-Maximum Duration of Malfunctions: {user_params["max"]}',
     ]
     build_param_text = [
+        f'|-Global Time Limit: {user_params["globalTimeLimit"]}',
         f'|-Remove agents on arrival: {user_params["remove"]}',
         f'|-Environment Time Limit: {user_params["globalTimeLimit"]}',
         f'|-Malfunction rate: '

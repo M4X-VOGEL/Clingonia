@@ -1169,6 +1169,10 @@ class BuildCanvas:
             used[pos][chosen] += 1
             return chosen
 
+        font = self.id_label_font.copy()
+        sysmod = 2 if sys_platform == 'Darwin' else 1
+        font.config(size=int(self.id_label_font.cget("size") * (adjusted_cell_size / 100) * sysmod))
+
         # draw the ids on all trains and their stations
         for index, row in self.train_data.iterrows():
             train_pos = row['start_pos']
@@ -1181,11 +1185,7 @@ class BuildCanvas:
                     0] * adjusted_cell_size),
                 text=str(index),
                 anchor="center",
-                font=(
-                    self.id_label_font[0],
-                    int(self.id_label_font[1] * (adjusted_cell_size / 100)),
-                    self.id_label_font[2]
-                ),
+                font=font,
                 fill=self.train_color,
                 tags="id_labels"
             )
@@ -1203,11 +1203,7 @@ class BuildCanvas:
                      station_pos[0] * adjusted_cell_size),
                     text=str(index),
                     anchor="center",
-                    font=(
-                        self.id_label_font[0],
-                        int(self.id_label_font[1] * (adjusted_cell_size / 100)),
-                        self.id_label_font[2]
-                    ),
+                    font=font,
                     fill=self.station_color,
                     tags="id_labels"
                 )
@@ -2540,6 +2536,14 @@ class ResultCanvas:
         )
         train_colors = dict(zip(self.paths_df['trainID'].unique(), colors))
 
+        font = self.path_label_font.copy()
+        sysmod = 2 if sys_platform == 'Darwin' else 1
+
+        if len(self.show_df['trainID'].unique()):
+            font.config(size=int(self.path_label_font.cget("size") * (adjusted_cell_size / 100) * sysmod))
+        else:
+            font.config(size=int(self.path_label_font.cget("size") * (adjusted_cell_size / 100) * (2/3) * sysmod))
+
         # draw each train position for each timestep
         for _, row in self.show_df.iterrows():
             self.canvas.create_text(
@@ -2549,11 +2553,7 @@ class ResultCanvas:
                  offset_dict[row['cell_offset']][1]),
                 text=row['timestep'],
                 anchor="center",
-                font=(
-                    self.path_label_font[0],
-                    int(self.path_label_font[1] * (adjusted_cell_size/100)),
-                    self.path_label_font[2]
-                ),
+                font=font,
                 fill=train_colors[row['trainID']],
                 tags="path_labels"
             )
