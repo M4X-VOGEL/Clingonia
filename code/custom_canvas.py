@@ -1170,6 +1170,8 @@ class BuildCanvas:
             return chosen
 
         font = self.id_label_font.copy()
+
+        # double the font size for mac
         sysmod = 2 if sys_platform == 'Darwin' else 1
         font.config(size=int(self.id_label_font.cget("size") * (adjusted_cell_size / 100) * sysmod))
 
@@ -2537,12 +2539,13 @@ class ResultCanvas:
         train_colors = dict(zip(self.paths_df['trainID'].unique(), colors))
 
         font = self.path_label_font.copy()
-        sysmod = 2 if sys_platform == 'Darwin' else 1
+        sysmod = 2 if sys_platform == 'Darwin' else 1   # double the font size for mac
 
-        if len(self.show_df['trainID'].unique()):
-            font.config(size=int(self.path_label_font.cget("size") * (adjusted_cell_size / 100) * sysmod))
-        else:
+        # if there is more than one path displayed shrink the font by  2/3
+        if len(self.show_df['trainID'].unique()) > 1:
             font.config(size=int(self.path_label_font.cget("size") * (adjusted_cell_size / 100) * (2/3) * sysmod))
+        else:
+            font.config(size=int(self.path_label_font.cget("size") * (adjusted_cell_size / 100) * sysmod))
 
         # draw each train position for each timestep
         for _, row in self.show_df.iterrows():
