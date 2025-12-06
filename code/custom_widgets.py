@@ -328,10 +328,10 @@ class Button:
             specify over how many grid columns this object can be placed.
         text (str):
             displayed on the button.
-        font (Union[Tuple[str, int], Tuple[str, int, str]]):
+        font (tk.font.Font):
             applied to the text on the button. Can be font family and font size
             or font family, font size, and font style.
-            E.g. ('Arial', 20, 'bold').
+            E.g. (family='Arial', size=20, style='bold').
         image (str):
             path to an image file. Will be displayed on the button.
         rotation (int):
@@ -414,10 +414,10 @@ class Button:
                 specify over how many grid columns this object can be placed.
             text (str):
                 displayed on the button.
-            font (Union[Tuple[str, int], Tuple[str, int, str]]):
+            font (tk.font.Font):
                 applied to the text on the button. Can be font family and font size
                 or font family, font size, and font style.
-                E.g. ('Arial', 20, 'bold').
+                E.g. (family='Arial', size=20, style='bold').
             image (str):
                 path to an image file. Will be displayed on the button.
             rotation (int):
@@ -591,10 +591,10 @@ class Label:
             5 pixel above and below the object.
         text (str):
             displayed on the label.
-        font (Union[Tuple[str, int], Tuple[str, int, str]]):
+        font (tk.font.Font):
             applied to the text on the label. Can be font family and font size
             or font family, font size, and font style.
-            E.g. ('Arial', 20, 'bold').
+            E.g. (family='Arial', size=20, style='bold').
         foreground_color (str):
             hex color code e.g. '#00FF00' or a color name e.g. 'red'.
         background_color (str):
@@ -649,10 +649,10 @@ class Label:
                 5 pixel above and below the object.
             text (str):
                 displayed on the label.
-            font (Union[Tuple[str, int], Tuple[str, int, str]]):
+            font (tk.font.Font):
                 applied to the text on the label. Can be font family and font size
                 or font family, font size, and font style.
-                E.g. ('Arial', 20, 'bold').
+                E.g. (family='Arial', size=20, style='bold').
             foreground_color (str):
                 hex color code e.g. '#00FF00' or a color name e.g. 'red'.
             background_color (str):
@@ -1310,10 +1310,10 @@ class EntryField:
             displayed on the entry field as an example. Will be removed once
             the entry filed is selected. Will be replaced if the entry field
             is unselected and no text is entered.
-        font (Union[Tuple[str, int], Tuple[str, int, str]]):
+        font (tk.font.Font):
             applied to the text on the entry field. Can be font family and
             font size or font family, font size, and font style.
-            E.g. ('Arial', 20, 'bold').
+            E.g. (family='Arial', size=20, style='bold').
         foreground_color (str):
             hex color code e.g. '#00FF00' or a color name e.g. 'red'.
         background_color (str):
@@ -1384,10 +1384,10 @@ class EntryField:
                 displayed on the entry field as an example. Will be removed once
                 the entry filed is selected. Will be replaced if the entry field
                 is unselected and no text is entered.
-            font (Union[Tuple[str, int], Tuple[str, int, str]]):
+            font (tk.font.Font):
                 applied to the text on the entry field. Can be font family and
                 font size or font family, font size, and font style.
-                E.g. ('Arial', 20, 'bold').
+                E.g. (family='Arial', size=20, style='bold').
             foreground_color (str):
                 hex color code e.g. '#00FF00' or a color name e.g. 'red'.
             background_color (str):
@@ -1553,10 +1553,10 @@ class Text:
             5 pixel above and below the object.
         text_data (str):
             displayed on the text.
-        font (Union[Tuple[str, int], Tuple[str, int, str]]):
+        font (tk.font.Font):
             applied to the text on the entry field. Can be font family and
             font size or font family, font size, and font style.
-            E.g. ('Arial', 20, 'bold').
+            E.g. (family='Arial', size=20, style='bold').
         wrap (int):
             text will insert a linebreak after this many text symbols.
         foreground_color (str):
@@ -1627,10 +1627,10 @@ class Text:
                 5 pixel above and below the object.
             text (str):
                 displayed on the text.
-            font (Union[Tuple[str, int], Tuple[str, int, str]]):
+            font (tk.font.Font):
                 applied to the text on the entry field. Can be font family and
                 font size or font family, font size, and font style.
-                E.g. ('Arial', 20, 'bold').
+                E.g. (family='Arial', size=20, style='bold').
             wrap (int):
                 text will insert a linebreak after this many text symbols.
             foreground_color (str):
