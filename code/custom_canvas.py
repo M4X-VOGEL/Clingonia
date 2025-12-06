@@ -12,11 +12,11 @@ Example usage:
         height=10,
         x=0,
         y=0,
-        font=('Arial', 20),
+        font=(family='Arial', size=20),
         background_color='#000000',
         grid_color='#000000',
         border_width=0,
-        image=path_to_image,
+        image='path_to_image',
         rows=10,
         cols=10
     )
@@ -49,9 +49,10 @@ class EnvCanvas:
             specifies the x position of the canvas in the parent container.
         y (int):
             specifies the y position of the canvas in the parent container.
-        font (tuple[str, int]):
+        font (tk.font.Font):
             applied to the grid label and mouse text on the canvas.
-            Can be font family and font size. E.g. ('Arial', 20).
+            Can be font family and font size.
+            E.g. (family='Arial', size=20).
         background_color (str):
             hex color code e.g. '#00FF00' or a color name e.g. 'red'.
         grid_color (str):
@@ -115,9 +116,10 @@ class EnvCanvas:
                 specifies the x position of the canvas in the parent container.
             y (int):
                 specifies the y position of the canvas in the parent container.
-            font (tuple[str, int]):
+            font (tk.font.Font):
                 applied to the grid label and mouse text on the canvas.
-                Can be font family and font size. E.g. ('Arial', 20).
+                Can be font family and font size.
+                E.g. (family='Arial', size=20).
             background_color (str):
                 hex color code e.g. '#00FF00' or a color name e.g. 'red'.
             grid_color (str):
@@ -158,6 +160,9 @@ class EnvCanvas:
         self.cell_size = 50
         self.scale = 1.0
         self.text_label = None
+
+        # draw grid labels
+        self.draw_grid_numbers = False
 
         self.canvas.bind("<MouseWheel>", self.zoom)
         self.canvas.bind("<ButtonPress-3>", self.start_pan)
@@ -367,13 +372,16 @@ class EnvCanvas:
                 tags='grid_line',
             )
 
-        # Uncomment to draw row and column labels on the canvas
-        # self.draw_grid_labels()
+        if self.draw_grid_numbers:
+            self.draw_grid_labels()
 
     def draw_grid_labels(self):
         """Draw the row and column labels next to the grid."""
         self.canvas.delete("grid_label")
         adjusted_cell_size = self.cell_size * self.scale
+
+        font = self.font.copy()
+        font.config(size=int(self.font.cget("size") * adjusted_cell_size * 0.02))
 
         for row in range(self.rows):
             self.canvas.create_text(
@@ -382,7 +390,7 @@ class EnvCanvas:
                     adjusted_cell_size / 2,
                 text=str(row),
                 anchor="e",
-                font=(self.font[0], int(self.font[1] * self.scale)),
+                font=font,
                 fill=self.grid_color,
                 tags="grid_label"
             )
@@ -390,12 +398,12 @@ class EnvCanvas:
         for col in range(self.cols):
             self.canvas.create_text(
                 (self.x_offset + col * adjusted_cell_size) +
-                    adjusted_cell_size / 2,
-                self.y_offset - 15,
+                    adjusted_cell_size,
+                self.y_offset - adjusted_cell_size,
                 text=str(col),
                 angle=90,
-                anchor="e",
-                font=(self.font[0], int(self.font[1] * self.scale)),
+                anchor="s",
+                font=font,
                 fill=self.grid_color,
                 tags="grid_label"
             )
@@ -432,12 +440,14 @@ class BuildCanvas:
             specifies the x position of the canvas in the parent container.
         y (int):
             specifies the y position of the canvas in the parent container.
-        font (tuple[str, int]):
+        font (tk.font.Font):
             applied to the grid label and mouse text on the canvas.
-            Can be font family and font size. E.g. ('Arial', 20).
-        id_label_font (tuple[str, int, str]):
+            Can be font family and font size.
+            E.g. (family='Arial', size=20).
+        id_label_font (tk.font.Font):
             applied to the text on the canvas. Can be font family, font
-            size and font style. E.g. ('Arial', 20, 'bold').
+            size and font style.
+            E.g. (family='Arial', size=20, style='bold').
         background_color (str):
             hex color code e.g. '#00FF00' or a color name e.g. 'red'.
         grid_color (str):
@@ -534,12 +544,14 @@ class BuildCanvas:
                 specifies the x position of the canvas in the parent container.
             y (int):
                 specifies the y position of the canvas in the parent container.
-            font (tuple[str, int]):
+            font (tk.font.Font):
                 applied to the grid label and mouse text on the canvas.
-                Can be font family and font size. E.g. ('Arial', 20).
-            id_label_font (tuple[str, int, str]):
+                Can be font family and font size.
+                E.g. (family='Arial', size=20).
+            id_label_font (tk.font.Font):
                 applied to the text on the canvas. Can be font family, font
-                size and font style. E.g. ('Arial', 20, 'bold').
+                size and font style.
+                E.g. (family='Arial', size=20, style='bold').
             background_color (str):
                 hex color code e.g. '#00FF00' or a color name e.g. 'red'.
             grid_color (str):
@@ -582,6 +594,9 @@ class BuildCanvas:
         self.text_label = None
         self.current_selection_image = None
         self.mouse_image = None
+
+        # draw grid labels
+        self.draw_grid_numbers = False
 
         self.canvas.bind("<MouseWheel>", self.zoom)
         self.canvas.bind("<ButtonPress-1>", self.modify_array)
@@ -685,13 +700,16 @@ class BuildCanvas:
                 tags='grid_line',
             )
 
-        # Uncomment to draw row and column labels on the canvas
-        # self.draw_grid_labels()
+        if self.draw_grid_numbers:
+            self.draw_grid_labels()
 
     def draw_grid_labels(self):
         """Draw the row and column labels next to the grid."""
         self.canvas.delete("grid_label")
         adjusted_cell_size = self.cell_size * self.scale
+
+        font = self.font.copy()
+        font.config(size=int(self.font.cget("size") * adjusted_cell_size * 0.02))
 
         for row in range(self.rows):
             self.canvas.create_text(
@@ -700,7 +718,7 @@ class BuildCanvas:
                 adjusted_cell_size / 2,
                 text=str(row),
                 anchor="e",
-                font=(self.font[0], int(self.font[1] * self.scale)),
+                font=font,
                 fill=self.grid_color,
                 tags="grid_label"
             )
@@ -708,12 +726,12 @@ class BuildCanvas:
         for col in range(self.cols):
             self.canvas.create_text(
                 (self.x_offset + col * adjusted_cell_size) +
-                adjusted_cell_size / 2,
-                self.y_offset - 15,
+                adjusted_cell_size,
+                self.y_offset - adjusted_cell_size,
                 text=str(col),
                 angle=90,
-                anchor="e",
-                font=(self.font[0], int(self.font[1] * self.scale)),
+                anchor="s",
+                font=font,
                 fill=self.grid_color,
                 tags="grid_label"
             )
@@ -1170,6 +1188,8 @@ class BuildCanvas:
             return chosen
 
         font = self.id_label_font.copy()
+
+        # double the font size for mac
         sysmod = 2 if sys_platform == 'Darwin' else 1
         font.config(size=int(self.id_label_font.cget("size") * (adjusted_cell_size / 100) * sysmod))
 
@@ -1287,17 +1307,18 @@ class TrainListCanvas:
             specifies the x position of the canvas in the parent container.
         y (int):
             specifies the y position of the canvas in the parent container.
-        base_font_layout (tuple[str, int]):
+        base_font_layout (tk.font.Font):
             applied to the train labels and other texts on the canvas.
-            Can be font family and font size. E.g. ('Arial', 20).
-        err_font_layout (tuple[str, int, str]):
+            Can be font family and font size.
+            E.g. (family='Arial', size=20).
+        err_font_layout (tk.font.Font):
             applied to the error texts on the canvas.
             Can be font family, font size and font style.
-            E.g. ('Arial', 20, 'bold').
-        title_font_layout (tuple[str, int, str]):
+            E.g. (family='Arial', size=20, style='bold').
+        title_font_layout (tk.font.Font):
             applied to the title texts on the canvas.
             Can be font family, font size and font style.
-            E.g. ('Arial', 20, 'bold').
+            E.g. (family='Arial', size=20, style='bold').
         background_color (str):
             hex color code e.g. '#00FF00' or a color name e.g. 'red'.
         label_color (str):
@@ -1391,17 +1412,18 @@ class TrainListCanvas:
                 specifies the x position of the canvas in the parent container.
             y (int):
                 specifies the y position of the canvas in the parent container.
-            base_font_layout (tuple[str, int]):
+            base_font_layout (tk.font.Font):
                 applied to the train labels and other texts on the canvas.
-                Can be font family and font size. E.g. ('Arial', 20).
-            err_font_layout (tuple[str, int, str]):
+                Can be font family and font size.
+                E.g. (family='Arial', size=20).
+            err_font_layout (tk.font.Font):
                 applied to the error texts on the canvas.
                 Can be font family, font size and font style.
-                E.g. ('Arial', 20, 'bold').
-            title_font_layout (tuple[str, int, str]):
+                E.g. (family='Arial', size=20, style='bold').
+            title_font_layout (tk.font.Font):
                 applied to the title texts on the canvas.
                 Can be font family, font size and font style.
-                E.g. ('Arial', 20, 'bold').
+                E.g. (family='Arial', size=20, style='bold').
             background_color (str):
                 hex color code e.g. '#00FF00' or a color name e.g. 'red'.
             label_color (str):
@@ -2114,12 +2136,14 @@ class ResultCanvas:
             specifies the x position of the canvas in the parent container.
         y (int):
             specifies the y position of the canvas in the parent container.
-        font (tuple[str, int]):
+        font (tk.font.Font):
             applied to the grid label and mouse text on the canvas.
-            Can be font family and font size. E.g. ('Arial', 20).
-        path_label_font (tuple[str, int]):
+            Can be font family and font size.
+            E.g. (family='Arial', size=20).
+        path_label_font (tk.font.Font):
             applied to the path labels the canvas.
-            Can be font family and font size. E.g. ('Arial', 20).
+            Can be font family and font size.
+            E.g. (family='Arial', size=20).
         background_color (str):
             hex color code e.g. '#00FF00' or a color name e.g. 'red'.
         grid_color (str):
@@ -2192,12 +2216,14 @@ class ResultCanvas:
                 specifies the x position of the canvas in the parent container.
             y (int):
                 specifies the y position of the canvas in the parent container.
-            font (tuple[str, int]):
+            font (tk.font.Font):
                 applied to the grid label and mouse text on the canvas.
-                Can be font family and font size. E.g. ('Arial', 20).
-            path_label_font (tuple[str, int]):
+                Can be font family and font size.
+                E.g. (family='Arial', size=20).
+            path_label_font (tk.font.Font):
                 applied to the path labels the canvas.
-                Can be font family and font size. E.g. ('Arial', 20).
+                Can be font family and font size.
+                E.g. (family='Arial', size=20).
             background_color (str):
                 hex color code e.g. '#00FF00' or a color name e.g. 'red'.
             grid_color (str):
@@ -2241,6 +2267,9 @@ class ResultCanvas:
         self.cell_size = 50
         self.scale = 1.0
         self.text_label = None
+
+        # draw grid labels
+        self.draw_grid_numbers = False
 
         self.canvas.bind("<MouseWheel>", self.zoom)
         self.canvas.bind("<ButtonPress-3>", self.start_pan)
@@ -2457,13 +2486,16 @@ class ResultCanvas:
                 tags='grid_line',
             )
 
-        # Uncomment to draw row and column labels on the canvas
-        # self.draw_grid_labels()
+        if self.draw_grid_numbers:
+            self.draw_grid_labels()
 
     def draw_grid_labels(self):
         """Draw the row and column labels next to the grid."""
         self.canvas.delete("grid_label")
         adjusted_cell_size = self.cell_size * self.scale
+
+        font = self.font.copy()
+        font.config(size=int(self.font.cget("size") * adjusted_cell_size * 0.02))
 
         for row in range(self.rows):
             self.canvas.create_text(
@@ -2472,7 +2504,7 @@ class ResultCanvas:
                 adjusted_cell_size / 2,
                 text=str(row),
                 anchor="e",
-                font=(self.font[0], int(self.font[1] * self.scale)),
+                font=font,
                 fill=self.grid_color,
                 tags="grid_label"
             )
@@ -2480,12 +2512,12 @@ class ResultCanvas:
         for col in range(self.cols):
             self.canvas.create_text(
                 (self.x_offset + col * adjusted_cell_size) +
-                adjusted_cell_size / 2,
-                self.y_offset - 15,
+                adjusted_cell_size,
+                self.y_offset - adjusted_cell_size,
                 text=str(col),
                 angle=90,
-                anchor="e",
-                font=(self.font[0], int(self.font[1] * self.scale)),
+                anchor="s",
+                font=font,
                 fill=self.grid_color,
                 tags="grid_label"
             )
@@ -2537,12 +2569,13 @@ class ResultCanvas:
         train_colors = dict(zip(self.paths_df['trainID'].unique(), colors))
 
         font = self.path_label_font.copy()
-        sysmod = 2 if sys_platform == 'Darwin' else 1
+        sysmod = 2 if sys_platform == 'Darwin' else 1   # double the font size for mac
 
-        if len(self.show_df['trainID'].unique()):
-            font.config(size=int(self.path_label_font.cget("size") * (adjusted_cell_size / 100) * sysmod))
-        else:
+        # if there is more than one path displayed shrink the font by  2/3
+        if len(self.show_df['trainID'].unique()) > 1:
             font.config(size=int(self.path_label_font.cget("size") * (adjusted_cell_size / 100) * (2/3) * sysmod))
+        else:
+            font.config(size=int(self.path_label_font.cget("size") * (adjusted_cell_size / 100) * sysmod))
 
         # draw each train position for each timestep
         for _, row in self.show_df.iterrows():
@@ -2592,9 +2625,10 @@ class PathListCanvas:
             specifies the x position of the canvas in the parent container.
         y (int):
             specifies the y position of the canvas in the parent container.
-        font (tuple[str, int]):
+        font (tk.font.Font):
             applied to the train labels and other texts on the canvas.
-            Can be font family and font size. E.g. ('Arial', 20).
+            Can be font family and font size.
+            E.g. (family='Arial', size=20).
         background_color (str):
             hex color code e.g. '#00FF00' or a color name e.g. 'red'.
         on_color (str):
@@ -2663,9 +2697,10 @@ class PathListCanvas:
                 specifies the x position of the canvas in the parent container.
             y (int):
                 specifies the y position of the canvas in the parent container.
-            font (tuple[str, int]):
+            font (tk.font.Font):
                 applied to the train labels and other texts on the canvas.
-                Can be font family and font size. E.g. ('Arial', 20).
+                Can be font family and font size.
+                E.g. (family='Arial', size=20).
             background_color (str):
                 hex color code e.g. '#00FF00' or a color name e.g. 'red'.
             on_color (str):

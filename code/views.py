@@ -47,16 +47,16 @@ font_base_mod = 1
 font_path_mod = 0.5
 font_err_mod = 0.75
 
-# font layouts
-base_font_layout = ('Arial', int(font_base_mod * base_font_size), 'bold')
-canvas_font_layout = ('Arial', int(font_base_mod * base_font_size))
-canvas_label_font_layout = ('Arial', int(font_base_mod * base_font_size), 'bold')
-save_font_layout = ('Arial', int(font_base_mod * base_font_size), 'italic')
-path_font_layout = ('Arial', int(font_base_mod * base_font_size * font_path_mod), 'bold')
-err_font_layout = ('Arial', int(font_base_mod * font_err_mod * base_font_size), 'bold')
-help_font_layout = ('Courier', int(font_base_mod * base_font_size))
-info_font_layout = ('Courier', int(font_base_mod * info_text_font_size))
-title_font_layout = ('Arial', int(font_base_mod * frame_title_font_size), 'bold')
+# font layouts -- get set in update_fonts()
+base_font_layout = None
+canvas_font_layout = None
+canvas_label_font_layout = None
+save_font_layout = None
+path_font_layout = None
+err_font_layout = None
+help_font_layout = None
+info_font_layout = None
+title_font_layout = None
 
 
 # color scheme
