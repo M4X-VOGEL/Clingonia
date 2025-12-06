@@ -23,6 +23,8 @@ Example usage:
 """
 
 import platform
+import threading
+# import cv2
 
 import numpy as np
 import pandas as pd
@@ -160,6 +162,7 @@ class EnvCanvas:
         self.cell_size = 50
         self.scale = 1.0
         self.text_label = None
+        self.high_quality_render = None
 
         # draw grid labels
         self.draw_grid_numbers = False
@@ -309,39 +312,6 @@ class EnvCanvas:
         self.canvas.delete(self.text_label)
         self.text_label = None
 
-    def draw_image(self):
-        """Display the image on the canvas and adjust to the current scale."""
-        width = int(self.cols * self.cell_size * self.scale)
-        height = int(self.rows * self.cell_size * self.scale)
-
-        # recall initial_zoom calculation if the image is not yet loaded
-        if width <= 0 or height <= 0:
-            self.root.after(100, self.initial_zoom)
-            return
-
-        self.display_image = ImageTk.PhotoImage(
-            self.image.resize((width, height))
-        )
-
-        # place the image or move it.
-        if self.canvas_image is None:
-            self.x_offset = (self.canvas.winfo_width() - width) // 2
-            self.y_offset = (self.canvas.winfo_height() - height) // 2
-
-            self.canvas_image = self.canvas.create_image(
-                self.x_offset,
-                self.y_offset,
-                anchor="nw",
-                image=self.display_image,
-                tags='env_image'
-            )
-        else:
-            self.canvas.itemconfig(self.canvas_image,image=self.display_image)
-            self.canvas.coords(self.canvas_image, self.x_offset, self.y_offset)
-
-        self.canvas.config(scrollregion=(0, 0, width, height))
-        self.draw_grid()
-
     def draw_grid(self):
         """Draw the grid lines on the canvas."""
         self.canvas.delete("grid_line")
@@ -424,6 +394,88 @@ class EnvCanvas:
             self.x_offset = (self.canvas.winfo_width() - width) // 2
             self.y_offset = (self.canvas.winfo_height() - height) // 2
             self.draw_image()
+
+    def draw_image(self):
+        """Display the image on the canvas and adjust to the current scale."""
+        width = int(self.cols * self.cell_size * self.scale)
+        height = int(self.rows * self.cell_size * self.scale)
+
+        # recall initial_zoom calculation if the image is not yet loaded
+        if width <= 0 or height <= 0:
+            self.root.after(100, self.initial_zoom)
+            return
+
+        # place the image or move it.
+        if self.canvas_image is None:
+            self.display_image = ImageTk.PhotoImage(
+                self.image.resize((width, height))
+            )
+            self.x_offset = (self.canvas.winfo_width() - width) // 2
+            self.y_offset = (self.canvas.winfo_height() - height) // 2
+
+            self.canvas_image = self.canvas.create_image(
+                self.x_offset,
+                self.y_offset,
+                anchor="nw",
+                image=self.display_image,
+                tags='env_image'
+            )
+        else:
+            self.display_image = ImageTk.PhotoImage(
+                self.image.resize((width, height), Image.NEAREST)
+            )
+
+            # needs opencv-python --> import cv2
+            # img_cv = cv2.cvtColor(np.array(self.image), cv2.COLOR_RGB2BGR)
+            # resized = cv2.resize(img_cv, (width, height), interpolation=cv2.INTER_NEAREST)
+            # resized_pil = Image.fromarray(cv2.cvtColor(resized, cv2.COLOR_BGR2RGB))
+            # self.display_image = ImageTk.PhotoImage(resized_pil)
+
+            self.canvas.itemconfig(self.canvas_image,image=self.display_image)
+            self.canvas.coords(self.canvas_image, self.x_offset, self.y_offset)
+
+        self.canvas.config(scrollregion=(0, 0, width, height))
+        self.draw_grid()
+
+        if self.high_quality_render:
+            self.root.after_cancel(self.high_quality_render)
+        self.high_quality_render = self.root.after(500, self.rerender_image_high_quality)
+
+    # def rerender_image_high_quality(self):
+    #     """Rerender the image with higher quality."""
+    #     width = int(self.cols * self.cell_size * self.scale)
+    #     height = int(self.rows * self.cell_size * self.scale)
+    #     self.display_image = ImageTk.PhotoImage(
+    #         self.image.resize((width, height))
+    #     )
+    #     self.canvas.itemconfig(self.canvas_image, image=self.display_image)
+    #     self.canvas.coords(self.canvas_image, self.x_offset, self.y_offset)
+    #     self.canvas.config(scrollregion=(0, 0, width, height))
+    #     self.draw_grid()
+
+    def rerender_image_high_quality(self):
+        width = int(self.cols * self.cell_size * self.scale)
+        height = int(self.rows * self.cell_size * self.scale)
+
+        # start a background thread
+        threading.Thread(
+            target=self._hq_resize_thread,
+            args=(width, height),
+            daemon=True
+        ).start()
+
+    def _hq_resize_thread(self, width, height):
+        hq_img = self.image.resize((width, height), Image.LANCZOS)
+        # Convert to Tk image AFTER switching back to main thread
+        self.root.after(10, lambda: self._apply_hq_image(hq_img))
+
+    def _apply_hq_image(self, pil_image):
+        width, height = pil_image.size
+        self.display_image = ImageTk.PhotoImage(pil_image)
+        self.canvas.itemconfig(self.canvas_image, image=self.display_image)
+        self.canvas.coords(self.canvas_image, self.x_offset, self.y_offset)
+        self.canvas.config(scrollregion=(0, 0, width, height))
+        self.draw_grid()
 
 
 class BuildCanvas:
@@ -2267,6 +2319,7 @@ class ResultCanvas:
         self.cell_size = 50
         self.scale = 1.0
         self.text_label = None
+        self.high_quality_render = None
 
         # draw grid labels
         self.draw_grid_numbers = False
@@ -2423,39 +2476,6 @@ class ResultCanvas:
         self.canvas.delete(self.text_label)
         self.text_label = None
 
-    def draw_image(self):
-        """Display the image on the canvas and adjust to the current scale."""
-        width = int(self.cols * self.cell_size * self.scale)
-        height = int(self.rows * self.cell_size * self.scale)
-
-        # recall initial_zoom calculation if the image is not yet loaded
-        if width <= 0 or height <= 0:
-            self.root.after(100, self.initial_zoom)
-            return
-
-        self.display_image = ImageTk.PhotoImage(
-            self.image.resize((width, height))
-        )
-
-        # place the image or move it.
-        if self.canvas_image is None:
-            self.x_offset = (self.canvas.winfo_width() - width) // 2
-            self.y_offset = (self.canvas.winfo_height() - height) // 2
-
-            self.canvas_image = self.canvas.create_image(
-                self.x_offset,
-                self.y_offset,
-                anchor="nw",
-                image=self.display_image,
-                tags='env_image',
-            )
-        else:
-            self.canvas.itemconfig(self.canvas_image, image=self.display_image)
-            self.canvas.coords(self.canvas_image, self.x_offset, self.y_offset)
-
-        self.canvas.config(scrollregion=(0, 0, width, height))
-        self.draw_grid()
-
     def draw_grid(self):
         """Draw the grid lines on the canvas."""
         self.canvas.delete("grid_line")
@@ -2521,6 +2541,107 @@ class ResultCanvas:
                 fill=self.grid_color,
                 tags="grid_label"
             )
+
+    def initial_zoom(self):
+        """Calculate the initial position of the image centred on the canvas."""
+        if self.rows > self.cols:
+            self.cell_size = (self.canvas.winfo_height() * 0.8) / self.rows
+            width = self.cell_size * self.cols
+            height = self.cell_size * self.rows
+            self.x_offset = (self.canvas.winfo_width() - width) // 2
+            self.y_offset = (self.canvas.winfo_height() - height) // 2
+            self.draw_grid()
+            self.draw_image()
+        else:
+            self.cell_size = (self.canvas.winfo_width() * 0.8) / self.cols
+            width = self.cell_size * self.cols
+            height = self.cell_size * self.rows
+            self.x_offset = (self.canvas.winfo_width() - width) // 2
+            self.y_offset = (self.canvas.winfo_height() - height) // 2
+            self.draw_grid()
+            self.draw_image()
+
+    def draw_image(self):
+        """Display the image on the canvas and adjust to the current scale."""
+        width = int(self.cols * self.cell_size * self.scale)
+        height = int(self.rows * self.cell_size * self.scale)
+
+        # recall initial_zoom calculation if the image is not yet loaded
+        if width <= 0 or height <= 0:
+            self.root.after(100, self.initial_zoom)
+            return
+
+        # place the image or move it.
+        if self.canvas_image is None:
+            self.display_image = ImageTk.PhotoImage(
+                self.image.resize((width, height))
+            )
+            self.x_offset = (self.canvas.winfo_width() - width) // 2
+            self.y_offset = (self.canvas.winfo_height() - height) // 2
+
+            self.canvas_image = self.canvas.create_image(
+                self.x_offset,
+                self.y_offset,
+                anchor="nw",
+                image=self.display_image,
+                tags='env_image'
+            )
+        else:
+            self.display_image = ImageTk.PhotoImage(
+                self.image.resize((width, height), Image.NEAREST)
+            )
+
+            # needs opencv-python --> import cv2
+            # img_cv = cv2.cvtColor(np.array(self.image), cv2.COLOR_RGB2BGR)
+            # resized = cv2.resize(img_cv, (width, height), interpolation=cv2.INTER_NEAREST)
+            # resized_pil = Image.fromarray(cv2.cvtColor(resized, cv2.COLOR_BGR2RGB))
+            # self.display_image = ImageTk.PhotoImage(resized_pil)
+
+            self.canvas.itemconfig(self.canvas_image,image=self.display_image)
+            self.canvas.coords(self.canvas_image, self.x_offset, self.y_offset)
+
+        self.canvas.config(scrollregion=(0, 0, width, height))
+        self.draw_grid()
+
+        if self.high_quality_render:
+            self.root.after_cancel(self.high_quality_render)
+        self.high_quality_render = self.root.after(500, self.rerender_image_high_quality)
+
+    # def rerender_image_high_quality(self):
+    #     """Rerender the image with higher quality."""
+    #     width = int(self.cols * self.cell_size * self.scale)
+    #     height = int(self.rows * self.cell_size * self.scale)
+    #     self.display_image = ImageTk.PhotoImage(
+    #         self.image.resize((width, height))
+    #     )
+    #     self.canvas.itemconfig(self.canvas_image, image=self.display_image)
+    #     self.canvas.coords(self.canvas_image, self.x_offset, self.y_offset)
+    #     self.canvas.config(scrollregion=(0, 0, width, height))
+    #     self.draw_grid()
+
+    def rerender_image_high_quality(self):
+        width = int(self.cols * self.cell_size * self.scale)
+        height = int(self.rows * self.cell_size * self.scale)
+
+        # start a background thread
+        threading.Thread(
+            target=self._hq_resize_thread,
+            args=(width, height),
+            daemon=True
+        ).start()
+
+    def _hq_resize_thread(self, width, height):
+        hq_img = self.image.resize((width, height), Image.LANCZOS)
+        # Convert to Tk image AFTER switching back to main thread
+        self.root.after(10, lambda: self._apply_hq_image(hq_img))
+
+    def _apply_hq_image(self, pil_image):
+        width, height = pil_image.size
+        self.display_image = ImageTk.PhotoImage(pil_image)
+        self.canvas.itemconfig(self.canvas_image, image=self.display_image)
+        self.canvas.coords(self.canvas_image, self.x_offset, self.y_offset)
+        self.canvas.config(scrollregion=(0, 0, width, height))
+        self.draw_grid()
 
     def update_paths(self):
         """Update what paths to show based on the show-list.
@@ -2590,25 +2711,6 @@ class ResultCanvas:
                 fill=train_colors[row['trainID']],
                 tags="path_labels"
             )
-
-    def initial_zoom(self):
-        """Calculate the initial position of the image centred on the canvas."""
-        if self.rows > self.cols:
-            self.cell_size = (self.canvas.winfo_height() * 0.8) / self.rows
-            width = self.cell_size * self.cols
-            height = self.cell_size * self.rows
-            self.x_offset = (self.canvas.winfo_width() - width) // 2
-            self.y_offset = (self.canvas.winfo_height() - height) // 2
-            self.draw_grid()
-            self.draw_image()
-        else:
-            self.cell_size = (self.canvas.winfo_width() * 0.8) / self.cols
-            width = self.cell_size * self.cols
-            height = self.cell_size * self.rows
-            self.x_offset = (self.canvas.winfo_width() - width) // 2
-            self.y_offset = (self.canvas.winfo_height() - height) // 2
-            self.draw_grid()
-            self.draw_image()
 
 
 class PathListCanvas:
