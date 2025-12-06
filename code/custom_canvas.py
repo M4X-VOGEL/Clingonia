@@ -161,6 +161,9 @@ class EnvCanvas:
         self.scale = 1.0
         self.text_label = None
 
+        # draw grid labels
+        self.draw_grid_numbers = False
+
         self.canvas.bind("<MouseWheel>", self.zoom)
         self.canvas.bind("<ButtonPress-3>", self.start_pan)
         self.canvas.bind("<B3-Motion>", self.pan)
@@ -369,8 +372,8 @@ class EnvCanvas:
                 tags='grid_line',
             )
 
-        # Uncomment to draw row and column labels on the canvas
-        # self.draw_grid_labels()
+        if self.draw_grid_numbers:
+            self.draw_grid_labels()
 
     def draw_grid_labels(self):
         """Draw the row and column labels next to the grid."""
@@ -378,7 +381,7 @@ class EnvCanvas:
         adjusted_cell_size = self.cell_size * self.scale
 
         font = self.font.copy()
-        font.config(size=int(self.font.cget("size") * self.scale))
+        font.config(size=int(self.font.cget("size") * adjusted_cell_size * 0.02))
 
         for row in range(self.rows):
             self.canvas.create_text(
@@ -395,11 +398,11 @@ class EnvCanvas:
         for col in range(self.cols):
             self.canvas.create_text(
                 (self.x_offset + col * adjusted_cell_size) +
-                    adjusted_cell_size / 2,
-                self.y_offset - 15,
+                    adjusted_cell_size,
+                self.y_offset - adjusted_cell_size,
                 text=str(col),
                 angle=90,
-                anchor="e",
+                anchor="s",
                 font=font,
                 fill=self.grid_color,
                 tags="grid_label"
@@ -592,6 +595,9 @@ class BuildCanvas:
         self.current_selection_image = None
         self.mouse_image = None
 
+        # draw grid labels
+        self.draw_grid_numbers = False
+
         self.canvas.bind("<MouseWheel>", self.zoom)
         self.canvas.bind("<ButtonPress-1>", self.modify_array)
         self.canvas.bind("<ButtonPress-3>", self.start_pan)
@@ -694,8 +700,8 @@ class BuildCanvas:
                 tags='grid_line',
             )
 
-        # Uncomment to draw row and column labels on the canvas
-        # self.draw_grid_labels()
+        if self.draw_grid_numbers:
+            self.draw_grid_labels()
 
     def draw_grid_labels(self):
         """Draw the row and column labels next to the grid."""
@@ -703,7 +709,7 @@ class BuildCanvas:
         adjusted_cell_size = self.cell_size * self.scale
 
         font = self.font.copy()
-        font.config(size=int(self.font.cget("size") * self.scale))
+        font.config(size=int(self.font.cget("size") * adjusted_cell_size * 0.02))
 
         for row in range(self.rows):
             self.canvas.create_text(
@@ -720,11 +726,11 @@ class BuildCanvas:
         for col in range(self.cols):
             self.canvas.create_text(
                 (self.x_offset + col * adjusted_cell_size) +
-                adjusted_cell_size / 2,
-                self.y_offset - 15,
+                adjusted_cell_size,
+                self.y_offset - adjusted_cell_size,
                 text=str(col),
                 angle=90,
-                anchor="e",
+                anchor="s",
                 font=font,
                 fill=self.grid_color,
                 tags="grid_label"
@@ -2262,6 +2268,9 @@ class ResultCanvas:
         self.scale = 1.0
         self.text_label = None
 
+        # draw grid labels
+        self.draw_grid_numbers = False
+
         self.canvas.bind("<MouseWheel>", self.zoom)
         self.canvas.bind("<ButtonPress-3>", self.start_pan)
         self.canvas.bind("<B3-Motion>", self.pan)
@@ -2477,8 +2486,8 @@ class ResultCanvas:
                 tags='grid_line',
             )
 
-        # Uncomment to draw row and column labels on the canvas
-        # self.draw_grid_labels()
+        if self.draw_grid_numbers:
+            self.draw_grid_labels()
 
     def draw_grid_labels(self):
         """Draw the row and column labels next to the grid."""
@@ -2486,7 +2495,7 @@ class ResultCanvas:
         adjusted_cell_size = self.cell_size * self.scale
 
         font = self.font.copy()
-        font.config(size=int(self.font.cget("size") * self.scale))
+        font.config(size=int(self.font.cget("size") * adjusted_cell_size * 0.02))
 
         for row in range(self.rows):
             self.canvas.create_text(
@@ -2503,11 +2512,11 @@ class ResultCanvas:
         for col in range(self.cols):
             self.canvas.create_text(
                 (self.x_offset + col * adjusted_cell_size) +
-                adjusted_cell_size / 2,
-                self.y_offset - 15,
+                adjusted_cell_size,
+                self.y_offset - adjusted_cell_size,
                 text=str(col),
                 angle=90,
-                anchor="e",
+                anchor="s",
                 font=font,
                 fill=self.grid_color,
                 tags="grid_label"
