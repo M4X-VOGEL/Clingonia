@@ -24,7 +24,6 @@ Example usage:
 
 import platform
 import threading
-# import cv2
 
 import numpy as np
 import pandas as pd
@@ -396,7 +395,8 @@ class EnvCanvas:
             self.draw_image()
 
     def draw_image(self):
-        """Display the image on the canvas and adjust to the current scale."""
+        """Display the image on the canvas and adjust to the current scale"""
+        # calculate new image size according to the zoom level
         width = int(self.cols * self.cell_size * self.scale)
         height = int(self.rows * self.cell_size * self.scale)
 
@@ -405,53 +405,75 @@ class EnvCanvas:
             self.root.after(100, self.initial_zoom)
             return
 
-        # place the image or move it.
-        if self.canvas_image is None:
-            self.display_image = ImageTk.PhotoImage(
-                self.image.resize((width, height))
-            )
-            self.x_offset = (self.canvas.winfo_width() - width) // 2
-            self.y_offset = (self.canvas.winfo_height() - height) // 2
+        # get the dimensions of the canvas
+        canvas_w = self.canvas.winfo_width()
+        canvas_h = self.canvas.winfo_height()
+        if canvas_w <= 0 or canvas_h <= 0:
+            return
 
+        # define the corners of the visible area of the image
+        vis_left = max(0, -int(self.x_offset))
+        vis_top = max(0, -int(self.y_offset))
+        vis_right = min(width,  canvas_w - int(self.x_offset))
+        vis_bottom = min(height, canvas_h - int(self.y_offset))
+
+        # return if the image is not visible
+        if vis_left >= vis_right or vis_top >= vis_bottom:
+            return
+
+        # calculate the scale factor relative to the previous fully loaded image
+        base_w, base_h = self.image.size
+        sx = width / base_w
+        sy = height / base_h
+
+        # calculate visible area relative to the image position
+        src_left = int(vis_left / sx)
+        src_top = int(vis_top / sy)
+        src_right = int(vis_right / sx)
+        src_bottom = int(vis_bottom / sy)
+
+        # Crop image to visible area
+        region = self.image.crop((src_left, src_top, src_right, src_bottom))
+
+        # get new image width and height
+        dst_w = int(vis_right - vis_left)
+        dst_h = int(vis_bottom - vis_top)
+
+        if dst_w <= 0 or dst_h <= 0:
+            return
+
+        # resize visible area to new zoom level
+        visible_img = region.resize((dst_w, dst_h), Image.NEAREST)
+        self.display_image = ImageTk.PhotoImage(visible_img)
+
+        # get position of the image
+        canvas_x = max(int(self.x_offset), 0)
+        canvas_y = max(int(self.y_offset), 0)
+
+        # create the image on the canvas or e modify the existing object
+        if self.canvas_image is None:
             self.canvas_image = self.canvas.create_image(
-                self.x_offset,
-                self.y_offset,
+                canvas_x,
+                canvas_y,
                 anchor="nw",
                 image=self.display_image,
                 tags='env_image'
             )
         else:
-            self.display_image = ImageTk.PhotoImage(
-                self.image.resize((width, height), Image.NEAREST)
-            )
+            self.canvas.itemconfig(self.canvas_image, image=self.display_image)
+            self.canvas.coords(self.canvas_image, canvas_x, canvas_y)
 
-            # needs opencv-python --> import cv2
-            # img_cv = cv2.cvtColor(np.array(self.image), cv2.COLOR_RGB2BGR)
-            # resized = cv2.resize(img_cv, (width, height), interpolation=cv2.INTER_NEAREST)
-            # resized_pil = Image.fromarray(cv2.cvtColor(resized, cv2.COLOR_BGR2RGB))
-            # self.display_image = ImageTk.PhotoImage(resized_pil)
-
-            self.canvas.itemconfig(self.canvas_image,image=self.display_image)
-            self.canvas.coords(self.canvas_image, self.x_offset, self.y_offset)
 
         self.canvas.config(scrollregion=(0, 0, width, height))
         self.draw_grid()
 
+        # rerender high quality after no further zoom commands are issued
         if self.high_quality_render:
             self.root.after_cancel(self.high_quality_render)
-        self.high_quality_render = self.root.after(500, self.rerender_image_high_quality)
+        self.high_quality_render = self.root.after(
+            500, self.rerender_image_high_quality
+        )
 
-    # def rerender_image_high_quality(self):
-    #     """Rerender the image with higher quality."""
-    #     width = int(self.cols * self.cell_size * self.scale)
-    #     height = int(self.rows * self.cell_size * self.scale)
-    #     self.display_image = ImageTk.PhotoImage(
-    #         self.image.resize((width, height))
-    #     )
-    #     self.canvas.itemconfig(self.canvas_image, image=self.display_image)
-    #     self.canvas.coords(self.canvas_image, self.x_offset, self.y_offset)
-    #     self.canvas.config(scrollregion=(0, 0, width, height))
-    #     self.draw_grid()
 
     def rerender_image_high_quality(self):
         width = int(self.cols * self.cell_size * self.scale)
