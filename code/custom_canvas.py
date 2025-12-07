@@ -160,8 +160,12 @@ class EnvCanvas:
         self.y_offset = 0
         self.cell_size = 50
         self.scale = 1.0
+        self.buffer_factor = 0.5
+        self.buffer_x = 0
+        self.buffer_y = 0
         self.text_label = None
         self.high_quality_render = None
+
 
         # draw grid labels
         self.draw_grid_numbers = False
@@ -261,6 +265,47 @@ class EnvCanvas:
         self.canvas.move("env_image", dx, dy)
         self.canvas.move("grid_line", dx, dy)
         self.canvas.move("grid_label", dx, dy)
+
+        # check if visible area still in buffer
+        if self._needs_buffer_update():
+            self.draw_image()
+
+    def _needs_buffer_update(self) -> bool:
+        """Check if the visible area is still within the buffer zone."""
+        # calculate new image size according to the zoom level
+        world_w = int(self.cols * self.cell_size * self.scale)
+        world_h = int(self.rows * self.cell_size * self.scale)
+
+        # get the dimensions of the canvas
+        canvas_w = self.canvas.winfo_width()
+        canvas_h = self.canvas.winfo_height()
+        if canvas_w <= 0 or canvas_h <= 0:
+            return False
+
+        # define the corners of the visible area of the image
+        view_left = max(0, -int(self.x_offset))
+        view_top = max(0, -int(self.y_offset))
+        view_right = min(world_w, canvas_w - int(self.x_offset))
+        view_bottom = min(world_h, canvas_h - int(self.y_offset))
+
+        # calculate buffer zone
+        buf_left = self.buffer_x
+        buf_top = self.buffer_y
+        buf_right = buf_left + int(canvas_w * self.buffer_factor)
+        buf_bottom = buf_top + int(canvas_h * self.buffer_factor)
+
+        # check if visible area outside the buffer zone
+        margin = 10
+        if view_left < buf_left + margin:
+            return True
+        if view_top < buf_top + margin:
+            return True
+        if view_right > buf_right - margin:
+            return True
+        if view_bottom > buf_bottom - margin:
+            return True
+
+        return False
 
     def draw_mouse_symbols(self, event):
         """Draw the coordinates of the current grid cell next to the cursor.
@@ -421,6 +466,25 @@ class EnvCanvas:
         if vis_left >= vis_right or vis_top >= vis_bottom:
             return
 
+        # calculate buffer size
+        buf_w = int(canvas_w * self.buffer_factor)
+        buf_h = int(canvas_h * self.buffer_factor)
+
+        # center buffer around visible area
+        center_x = (vis_left + vis_right) // 2
+        center_y = (vis_top + vis_bottom) // 2
+        buf_left = max(0, center_x - buf_w // 2)
+        buf_top = max(0, center_y - buf_h // 2)
+        buf_right = min(width, buf_left + buf_w)
+        buf_bottom = min(height, buf_top + buf_h)
+
+        # if buffer outside of visible area
+        buf_left = buf_right - buf_w if buf_right - buf_w > 0 else buf_left
+        buf_top = buf_bottom - buf_h if buf_bottom - buf_h > 0 else buf_top
+
+        self.buffer_x = buf_left
+        self.buffer_y = buf_top
+
         # calculate the scale factor relative to the previous fully loaded image
         base_w, base_h = self.image.size
         sx = width / base_w
@@ -467,36 +531,83 @@ class EnvCanvas:
         self.canvas.config(scrollregion=(0, 0, width, height))
         self.draw_grid()
 
-        # rerender high quality after no further zoom commands are issued
+        # rerender high quality after no further zoom commands are issued for 0.5 seconds
         if self.high_quality_render:
             self.root.after_cancel(self.high_quality_render)
         self.high_quality_render = self.root.after(
             500, self.rerender_image_high_quality
         )
 
-
     def rerender_image_high_quality(self):
+        """Re-render the full image with full quality."""
+        # calculate new image size according to the zoom level
         width = int(self.cols * self.cell_size * self.scale)
         height = int(self.rows * self.cell_size * self.scale)
 
-        # start a background thread
+        # start worker thread for resizing
         threading.Thread(
             target=self._hq_resize_thread,
-            args=(width, height),
+            args=(
+                width,
+                height,
+                self.canvas.winfo_width(),
+                self.canvas.winfo_height(),
+                int(self.x_offset),
+                int(self.y_offset)
+            ),
             daemon=True
         ).start()
 
-    def _hq_resize_thread(self, width, height):
-        hq_img = self.image.resize((width, height), Image.LANCZOS)
-        # Convert to Tk image AFTER switching back to main thread
-        self.root.after(10, lambda: self._apply_hq_image(hq_img))
+    def _hq_resize_thread(self, width, height, canvas_w, canvas_h, x_off, y_off):
+        """Resize the image to the new size according to the current zoom level."""
+        # define the corners of the visible area of the image
+        vis_left = max(0, -x_off)
+        vis_top = max(0, -y_off)
+        vis_right = min(width, canvas_w - x_off)
+        vis_bottom = min(height, canvas_h - y_off)
 
-    def _apply_hq_image(self, pil_image):
-        width, height = pil_image.size
+        # return if the image is not visible
+        if vis_left >= vis_right or vis_top >= vis_bottom:
+            return
+
+        # calculate the scale factor relative to the previous fully loaded image
+        base_w, base_h = self.image.size
+        sx = width / base_w
+        sy = height / base_h
+
+        # calculate visible area relative to the image position
+        src_left = int(vis_left / sx)
+        src_top = int(vis_top / sy)
+        src_right = int(vis_right / sx)
+        src_bottom = int(vis_bottom / sy)
+
+        # Crop image to visible area
+        region = self.image.crop((src_left, src_top, src_right, src_bottom))
+
+        # get new image width and height
+        dst_w = int(vis_right - vis_left)
+        dst_h = int(vis_bottom - vis_top)
+        if dst_w <= 0 or dst_h <= 0:
+            return
+
+        # resize visible area to new zoom level
+        hq_img = region.resize((dst_w, dst_h), Image.LANCZOS)
+
+        # get position of the image
+        canvas_x = max(x_off, 0)
+        canvas_y = max(y_off, 0)
+
+        # place image on canvas in main thread
+        self.root.after(
+            10,
+            lambda: self._apply_hq_image(hq_img, canvas_x, canvas_y, width, height)
+        )
+
+    def _apply_hq_image(self, pil_image, canvas_x, canvas_y, world_w, world_h):
         self.display_image = ImageTk.PhotoImage(pil_image)
         self.canvas.itemconfig(self.canvas_image, image=self.display_image)
-        self.canvas.coords(self.canvas_image, self.x_offset, self.y_offset)
-        self.canvas.config(scrollregion=(0, 0, width, height))
+        self.canvas.coords(self.canvas_image, canvas_x, canvas_y)
+        self.canvas.config(scrollregion=(0, 0, world_w, world_h))
         self.draw_grid()
 
 
