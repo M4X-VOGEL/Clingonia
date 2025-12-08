@@ -1393,11 +1393,11 @@ def switch_main_to_builder():
             global tracker of the current build menu state.
     """
     global build_mode, user_params_backup, \
-        current_builder_backup_array, current_builder_backup_df
+        current_modify_backup_array, current_modify_backup_df
 
     user_params_backup = user_params.copy()
-    current_builder_backup_array = current_array.copy()
-    current_builder_backup_df = current_df.copy()
+    current_modify_backup_array = current_array.copy()
+    current_modify_backup_df = current_df.copy()
 
     build_mode = 'build'
 
@@ -3060,9 +3060,9 @@ def builder_change_to_start_or_main():
     first_build_try = True
 
     # only overwrite if exiting para from modify - to not overwrite with default empty array when coming from build
-    if build_mode == 'modify':
-        current_array = current_modify_backup_array.copy()
-        current_df = current_modify_backup_df.copy()
+    #if build_mode == 'modify':
+    current_array = current_modify_backup_array.copy()
+    current_df = current_modify_backup_df.copy()
 
     if last_menu == 'start':
         builder_para_to_start()
