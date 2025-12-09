@@ -235,7 +235,7 @@ def get_clingo_answer(clingo_output, answer_number):
     # Iterate over each line to find desired Answer
     for i, line in enumerate(lines):
         # Check for Answer
-        if line.strip() == f'Answer: {answer_number}':
+        if line.strip().startswith(f"Answer: {answer_number}"):
             if i + 1 < len(lines):
                 # Save Answer
                 answer = lines[i+1].strip()
