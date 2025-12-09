@@ -274,7 +274,7 @@ clingo_err_dict = {
     -1: 'No .lp files given.',
     -2: 'Clingo returned an error.',
     -3: 'Clingo returns UNSATISFIABLE.',
-    -4: 'Clingo did not provide the requested Answer: ',
+    -4: 'Clingo did not provide the requested answer: ',
     -5: 'Invalid actions. Ensure to use #show action/3.',
     -6: 'Invalid action format. Ensure action(train(ID), Action, Timestep).'
 }

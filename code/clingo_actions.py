@@ -220,6 +220,33 @@ def run_clingo_api(lp_files, answer_number):
     return "\n".join(output).strip()
 
 
+def print_last_clingo_answer(lines, requested_answer):
+    """Prints last answer from Clingo output, when desired answer does not exist.
+
+    Args:
+        lines (list): Lines of Clingo output.
+        requested_answer (int): Desired answer number.
+    
+    Returns:
+        int: -3, if UNSATISFIABLE.
+             -4, if requested answer (!=1) non-existent.
+    """
+    last_clingo_answer = ""
+    # Find last answer
+    for i in range(len(lines)-1,-1,-1):
+        if lines[i].strip().startswith("Answer:"):
+            last_clingo_answer = lines[i][8:] + "."
+            break
+    # Print last answer, if it exists
+    if last_clingo_answer and not requested_answer == 1:
+        print(f"❌ Clingo did not provide the requested answer: {requested_answer}.")
+        print(f"➡️  Highest pickable clingo answer: {last_clingo_answer}")
+        return -4
+    else:
+        print(f"❌ Clingo returns UNSATISFIABLE")
+        return -3
+
+
 def get_clingo_answer(clingo_output, answer_number):
     """Extracts specific answer from Clingo output.
 
@@ -243,11 +270,7 @@ def get_clingo_answer(clingo_output, answer_number):
     try:
         return answer
     except UnboundLocalError:
-        if answer_number == 1:
-            print(f"❌ Clingo returns UNSATISFIABLE")
-            return -3
-        print(f"❌ Clingo did not provide the requested Answer: {answer_number}.")
-        return -4
+        return print_last_clingo_answer(lines, answer_number)
 
 
 def get_action_params(clingo_answer):
