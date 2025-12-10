@@ -370,7 +370,7 @@ class EnvCanvas:
         scale_factor = 1.1 if event.delta > 0 else 0.9
         new_scale = self.scale * scale_factor
 
-        new_scale  = max(0.1, min(new_scale, 10))
+        new_scale  = max(1/2, min(new_scale, max(self.rows/3, self.cols/3)))
 
         grid_mouse_x = (event.x - self.x_offset) / self.scale
         grid_mouse_y = (event.y - self.y_offset) / self.scale
@@ -2818,7 +2818,7 @@ class ResultCanvas:
         scale_factor = 1.1 if event.delta > 0 else 0.9
         new_scale = self.scale * scale_factor
 
-        new_scale = max(0.1, min(new_scale, 10))
+        new_scale  = max(1/2, min(new_scale, max(self.rows/3, self.cols/3)))
 
         grid_mouse_x = (event.x - self.x_offset) / self.scale
         grid_mouse_y = (event.y - self.y_offset) / self.scale
