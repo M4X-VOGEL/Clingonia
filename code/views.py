@@ -242,7 +242,10 @@ err_dict = {
         ValueError: 'needs int > 0',
         'negativeValue': 'needs int > 0',
     },
-    'answer': {ValueError: 'needs int > 0'},
+    'answer': {
+        ValueError: 'needs int >= 0',
+        'negativeValue': 'needs int >= 0',
+    },
     'clingo': {
         'noPathToClingo': 'The given path does not lead to clingo',
     },
@@ -1466,7 +1469,7 @@ def switch_main_to_clingo_para():
 
 def switch_clingo_para_to_main():
     """Destroys all clingo parameter frames and opens the main menu frame."""
-    if save_clingo_params() == -1:
+    if save_clingo_params('main') == -1:
         return
 
     if 'clingo_para_frame' in frames:
@@ -1505,7 +1508,7 @@ def switch_clingo_para_to_result():
     """
     global last_solve_params, show_act_err_logs
 
-    if save_clingo_params() == -1:
+    if save_clingo_params('result') == -1:
         return
 
     labels['clingo_status_label'].label.config(
@@ -1601,8 +1604,11 @@ def load_lp_files():
     if labels['clingo_status_label'].label.cget('text') == 'No .lp files given.':
         labels['clingo_status_label'].label.config(text='')
 
-def save_clingo_params() -> int:
+def save_clingo_params(next_menu) -> int:
     """Saves the clingo parameters from the clingo parameter view.
+
+    Args:
+        next_menu (str): The next menu to be opened.
 
     Returns:
         int: -1 if there was an error with any input 0 otherwise.
@@ -1654,12 +1660,19 @@ def save_clingo_params() -> int:
             err = 'noPathToClingo'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
+            data = default_params[key]
+        elif key == 'answer' and data < 0:
+            err_count += 1
+            err = 'negativeValue'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+            data = default_params[key]
 
         # only save non string values as parameters except for the clingo path
         if type(data) is not str or key == 'clingo':
             user_params[key] = data
 
-    if err_count:
+    if err_count and next_menu == 'result':
         return -1
     else:
         return 0
