@@ -187,11 +187,13 @@ user_params_backup = user_params.copy()
 err_dict = {
     'rows': {
         ValueError: 'needs int > 0',
-        'tooFewRows': 'needs at least 10 rows'
+        'tooFewRows': 'needs at least 10 rows',
+        'notEnoughRows': 'needs int > 0',
     },
     'cols': {
         ValueError: 'needs int > 0',
-        'tooFewCols': 'needs at least 10 cols'
+        'tooFewCols': 'needs at least 10 cols',
+        'notEnoughCols': 'needs int > 0',
     },
     'agents': {
         ValueError: 'needs int > 0',
@@ -5436,7 +5438,17 @@ def save_builder_env_params():
             continue
 
         # check for additional constrains and display error when violated
-        if key == 'globalTimeLimit' and data < 1:
+        if key == 'rows' and data < 1:
+            err_count += 1
+            err = 'notEnoughRows'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        elif key == 'cols' and data < 1:
+            err_count += 1
+            err = 'notEnoughCols'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+        elif key == 'globalTimeLimit' and data < 1:
             err_count += 1
             err = 'notEnoughTime'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
