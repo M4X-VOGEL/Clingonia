@@ -1234,7 +1234,7 @@ class ZoomableGIF:
             )
         ]
         
-        new_scale  = max(1.0, min(new_scale,max(self.rows/limit, self.cols/limit)))
+        new_scale  = max(1/2, min(new_scale, max(self.rows / limit, self.cols / limit)))
 
         mouse_x = (event.x - self.offset_x) / self.scale
         mouse_y = (event.y - self.offset_y) / self.scale

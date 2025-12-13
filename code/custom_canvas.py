@@ -1616,7 +1616,24 @@ class BuildCanvas:
         scale_factor = 1.2 if event.delta > 0 else 0.8
         new_scale = self.scale * scale_factor
 
-        new_scale = max(0.1, min(new_scale, 10))
+        max_limit = {
+            # row/col threshold: zoom limit
+            10: 3,
+            50: 4.5,
+            100: 5,
+            200: 30,
+            500: 60,
+        }
+
+        limit = max_limit[
+            next(
+                # find zoom limit for rows or cols <= threshold
+                (k for k in sorted(max_limit) if max(self.rows, self.cols) <= k),
+                max(max_limit)  # fallback if rows > 500
+            )
+        ]
+
+        new_scale = max(0.1, min(new_scale, min(self.rows / limit, self.cols / limit)))
 
         grid_mouse_x = (event.x - self.x_offset) / self.scale
         grid_mouse_y = (event.y - self.y_offset) / self.scale
