@@ -300,7 +300,7 @@ current_df = pd.DataFrame(
 current_builder_backup_df = current_df.copy()
 current_modify_backup_df = current_df.copy()
 
-# Environment image and gif
+# Environment image and GIF
 current_img = None
 current_gif = None
 current_timestep = None
@@ -6014,6 +6014,8 @@ def build_result_gif_frame():
         sticky='nesw',
         columnspan=2,
         gif=current_gif,
+        rows=user_params['rows'],
+        cols=user_params['cols'],
         background_color=canvas_color,
         visibility=True,
     )
@@ -6218,7 +6220,7 @@ def toggle_result_timetable():
         build_result_timetable_frame()
 
 def toggle_result_gif():
-    """Hides all other frames and opens or closes the result gif frame.
+    """Hides all other frames and opens or closes the result GIF frame.
 
     Checks if entered frame rate parameter is valid.
     If any of the parameters changed since the last GIF generation or if this
