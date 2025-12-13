@@ -424,7 +424,7 @@ class EnvCanvas:
             bool (boolean):
                 whether the visible area is outside the buffer zone.
         """
-
+        # compute environment size
         env_width, env_height = self.get_env_size()
 
         # check if the image is not loaded yet

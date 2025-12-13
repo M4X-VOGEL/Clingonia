@@ -1163,42 +1163,6 @@ class ZoomableGIF:
         )
         self.visibility = True
 
-    def update_image(self):
-        """Updates the currently displayed image on the canvas."""
-        key = round(self.scale, 1)
-
-        # if the frames don't exist in the current zoom level resizes them
-        if key not in self.cached_frames:
-            resized_frames = []
-            # use a faster resampling method while actively zooming
-            resample_method = Image.Resampling.NEAREST \
-                if self.zooming else Image.Resampling.LANCZOS
-
-            # resize the frames in teh gif to the specified size
-            for frame in self.frames:
-                new_width = int(frame.width * self.scale)
-                new_height = int(frame.height * self.scale)
-                resized_frame = frame.resize((new_width, new_height), resample=resample_method)
-                resized_frames.append(ImageTk.PhotoImage(resized_frame))
-
-            # cache the resized frames
-            self.cached_frames[key] = resized_frames
-
-        # display the current frame on the canvas
-        canvas_gif = self.cached_frames[key][self.current_frame_index]
-        self.canvas.itemconfig(self.image, image=canvas_gif)
-        self.canvas.coords(self.image, self.offset_x, self.offset_y)
-
-    def animate(self):
-        """Animate the GIF."""
-        # go to next frame and update the canvas with this frame
-        self.current_frame_index = (self.current_frame_index + 1) % len(self.frames)
-        self.update_image()
-
-        # Delay to ensure correct durations
-        delay = self.durations[self.current_frame_index]
-        self.animate_id = self.root.after(delay, self.animate)
-
     def calculate_initial_pos(self):
         """Calculates the initial GIF position base on its size."""
         self.root.update_idletasks()
@@ -1213,9 +1177,28 @@ class ZoomableGIF:
 
         self.offset_x = (self.canvas.winfo_width() - new_width) // 2
         self.offset_y = (self.canvas.winfo_height() - new_height) // 2
-        
+
         self.update_image()
         self.animate()
+
+    def animate(self):
+        """Animate the GIF."""
+        # go to next frame and update the canvas with this frame
+        self.current_frame_index = (self.current_frame_index + 1) % len(self.frames)
+        self.update_image()
+
+        # Delay to ensure correct durations
+        delay = self.durations[self.current_frame_index]
+        self.animate_id = self.root.after(delay, self.animate)
+
+    def stop(self):
+        """Stop animation and cancel all pending after calls."""
+        if self.zoom_end is not None:
+            self.root.after_cancel(self.zoom_end)
+            self.zoom_end = None
+        if self.animate_id is not None:
+            self.root.after_cancel(self.animate_id)
+            self.animate_id = None
 
     def zoom(self, event):
         """Calculate new scale and offset.
@@ -1277,14 +1260,31 @@ class ZoomableGIF:
         self.pan_start_coord = (event.x, event.y)
         self.update_image()
 
-    def stop(self):
-        """Stop animation and cancel all pending after calls."""
-        if self.zoom_end is not None:
-            self.root.after_cancel(self.zoom_end)
-            self.zoom_end = None
-        if self.animate_id is not None:
-            self.root.after_cancel(self.animate_id)
-            self.animate_id = None
+    def update_image(self):
+        """Updates the currently displayed image on the canvas."""
+        key = round(self.scale, 1)
+
+        # if the frames don't exist in the current zoom level resizes them
+        if key not in self.cached_frames:
+            resized_frames = []
+            # use a faster resampling method while actively zooming
+            resample_method = Image.Resampling.NEAREST \
+                if self.zooming else Image.Resampling.LANCZOS
+
+            # resize the frames in the GIF to the specified size
+            for frame in self.frames:
+                new_width = int(frame.width * self.scale)
+                new_height = int(frame.height * self.scale)
+                resized_frame = frame.resize((new_width, new_height), resample=resample_method)
+                resized_frames.append(ImageTk.PhotoImage(resized_frame))
+
+            # cache the resized frames
+            self.cached_frames[key] = resized_frames
+
+        # display the current frame on the canvas
+        canvas_gif = self.cached_frames[key][self.current_frame_index]
+        self.canvas.itemconfig(self.image, image=canvas_gif)
+        self.canvas.coords(self.image, self.offset_x, self.offset_y)
 
 
 class EntryField:
