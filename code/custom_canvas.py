@@ -1237,7 +1237,8 @@ class BuildCanvas:
 
     def calculate_initial_pos(self):
         """Calculate the initial position of the grid centred on the canvas."""
-        if max(self.rows, self.cols) > 50:
+        # if array is empty start in the top left corner, else start with full env in view
+        if not np.any(self.array):
             self.x_offset = 50
             self.y_offset = 50
         elif self.rows > self.cols:
@@ -1616,24 +1617,7 @@ class BuildCanvas:
         scale_factor = 1.2 if event.delta > 0 else 0.8
         new_scale = self.scale * scale_factor
 
-        max_limit = {
-            # row/col threshold: zoom limit
-            10: 3,
-            50: 4.5,
-            100: 5,
-            200: 30,
-            500: 60,
-        }
-
-        limit = max_limit[
-            next(
-                # find zoom limit for rows or cols <= threshold
-                (k for k in sorted(max_limit) if max(self.rows, self.cols) <= k),
-                max(max_limit)  # fallback if rows > 500
-            )
-        ]
-
-        new_scale = max(0.1, min(new_scale, min(self.rows / limit, self.cols / limit)))
+        new_scale = max(1/2, min(new_scale, max(self.rows / 3, self.cols / 3)))
 
         grid_mouse_x = (event.x - self.x_offset) / self.scale
         grid_mouse_y = (event.y - self.y_offset) / self.scale
