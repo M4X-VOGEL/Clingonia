@@ -928,6 +928,7 @@ class BuildCanvas:
         self.x_offset = 0
         self.y_offset = 0
         self.cell_size = 50
+        self.start_with_empty = not np.any(array)
         self.scale = 1.0
         self.text_label = None
         self.current_selection_image = None
@@ -1238,7 +1239,7 @@ class BuildCanvas:
     def calculate_initial_pos(self):
         """Calculate the initial position of the grid centred on the canvas."""
         # if array is empty start in the top left corner, else start with full env in view
-        if not np.any(self.array):
+        if self.start_with_empty and max(self.rows, self.cols) > 50:
             self.x_offset = 50
             self.y_offset = 50
         elif self.rows > self.cols:
@@ -1355,6 +1356,9 @@ class BuildCanvas:
     def resize_images(self):
         """Resize the images according to the current zoom level."""
         adjusted_cell_size = int(self.cell_size * self.scale)
+
+        if adjusted_cell_size <= 0:
+            return
 
         for value, img in self.image_cache.items():
             resized = img.resize((adjusted_cell_size, adjusted_cell_size))
@@ -1617,7 +1621,44 @@ class BuildCanvas:
         scale_factor = 1.2 if event.delta > 0 else 0.8
         new_scale = self.scale * scale_factor
 
-        new_scale = max(1/2, min(new_scale, max(self.rows / 3, self.cols / 3)))
+        if self.start_with_empty:
+            max_limit = {
+                # row/col threshold: max zoom limit
+                10: 3,
+                50: 4.5,
+                100: 5,
+                200: 30,
+                500: 60,
+            }
+
+            min_limit = {
+                # row/col threshold: min zoom limit
+                10: 0.5,
+                200: 0.1,
+                1000: 0.01,
+            }
+
+            max_dim = max(self.rows, self.cols)
+
+            mx_limit = max_limit[
+                next(
+                    # find max zoom limit for rows or cols <= threshold
+                    (k for k in sorted(max_limit) if max_dim <= k),
+                    max(max_limit)  # fallback if rows > 500
+                )
+            ]
+
+            mn_limit = min_limit[
+                next(
+                    # find min zoom limit for rows or cols <= threshold
+                    (k for k in sorted(min_limit) if max_dim <= k),
+                    max(min_limit)  # fallback if rows > 1000
+                )
+            ]
+
+            new_scale = max(mn_limit, min(new_scale, min(self.rows / mx_limit, self.cols / mx_limit)))
+        else:
+            new_scale = max(1/2, min(new_scale, max(self.rows / 3, self.cols / 3)))
 
         grid_mouse_x = (event.x - self.x_offset) / self.scale
         grid_mouse_y = (event.y - self.y_offset) / self.scale
