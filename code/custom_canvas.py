@@ -969,7 +969,7 @@ class BuildCanvas:
             'w': 4,
         }
 
-        self.root.after(200, self.calculate_initial_pos)
+        self.root.after(100, self.calculate_initial_pos)
 
     def create_canvas(self) -> tk.Canvas:
         """Initializes a tkinter canvas with the current attribute values.
