@@ -969,7 +969,7 @@ class BuildCanvas:
             'w': 4,
         }
 
-        self.root.after(100, self.calculate_initial_pos)
+        self.root.after(200, self.calculate_initial_pos)
 
     def create_canvas(self) -> tk.Canvas:
         """Initializes a tkinter canvas with the current attribute values.
@@ -1238,22 +1238,21 @@ class BuildCanvas:
 
     def calculate_initial_pos(self):
         """Calculate the initial position of the grid centred on the canvas."""
-        # if array is empty start in the top left corner, else start with full env in view
-        if self.start_with_empty and max(self.rows, self.cols) > 50:
-            self.x_offset = 50
-            self.y_offset = 50
-        elif self.rows > self.cols:
+        if self.rows > self.cols:
             self.cell_size = (self.canvas.winfo_height() * 0.8) / self.rows
-            width = self.cell_size * self.cols
-            height = self.cell_size * self.rows
-            self.x_offset = (self.canvas.winfo_width() - width) // 2
-            self.y_offset = (self.canvas.winfo_height() - height) // 2
         else:
             self.cell_size = (self.canvas.winfo_width() * 0.8) / self.cols
-            width = self.cell_size * self.cols
-            height = self.cell_size * self.rows
-            self.x_offset = (self.canvas.winfo_width() - width) // 2
-            self.y_offset = (self.canvas.winfo_height() - height) // 2
+
+        width = self.cell_size * self.cols
+        height = self.cell_size * self.rows
+        self.x_offset = (self.canvas.winfo_width() - width) // 2
+        self.y_offset = (self.canvas.winfo_height() - height) // 2
+
+        # if array is empty start in the top left corner, else start with full env in view
+        if self.start_with_empty and max(self.rows, self.cols) > 50:
+            self.sim_zoom()
+            self.x_offset = 50
+            self.y_offset = 50
 
         self.draw_grid()
         self.resize_images()
@@ -1621,44 +1620,7 @@ class BuildCanvas:
         scale_factor = 1.2 if event.delta > 0 else 0.8
         new_scale = self.scale * scale_factor
 
-        if self.start_with_empty:
-            max_limit = {
-                # row/col threshold: max zoom limit
-                10: 3,
-                50: 4.5,
-                100: 5,
-                200: 30,
-                500: 60,
-            }
-
-            min_limit = {
-                # row/col threshold: min zoom limit
-                10: 0.5,
-                200: 0.1,
-                1000: 0.01,
-            }
-
-            max_dim = max(self.rows, self.cols)
-
-            mx_limit = max_limit[
-                next(
-                    # find max zoom limit for rows or cols <= threshold
-                    (k for k in sorted(max_limit) if max_dim <= k),
-                    max(max_limit)  # fallback if rows > 500
-                )
-            ]
-
-            mn_limit = min_limit[
-                next(
-                    # find min zoom limit for rows or cols <= threshold
-                    (k for k in sorted(min_limit) if max_dim <= k),
-                    max(min_limit)  # fallback if rows > 1000
-                )
-            ]
-
-            new_scale = max(mn_limit, min(new_scale, min(self.rows / mx_limit, self.cols / mx_limit)))
-        else:
-            new_scale = max(1/2, min(new_scale, max(self.rows / 3, self.cols / 3)))
+        new_scale = max(1/2, min(new_scale, max(self.rows / 3, self.cols / 3)))
 
         grid_mouse_x = (event.x - self.x_offset) / self.scale
         grid_mouse_y = (event.y - self.y_offset) / self.scale
@@ -1672,6 +1634,28 @@ class BuildCanvas:
         self.resize_images()
         self.draw_images()
 
+    def sim_zoom(self):
+        """Calculate new scale and offset for a simulated zoom."""
+        event = tk.Event()
+        event.delta = 120
+        event.x = 0
+        event.y = 0
+
+        cond = max(self.rows, self.cols) / 10
+
+        while self.scale < cond:
+            scale_factor = 1.2 if event.delta > 0 else 0.8
+            new_scale = self.scale * scale_factor
+
+            new_scale = max(1 / 2, min(new_scale, max(self.rows / 3, self.cols / 3)))
+
+            grid_mouse_x = (event.x - self.x_offset) / self.scale
+            grid_mouse_y = (event.y - self.y_offset) / self.scale
+
+            self.x_offset -= (grid_mouse_x * new_scale - grid_mouse_x * self.scale)
+            self.y_offset -= (grid_mouse_y * new_scale - grid_mouse_y * self.scale)
+
+            self.scale = new_scale
 
 class TrainListCanvas:
     """A custom tkinter Canvas to display a list of trains.
