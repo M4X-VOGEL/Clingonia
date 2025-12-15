@@ -1116,7 +1116,6 @@ class ZoomableGIF:
         self.zoom_levels = []
         self.zoom_factors = [1, 1.5, 2] # discrete zoom levels
         self.modify_zoom_levels()
-        print(self.zoom_factors)
 
         self.cached_frames = {}
         self.frames = []
