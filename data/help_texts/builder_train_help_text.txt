@@ -52,7 +52,8 @@ Individual Configuration
 
 1. Click the "configure [ID]" button for the desired train in the list.
 2. Enter integers (> 0) for Earliest DEP and Latest ARR.
-3. Click "Save".
+3. Enter float (> 0 as fraction a/b) for speed.
+4. Click "Save".
 
 
 
@@ -60,11 +61,12 @@ Individual Configuration
 Configure All Trains
 --------------------
 
-Set the Earliest DEP and Latest ARR to the same values for every train.
+Set the Earliest DEP, Latest ARR and Speed to the same values for every train.
 
 1. Click the "Config All Trains" button.
 2. Enter integers (> 0) for Earliest DEP and Latest ARR.
-3. Click "Save".
+3. Enter float (> 0 as fraction a/b) for speed.
+4. Click "Save".
 
 
 
