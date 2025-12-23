@@ -53,7 +53,7 @@ is shown on the button.
 
 > Settings:
     - GIF Timesteps/sec: Set the frame rate of the animation.
-    - GIF Low Quality Mode: Lower resolution to significantly reduce the GIF file size.
+    - GIF Low Quality Mode: Lower resolution to significantly reduce the render time and GIF file size.
 
 After initiating the render, please monitor the terminal for progress. Once complete, the GIF animation will be displayed.
 

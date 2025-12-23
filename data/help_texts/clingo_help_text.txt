@@ -17,7 +17,7 @@ Clingo Path
 
 Enter the full path to your clingo.exe or simply use "clingo" if it is included in your system's PATH.
 
-API:   To use clingo's python API, enter "API".
+Alternatively, use the Python clingo API by entering "API".
 
 
 
@@ -27,6 +27,8 @@ Answer to display
 
 Choose which answer set from Clingo should be visualized
 (default is 1).
+
+If you rerun the simulation without changing parameters, Clingonia reuses the previous result. If you changed the file encoding, select Answer 0 to force a new run for Answer 1.
 
 
 

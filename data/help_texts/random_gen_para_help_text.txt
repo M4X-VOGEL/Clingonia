@@ -87,9 +87,9 @@ Parameters (Advanced)
 ---------------------
 
 === Use grid mode:
-True:  Distributes cities
-       uniformly in a grid.
-False: Distr. cities randomly.
+ON:  Distributes cities
+     uniformly in a grid.
+OFF: Distr. cities randomly.
 === 
 
 
@@ -115,10 +115,10 @@ of its train stations.
 
 
 === Remove agents on arrival:
-True:  Agents are removed upon
-       reaching their destination.
-False: Agents remain, blocking
-       the destination.
+ON:  Agents are removed upon
+     reaching their destination.
+OFF: Agents remain, blocking
+     the destination.
 === 
 
 

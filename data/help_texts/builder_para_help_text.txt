@@ -64,10 +64,10 @@ Parameters (Advanced)
 ---------------------
 
 === Remove agents on arrival:
-True:  Agents are removed upon
-       reaching their destination.
-False: Agents remain, blocking
-       the destination.
+ON:  Agents are removed upon
+     reaching their destination.
+OFF: Agents remain, blocking
+     the destination.
 === 
 
 

@@ -26,7 +26,7 @@ Define dimensions, the number of trains and cities, rail system details, and tra
 Build New Environment
 ---------------------
 
-Kick off your custom build by defining your grid size and specifying train behavior. Then, unleash your creativity in the Railway Creation Lab: Simply select and place rails onto the grid.
+Kick off your custom build by defining your grid size. Then, unleash your creativity in the Railway Creation Lab: Simply select and place rails onto the grid.
 
 Once your rail network is complete, add trains with their corresponding stations and details.
 
