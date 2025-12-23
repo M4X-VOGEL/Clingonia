@@ -24,6 +24,7 @@ Example usage:
 
 import platform
 import threading
+import re
 
 import numpy as np
 import pandas as pd
@@ -1331,7 +1332,7 @@ class BuildCanvas:
                 'end_pos': (-1, -1),
                 'e_dep': -1,
                 'l_arr': -1,
-                'speed': 1,
+                'speed': '1/1',
             }
             self.train_data.loc[len(self.train_data)] = data
 
@@ -1656,6 +1657,7 @@ class BuildCanvas:
             self.y_offset -= (grid_mouse_y * new_scale - grid_mouse_y * self.scale)
 
             self.scale = new_scale
+
 
 class TrainListCanvas:
     """A custom tkinter Canvas to display a list of trains.
@@ -2040,7 +2042,6 @@ class TrainListCanvas:
             style_map=self.remove_button_style_map,
         )
 
-
     def on_frame_configure(self, event):
         """Configure the scroll_frame for scrolling.
 
@@ -2422,14 +2423,15 @@ class TrainListCanvas:
             if speed.startswith('e.g.') or speed == '' or speed is None:
                 speed = None
             else:
-                speed = int(speed)
+                if not re.fullmatch(r'\d+/\d+', speed):
+                    raise ValueError
 
             # hide label if there was no problem with the data conversion
             speed_err_label.hide_label()
         except ValueError:
             # register the error and display corresponding error message
             speed_err_label.label.config(
-                text='needs int > 0',
+                text='needs float > 0 as a/b',
                 fg=self.bad_status_color,
             )
             speed_err_label.place_label()
@@ -2468,9 +2470,9 @@ class TrainListCanvas:
 
         if speed is not None:
             # check for additional constrains and display error when violated
-            if speed < 1:
+            if int(speed.split('/')[0]) < 1 or int(speed.split('/')[1]) < 1:
                 speed_err_label.label.config(
-                    text='needs int > 0',
+                    text='needs float > 0 as a/b',
                     fg=self.bad_status_color,
                 )
                 speed_err_label.place_label()
