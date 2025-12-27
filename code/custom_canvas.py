@@ -24,7 +24,6 @@ Example usage:
 
 import platform
 import threading
-import re
 
 import numpy as np
 import pandas as pd
@@ -1332,7 +1331,7 @@ class BuildCanvas:
                 'end_pos': (-1, -1),
                 'e_dep': -1,
                 'l_arr': -1,
-                'speed': '1/1',
+                'speed': 1,
             }
             self.train_data.loc[len(self.train_data)] = data
 
@@ -2423,15 +2422,14 @@ class TrainListCanvas:
             if speed.startswith('e.g.') or speed == '' or speed is None:
                 speed = None
             else:
-                if not re.fullmatch(r'\d+/\d+', speed):
-                    raise ValueError
+                speed = int(speed)
 
             # hide label if there was no problem with the data conversion
             speed_err_label.hide_label()
         except ValueError:
             # register the error and display corresponding error message
             speed_err_label.label.config(
-                text='needs float > 0 as a/b',
+                text='needs int > 0',
                 fg=self.bad_status_color,
             )
             speed_err_label.place_label()
@@ -2470,9 +2468,9 @@ class TrainListCanvas:
 
         if speed is not None:
             # check for additional constrains and display error when violated
-            if int(speed.split('/')[0]) < 1 or int(speed.split('/')[1]) < 1:
+            if speed < 1:
                 speed_err_label.label.config(
-                    text='needs float > 0 as a/b',
+                    text='needs int > 0',
                     fg=self.bad_status_color,
                 )
                 speed_err_label.place_label()
