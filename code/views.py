@@ -2665,7 +2665,7 @@ def random_gen_para_to_env():
         return
 
     # TODO: remove once gen_env outputs trains with speed.
-    trains["speed"] = '1/1'
+    trains["speed"] = 1
 
     if len(trains):
         start_pos = list(zip(trains['x'], trains['y']))
@@ -4991,14 +4991,12 @@ def save_train_all_config(save):
         if speed.startswith('e.g.') or speed == '' or speed is None:
             speed = None
         else:
-            if re.fullmatch(r'\d+/\d+', speed):
-                labels['speed_error_label'].hide_label()
-            else:
-                raise ValueError
+            speed = int(speed)
+            labels['speed_error_label'].hide_label()
     except ValueError:
         # register the error and print an error message
         labels['speed_error_label'].label.config(
-            text='needs float > 0 as a/b',
+            text='needs int > 0',
             fg=bad_status_color,
         )
         labels[f'speed_error_label'].place_label()
@@ -5031,9 +5029,9 @@ def save_train_all_config(save):
             current_df['l_arr'] = [la] * len(current_df['l_arr'])
 
     if speed is not None:
-        if int(speed.split('/')[0]) < 1 or int(speed.split('/')[1]) < 1:
+        if speed < 1:
             labels['speed_error_label'].label.config(
-                text='needs float > 0 as a/b',
+                text='needs int > 0',
                 fg=bad_status_color,
             )
             labels['speed_error_label'].place_label()
@@ -7010,7 +7008,7 @@ def load_env_from_file():
     end_pos = list(zip(trains['y_end'], trains['x_end']))
 
     # TODO: remove once load_env outputs trains with speed.
-    trains["speed"] = "1/1"
+    trains["speed"] = 1
 
     current_df = pd.DataFrame({
         '': trains['id'],
