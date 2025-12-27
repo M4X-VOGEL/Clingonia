@@ -247,6 +247,7 @@ err_dict = {
     'answer': {
         ValueError: 'needs int >= 0',
         'negativeValue': 'needs int >= 0',
+        'tooBigAnswer': 'answer is too big',
     },
     'clingo': {
         'noPathToClingo': 'The given path does not lead to clingo',
@@ -1666,6 +1667,12 @@ def save_clingo_params(next_menu) -> int:
         elif key == 'answer' and data < 0:
             err_count += 1
             err = 'negativeValue'
+            labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+            labels[f'{key}_error_label'].place_label()
+            data = default_params[key]
+        elif key == 'answer' and data >= 2**31:
+            err_count += 1
+            err = 'tooBigAnswer'
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
             data = default_params[key]
