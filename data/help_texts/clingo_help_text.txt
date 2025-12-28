@@ -21,6 +21,20 @@ Alternatively, use the Python clingo API by entering "API".
 
 
 
+-----------------------------
+Clingo Options (NOT REQUIRED)
+-----------------------------
+
+Enter additional options for the clingo.exe command line.
+Example: --stats
+Separate multiple options using spaces.
+Example: --option1 --option2
+
+(!) Be aware that some options may cause the program
+    to malfunction. Use at your own risk.
+
+
+
 -----------------
 Answer to display
 -----------------
