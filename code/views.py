@@ -223,11 +223,11 @@ err_dict = {
     },
     'remove': {ValueError: 'needs true or false'},
     'speedMap': {
-        ValueError: 'needs dictionary: float: float,... , 0 <= float <= 1',
-        SyntaxError: 'needs dictionary: float: float,... , 0 <= float <= 1',
-        'negativeValue': 'needs dictionary float: float,... , 0 <= float <= 1',
-        'tooBigSpeed': 'needs dictionary float: float,... , 0 <= float <= 1',
-        'notFloat': 'needs dictionary float: float,... , 0 <= float <= 1',
+        ValueError: 'needs dictionary: float: float,... , 0 < float <= 1',
+        SyntaxError: 'needs dictionary: float: float,... , 0 < float <= 1',
+        'negativeValue': 'needs dictionary float: float,... , 0 < float <= 1',
+        'tooBigSpeed': 'needs dictionary float: float,... , 0 < float <= 1',
+        'notFloat': 'needs dictionary float: float,... , 0 < float <= 1',
     },
     'malfunction': {
         ValueError: 'needs fraction: int / int, 0 <= fraction <= 1',
@@ -2989,7 +2989,7 @@ def save_random_gen_env_params():
                     labels[f'{key}_error_label'].label.config(
                         text=err_dict[key][err])
                     labels[f'{key}_error_label'].place_label()
-                if k < 0 or v < 0:
+                if k <= 0 or v <= 0:
                     err_count += 1
                     err = 'negativeValue'
                     labels[f'{key}_error_label'].label.config(
