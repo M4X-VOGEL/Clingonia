@@ -17,6 +17,7 @@ from code.build_png import calc_resolution, pil_config
 from code.config import TRACKS, DEAD_ENDS
 
 LAST_HINTS = None
+LAST_SPEEDS = None
 
 def create_agents_from_train_stations(hints, num_agents, np_random):
     """Generates agent positions, directions, and targets from station hints.
@@ -64,6 +65,15 @@ def create_agents_from_train_stations(hints, num_agents, np_random):
     return agents_positions, agents_directions, agents_targets
 
 
+def prep_speed_distr(speed_map):
+    speeds, probs = zip(*speed_map.items())
+    # Normalize probabilities
+    probs_sum = sum(probs)
+    probs = [p / probs_sum for p in probs]
+
+    return speeds, probs
+
+
 def custom_sparse_line_generator(env_params, seed=1):
     """Creates a custom line generator for agent generation.
 
@@ -75,9 +85,10 @@ def custom_sparse_line_generator(env_params, seed=1):
         function: Custom line generator function.
     """
     base_line_gen = sparse_line_generator(env_params["speedMap"], seed)
+    speed_v, speed_p = prep_speed_distr(env_params["speedMap"])
 
     def generator(rail, num_agents, hints, num_resets, np_random):
-        global LAST_HINTS
+        global LAST_HINTS, LAST_SPEEDS
         
         # When there are no hints, generate dummy hints.
         if hints is None or 'train_stations' not in hints or 'city_positions' not in hints or 'city_orientations' not in hints:
@@ -100,10 +111,15 @@ def custom_sparse_line_generator(env_params, seed=1):
                 start_wp = Waypoint(position=pos, direction=dir)
                 end_wp = Waypoint(position=target, direction=None)
                 waypoints.append([[start_wp, end_wp]])
-            
-            speeds = [1.0] * num_agents
-            line = Line(agent_waypoints=waypoints,
-                        agent_speeds=speeds)
+            # Random speeds
+            sampled = np_random.choice(speed_v, size=num_agents, p=speed_p)
+            speeds = [x for x in sampled.tolist()]
+            LAST_SPEEDS = speeds  # consistency for create_env
+            # Line for Flatland
+            line = Line(
+                agent_waypoints=waypoints,
+                agent_speeds=speeds
+            )
             return line
         except Exception as e:
             print("Agent generation failed:", e)
@@ -124,17 +140,27 @@ def extract_trains_from_hints(hints, np_random, env_params):
     Returns:
         pd.DataFrame: Train configuration.
     """
+    global LAST_SPEEDS
     num_agents = env_params["agents"]
     agents_positions, agents_directions, agents_targets = create_agents_from_train_stations(hints, num_agents, np_random)
     direction_map = {0: 'n', 1: 'e', 2: 's', 3: 'w'}
     # Default for Lastest Arrival based on Dimensions and number of Agents
     l_arr = math.ceil(3 * max(env_params['rows'], env_params['cols'])) + 2 * num_agents
+    # Inversed Speeds
+    if LAST_SPEEDS is not None and len(LAST_SPEEDS) == num_agents:
+        inv_speeds = [int(round(1.0/float(spd))) for spd in LAST_SPEEDS]
+    else:
+        speed_v, speed_p = prep_speed_distr(env_params["speedMap"])
+        sampled = np_random.choice(speed_v, size=num_agents, p=speed_p)
+        LAST_SPEEDS = [x for x in sampled.tolist()]
+        inv_speeds = [int(round(1.0/float(spd))) for spd in LAST_SPEEDS]
     # Construct a dictionary for DF columns.
     data = {
         "id": list(range(num_agents)),
         "x": [pos[0] for pos in agents_positions],
         "y": [pos[1] for pos in agents_positions],
         "dir": [direction_map.get(d, 'unknown') for d in agents_directions],
+        "speed": inv_speeds,
         "x_end": [target[0] for target in agents_targets],
         "y_end": [target[1] for target in agents_targets],
         "e_dep": [1] * num_agents,
@@ -304,6 +330,7 @@ def extract_trains(env):
         "x": [],
         "y": [],
         "dir": [],
+        "speed": [],
         "x_end": [],
         "y_end": [],
         "e_dep": [],
@@ -319,6 +346,9 @@ def extract_trains(env):
             trains_data["x"].append(agent.position[0])
             trains_data["y"].append(agent.position[1])
             trains_data["dir"].append(direction_map.get(agent.direction, 'unknown'))
+            spd = agent.speed_counter.speed
+            inv_spd = int(round(1.0/float(spd)))
+            trains_data["speed"].append(inv_spd)
             x_end, y_end = agent.target[0], agent.target[1]
             trains_data["x_end"].append(x_end)
             trains_data["y_end"].append(y_end)
@@ -388,6 +418,8 @@ def create_env(env_params):
     Returns:
         RailEnv: Generated Flatland environment.
     """
+    global LAST_SPEEDS
+
     used_seed = env_params['seed']
     random.seed(used_seed)
     
@@ -467,9 +499,18 @@ def create_env(env_params):
             agent.direction = agents_directions[idx]
             agent.target = agents_targets[idx]
     # Speed
-    for idx, agent in enumerate(env.agents):
-        agent_speed = float(env_params['speedMap'].get(idx, 1.0))
-        agent.speed_counter = SpeedCounter(speed=agent_speed)
+    if LAST_SPEEDS is not None and len(LAST_SPEEDS) == len(env.agents):
+        speeds_for_agents = LAST_SPEEDS
+    else:  # fallback when inconsistent or no speeds
+        speed_v, speed_p = prep_speed_distr(env_params["speedMap"])
+        # Generate speeds
+        np_random_local = np.random.RandomState(seed=env_params["seed"])
+        sampled = np_random_local.choice(speed_v, size=len(env.agents), p=speed_p)
+        speeds_for_agents = [x for x in sampled.tolist()]
+        LAST_SPEEDS = speeds_for_agents
+    # SpeedCounter for every agent
+    for agent, agent_speed in zip(env.agents, speeds_for_agents):
+        agent.speed_counter = SpeedCounter(speed=float(agent_speed))
     # Validate that initial agent direction matches with track
     for agent in env.agents:
         if agent.position is not None:

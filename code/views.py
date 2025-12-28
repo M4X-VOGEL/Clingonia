@@ -2672,9 +2672,6 @@ def random_gen_para_to_env():
         frames['random_gen_para_frame'].frame.update()
         return
 
-    # TODO: remove once gen_env outputs trains with speed.
-    trains["speed"] = 1
-
     if len(trains):
         start_pos = list(zip(trains['x'], trains['y']))
         end_pos = list(zip(trains['x_end'], trains['y_end']))
