@@ -223,11 +223,11 @@ err_dict = {
     },
     'remove': {ValueError: 'needs true or false'},
     'speedMap': {
-        ValueError: 'needs dictionary: float: float,... , 0 <= float <= 1',
-        SyntaxError: 'needs dictionary: float: float,... , 0 <= float <= 1',
-        'negativeValue': 'needs dictionary float: float,... , 0 <= float <= 1',
-        'tooBigSpeed': 'needs dictionary float: float,... , 0 <= float <= 1',
-        'notFloat': 'needs dictionary float: float,... , 0 <= float <= 1',
+        ValueError: 'needs dictionary: float: float,... , 0 < float <= 1',
+        SyntaxError: 'needs dictionary: float: float,... , 0 < float <= 1',
+        'negativeValue': 'needs dictionary float: float,... , 0 < float <= 1',
+        'tooBigSpeed': 'needs dictionary float: float,... , 0 < float <= 1',
+        'notFloat': 'needs dictionary float: float,... , 0 < float <= 1',
     },
     'malfunction': {
         ValueError: 'needs fraction: int / int, 0 <= fraction <= 1',
@@ -2989,7 +2989,7 @@ def save_random_gen_env_params():
                     labels[f'{key}_error_label'].label.config(
                         text=err_dict[key][err])
                     labels[f'{key}_error_label'].place_label()
-                if k < 0 or v < 0:
+                if k <= 0 or v <= 0:
                     err_count += 1
                     err = 'negativeValue'
                     labels[f'{key}_error_label'].label.config(
@@ -4864,7 +4864,7 @@ def open_train_all_config_frame():
         grid_pos=(4,0),
         padding=(100,(0,20)),
         sticky='sw',
-        text=f'Speed All Trains:',
+        text=f'Inverse Speed All Trains:',
         font=base_font_layout,
         foreground_color=label_color,
         background_color=background_color,
@@ -6808,7 +6808,7 @@ def get_load_info():
         """Formats a text line from the passed row and index."""
         new_line = (f"| {index:>8} | {str(row['start_pos']):>14} "
                     f"| {row['dir']:^3} | {str(row['end_pos']):>14} "
-                    f"| {row['e_dep']:>5} | {row['l_arr']:>5} | {row['speed']:>5} |")
+                    f"| {row['e_dep']:>5} | {row['l_arr']:>5} | {row['speed']:>6} |")
         return new_line
 
     param_header = '| Parameters |'
@@ -6821,9 +6821,9 @@ def get_load_info():
     spacing = '|\n|'
 
     table_header = ("| Train ID | Start Position | Dir |   "
-                    "End Position | E Dep | L Arr | Speed |")
+                    "End Position | E Dep | L Arr | InvSpd |")
     table_divider = ("|----------|----------------|-----|"
-                     "----------------|-------|-------|-------|")
+                     "----------------|-------|-------|--------|")
 
     new_rows = [format_row(index, row) for index, row in current_df.iterrows()]
 
@@ -6849,7 +6849,7 @@ def current_df_to_env_text(mode):
         """Helper function to format a dataframe row"""
         new_line = (f"| {index:>8} | {str(row['start_pos']):>14} "
                     f"| {row['dir']:^3} | {str(row['end_pos']):>14} "
-                    f"| {row['e_dep']:>5} | {row['l_arr']:>5} | {row['speed']:>5} |")
+                    f"| {row['e_dep']:>5} | {row['l_arr']:>5} | {row['speed']:>6} |")
         return new_line
 
     param_header = '| Parameters |'
@@ -6879,9 +6879,9 @@ def current_df_to_env_text(mode):
     spacing = '|\n|'
 
     table_header = ("| Train ID | Start Position | Dir |   "
-                    "End Position | E Dep | L Arr | Speed |")
+                    "End Position | E Dep | L Arr | InvSpd |")
     table_divider = ("|----------|----------------|-----|"
-                     "----------------|-------|-------|-------|")
+                     "----------------|-------|-------|--------|")
 
     new_rows = [format_row(index, row) for index, (_, row) in enumerate(current_df.iterrows())]
 
