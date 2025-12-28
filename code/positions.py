@@ -446,7 +446,7 @@ def beep_feedback():
         print('\a')
 
 
-def position_df(tracks, trains, clingo_path, lp_files, answer_number):
+def position_df(tracks, trains, clingo_path, clingo_options, lp_files, answer_number):
     """Creates a DataFrame of train positions and directions at each timestep.
 
     Converts Clingo action predicates into a positions DataFrame,
@@ -457,6 +457,7 @@ def position_df(tracks, trains, clingo_path, lp_files, answer_number):
         tracks (list[list[int]]): 2D list of track types.
         trains (pd.DataFrame): Train configuration.
         clingo_path (str): Path to Clingo installation.
+        clingo_options (list[str]): List of additional Clingo options.
         lp_files (list[str]): List of ASP files.
         answer_number (int): Desired answer number from Clingo.
 
@@ -464,7 +465,7 @@ def position_df(tracks, trains, clingo_path, lp_files, answer_number):
         pd.DataFrame: DataFrame with trainID, x, y, direction, and timestep.
     """
     # Actions into DF
-    df_actions_original = clingo_to_df(clingo_path, lp_files, answer_number)
+    df_actions_original = clingo_to_df(clingo_path, clingo_options, lp_files, answer_number)
     if isinstance(df_actions_original, int): return df_actions_original  # Error Handling
     # Save original df_actions to provide a faulty list of action predicates, later.
     df_actions = df_actions_original.copy(deep=True)

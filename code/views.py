@@ -154,6 +154,7 @@ default_params = {
     'saveImage': False,
     'answer': 1,
     'clingo': 'clingo',
+    'clingoOptions': [],
     'lpFiles': [],
     'lowQualityGIF': False,
     'frameRate': 2.0,
@@ -177,6 +178,7 @@ user_params = {
     'saveImage': False,
     'answer': None,
     'clingo': None,
+    'clingoOptions': [],
     'lpFiles': [],
     'lowQualityGIF': False,
     'frameRate': None,
@@ -251,6 +253,9 @@ err_dict = {
     },
     'clingo': {
         'noPathToClingo': 'The given path does not lead to clingo',
+    },
+    'clingoOptions': {
+        'invalidOptions': 'needs valid clingo options starting with --',
     },
     'lpFiles': {},
     'frameRate': {
@@ -1186,9 +1191,50 @@ def build_clingo_para_frame():
         visibility=False,
     )
 
-    labels['answer_label'] = Label(
+    labels['clingoOptions_label'] = Label(
         root=frames['clingo_para_frame'].frame,
         grid_pos=(3, 2),
+        padding=(0, 0),
+        sticky='nw',
+        text='[OPTIONAL] Clingo Options:',
+        font=base_font_layout,
+        foreground_color=label_color,
+        background_color=background_color,
+        visibility=True,
+    )
+
+    entry_fields['clingoOptions_entry'] = EntryField(
+        root=frames['clingo_para_frame'].frame,
+        width=10,
+        height=1,
+        grid_pos=(3, 3),
+        padding=(0, 0),
+        sticky='nw',
+        text=f'e.g. --stats',
+        font=base_font_layout,
+        foreground_color=input_color,
+        background_color=entry_color,
+        example_color=example_color,
+        border_width=0,
+        visibility=True,
+    )
+
+    labels['clingoOptions_error_label'] = Label(
+        root=frames['clingo_para_frame'].frame,
+        grid_pos=(4, 2),
+        padding=(0, 0),
+        sticky='nw',
+        columnspan=2,
+        text='',
+        font=err_font_layout,
+        foreground_color=bad_status_color,
+        background_color=background_color,
+        visibility=False,
+    )
+
+    labels['answer_label'] = Label(
+        root=frames['clingo_para_frame'].frame,
+        grid_pos=(5, 2),
         padding=(0, 0),
         sticky='nw',
         text='Answer to display:',
@@ -1202,7 +1248,7 @@ def build_clingo_para_frame():
         root=frames['clingo_para_frame'].frame,
         width=10,
         height=1,
-        grid_pos=(3, 3),
+        grid_pos=(5, 3),
         padding=(0, 0),
         sticky='nw',
         text=f'e.g. {default_params["answer"]}',
@@ -1216,7 +1262,7 @@ def build_clingo_para_frame():
 
     labels['answer_error_label'] = Label(
         root=frames['clingo_para_frame'].frame,
-        grid_pos=(4, 2),
+        grid_pos=(6, 2),
         padding=(0, 0),
         sticky='nw',
         columnspan=2,
@@ -1231,7 +1277,7 @@ def build_clingo_para_frame():
         root=frames['clingo_para_frame'].frame,
         width=30,
         height=1,
-        grid_pos=(5, 2),
+        grid_pos=(7, 2),
         padding=(0, 0),
         sticky='nw',
         columnspan=2,
@@ -1247,7 +1293,7 @@ def build_clingo_para_frame():
 
     labels['clingo_paths_label'] = Label(
         root=frames['clingo_para_frame'].frame,
-        grid_pos=(6, 2),
+        grid_pos=(8, 2),
         padding=(0, 0),
         sticky='w',
         columnspan=2,
@@ -1262,7 +1308,7 @@ def build_clingo_para_frame():
         root=frames['clingo_para_frame'].frame,
         width=30,
         height=2,
-        grid_pos=(7, 2),
+        grid_pos=(9, 2),
         padding=(0, 0),
         sticky='sw',
         columnspan=2,
@@ -1278,7 +1324,7 @@ def build_clingo_para_frame():
 
     labels['clingo_status_label'] = Label(
         root=frames['clingo_para_frame'].frame,
-        grid_pos=(8, 2),
+        grid_pos=(10, 2),
         padding=(0, 0),
         text='',
         font=err_font_layout,
@@ -1291,7 +1337,7 @@ def build_clingo_para_frame():
     frames['clingo_para_frame'].frame.columnconfigure(0, weight=1)
     frames['clingo_para_frame'].frame.columnconfigure(1, weight=1)
     frames['clingo_para_frame'].frame.rowconfigure(
-        tuple(range(1,9)), weight=2
+        tuple(range(1,11)), weight=2
     )
     frames['clingo_para_frame'].frame.columnconfigure(
         tuple(range(2,4)), weight=2
@@ -1624,7 +1670,7 @@ def save_clingo_params(next_menu) -> int:
         key = field.split('_')[0]
         if key not in default_params:
             continue
-        elif key not in ['answer', 'clingo']:
+        elif key not in ['answer', 'clingo', 'clingoOptions']:
             continue
 
         # get the data from the entry field
@@ -1640,6 +1686,9 @@ def save_clingo_params(next_menu) -> int:
                     data = data[:-4]
                 else:
                     data = data
+            elif key == 'clingoOptions':
+                data = data.split(' ')
+                data = [opt.strip() for opt in data if opt.strip() != '']
             else:
                 data = int(data)
 
@@ -1665,6 +1714,14 @@ def save_clingo_params(next_menu) -> int:
             labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
             labels[f'{key}_error_label'].place_label()
             data = default_params[key]
+        elif key == 'clingoOptions':
+            for opt in data:
+                if not opt.startswith('--'):
+                    err_count += 1
+                    err = 'invalidOptions'
+                    labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
+                    labels[f'{key}_error_label'].place_label()
+                    data = []
         elif key == 'answer' and data < 0:
             err_count += 1
             err = 'negativeValue'
@@ -1695,10 +1752,12 @@ def load_clingo_params():
 
         if key not in default_params:
             continue
-        elif key not in ['answer', 'clingo']:
+        elif key not in ['answer', 'clingo', 'clingoOptions']:
             continue
         elif user_params[key] is None:
             continue
+        elif key == 'clingoOptions':
+            entry_fields[field].insert_string(" ".join(user_params[key]))
         else:
             entry_fields[field].insert_string(str(user_params[key]))
 
@@ -7163,6 +7222,7 @@ def calc_paths(tracks, trains) -> pd.DataFrame:
         tracks,
         trains,
         user_params['clingo'],
+        user_params['clingoOptions'],
         user_params['lpFiles'] + ['data/running_tmp.lp'],
         user_params['answer']
     )
