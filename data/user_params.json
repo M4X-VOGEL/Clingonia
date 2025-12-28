@@ -17,6 +17,7 @@
     "saveImage": null,
     "answer": null,
     "clingo": null,
+    "clingoOptions": [],
     "lpFiles": [],
     "lowQualityGIF": null,
     "frameRate": null
