@@ -3510,9 +3510,9 @@ class PathListCanvas:
 
             label = tk.Label(
                 frame,
-                width=20, font=self.font,
+                width=30, font=self.font,
                 fg=colors[index], bg=self.background_color,
-                text=f'Train {idx}: {row["start_pos"]}, {row["dir"]}',
+                text=f'Train {idx}: {row["start_pos"]}, {row["dir"]}   --   Speed {row["speed"]}',
                 anchor='w',
             )
             label.pack(side='left', padx=10)

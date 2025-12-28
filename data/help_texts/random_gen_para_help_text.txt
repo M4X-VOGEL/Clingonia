@@ -119,7 +119,21 @@ ON:  Agents are removed upon
      reaching their destination.
 OFF: Agents remain, blocking
      the destination.
-=== 
+===
+
+
+=== Speed ratio map for trains:
+Distribution of train speeds.
+ Format:  {speed : probability}
+ Example: {1.0: 0.5, 0.25: 0.5}
+> 50 % chance for speed 1
+  (one cell every timestep)
+> 50 % chance for speed 0.25
+  (one cell every 4 timesteps)
+Note: Speeds must be of the form
+      1/n, and the probabilities
+      must sum to 1.
+===
 
 
 === Low quality mode:
@@ -134,20 +148,6 @@ environments over 1000x1000.
 -----------------------------
 Parameters (no Clingo impact)
 -----------------------------
-
-=== Speed ratio map for trains:
-Distribution of train speeds.
- Format:  {speed : probability}
- Example: {1.0: 0.5, 0.25: 0.5}
-> 50 % chance for speed 1
-  (one cell every timestep)
-> 50 % chance for speed 0.25
-  (one cell every 4 timesteps)
-Note: Speeds must be of the form
-      1/n, and the probabilities
-      must sum to 1.
-=== 
-
 
 === Malfunction rate:
 Fraction A/B represents the
