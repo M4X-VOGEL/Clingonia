@@ -2261,7 +2261,7 @@ class TrainListCanvas:
             grid_pos=(3, 0),
             padding=(100, (0,20)),
             sticky='w',
-            text=f'Speed:',
+            text=f'Inverse Speed:',
             font=self.base_font_layout,
             foreground_color=self.label_color,
             background_color=self.background_color,
