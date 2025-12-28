@@ -91,7 +91,7 @@ The `Action` variable must be one of the following:
 - `move_right`
 - `wait`
 
-Once an encoding or set of encodings has been developed that produces valid paths in the form of the appropriate `action(...)` output, developers can initialize the program.
+Once an encoding or set of encodings has been developed that produces valid paths in the form of the appropriate `action(...)` output, developers can initialize the program. If Clingonia does not offer a particular feature, it must be integrated into your problem-solving LP files.
 
 <br>
 

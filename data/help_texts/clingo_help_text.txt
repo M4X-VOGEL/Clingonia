@@ -54,6 +54,8 @@ Browse and select your ASP encoding files via the file explorer. These files sho
 
 (!) Please do not include the environment encoding here.
 
+If Clingonia does not offer a particular feature, it must be integrated into your problem-solving LP files.
+
 
 
 --------------
