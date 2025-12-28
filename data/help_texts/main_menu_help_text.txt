@@ -66,6 +66,7 @@ The program then scans the file for explicit predicates:
 
 - global(MaxTime).
 - train(ID).
+- speed(ID, InvSpd).
 - start(ID, (row, column), earliest_departure, direction).
 - end(ID, (row, column), latest_arrival).
 - cell((row, column), track).
@@ -74,6 +75,7 @@ Each predicate must adhere to these conditions:
 
 MaxTime: integer > 0
 ID: integer >= 0
+InvSpd: integer > 0
 row and column: integers >= 0
 earliest_departure and latest_arrival: integers > 0
 direction: one of n, e, s, or w

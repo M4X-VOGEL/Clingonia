@@ -30,9 +30,11 @@ def write_trains(trains, lp):
         lp (file object): .lp file.
     """
     for _, row in trains.iterrows():
-        # Write train, start and end predicates
+        tid, inv_spd = row['id'], row['speed']
+        # Write train, speed, start and end predicates
         lp.write(
             f"train({row['id']}).\n"
+            f"speed({tid},{inv_spd}).\n"
             f"start({row['id']},({row['y']},{row['x']}),{row['e_dep']},{row['dir']}).\n"
             f"end({row['id']},({row['y_end']},{row['x_end']}),{row['l_arr']}).\n\n"
         )

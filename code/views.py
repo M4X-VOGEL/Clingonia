@@ -274,7 +274,8 @@ loading_err_dict = {
     -12: 'Negative coordinates are invalid.',
     -13: 'An end predicate has an invalid latest arrival.',
     -14: 'No dead ends allowed in the environment.',
-    -15: 'Invalid file type. Environment must be a .lp file'
+    -15: 'Invalid file type. Environment must be a .lp file',
+    -16: 'A speed predicate is improperly specified.'
 }
 clingo_err_dict = {
     -1: 'No .lp files given.',
@@ -7013,9 +7014,6 @@ def load_env_from_file():
 
     start_pos = list(zip(trains['y'], trains['x']))
     end_pos = list(zip(trains['y_end'], trains['x_end']))
-
-    # TODO: remove once load_env outputs trains with speed.
-    trains["speed"] = 1
 
     current_df = pd.DataFrame({
         '': trains['id'],

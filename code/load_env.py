@@ -79,15 +79,16 @@ def add_cell(df_tracks, pred):
 
 
 def fill_tse(tse_list, pred):
-    """Parses train, start, or end predicates and appends the information to tse_list.
+    """Parses train, speed, start, end predicates and appends the information to tse_list.
 
     Expected formats:
         - train(ID)
+        - speed(ID, InvSpd)
         - start(ID, (X,Y), EarliestDeparture, Direction)
         - end(ID, (X,Y), LatestArrival)
 
     Args:
-        tse_list (list): List to collect train, start, and end information.
+        tse_list (list): List to collect train, speed, start, end information.
         pred (str): Predicate string from the .lp file.
 
     Returns:
@@ -109,6 +110,23 @@ def fill_tse(tse_list, pred):
         # Add ID to tse_list
         tse_list.append(id)
 
+    elif pred.startswith("speed"):
+        # Extract variables
+        params = pred[6:-1]
+        speed = [p.strip() for p in params.split(',')]
+        if len(speed) != 2:
+            return -16  # Report invalid speed
+        try:
+            id = int(speed[0])
+            inv_spd = int(speed[1])
+            if inv_spd < 1:
+                print(f"⚠️ speed({id},...) Warning: InvSpd < 1 not allowed.")
+                return -16
+        except ValueError:
+            return -16
+        # Add speed predicate to tse_list
+        tse_list.append(["speed", id, inv_spd])
+    
     elif pred.startswith("start"):
         # Extract variables
         params = pred[6:-1].replace('(', '').replace(')', '')
@@ -179,11 +197,11 @@ def prep_tracks_and_trains(path):
                 # cell
                 elif pred.startswith("cell"):
                     rc = add_cell(df_tracks, pred)
-                    if rc != 0: return rc, rc  # Error -2
-                # train, start, end
+                    if rc != 0: return rc, rc, global_max_time  # Error -2
+                # train, speed, start, end
                 else:
                     rc = fill_tse(tse_list, pred)
-                    if rc != 0: return rc, rc  # Error -3,-4,-5
+                    if rc != 0: return rc, rc, global_max_time  # Error -3,-4,-5,-16
     # Sort by y, then x in ascending order
     df_tracks = df_tracks.sort_values(by=['y', 'x'], ascending=[True, True])
     return df_tracks, tse_list, global_max_time
@@ -213,27 +231,35 @@ def create_df_of_trains(tse_list):
     """Creates a DataFrame of train configuration from predicate data.
 
     Args:
-        tse_list (list): Train, start, and end predicates.
+        tse_list (list): Train, speed, start, end predicates.
 
     Returns:
         pd.DataFrame: DataFrame with columns [id, x, y, dir, x_end, y_end, e_dep, l_arr].
     """
     # List of trainIDs
     train_ids = sorted([p for p in tse_list if isinstance(p, int)])
-    # Dictionaries for start and end
-    start_dict, end_dict = {}, {}
+    # Dictionaries for speed, start and end
+    speed_dict, start_dict, end_dict = {}, {}, {}
     for p in tse_list:
         if isinstance(p, list):
+            if p[0] == "speed":
+                speed_dict[p[1]] = p
             if p[0] == 'start':
                 start_dict[p[1]] = p
             elif p[0] == 'end':
                 end_dict[p[1]] = p
     
-    trains = pd.DataFrame(columns=["id", "x", "y", "dir", "x_end", "y_end", "e_dep", "l_arr"])
+    trains = pd.DataFrame(columns=["id", "x", "y", "dir", "speed", "x_end", "y_end", "e_dep", "l_arr"])
     # For each ID, add it if both start and end exist
     for id in train_ids:
         if id not in start_dict or id not in end_dict:
             continue  # Skip trains without start and/or end
+        # speed variables (optional)
+        try:
+            spd = speed_dict[id]
+            speed = spd[2]
+        except KeyError:
+            speed = 1
         # start variables
         s = start_dict[id]
         x, y = s[2], s[3]
@@ -243,7 +269,7 @@ def create_df_of_trains(tse_list):
         x_end, y_end = e[2], e[3]
         l_arr = e[4]
         # Add row
-        trains.loc[len(trains)] = [id, x, y, dir, x_end, y_end, e_dep, l_arr]
+        trains.loc[len(trains)] = [id, x, y, dir, speed, x_end, y_end, e_dep, l_arr]
     return trains
 
 
@@ -288,7 +314,7 @@ def validate_train_consistency(tse_list):
     """Ensures that every train has both a start and an end, and that LatestArrival is not before EarliestDeparture.
 
     Args:
-        tse_list (list): Train, start, and end predicates.
+        tse_list (list): Train, speed, start, end predicates.
 
     Returns:
         int: 0 if consistent; negative error code otherwise.
@@ -357,7 +383,7 @@ def validate(tse_list, df_tracks):
     """Validates predicate consistency, start directions, and grid completeness.
 
     Args:
-        tse_list (list): Train, start, and end predicates.
+        tse_list (list): Train, speed, start, end predicates.
         df_tracks (pd.DataFrame): Cell predicates.
 
     Returns:
@@ -415,12 +441,12 @@ def load_env(lp_file):
     df_tracks, tse_list, global_max_time = prep_tracks_and_trains(lp_file)
     if isinstance(df_tracks, int) or isinstance(tse_list, int):
         print("❌ Load Error: No environment loaded.")
-        return df_tracks, tse_list  # Errors -2,-3,-4,-5,-11,-12
+        return df_tracks, tse_list, global_max_time  # Errors -2,-3,-4,-5,-11,-12,-16
     # Validation
     rc = validate(tse_list, df_tracks)
     if rc != 0:
         print("❌ Validation Error: No environment loaded.")
-        return rc, rc  # Errors -6,-7,-8,-9,-10
+        return rc, rc, global_max_time  # Errors -6,-7,-8,-9,-10
     # Convert df_tracks into a 2D list and tse_list into a DF
     tracks = create_list_of_tracks(df_tracks)
     trains = create_df_of_trains(tse_list)
