@@ -1688,6 +1688,7 @@ def save_clingo_params(next_menu) -> int:
                     data = data
             elif key == 'clingoOptions':
                 data = data.split(' ')
+                data = [opt.strip() for opt in data if opt.strip() != '']
             else:
                 data = int(data)
 
@@ -1714,8 +1715,8 @@ def save_clingo_params(next_menu) -> int:
             labels[f'{key}_error_label'].place_label()
             data = default_params[key]
         elif key == 'clingoOptions':
-            for i in data:
-                if not i.startswith('--'):
+            for opt in data:
+                if not opt.startswith('--'):
                     err_count += 1
                     err = 'invalidOptions'
                     labels[f'{key}_error_label'].label.config(text=err_dict[key][err])
@@ -7221,6 +7222,7 @@ def calc_paths(tracks, trains) -> pd.DataFrame:
         tracks,
         trains,
         user_params['clingo'],
+        user_params['clingoOptions'],
         user_params['lpFiles'] + ['data/running_tmp.lp'],
         user_params['answer']
     )

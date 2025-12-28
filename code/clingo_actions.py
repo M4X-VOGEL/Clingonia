@@ -5,10 +5,6 @@ import threading
 import subprocess
 import pandas as pd
 
-# HERE YOU CAN ADD OPTIONS FOR THE CLINGO COMMAND LIKE "--stats" TO THE LIST.
-clingo_options = []
-# Be aware that some options may cause the program to malfunction.
-
 clingo_frustration = {
     30:  "I'm lost in Flatland, again...",
     60:  "tracks won't align, damn it...",
@@ -103,11 +99,12 @@ def run_timer_thread(is_running, timer_start):
     return t
 
 
-def run_clingo(clingo_path, lp_files, answer_number):
+def run_clingo(clingo_path, clingo_options, lp_files, answer_number):
     """Runs Clingo on given ASP files and returns its output.
 
     Args:
         clingo_path (str): Path to Clingo installation or "API".
+        clingo_options (list[str]): List of additional Clingo options.
         lp_files (list[str]): List of ASP files.
         answer_number (int): Desired answer number from Clingo.
 
@@ -338,11 +335,12 @@ def create_df(action_params):
     return df_actions
 
 
-def clingo_to_df(clingo_path="clingo", lp_files=[], answer_number=1):
+def clingo_to_df(clingo_path="clingo", clingo_options=[], lp_files=[], answer_number=1):
     """Runs Clingo and converts its output to a DataFrame of action predicates.
 
     Args:
         clingo_path (str): Path to Clingo installation.
+        clingo_options (list[str]): List of additional Clingo options.
         lp_files (list[str]): List of ASP files.
         answer_number (int): Desired answer number (default is 1).
 
@@ -360,7 +358,7 @@ def clingo_to_df(clingo_path="clingo", lp_files=[], answer_number=1):
 
     print("Running Clingo...")
     # Run Clingo and capture its output
-    output = run_clingo(clingo_path, lp_files, answer_number)
+    output = run_clingo(clingo_path, clingo_options, lp_files, answer_number)
     if output == -2:
         return -2  # clingo error
     # Extract desired answer
