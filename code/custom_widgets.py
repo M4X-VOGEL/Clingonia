@@ -14,12 +14,17 @@ Example usage:
     )
 """
 
+import platform
 import warnings
 import tkinter as tk
 from tkinter import ttk
 from typing import Union, Tuple, Dict, List
 
 from PIL import Image, ImageTk, ImageDraw, ImageSequence
+
+
+# Platform:
+sys_platform = platform.system()
 
 
 class Window:
@@ -1136,8 +1141,18 @@ class ZoomableGIF:
         self.canvas.bind("<MouseWheel>", self.zoom)
         self.canvas.bind("<Button-4>", self.zoom)
         self.canvas.bind("<Button-5>", self.zoom)
-        self.canvas.bind("<ButtonPress-3>", self.pan_start_event)
-        self.canvas.bind("<B3-Motion>", self.pan)
+
+        if sys_platform == "Darwin":
+            # different right mouse button labeling
+            self.canvas.bind("<ButtonPress-2>", self.pan_start_event)
+            self.canvas.bind("<B2-Motion>", self.pan)
+
+            # back-up using control and left mouse click
+            self.canvas.bind("<Control-ButtonPress-1>", self.pan_start_event)
+            self.canvas.bind("<Control-B1-Motion>", self.pan)
+        else:
+            self.canvas.bind("<ButtonPress-3>", self.pan_start_event)
+            self.canvas.bind("<B3-Motion>", self.pan)
 
         if visibility:
             self.place_canvas()
