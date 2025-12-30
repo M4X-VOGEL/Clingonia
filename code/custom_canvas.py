@@ -22,7 +22,6 @@ Example usage:
     )
 """
 
-import platform
 import threading
 
 import numpy as np
@@ -183,8 +182,19 @@ class EnvCanvas:
         self.draw_grid_numbers = False
 
         self.canvas.bind("<MouseWheel>", self.zoom)
-        self.canvas.bind("<ButtonPress-3>", self.start_pan)
-        self.canvas.bind("<B3-Motion>", self.pan)
+
+        if sys_platform == "Darwin":
+            # different right mouse button labeling
+            self.canvas.bind("<ButtonPress-2>", self.start_pan)
+            self.canvas.bind("<B2-Motion>", self.pan)
+
+            # back-up using control and left mouse click
+            self.canvas.bind("<Control-ButtonPress-1>", self.start_pan)
+            self.canvas.bind("<Control-B1-Motion>", self.pan)
+        else:
+            self.canvas.bind("<ButtonPress-3>", self.start_pan)
+            self.canvas.bind("<B3-Motion>", self.pan)
+
         self.canvas.bind("<Leave>", self.remove_mouse_symbols)
         self.canvas.bind("<Motion>", self.draw_mouse_symbols)
 
@@ -938,9 +948,20 @@ class BuildCanvas:
         self.draw_grid_numbers = False
 
         self.canvas.bind("<MouseWheel>", self.zoom)
+
+        if sys_platform == "Darwin":
+            # different right mouse button labeling
+            self.canvas.bind("<ButtonPress-2>", self.start_pan)
+            self.canvas.bind("<B2-Motion>", self.pan)
+
+            # back-up using control and left mouse click
+            self.canvas.bind("<Control-ButtonPress-1>", self.start_pan)
+            self.canvas.bind("<Control-B1-Motion>", self.pan)
+        else:
+            self.canvas.bind("<ButtonPress-3>", self.start_pan)
+            self.canvas.bind("<B3-Motion>", self.pan)
+
         self.canvas.bind("<ButtonPress-1>", self.modify_array)
-        self.canvas.bind("<ButtonPress-3>", self.start_pan)
-        self.canvas.bind("<B3-Motion>", self.pan)
         self.canvas.bind("<Leave>", self.remove_mouse_symbols)
         self.canvas.bind("<Motion>", self.draw_mouse_symbols)
 
@@ -2653,8 +2674,19 @@ class ResultCanvas:
         self.draw_grid_numbers = False
 
         self.canvas.bind("<MouseWheel>", self.zoom)
-        self.canvas.bind("<ButtonPress-3>", self.start_pan)
-        self.canvas.bind("<B3-Motion>", self.pan)
+
+        if sys_platform == "Darwin":
+            # different right mouse button labeling
+            self.canvas.bind("<ButtonPress-2>", self.start_pan)
+            self.canvas.bind("<B2-Motion>", self.pan)
+
+            # back-up using control and left mouse click
+            self.canvas.bind("<Control-ButtonPress-1>", self.start_pan)
+            self.canvas.bind("<Control-B1-Motion>", self.pan)
+        else:
+            self.canvas.bind("<ButtonPress-3>", self.start_pan)
+            self.canvas.bind("<B3-Motion>", self.pan)
+
         self.canvas.bind("<Leave>", self.remove_mouse_symbols)
         self.canvas.bind("<Motion>", self.draw_mouse_symbols)
 
