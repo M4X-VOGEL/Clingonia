@@ -1180,36 +1180,36 @@ class BuildCanvas:
         """
         dictionary = {
             0: ('eraser', 0),
-            1: ('Zug_Gleis_#0091ea', 0),
-            2: ('Zug_Gleis_#0091ea', 270),
-            3: ('Zug_Gleis_#0091ea', 180),
-            4: ('Zug_Gleis_#0091ea', 90),
-            5: ('Bahnhof_#d50000', 0),
-            32800: ('Gleis_vertikal', 0),
-            1025: ('Gleis_horizontal', 0),
-            2064: ('Gleis_kurve_oben_links', 0),
-            72: ('Gleis_kurve_oben_rechts', 0),
-            16386: ('Gleis_kurve_unten_rechts', 0),
-            4608: ('Gleis_kurve_unten_links', 0),
-            3089: ('Weiche_horizontal_oben_links', 0),
-            1097: ('Weiche_horizontal_oben_rechts', 0),
-            17411: ('Weiche_horizontal_unten_rechts', 0),
-            5633: ('Weiche_horizontal_unten_links', 0),
-            34864: ('Weiche_vertikal_oben_links', 0),
-            32872: ('Weiche_vertikal_oben_rechts', 0),
-            49186: ('Weiche_vertikal_unten_rechts', 0),
-            37408: ('Weiche_vertikal_unten_links', 0),
-            33825: ('Gleis_Diamond_Crossing', 0),
-            35889: ('Weiche_Single_Slip', 270),
-            33897: ('Weiche_Single_Slip', 180),
-            50211: ('Weiche_Single_Slip', 90),
-            38433: ('Weiche_Single_Slip', 0),
-            52275: ('Weiche_Double_Slip', 90),
-            38505: ('Weiche_Double_Slip', 0),
-            2136: ('Weiche_Symetrical', 180),
-            16458: ('Weiche_Symetrical', 90),
-            20994: ('Weiche_Symetrical', 0),
-            6672: ('Weiche_Symetrical', 270),
+            1: ('train', 0),
+            2: ('train', 270),
+            3: ('train', 180),
+            4: ('train', 90),
+            5: ('train_station', 0),
+            32800: ('track_vertical', 0),
+            1025: ('track_horizontal', 0),
+            2064: ('track_curve_top_left', 0),
+            72: ('track_curve_top_right', 0),
+            16386: ('track_curve_bottom_right', 0),
+            4608: ('track_curve_bottom_left', 0),
+            3089: ('switch_horizontal_top_left', 0),
+            1097: ('switch_horizontal_top_right', 0),
+            17411: ('switch_horizontal_bottom_right', 0),
+            5633: ('switch_horizontal_bottom_left', 0),
+            34864: ('switch_vertical_top_left', 0),
+            32872: ('switch_vertical_top_right', 0),
+            49186: ('switch_vertical_bottom_right', 0),
+            37408: ('switch_vertical_bottom_left', 0),
+            33825: ('track_diamond_crossing', 0),
+            35889: ('switch_single_slip', 270),
+            33897: ('switch_single_slip', 180),
+            50211: ('switch_single_slip', 90),
+            38433: ('switch_single_slip', 0),
+            52275: ('switch_double_slip', 90),
+            38505: ('switch_double_slip', 0),
+            2136: ('switch_symmetrical', 180),
+            16458: ('switch_symmetrical', 90),
+            20994: ('switch_symmetrical', 0),
+            6672: ('switch_symmetrical', 270),
         }
         return dictionary
 
@@ -1877,7 +1877,7 @@ class TrainListCanvas:
         self.config_dict = {}
         self.remove_dict = {}
 
-        self.station_img = 'data/png/Bahnhof_#d50000.png'
+        self.station_img = 'data/png/train_station.png'
 
         self.canvas = self.create_canvas()
         self.pack_canvas()
