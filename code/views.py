@@ -7104,12 +7104,13 @@ def load_env_from_file():
     user_params['rows'] = tracks.shape[0]
     user_params['cols'] = tracks.shape[1]
     user_params['agents'] = len(trains)
+    user_params['malfunction'] = default_params['malfunction']
 
     print("\nBuilding environment...")
     env,_,_,_ = create_custom_env(tracks, trains, user_params)
 
     # save the png for the runtime of the program
-    delete_tmp_malfunctions()
+    save_malfunctions(user_params)
     delete_tmp_frames()
     env_counter += 1
     os.makedirs("data", exist_ok=True)

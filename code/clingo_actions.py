@@ -111,6 +111,12 @@ def run_clingo(clingo_path, clingo_options, lp_files, answer_number):
     Returns:
         str: Clingo output with its answers, or -2 if Clingo returns an error.
     """
+    from code.files import MALFUNCTIONS_EXIST
+    malf_path = "data/malfunction_tmp.lp"
+    if MALFUNCTIONS_EXIST:
+        lp_files.append(malf_path)
+    elif malf_path in lp_files:
+        lp_files.remove(malf_path)
     timer_start = time.perf_counter() # Timer for Clingo execution time
     if clingo_path.lower() == "api":
         # Using clingo's python API, not the clingo.exe CLI

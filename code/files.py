@@ -3,7 +3,7 @@ import shutil
 import importlib
 import numpy as np
 from random import seed, randint
-
+MALFUNCTIONS_EXIST = False
 MALFUNCTION_SEED = False
 
 def ensure_directory(d):
@@ -16,12 +16,15 @@ def ensure_directory(d):
 
 
 def save_malfunctions(user_params):
+    global MALFUNCTIONS_EXIST
     # Requirement check
     fraction = user_params["malfunction"]
     num, denom = fraction[0], fraction[1]
     if not num:
         delete_tmp_malfunctions()
+        MALFUNCTIONS_EXIST = False
         return
+    MALFUNCTIONS_EXIST = True
     if not MALFUNCTION_SEED:
         seed(np.random.randint(-2**31,2**31))
     # Parameters
