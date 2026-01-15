@@ -24,7 +24,7 @@ import pandas as pd
 from code.build_png import create_custom_env, save_png
 from code.build_gif import render_gif
 from code.custom_canvas import *
-from code.files import save_env, delete_tmp_lp, delete_tmp_png, delete_tmp_gif, delete_tmp_frames
+from code.files import save_env, save_malfunctions, delete_tmp_lp, delete_tmp_png, delete_tmp_gif, delete_tmp_frames, delete_tmp_malfunctions
 from code.gen_png import gen_env, render_time_prediction
 from code.load_env import load_env
 from code.positions import position_df
@@ -1855,6 +1855,7 @@ def exit_gui():
     delete_tmp_png()
     delete_tmp_gif()
     delete_tmp_frames()
+    delete_tmp_malfunctions()
 
     windows['flatland_window'].close_window()
 
@@ -2695,6 +2696,7 @@ def random_gen_para_to_env():
 
     try:
         tracks, trains = gen_env(user_params)
+        save_malfunctions(user_params)
         delete_tmp_frames()
         env_counter += 1
     except ValueError as e:
@@ -5292,6 +5294,7 @@ def builder_train_grid_to_env():
     })
 
     # save the generated image for the runtime of the program
+    save_malfunctions(user_params)
     delete_tmp_frames()
     env_counter += 1
     os.makedirs("data", exist_ok=True)
@@ -7106,6 +7109,7 @@ def load_env_from_file():
     env,_,_,_ = create_custom_env(tracks, trains, user_params)
 
     # save the png for the runtime of the program
+    delete_tmp_malfunctions()
     delete_tmp_frames()
     env_counter += 1
     os.makedirs("data", exist_ok=True)

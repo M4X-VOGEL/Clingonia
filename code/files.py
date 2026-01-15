@@ -1,6 +1,10 @@
 import os
 import shutil
 import importlib
+import numpy as np
+from random import seed, randint
+
+MALFUNCTION_SEED = False
 
 def ensure_directory(d):
     """Creates the specified directory if it does not exist.
@@ -9,6 +13,34 @@ def ensure_directory(d):
         d (str): Directory path to create.
     """
     os.makedirs(d, exist_ok=True)
+
+
+def save_malfunctions(user_params):
+    # Requirement check
+    fraction = user_params["malfunction"]
+    num, denom = fraction[0], fraction[1]
+    if not num:
+        delete_tmp_malfunctions()
+        return
+    if not MALFUNCTION_SEED:
+        seed(np.random.randint(-2**31,2**31))
+    # Parameters
+    rate = int(denom/num)
+    max_time = user_params["globalTimeLimit"]
+    train_count = user_params["agents"]
+    min_malf = user_params["min"]
+    max_malf = user_params["max"]
+    # File creation
+    path = "data/malfunction_tmp.lp"
+    with open(path, 'w') as lp:
+        # Malfunction generation
+        for t in range(max_time):
+            if not randint(0, rate-1):
+                tid = randint(0, train_count-1)
+                dur = randint(min_malf, max_malf)
+                # Write malfunction predicates
+                lp.write(f"malfunction({tid},{dur},{t}).\n")
+    seed(user_params["seed"])
 
 
 def write_globals(user_params, lp):
@@ -111,6 +143,7 @@ def delete_tmp_gif():
 def delete_tmp_frames():
     """Deletes the temporary folder containing GIF frames.
     """
+    ensure_directory("data")
     path = "data/tmp_frames"
     if os.path.isdir(path):
         try:
@@ -118,6 +151,18 @@ def delete_tmp_frames():
             shutil.rmtree(path)
         except OSError as e:
             print(f"Error: tmp_frames folder could not be deleted:\n{e}")
+
+
+def delete_tmp_malfunctions():
+    """Deletes the temporary .lp file of the malfunctions.
+    """
+    ensure_directory("data")
+    path = "data/malfunction_tmp.lp"
+    if os.path.isfile(path):
+        try:
+            os.remove(path)
+        except OSError as e:
+            print(f"Error: malfunction_tmp.lp could not be deleted:\n{e}")
 
 
 def initial_import_test():
@@ -157,3 +202,4 @@ def remove_data_remnants():
     delete_tmp_png()
     delete_tmp_gif()
     delete_tmp_frames()
+    delete_tmp_malfunctions()
