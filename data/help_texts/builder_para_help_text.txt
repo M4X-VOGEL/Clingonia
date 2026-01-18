@@ -68,7 +68,37 @@ ON:  Agents are removed upon
      reaching their destination.
 OFF: Agents remain, blocking
      the destination.
-=== 
+===
+
+
+=== Malfunction rate:
+Fraction A/B represents the
+per-timestep malfunction
+probability.
+ Example: 1/3 means that,
+on average, a malfunction is
+generated for a train every
+three timesteps until the
+global time limit is reached.
+
+The corresponding .lp-file
+malfunction_tmp will be created
+in the data folder for non-zero
+rates and can be modified while
+Clingonia is still running.
+===
+
+
+=== Min. duration for malfunctions:
+Shortest number of timesteps
+a malfunction can last.
+===
+
+
+=== Max. duration for malfunctions:
+Longest number of timesteps
+a malfunction can last.
+===
 
 
 === Low quality mode:
@@ -77,33 +107,6 @@ reduce the PNG file size.
  Low quality is the default for
 environments over 1000x1000.
 ===
-
-
-
------------------------------
-Parameters (no Clingo impact)
------------------------------
-
-=== Malfunction rate:
-Fraction A/B represents the
-per-timestep malfunction
-probability.
- Example: 1/3 means a malfunction
-occurs on average every
-three timesteps.
-=== 
-
-
-=== Min. duration for malfunctions:
-Shortest number of timesteps
-a malfunction can last.
-=== 
-
-
-=== Max. duration for malfunctions:
-Longest number of timesteps
-a malfunction can last.
-=== 
 
 
 

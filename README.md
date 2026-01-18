@@ -132,6 +132,7 @@ If you encounter unexpected issues, please report them right away. Your input is
 ### ⚠️ Known issues
 
 - Our example `ASP` code for solving environments is provided for reference and simple environments. It is not flawless. We recommend using your own implementation for optimal results.
+- Additional Clingo options may cause unexpected behavior due to incompatibilities.
 - Flatland sometimes generates environments larger than requested. Clingonia trims them to match the request, which may cut off part of the railway system. Fortunately, this can be quickly resolved by the user in the Modify Environment mode.
 
 <br>

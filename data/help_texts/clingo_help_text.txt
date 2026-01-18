@@ -56,7 +56,7 @@ Browse and select your ASP encoding files via the file explorer. These files sho
 
 (!) Please do NOT include the environment encoding and/or malfunction_tmp.lp here.
 
-To customize your malfunctions, you can modify an existing malfunction_tmp.lp file in Clingonia's "data" folder. This file will be created, when you have a non-zero malfunction rate.
+Malfunctions can be customized by editing the generated malfunction_tmp.lp file in Clingonia's data folder; it is generated only when the malfunction rate is non-zero.
 
 If Clingonia does not offer a particular feature, it must be integrated into your problem-solving LP files.
 
