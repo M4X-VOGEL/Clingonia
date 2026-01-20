@@ -4,6 +4,7 @@ import clingo
 import threading
 import subprocess
 import pandas as pd
+from code.config import CLINGO_OPTIONS, INCOMPATIBLE_CLINGO_OPTIONS
 
 clingo_frustration = {
     30:  "I'm lost in Flatland, again...",
@@ -246,7 +247,7 @@ def print_last_clingo_answer(lines, requested_answer):
         print(f"➡️  Highest pickable clingo answer: {last_clingo_answer}")
         return -4
     else:
-        print(f"❌ Clingo returns UNSATISFIABLE")
+        print(f"❌ Clingo returns UNSATISFIABLE (no answer)")
         return -3
 
 
@@ -341,6 +342,28 @@ def create_df(action_params):
     return df_actions
 
 
+def validate_clingo_options(clingo_options):
+    """Runs Clingo and converts its output to a DataFrame of action predicates.
+
+    Args:
+        clingo_options (list[str]): List of desired Clingo options.
+
+    Returns:
+        list[str]: List of filtered Clingo options.
+    """
+    clingo_options = set(clingo_options)
+    filtered_clingo_options = set()
+    for opt in clingo_options:
+        if opt.startswith(tuple(CLINGO_OPTIONS)):
+            if not opt.startswith(tuple(INCOMPATIBLE_CLINGO_OPTIONS)):
+                filtered_clingo_options.add(opt)
+            else:
+                print(f"⚠️ Incompatible Clingo Option: {opt} was ignored.")
+        else:
+            print(f"⚠️ Invalid Clingo Option: {opt} was ignored.")
+    return list(filtered_clingo_options)
+
+
 def clingo_to_df(clingo_path="clingo", clingo_options=[], lp_files=[], answer_number=1):
     """Runs Clingo and converts its output to a DataFrame of action predicates.
 
@@ -361,6 +384,8 @@ def clingo_to_df(clingo_path="clingo", clingo_options=[], lp_files=[], answer_nu
     if answer_number < 1:
         print(f"❌ Invalid answer to display: {answer_number}.")
         return -4
+    # Ignore invalid clingo options
+    clingo_options = validate_clingo_options(clingo_options)
 
     print("Running Clingo...")
     # Run Clingo and capture its output
