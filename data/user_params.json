@@ -13,6 +13,7 @@
     "malfunction": null,
     "min": null,
     "max": null,
+    "malfuncRepro": null,
     "lowQuality": null,
     "saveImage": null,
     "answer": null,
