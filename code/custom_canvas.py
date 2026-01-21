@@ -760,8 +760,16 @@ class EnvCanvas:
             env_height (int):
                 height of the environment grid.
         """
+        # check if canvas still exists
+        if not self.canvas.winfo_exists():
+            return
+
         # convert image to tk format
         self.display_image = ImageTk.PhotoImage(hq_image)
+
+        # check if canvas image still exists
+        if not self.canvas.find_withtag(self.canvas_image):
+            return
 
         # update the image object on the canvas and move it to the correct coordinates
         self.canvas.itemconfig(self.canvas_image, image=self.display_image)
@@ -3261,8 +3269,16 @@ class ResultCanvas:
             env_height (int):
                 height of the environment grid.
         """
+        # check if canvas still exists
+        if not self.canvas.winfo_exists():
+            return
+
         # convert image to tk format
         self.display_image = ImageTk.PhotoImage(hq_image)
+
+        # check if canvas image still exists
+        if not self.canvas.find_withtag(self.canvas_image):
+            return
 
         # update the image object on the canvas and move it to the correct coordinates
         self.canvas.itemconfig(self.canvas_image, image=self.display_image)
