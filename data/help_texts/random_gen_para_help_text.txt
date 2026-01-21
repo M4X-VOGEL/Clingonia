@@ -168,6 +168,12 @@ a malfunction can last.
 ===
 
 
+=== Malfunctions Reproducibility:
+Applies the seed to the malfunction
+generation.
+===
+
+
 === Low quality mode:
 Lowers resolution to significantly
 reduce the PNG file size.
