@@ -1716,7 +1716,7 @@ def save_clingo_params(next_menu) -> int:
             data = default_params[key]
         elif key == 'clingoOptions':
             for opt in data:
-                if not opt.startswith('-'):
+                if not (opt.startswith('-') or opt.isdecimal()):
                     err_count += 1
                     err = 'invalidOptions'
                     labels[f'{key}_error_label'].label.config(text=err_dict[key][err])

@@ -51,10 +51,13 @@ CLINGO_OPTIONS = {
     '--reify-sccs', '--reify-steps', '--help', '-h', '--version', '-v', '--verbose', '-V',
     '--time-limit', '--fast-exit', '--print-portfolio', '--quiet', '-q', '--pre', '--outf',
     '--out-atomf', '--out-ifs', '--out-hide-aux', '--lemma-in', '--lemma-out', '--lemma-out-lbd',
-    '--lemma-out-max', '--lemma-out-dom', '--lemma-out-txt', '--hcc-out', '--compute', '--mode'
+    '--lemma-out-max', '--lemma-out-dom', '--lemma-out-txt', '--hcc-out', '--compute', '--mode',
+    '--sat-p', '--save-p'
 }
 
 
 INCOMPATIBLE_CLINGO_OPTIONS = {
-    '--help'
+    '--models', '-n', '--text', '--output=', '-o', '--help', '-h',
+    '--version', '-v', '--print-portfolio', '--quiet', '-q', '--pre',
+    '--outf', '--out-atomf', '--out-ifs', '--mode'
 }

@@ -354,7 +354,7 @@ def validate_clingo_options(clingo_options):
     clingo_options = set(clingo_options)
     filtered_clingo_options = set()
     for opt in clingo_options:
-        if opt.startswith(tuple(CLINGO_OPTIONS)):
+        if opt.startswith(tuple(CLINGO_OPTIONS)) or opt.isdecimal():
             if not opt.startswith(tuple(INCOMPATIBLE_CLINGO_OPTIONS)):
                 filtered_clingo_options.add(opt)
             else:
