@@ -2525,9 +2525,30 @@ def build_random_gen_para_frame():
         visibility=False,
     )
 
-    labels['lowQuality_label'] = Label(
+    labels['malfuncRepro_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
         grid_pos=(15, 2),
+        padding=(0, 0),
+        sticky='nw',
+        text='Malfunction Reproducibility:',
+        font=base_font_layout,
+        foreground_color=label_color,
+        background_color=background_color,
+        visibility=False,
+    )
+
+    buttons['malfuncRepro_button'] = ToggleSwitch(
+        root=frames['random_gen_para_frame'].frame,
+        width=70, height=30,
+        on_color=switch_on_color, off_color=switch_off_color,
+        handle_color=input_color, background_color=background_color,
+        command=change_malfunc_repro_status,
+    )
+    buttons['malfuncRepro_button'].set_state(user_params['malfuncRepro'])
+
+    labels['lowQuality_label'] = Label(
+        root=frames['random_gen_para_frame'].frame,
+        grid_pos=(16, 2),
         padding=(0, 0),
         sticky='nw',
         text='Low quality mode:',
@@ -2550,7 +2571,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=15,
         height=1,
-        grid_pos=(16, 2),
+        grid_pos=(17, 2),
         padding=(0, 0),
         sticky='nw',
         command=random_gen_toggle_advanced_para_options,
@@ -2567,7 +2588,7 @@ def build_random_gen_para_frame():
         root=frames['random_gen_para_frame'].frame,
         width=9,
         height=1,
-        grid_pos=(16, 3),
+        grid_pos=(17, 3),
         padding=(0, 0),
         sticky='nw',
         command=random_gen_para_to_env,
@@ -2582,7 +2603,7 @@ def build_random_gen_para_frame():
 
     labels['random_gen_status_label'] = Label(
         root=frames['random_gen_para_frame'].frame,
-        grid_pos=(16, 4),
+        grid_pos=(17, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -2594,7 +2615,7 @@ def build_random_gen_para_frame():
 
     frames['random_gen_para_frame'].frame.rowconfigure(0, weight=1)
     frames['random_gen_para_frame'].frame.rowconfigure(
-        tuple(range(1,17)), weight=2
+        tuple(range(1,18)), weight=2
     )
     frames['random_gen_para_frame'].frame.columnconfigure(0, weight=1)
     frames['random_gen_para_frame'].frame.columnconfigure(1, weight=1)
@@ -2891,11 +2912,16 @@ def random_gen_toggle_advanced_para_options():
     entry_fields['min_duration_entry'].toggle_visibility()
     labels['max_duration_label'].toggle_visibility()
     entry_fields['max_duration_entry'].toggle_visibility()
+    labels['malfuncRepro_label'].toggle_visibility()
+    if buttons['malfuncRepro_button'].winfo_ismapped():
+        buttons['malfuncRepro_button'].grid_forget()
+    else:
+        buttons['malfuncRepro_button'].grid(row=15, column=3, sticky='n')
     labels['lowQuality_label'].toggle_visibility()
     if buttons['lowQuality_button'].winfo_ismapped():
         buttons['lowQuality_button'].grid_forget()
     else:
-        buttons['lowQuality_button'].grid(row=15, column=3, sticky='n')
+        buttons['lowQuality_button'].grid(row=16, column=3, sticky='n')
     return
 
 def toggle_random_gen_para_help():
@@ -3598,9 +3624,30 @@ def build_builder_para_frame():
         visibility=False,
     )
 
-    labels['lowQuality_label'] = Label(
+    labels['malfuncRepro_label'] = Label(
         root=frames['builder_para_frame'].frame,
         grid_pos=(8, 2),
+        padding=(0, 0),
+        sticky='nw',
+        text='Malfunction Reproducibility:',
+        font=base_font_layout,
+        foreground_color=label_color,
+        background_color=background_color,
+        visibility=False,
+    )
+
+    buttons['malfuncRepro_button'] = ToggleSwitch(
+        root=frames['builder_para_frame'].frame,
+        width=70, height=30,
+        on_color=switch_on_color, off_color=switch_off_color,
+        handle_color=input_color, background_color=background_color,
+        command=change_malfunc_repro_status,
+    )
+    buttons['malfuncRepro_button'].set_state(user_params['malfuncRepro'])
+
+    labels['lowQuality_label'] = Label(
+        root=frames['builder_para_frame'].frame,
+        grid_pos=(9, 2),
         padding=(0, 0),
         sticky='nw',
         text='Low quality mode:',
@@ -3623,7 +3670,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=15,
         height=1,
-        grid_pos=(9, 2),
+        grid_pos=(10, 2),
         padding=(0, 0),
         sticky='nw',
         command=builder_toggle_advanced_para_options,
@@ -3640,7 +3687,7 @@ def build_builder_para_frame():
         root=frames['builder_para_frame'].frame,
         width=9,
         height=1,
-        grid_pos=(9, 3),
+        grid_pos=(10, 3),
         padding=(0, 0),
         sticky='nw',
         command=builder_para_to_track_grid,
@@ -3655,7 +3702,7 @@ def build_builder_para_frame():
 
     labels['build_para_status_label'] = Label(
         root=frames['builder_para_frame'].frame,
-        grid_pos=(9, 4),
+        grid_pos=(10, 4),
         padding=(0, 0),
         sticky='nw',
         text='',
@@ -3667,7 +3714,7 @@ def build_builder_para_frame():
 
     frames['builder_para_frame'].frame.rowconfigure(0, weight=1)
     frames['builder_para_frame'].frame.rowconfigure(
-        tuple(range(1,10)), weight=2
+        tuple(range(1,11)), weight=2
     )
     frames['builder_para_frame'].frame.columnconfigure(0, weight=1)
     frames['builder_para_frame'].frame.columnconfigure(1, weight=1)
@@ -5432,11 +5479,16 @@ def builder_toggle_advanced_para_options():
     entry_fields['min_duration_entry'].toggle_visibility()
     labels['max_duration_label'].toggle_visibility()
     entry_fields['max_duration_entry'].toggle_visibility()
+    labels['malfuncRepro_label'].toggle_visibility()
+    if buttons['malfuncRepro_button'].winfo_ismapped():
+        buttons['malfuncRepro_button'].grid_forget()
+    else:
+        buttons['malfuncRepro_button'].grid(row=8, column=3, sticky='n')
     labels['lowQuality_label'].toggle_visibility()
     if buttons['lowQuality_button'].winfo_ismapped():
         buttons['lowQuality_button'].grid_forget()
     else:
-        buttons['lowQuality_button'].grid(row=8, column=3, sticky='n')
+        buttons['lowQuality_button'].grid(row=9, column=3, sticky='n')
     return
 
 def switch_builder_to_main():
@@ -6765,6 +6817,10 @@ def change_grid_status():
 def change_remove_status():
      """Changes the remove parameter to the opposite"""
      user_params['remove'] = not user_params['remove']
+
+def change_malfunc_repro_status():
+    """Changes the lowQuality parameter to the opposite"""
+    user_params['malfuncRepro'] = not user_params['malfuncRepro']
 
 def change_low_quality_status():
     """Changes the lowQuality parameter to the opposite"""
