@@ -24,7 +24,8 @@ Additionally, visualize your solutions as a numbered path, detailed timetable, o
 
 ## ⚙️ Please note:
 
-⚠️ This software is optimized for Windows and macOS.
+✅ This software is optimized for Windows and macOS.
+ℹ️ Based on user reports, it also runs on Linux, though minor limitations may occur.
 
 <br>
 
@@ -132,7 +133,6 @@ If you encounter unexpected issues, please report them right away. Your input is
 ### ⚠️ Known issues
 
 - Our example `ASP` code for solving environments is provided for reference and simple environments. It is not flawless. We recommend using your own implementation for optimal results.
-- Additional Clingo options may cause unexpected behavior due to incompatibilities.
 - Flatland sometimes generates environments larger than requested. Clingonia trims them to match the request, which may cut off part of the railway system. Fortunately, this can be quickly resolved by the user in the Modify Environment mode.
 
 <br>
@@ -150,3 +150,6 @@ If you encounter unexpected issues, please report them right away. Your input is
 
 ### Review Solutions
 ![Results](data/readme_png/Results.png)
+
+### Transparency
+![Terminal](data/readme_png/Terminal.png)

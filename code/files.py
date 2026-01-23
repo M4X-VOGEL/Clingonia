@@ -4,7 +4,6 @@ import importlib
 import numpy as np
 from random import seed, randint
 MALFUNCTIONS_EXIST = False
-MALFUNCTION_SEED = False
 
 def ensure_directory(d):
     """Creates the specified directory if it does not exist.
@@ -25,7 +24,8 @@ def save_malfunctions(user_params):
         MALFUNCTIONS_EXIST = False
         return
     MALFUNCTIONS_EXIST = True
-    if not MALFUNCTION_SEED:
+    m_reprod = user_params["malfuncRepro"]
+    if not m_reprod:
         seed(np.random.randint(-2**31,2**31))
     # Parameters
     rate = int(denom/num)

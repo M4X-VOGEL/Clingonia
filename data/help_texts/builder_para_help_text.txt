@@ -102,8 +102,10 @@ a malfunction can last.
 
 
 === Malfunctions Reproducibility:
-Applies the seed to the malfunction
-generation.
+ON:  Uses your specified seed for
+     malfunction generation.
+OFF: Uses a random seed each time
+     (results not reproducible).
 ===
 
 
