@@ -25,6 +25,7 @@ Additionally, visualize your solutions as a numbered path, detailed timetable, o
 ## ⚙️ Please note:
 
 ✅ This software is optimized for Windows and macOS.
+
 ℹ️ Based on user reports, it also runs on Linux, though minor limitations may occur.
 
 <br>
@@ -44,28 +45,28 @@ conda create python=3.11 --name flatland
 conda activate flatland
 ```
 
-📦 Then, install the stable release of Flatland (Version 4.2.2 or newer):
+📦 Install Flatland (Version 4.2.2 or newer):
 ```
 pip install flatland-rl==4.2.2
 ```
 
-📦 To use the clingo CLI (optional), install the required clingo package:
+📦 (Optional) Install the clingo CLI:
 ```
 conda install -c potassco clingo
 ```
 
-📦 Additionally, ensure that the following required packages are installed:
+📦 Install required Python packages:
 
 `clingo`, `imageio`, `pillow`, `numpy`, `pandas`, `matplotlib`.
 ```
-pip install [package]
+pip install <package>
 ```
 
 <br>
 
 ### 🖥️ Installation
 
-To use this repository locally, clone it:
+Clone this repository to use it locally:
 ```
 git clone https://github.com/M4X-VOGEL/Clingonia.git
 ```
@@ -76,23 +77,23 @@ git clone https://github.com/M4X-VOGEL/Clingonia.git
 
 ### 🐣 Initial development
 
-We will provide all necessary resources to be able to use all features of Clingonia.
+Clingonia provides ASP encodings to support all core features.
 
 If you want to use your own ASP encodings, make sure that they are capable of solving Flatland problems.  During the development phase, the `lp` representation of the environment may be beneficial for initial testing and debugging of the encoding or encodings.  Keep in mind that several encodings can be called simultaneously by clingo, for example:
 ```
 clingo env.lp example1.lp example2.lp
 ```
 
-The order is not important.  What will ultimately be necessary is that the output be appropriately formatted in the following manner:
+The order does not matter.  What will ultimately be necessary is that your output must contain actions in this format:
 `action(train(ID), Action, Timestep).` 
 
-The `Action` variable must be one of the following:
+Valid `Action` values are:
 - `move_forward`
 - `move_left`
 - `move_right`
 - `wait`
 
-Once an encoding or set of encodings has been developed that produces valid paths in the form of the appropriate `action(...)` output, developers can initialize the program. If Clingonia does not offer a particular feature, it must be integrated into your problem-solving LP files.
+Once your encodings produce valid paths in the required `action(...)` format, they are compatible with Clingonia. If Clingonia does not offer a particular feature, it must be integrated into your problem-solving LP files.
 
 <br>
 
@@ -115,8 +116,8 @@ Keep in mind:
 
 ## 🚀 Program initialization
 
-1. It is optional to put your `lp` files into the 📁 `asp` folder. They can be in any directory.
-2. Ensure that you are in the directory of your cloned repository with 📝 `main.py` and type the following:
+1. (Optional) Put your problem-solving `lp` files into 📁 `asp` (they may also be located elsewhere).
+2. Make sure you are in the directory of your cloned repository with 📝 `main.py` and run the following:
 ```
 python main.py
 ```
