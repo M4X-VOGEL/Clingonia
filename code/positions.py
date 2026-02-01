@@ -433,7 +433,7 @@ def beep_feedback():
     """Plays an audio signal based on the operating system.
     
     On Windows, plays two beeps. On macOS, plays a system sound.
-    On Linux or other systems, prints a bell character.
+    No sound on Linux or other systems.
     """
     sys_platform = platform.system()
     if sys_platform == "Windows":
@@ -441,9 +441,14 @@ def beep_feedback():
         winsound.Beep(600, 200)
         winsound.Beep(800, 250)
     elif sys_platform == "Darwin":  # macOS (system sound)
-        subprocess.run(["afplay", "/System/Library/Sounds/Glass.aiff"])
-    else:  # Linux and other
-        print('\a')
+        try:
+            subprocess.run(
+                ["afplay", "/System/Library/Sounds/Glass.aiff"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            return
 
 
 def position_df(tracks, trains, clingo_path, clingo_options, lp_files, answer_number):
