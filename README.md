@@ -102,6 +102,7 @@ Once your encodings produce valid paths in the required `action(...)` format, th
 Valid predicates are:
 - `global(MaxTime).`
 - `train(ID).`
+- `speed(ID,InvSpd).`
 - `start(ID,(X,Y),Earliest_Dep,Dir).`
 - `end(ID,(X,Y),Latest_Arr).`
 - `cell((X,Y),Track).`
